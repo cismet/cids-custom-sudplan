@@ -33,11 +33,13 @@ import org.apache.log4j.Logger;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 
+import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Image;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
 import java.net.URL;
@@ -98,6 +100,22 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     void init() {
+        EventQueue.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    final StringBuilder sb = new StringBuilder();
+                    try {
+                        for (final Double result : MultiplyHelper.doublesFromFile(new File(model.getLocation()))) {
+                            sb.append(result).append('\n');
+                        }
+                        jtpResults.setText(sb.toString());
+                    } catch (final IOException ex) {
+                        jtpResults.setText(ex.toString());
+                    }
+                }
+            });
+
         new ChartRetriever().execute();
     }
 
@@ -299,11 +317,6 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
         @Override
         protected void done() {
             try {
-                final StringBuilder sb = new StringBuilder();
-                for (final Double result : results) {
-                    sb.append(result).append('\n');
-                }
-                jtpResults.setText(sb.toString());
                 ((ImagePanel)jplChart).setImage(get());
             } catch (final Exception ex) {
                 LOG.error("could not set image", ex); // NOI18N
