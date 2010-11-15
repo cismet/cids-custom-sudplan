@@ -299,12 +299,12 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
         @Override
         protected void done() {
             try {
-                ((ImagePanel)jplChart).setImage(get());
                 final StringBuilder sb = new StringBuilder();
                 for (final Double result : results) {
                     sb.append(result).append('\n');
                 }
                 jtpResults.setText(sb.toString());
+                ((ImagePanel)jplChart).setImage(get());
             } catch (final Exception ex) {
                 LOG.error("could not set image", ex); // NOI18N
             } finally {

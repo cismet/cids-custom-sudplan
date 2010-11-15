@@ -11,8 +11,6 @@ import Sirius.server.middleware.types.MetaClass;
 
 import org.apache.log4j.Logger;
 
-import org.openide.util.Exceptions;
-
 import java.awt.EventQueue;
 
 import java.io.File;

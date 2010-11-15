@@ -114,8 +114,8 @@ public class MultiplyModelManagerUI extends javax.swing.JPanel {
             jbnRun.setEnabled(true);
             btnCancel.setEnabled(false);
         }
-        jpbStatus.setMaximum(0);
-        jpbStatus.setValue(0);
+        jpbStatus.setMaximum(1);
+        jpbStatus.setValue(1);
         jpbStatus.setStringPainted(model.isStarted());
         jpbStatus.setIndeterminate(false);
     }
@@ -189,7 +189,6 @@ public class MultiplyModelManagerUI extends javax.swing.JPanel {
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(8, 10, 5, 8);
         add(btnCancel, gridBagConstraints);
 
@@ -299,9 +298,6 @@ public class MultiplyModelManagerUI extends javax.swing.JPanel {
                 jpbStatus.setIndeterminate(false);
             } else if (ProgressEvent.State.FINISHED.equals(event.getState())) {
                 lblStatus.setText("Finished");
-                jpbStatus.setMaximum(100);
-                jpbStatus.setValue(100);
-                jpbStatus.setIndeterminate(false);
                 model.removeProgressListener(this);
             }
         }

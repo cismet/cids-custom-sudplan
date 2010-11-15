@@ -8,7 +8,6 @@
 package de.cismet.cids.custom.sudplan;
 
 import Sirius.navigator.connection.SessionManager;
-import Sirius.navigator.exception.ConnectionException;
 import Sirius.navigator.types.treenode.RootTreeNode;
 import Sirius.navigator.ui.ComponentRegistry;
 import Sirius.navigator.ui.tree.MetaCatalogueTree;
@@ -16,6 +15,7 @@ import Sirius.navigator.ui.tree.MetaCatalogueTree;
 import org.apache.log4j.Logger;
 
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -129,13 +129,15 @@ public final class RunHelper {
      */
     public static void reloadCatalogTree() {
         final MetaCatalogueTree tree = ComponentRegistry.getRegistry().getCatalogueTree();
+        final TreePath path = tree.getSelectionPath();
         final DefaultTreeModel model = (DefaultTreeModel)tree.getModel();
 
         try {
             final RootTreeNode root = new RootTreeNode(SessionManager.getProxy().getRoots());
             model.setRoot(root);
             model.reload();
-        } catch (final ConnectionException ex) {
+            tree.exploreSubtree(path.getParentPath());
+        } catch (final Exception ex) {
             LOG.warn("could not reload tree", ex); // NOI18N
         }
     }
