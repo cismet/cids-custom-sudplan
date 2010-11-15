@@ -6,16 +6,16 @@
     <parent>
         <groupId>de.cismet.cids</groupId>
         <artifactId>cids-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.1</version>
     </parent>
 
-    <groupId>de.cismet.cids.custom.wupp</groupId>
+    <groupId>de.cismet.cids.custom.sudplan</groupId>
     <artifactId>cids-custom-sudplan</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>cids Custom Sudplan</name>
-    <description>!!! description pending !!!</description>
+    <description>cids Navigator customisation for the SUDPLAN FP7 project</description>
 
     <properties>
         <!--
@@ -36,7 +36,14 @@
             <artifactId>jxlayer</artifactId>
             <version>3.0.3</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.4</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <!-- overwritten because the artifact has to be renamed du to
