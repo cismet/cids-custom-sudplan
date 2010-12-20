@@ -28,6 +28,8 @@
  */
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import org.apache.log4j.Logger;
+
 import org.openide.util.NbBundle;
 
 import java.awt.BorderLayout;
@@ -37,6 +39,7 @@ import de.cismet.cids.custom.sudplan.Manager;
 import de.cismet.cids.custom.sudplan.RunHelper;
 
 import de.cismet.cids.dynamics.CidsBean;
+import de.cismet.cids.dynamics.Disposable;
 
 import de.cismet.cids.editors.DefaultCustomObjectEditor;
 
@@ -50,9 +53,15 @@ import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
  */
 public class ModeloutputRenderer extends javax.swing.JPanel implements CidsBeanRenderer {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(ModeloutputRenderer.class);
+
     //~ Instance fields --------------------------------------------------------
 
     private transient CidsBean cidsBean;
+
+    private transient Manager manager;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
@@ -86,6 +95,7 @@ public class ModeloutputRenderer extends javax.swing.JPanel implements CidsBeanR
         lblOutputURI = new javax.swing.JLabel();
         jplManager = new javax.swing.JPanel();
 
+        setMaximumSize(new java.awt.Dimension(1500, 800));
         setLayout(new java.awt.GridBagLayout());
 
         jLabel1.setText(NbBundle.getMessage(ModeloutputRenderer.class, "ModeloutputRenderer.jLabel1.text")); // NOI18N
@@ -109,14 +119,16 @@ public class ModeloutputRenderer extends javax.swing.JPanel implements CidsBeanR
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
         add(lblOutputURI, gridBagConstraints);
 
+        jplManager.setMaximumSize(new java.awt.Dimension(1200, 600));
         jplManager.setOpaque(false);
         jplManager.setLayout(new java.awt.BorderLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
         add(jplManager, gridBagConstraints);
 
         bindingGroup.bind();
@@ -129,6 +141,10 @@ public class ModeloutputRenderer extends javax.swing.JPanel implements CidsBeanR
      */
     @Override
     public CidsBean getCidsBean() {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("getCidsBean() " + toString());
+        }
+
         return cidsBean;
     }
     /**
@@ -138,6 +154,9 @@ public class ModeloutputRenderer extends javax.swing.JPanel implements CidsBeanR
      */
     @Override
     public void setCidsBean(final CidsBean cidsBean) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("set cidsbean interface modeloutputrenderer");
+        }
         this.cidsBean = cidsBean;
         DefaultCustomObjectEditor.setMetaClassInformationToMetaClassStoreComponentsInBindingGroup(
             bindingGroup,
@@ -152,7 +171,7 @@ public class ModeloutputRenderer extends javax.swing.JPanel implements CidsBeanR
      */
     private void init() {
         final CidsBean modelBean = (CidsBean)cidsBean.getProperty("model"); // NOI18N
-        final Manager manager = RunHelper.loadManagerFromModel(modelBean, RunHelper.ManagerType.OUTPUT);
+        manager = RunHelper.loadManagerFromModel(modelBean, Manager.ManagerType.OUTPUT);
         manager.setCidsBean(cidsBean);
 
         if (EventQueue.isDispatchThread()) {
@@ -184,6 +203,13 @@ public class ModeloutputRenderer extends javax.swing.JPanel implements CidsBeanR
      */
     @Override
     public void dispose() {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("dispose() " + toString());
+        }
+
+        if (manager instanceof Disposable) {
+            ((Disposable)manager).dispose();
+        }
         bindingGroup.unbind();
     }
 

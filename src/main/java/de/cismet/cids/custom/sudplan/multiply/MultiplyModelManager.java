@@ -22,7 +22,6 @@ import java.net.URISyntaxException;
 import java.sql.Timestamp;
 
 import java.util.GregorianCalendar;
-import java.util.List;
 
 import javax.swing.JComponent;
 
@@ -39,13 +38,15 @@ import de.cismet.cids.editors.converters.SqlTimestampToUtilDateConverter;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
+import de.cismet.cismap.commons.features.Feature;
+
 /**
  * DOCUMENT ME!
  *
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class MultiplyModelManager implements Manager, Executable {
+public class MultiplyModelManager implements Manager, Executable {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -106,23 +107,23 @@ public final class MultiplyModelManager implements Manager, Executable {
         }
 
         final File multipliersInput = new File(inputFolder, MultiplyInputManager.FILENAME_MULTIPLIERS);
-        final List<Double> multipliers = MultiplyHelper.doublesFromFile(multipliersInput);
+        final Double[] multipliers = MultiplyHelper.doublesFromFile(multipliersInput);
 
-        final int maxSteps = multipliers.size() + 2;
+        final int maxSteps = multipliers.length + 2;
         fireProgressed(1, maxSteps);
 
         final File multiplicandInput = new File(inputFolder, MultiplyInputManager.FILENAME_MULTIPLICAND);
         final int multiplicand = MultiplyHelper.intFromFile(multiplicandInput);
 
-        final Double[] results = new Double[multipliers.size()];
-        for (int i = 0; i < multipliers.size(); ++i) {
-            results[i] = multipliers.get(i) * multiplicand;
+        final Double[] results = new Double[multipliers.length];
+        for (int i = 0; i < multipliers.length; ++i) {
+            results[i] = multipliers[i] * multiplicand;
             fireProgressed(i + 1, maxSteps);
             try {
                 Thread.sleep(1000);
             } catch (final InterruptedException ex) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("interrupted", ex);
+                    LOG.debug("interrupted", ex); // NOI18N
                 }
             }
         }
@@ -134,7 +135,7 @@ public final class MultiplyModelManager implements Manager, Executable {
             Thread.sleep(1000);
         } catch (final InterruptedException ex) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("interrupted", ex);
+                LOG.debug("interrupted", ex); // NOI18N
             }
         }
 
@@ -146,7 +147,7 @@ public final class MultiplyModelManager implements Manager, Executable {
      *
      * @throws  IllegalStateException  DOCUMENT ME!
      */
-    private void fireStarted() {
+    protected void fireStarted() {
         final SqlTimestampToUtilDateConverter dateConverter = new SqlTimestampToUtilDateConverter();
         try {
             cidsBean.setProperty("started", dateConverter.convertReverse(GregorianCalendar.getInstance().getTime())); // NOI18N
@@ -165,7 +166,7 @@ public final class MultiplyModelManager implements Manager, Executable {
      * @param  step      percent DOCUMENT ME!
      * @param  maxSteps  DOCUMENT ME!
      */
-    private void fireProgressed(final int step, final int maxSteps) {
+    protected void fireProgressed(final int step, final int maxSteps) {
         progressSupport.fireEvent(new ProgressEvent(ProgressEvent.State.PROGRESSING, step, maxSteps));
     }
 
@@ -174,7 +175,7 @@ public final class MultiplyModelManager implements Manager, Executable {
      *
      * @throws  IllegalStateException  DOCUMENT ME!
      */
-    private void fireFinised() {
+    protected void fireFinised() {
         final SqlTimestampToUtilDateConverter dateConverter = new SqlTimestampToUtilDateConverter();
         try {
             cidsBean.setProperty("finished", dateConverter.convertReverse(GregorianCalendar.getInstance().getTime())); // NOI18N
@@ -224,7 +225,7 @@ public final class MultiplyModelManager implements Manager, Executable {
      *
      * @return  DOCUMENT ME!
      */
-    private String getInputFolderURI() {
+    protected String getInputFolderURI() {
         final CidsBean modelinput = (CidsBean)cidsBean.getProperty("modelinput"); // NOI18N
 
         assert modelinput != null : "modelinput cannot be null at this point"; // NOI18N
@@ -316,5 +317,10 @@ public final class MultiplyModelManager implements Manager, Executable {
     @Override
     public void removeProgressListener(final ProgressListener progressL) {
         progressSupport.removeProgressListener(progressL);
+    }
+
+    @Override
+    public Feature getFeature() throws IOException {
+        return null;
     }
 }

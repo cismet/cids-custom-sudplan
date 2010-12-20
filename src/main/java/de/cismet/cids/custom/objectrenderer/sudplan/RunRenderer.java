@@ -193,7 +193,7 @@ public class RunRenderer extends JPanel implements CidsBeanRenderer {
      * DOCUMENT ME!
      */
     private void init() {
-        final Manager manager = RunHelper.loadManagerFromRun(cidsBean, RunHelper.ManagerType.MODEL);
+        final Manager manager = RunHelper.loadManagerFromRun(cidsBean, Manager.ManagerType.MODEL);
         manager.setCidsBean(cidsBean);
 
         if (EventQueue.isDispatchThread()) {

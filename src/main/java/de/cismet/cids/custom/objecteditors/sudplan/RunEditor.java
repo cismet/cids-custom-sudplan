@@ -282,7 +282,7 @@ public class RunEditor extends JPanel implements CidsBeanRenderer, EditorSaveLis
                         LOG.error(message, ex);
                         throw new IllegalStateException(message, ex);
                     }
-                    manager = RunHelper.loadManagerFromRun(cidsBean, RunHelper.ManagerType.INPUT);
+                    manager = RunHelper.loadManagerFromRun(cidsBean, Manager.ManagerType.INPUT);
 
                     final Object input = cidsBean.getProperty("modelinput");                                           // NOI18N
                     if (input == null) {

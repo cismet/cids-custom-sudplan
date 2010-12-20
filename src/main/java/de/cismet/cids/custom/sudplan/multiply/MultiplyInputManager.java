@@ -17,14 +17,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.swing.JComponent;
 
 import de.cismet.cids.custom.sudplan.Manager;
 
 import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.cismap.commons.features.Feature;
 
 /**
  * DOCUMENT ME!
@@ -32,11 +31,11 @@ import de.cismet.cids.dynamics.CidsBean;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class MultiplyInputManager implements Manager {
+public class MultiplyInputManager implements Manager {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String FILENAME_MULTIPLICAND = "multiplicand.txt";
+    public static final String FILENAME_MULTIPLICAND = "multiplicand.txt"; // NOI18N
 
     public static final String FILENAME_MULTIPLIERS = "multipliers.txt"; // NOI18N
 
@@ -44,7 +43,7 @@ public final class MultiplyInputManager implements Manager {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient MultiplyInputManagerUI ui;
+    protected transient MultiplyInputManagerUI ui;
 
     private transient CidsBean modelInputBean;
 
@@ -130,15 +129,15 @@ public final class MultiplyInputManager implements Manager {
      *
      * @throws  IOException  DOCUMENT ME!
      */
-    List<Double> getMultipliers() throws IOException {
-        final List<Double> multipliers;
+    Double[] getMultipliers() throws IOException {
+        final Double[] multipliers;
         final File multipliersInput = getFactorFile(new File(getLocation()), FILENAME_MULTIPLIERS, false);
 
         if (multipliersInput == null) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("no multipliers file found, multipliers empty"); // NOI18N
             }
-            multipliers = new ArrayList<Double>(0);
+            multipliers = new Double[0];
         } else {
             multipliers = MultiplyHelper.doublesFromFile(multipliersInput);
         }
@@ -153,9 +152,8 @@ public final class MultiplyInputManager implements Manager {
      *
      * @throws  IOException  DOCUMENT ME!
      */
-    void setMultipliers(final List<Double> multipliers) throws IOException {
-        MultiplyHelper.numbersToFile(getFactorFile(new File(getLocation()), FILENAME_MULTIPLIERS, true),
-            multipliers.toArray(new Double[multipliers.size()]));
+    void setMultipliers(final Double[] multipliers) throws IOException {
+        MultiplyHelper.numbersToFile(getFactorFile(new File(getLocation()), FILENAME_MULTIPLIERS, true), multipliers);
     }
 
     /**
@@ -216,7 +214,8 @@ public final class MultiplyInputManager implements Manager {
      *
      * @throws  IOException  DOCUMENT ME!
      */
-    private File getFactorFile(final File parentDir, final String factorFile, final boolean create) throws IOException {
+    protected File getFactorFile(final File parentDir, final String factorFile, final boolean create)
+            throws IOException {
         if (!parentDir.exists() || !parentDir.isDirectory() || !parentDir.canRead()) {
             throw new IOException("illegal parent directory: " + parentDir); // NOI18N
         }
@@ -240,5 +239,10 @@ public final class MultiplyInputManager implements Manager {
         }
 
         return input;
+    }
+
+    @Override
+    public Feature getFeature() throws IOException {
+        return null;
     }
 }

@@ -15,6 +15,8 @@ import javax.swing.JComponent;
 
 import de.cismet.cids.dynamics.CidsBeanStore;
 
+import de.cismet.cismap.commons.features.Feature;
+
 /**
  * DOCUMENT ME!
  *
@@ -22,6 +24,20 @@ import de.cismet.cids.dynamics.CidsBeanStore;
  * @version  $Revision$, $Date$
  */
 public interface Manager extends CidsBeanStore {
+
+    //~ Enums ------------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    public static enum ManagerType {
+
+        //~ Enum constants -----------------------------------------------------
+
+        INPUT, MODEL, OUTPUT
+    }
 
     //~ Methods ----------------------------------------------------------------
 
@@ -47,4 +63,13 @@ public interface Manager extends CidsBeanStore {
      * @throws  IOException  DOCUMENT ME!
      */
     void apply() throws IOException;
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
+    Feature getFeature() throws IOException;
 }

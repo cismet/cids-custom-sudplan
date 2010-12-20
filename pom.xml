@@ -6,7 +6,7 @@
     <parent>
         <groupId>de.cismet.cids</groupId>
         <artifactId>cids-parent</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
     </parent>
 
     <groupId>de.cismet.cids.custom.sudplan</groupId>
@@ -41,6 +41,16 @@
             <artifactId>junit</artifactId>
             <version>4.4</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>at.ac.ait.enviro</groupId>
+            <artifactId>SOSClient</artifactId>
+            <version>4.0.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>at.ac.ait.enviro</groupId>
+            <artifactId>SPSClient</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

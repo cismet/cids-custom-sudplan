@@ -7,18 +7,27 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.multiply;
 
+
 import org.apache.log4j.Logger;
 
+import java.awt.image.BufferedImage;
+
+import java.io.File;
 import java.io.IOException;
 
 import java.net.URI;
 
 import javax.swing.JComponent;
 
+import de.cismet.cids.custom.sudplan.Grid;
+import de.cismet.cids.custom.sudplan.ImmutableGrid;
 import de.cismet.cids.custom.sudplan.Manager;
+import de.cismet.cids.custom.sudplan.RunHelper;
 
 import de.cismet.cids.dynamics.CidsBean;
+import de.cismet.cids.dynamics.Disposable;
 
+import de.cismet.cismap.commons.features.DefaultRasterDocumentFeature;
 import de.cismet.cismap.commons.features.Feature;
 
 /**
@@ -27,28 +36,34 @@ import de.cismet.cismap.commons.features.Feature;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public class MultiplyOutputManager implements Manager {
+public final class GridMultiplyOutputManager implements Manager, Disposable {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final transient Logger LOG = Logger.getLogger(MultiplyOutputManager.class);
+    private static final transient Logger LOG = Logger.getLogger(GridMultiplyOutputManager.class);
 
     //~ Instance fields --------------------------------------------------------
 
-    protected transient MultiplyOutputManagerUI ui;
+    protected transient GridMultiplyOutputManagerUI ui;
 
     private transient CidsBean cidsBean;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates a new MultiplyOutputManager object.
+     * Creates a new GridMultiplyOutputManager object.
      */
-    public MultiplyOutputManager() {
-        ui = new MultiplyOutputManagerUI(this);
+    public GridMultiplyOutputManager() {
+        ui = new GridMultiplyOutputManagerUI(this);
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * Creates a new MultiplyOutputManager object.
+     *
+     * @return  DOCUMENT ME!
+     */
 
     /**
      * DOCUMENT ME!
@@ -109,8 +124,44 @@ public class MultiplyOutputManager implements Manager {
         ui.init();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
+    Grid getMultiplierGrid() throws IOException {
+        final Grid grid;
+        final File multipliersInput = new File(getLocation());
+
+        if (multipliersInput == null) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("no multipliers file found, multipliers empty"); // NOI18N
+            }
+            grid = new ImmutableGrid(null);
+        } else {
+            grid = MultiplyHelper.gridFromFile(multipliersInput);
+        }
+
+        return grid;
+    }
+
+    @Override
+    public void dispose() {
+        ui.dispose();
+    }
+
     @Override
     public Feature getFeature() throws IOException {
-        return null;
+        final Grid grid = getMultiplierGrid();
+
+        if (grid.getGeometry() == null) {
+            return null;
+        } else {
+            final BufferedImage image = RunHelper.toBufferedImage(RunHelper.gridToImage(grid, 0));
+
+            return new DefaultRasterDocumentFeature(image, grid.getGeometry());
+        }
     }
 }

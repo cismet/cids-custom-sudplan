@@ -14,12 +14,11 @@ import org.openide.util.NbBundle;
 import java.awt.EventQueue;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -37,16 +36,16 @@ public class MultiplyInputManagerUI extends javax.swing.JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient MultiplyInputManager model;
+    protected final transient MultiplyInputManager model;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JEditorPane jepMultipliers;
-    private javax.swing.JSpinner jspMultiplicand;
-    private javax.swing.JTextField txtInputLocation;
+    protected javax.swing.JLabel jLabel1;
+    protected javax.swing.JLabel jLabel2;
+    protected javax.swing.JLabel jLabel3;
+    protected javax.swing.JScrollPane jScrollPane1;
+    protected javax.swing.JEditorPane jepMultipliers;
+    protected javax.swing.JSpinner jspMultiplicand;
+    protected javax.swing.JTextField txtInputLocation;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -69,24 +68,8 @@ public class MultiplyInputManagerUI extends javax.swing.JPanel {
      * @throws  IOException  DOCUMENT ME!
      */
     void store() throws IOException {
-        final String[] lines = jepMultipliers.getText().split("\\r?\\n"); // NOI18N
-        final List<Double> multipliers = new ArrayList<Double>(lines.length);
-
-        for (final String multiplier : lines) {
-            try {
-                multipliers.add(Double.parseDouble(multiplier));
-            } catch (final NumberFormatException nfe) {
-                LOG.error("invalid double: " + multiplier, nfe); // NOI18N
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Invalid double: "
-                            + multiplier,
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
-
-                return;
-            }
-        }
+        final StringReader sr = new StringReader(jepMultipliers.getText());
+        final Double[] multipliers = MultiplyHelper.doublesFromReader(sr);
 
         final URI location;
         try {
@@ -138,11 +121,9 @@ public class MultiplyInputManagerUI extends javax.swing.JPanel {
         if (EventQueue.isDispatchThread()) {
             triggerEnable(true);
             try {
-                final StringBuilder sb = new StringBuilder();
-                for (final Double multiplier : model.getMultipliers()) {
-                    sb.append(multiplier).append('\n');
-                }
-                jepMultipliers.setText(sb.toString());
+                final StringWriter sw = new StringWriter();
+                MultiplyHelper.numbersToWriter(sw, model.getMultipliers());
+                jepMultipliers.setText(sw.toString());
 
                 jspMultiplicand.setValue(model.getMulitplicand());
 
@@ -162,7 +143,7 @@ public class MultiplyInputManagerUI extends javax.swing.JPanel {
      *
      * @param  enable  DOCUMENT ME!
      */
-    private void triggerEnable(final boolean enable) {
+    protected void triggerEnable(final boolean enable) {
         setEnabled(enable);
         jepMultipliers.setEnabled(enable);
         jspMultiplicand.setEnabled(enable);

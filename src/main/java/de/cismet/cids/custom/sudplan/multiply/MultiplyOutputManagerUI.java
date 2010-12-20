@@ -70,16 +70,16 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
     //~ Instance fields --------------------------------------------------------
 
     /** Creates new form MultiplyOutputManagerUI. */
-    private final transient MultiplyOutputManager model;
+    protected final transient MultiplyOutputManager model;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JComboBox jcbChartType;
-    private javax.swing.JPanel jplChart;
-    private javax.swing.JTextPane jtpRequestURL;
-    private javax.swing.JTextPane jtpResults;
+    protected javax.swing.JLabel jLabel2;
+    protected javax.swing.JScrollPane jScrollPane1;
+    protected javax.swing.JScrollPane jScrollPane2;
+    protected javax.swing.JComboBox jcbChartType;
+    protected javax.swing.JPanel jplChart;
+    protected javax.swing.JTextPane jtpRequestURL;
+    protected javax.swing.JTextPane jtpResults;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -100,6 +100,9 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     void init() {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("init"); // NOI18N
+        }
         EventQueue.invokeLater(new Runnable() {
 
                 @Override
@@ -136,6 +139,8 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
         jScrollPane2 = new javax.swing.JScrollPane();
         jtpRequestURL = new javax.swing.JTextPane();
 
+        setMaximumSize(new java.awt.Dimension(755, 451));
+        setMinimumSize(new java.awt.Dimension(755, 451));
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
@@ -156,9 +161,9 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
         final org.jdesktop.layout.GroupLayout jplChartLayout = new org.jdesktop.layout.GroupLayout(jplChart);
         jplChart.setLayout(jplChartLayout);
         jplChartLayout.setHorizontalGroup(
-            jplChartLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 74, Short.MAX_VALUE));
+            jplChartLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 350, Short.MAX_VALUE));
         jplChartLayout.setVerticalGroup(
-            jplChartLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 203, Short.MAX_VALUE));
+            jplChartLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 354, Short.MAX_VALUE));
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -177,10 +182,14 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(9, 9, 9, 1);
         add(jLabel2, gridBagConstraints);
 
+        jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        jScrollPane1.setMaximumSize(new java.awt.Dimension(369, 354));
+        jScrollPane1.setMinimumSize(new java.awt.Dimension(369, 354));
+
         jtpResults.setDragEnabled(false);
         jtpResults.setEnabled(false);
         jtpResults.setMaximumSize(new java.awt.Dimension(350, 350));
-        jtpResults.setMinimumSize(new java.awt.Dimension(50, 50));
+        jtpResults.setMinimumSize(new java.awt.Dimension(350, 350));
         jtpResults.setPreferredSize(new java.awt.Dimension(350, 350));
         jScrollPane1.setViewportView(jtpResults);
 
@@ -210,7 +219,7 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
      *
      * @version  $Revision$, $Date$
      */
-    private final class ImagePanel extends JPanel {
+    protected final class ImagePanel extends JPanel {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -226,6 +235,16 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
         public void setImage(final Image image) {
             this.image = image;
         }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public Image getImage() {
+            return image;
+        }
+
         @Override
         protected void paintComponent(final Graphics g) {
             if (image == null) {
@@ -247,10 +266,6 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
         private static final String BAR_URL =
             "http://chart.apis.google.com/chart?chxt=x,y&chxr=1,0,{3}&cht=bvs&chs={0}x{1}&chd=t:{2}&chco=FFC6A5%7CFFFF42%7CDEF3BD%7C00A5C6%7CDEBDDE";
 
-        //~ Instance fields ----------------------------------------------------
-
-        private transient List<Double> results;
-
         //~ Methods ------------------------------------------------------------
 
         /**
@@ -262,7 +277,7 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
          */
         @Override
         protected Image doInBackground() throws Exception {
-            results = MultiplyHelper.doublesFromFile(new File(model.getLocation()));
+            final Double[] results = MultiplyHelper.doublesFromFile(new File(model.getLocation()));
             final StringBuilder sb = new StringBuilder();
 
             Double max = 0d;
