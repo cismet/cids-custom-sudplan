@@ -1,0 +1,23 @@
+            ------
+            What is SMS
+            ------
+            Martin Scholl
+            ------
+            29/12/2010
+
+{What is the SMS}
+
+
+  This is the project site of the SUDPLAN SMS (Scenario Management System).
+  SUDPLAN (Sustainable Urban Development Planner for Climate Change Adaptation)
+  is an EU FP7 project running from 2010 until 2012. The SMS is the main piece of
+  software that lets users (city planners, IT and GIS experts, enviromental modellers, etc.)
+  interact with the system.
+
+[../images/sms_screener.png] SMS Screenshot
+
+  Head for the {{{./download.html#Download_SMS_component}download section}} to download
+  binaries and the sources of the SUDPLAN extension.
+
+  In the {{{./run.html#Run_the_SMS_from_the_web}run section}} you can run the current
+  version of the SMS right away.

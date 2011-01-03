@@ -1,0 +1,67 @@
+
+<project name="SUDPLAN SMS - Sudplan scenario management system">
+
+    <publishDate position="right"/>
+    <version position="none"/>
+
+    <skin>
+        <groupId>de.cismet.cids.custom</groupId>
+        <artifactId>sudplan-site-skin</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </skin>
+
+    <bannerLeft>
+        <name>cismet</name>
+        <src>images/cismet_logo.png</src>
+        <href>http://www.cismet.de</href>
+    </bannerLeft>
+
+    <body>
+		
+        <menu name="Main" collapse="false">
+            <item name="Welcome" href="index.html"/>
+            <item name="News" href="news.html"/>
+        </menu>
+
+        <menu name="About" collapse="false">
+            <item name="What is SUDPLAN" href="about/sudplan.html"/>
+            <item name="What is the SMS" href="about/sms.html" />
+        </menu>
+
+        <menu name="Get Components" collapse="false">
+            <item name="Download" href="download.html"/>
+            <item name="Instant Run" href="run.html"/>
+            <item name="License" href="license.html" />
+        </menu>
+
+        <!--menu name="Documentation" collapse="false">
+            <item name="Set up CHARON" href="setupCharon.html"/>
+            <item name="Add your services to CHARON" href="setupProxy.html"/>
+            <item name="Administer CHARON" href="administerCharon.html"/>
+            <item name="Examples" href="examples.html" collapse="true">
+            </item>
+        </menu-->
+		
+<!--        <menu name="Project Information" collapse="true">
+            <item name="Continuous Integration" href="integration.html"/>
+            <item name="Dependencies" href="dependencies.html"/>
+            <item name="Issue Tracking" href="issue-tracking.html"/>
+            <item name="Mailing List" href="mail-lists.html"/>
+            <item name="Plugin Management" href="plugin-management.html"/>
+            <item name="Project License" href="license.html"/>
+            <item name="Project Plugins" href="plugins.html"/>
+            <item name="Project Summary" href="project-summary.html"/>
+            <item name="Project Team" href="team-list.html"/>
+            <item name="Source Repository" href="source-repository.html"/>
+        </menu>-->
+
+        <menu ref="reports"/>
+        
+        <!--menu name="CHARON Sub-Projects" ref="modules" collapse="false"/-->
+		
+    </body>
+
+    <poweredBy>
+        <logo name="SUDPLAN" href="http://www.smhi.se/sudplan" img="images/sudplan_logo.png"/>
+    </poweredBy>
+</project>

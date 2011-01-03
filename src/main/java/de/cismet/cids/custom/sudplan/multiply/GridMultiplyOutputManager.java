@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.multiply;
 
-
 import org.apache.log4j.Logger;
 
 import java.awt.image.BufferedImage;

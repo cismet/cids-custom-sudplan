@@ -6,7 +6,7 @@
     <parent>
         <groupId>de.cismet.cids</groupId>
         <artifactId>cids-parent</artifactId>
-        <version>1.0.2</version>
+        <version>1.0.3</version>
     </parent>
 
     <groupId>de.cismet.cids.custom.sudplan</groupId>
@@ -17,7 +17,39 @@
     <name>cids Custom Sudplan</name>
     <description>cids Navigator customisation for the SUDPLAN FP7 project</description>
 
+    <developers>
+        <developer>
+            <id>thell</id>
+            <name>Thorsten Hell</name>
+            <email>thorsten.hell@cismet.de</email>
+            <organization>cismet GmbH</organization>
+        </developer>
+        <developer>
+            <id>sschlobinski</id>
+            <name>Sascha Schlobinski</name>
+            <email>sascha.schlobinski@cismet.de</email>
+            <organization>cismet GmbH</organization>
+        </developer>
+        <developer>
+            <id>mscholl</id>
+            <name>Martin Scholl</name>
+            <email>martin.scholl@cismet.de</email>
+            <organization>cismet GmbH</organization>
+        </developer>
+    </developers>
+    
+    <distributionManagement>
+        <site>
+            <id>sudplan-site</id>
+            <url>scp://sudplanwp3.cismet.de/var/www/vhosts/sudplanwp3.cismet.de/httpdocs/sms/</url>
+        </site>
+    </distributionManagement>
+
     <properties>
+        <!-- unfortunately the site generation cannot handle variables that contain a dot -->
+        <projectVersion>${project.version}</projectVersion>
+        <projectName>${project.artifactId}</projectName>
+        <projectPackaging>${project.packaging}</projectPackaging>
         <!--
             ToDo make constants for the single values to ease the configuration
             of the child POMs.
@@ -42,6 +74,20 @@
             <version>4.4</version>
             <scope>test</scope>
         </dependency>
+        <!--
+            cannot be used yet since maven will request for a key authorisation
+            making the build interactive which is at least for hudson inacceptable
+         -->
+        <!--dependency>
+            <groupId>at.ac.ait.enviro.sudplan</groupId>
+            <artifactId>SOSDummyHandler</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>at.ac.ait.enviro.sudplan</groupId>
+            <artifactId>SPSDummyHandler</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency-->
     </dependencies>
 
     <build>
@@ -63,6 +109,11 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>2.2</version>
             </plugin>
         </plugins>
     </build>
