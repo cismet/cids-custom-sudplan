@@ -7,17 +7,21 @@
 
 {What is the SMS}
 
+  The SUDPLAN Scenario Management System (SMS) is the main piece of software that lets users (city planners, IT and GIS
+  experts, environmental modelers, etc.) interact with SUDPLAN. It is build on top of the
+  {{{http://wiki.cismet.de/index.php/Cids_Integrationsbaukasten}cids integration toolkit}} and enables users to easily
+  create, view and manage SUDPLAN actions and results. It is also built for providing an user interface capable of
+  management of local models including model input and output. On top of that the SMS ultimately allows for easy
+  integration of SUDPLAN results with local models to provide more precise results than ever before.
 
-  This is the project site of the SUDPLAN SMS (Scenario Management System).
-  SUDPLAN (Sustainable Urban Development Planner for Climate Change Adaptation)
-  is an EU FP7 project running from 2010 until 2012. The SMS is the main piece of
-  software that lets users (city planners, IT and GIS experts, enviromental modellers, etc.)
-  interact with the system.
+
+  Here you can see a screenshot of a very early version of the SMS showing several catchment areas and flow data which
+  is used in hydrological context:
 
 [../images/sms_screener.png] SMS Screenshot
 
-  Head for the {{{./download.html#Download_SMS_component}download section}} to download
+  Head for the {{{../download.html#Download_SMS_component}download section}} to download
   binaries and the sources of the SUDPLAN extension.
 
-  In the {{{./run.html#Run_the_SMS_from_the_web}run section}} you can run the current
+  In the {{{../run.html#Run_the_SMS_from_the_web}run section}} you can run the current
   version of the SMS right away.

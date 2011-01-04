@@ -10,12 +10,12 @@ Welcome to the Web Page of the SUDPLAN SMS
   This is the project site of the <<SUDPLAN Scenario Management System>>.
 
   If you want a short introduction to SUDPLAN have a look at the
-  {{{about/sudplan.html}What is SUDPLAN}} page or
+  {{{./about/sudplan.html}What is SUDPLAN}} page or
   at the leaflet which can be found
   {{{http://www.smhi.se/polopoly_fs/1.12560!SUDPLANsep-10.pdf}here}}. Alternatively visit
   the {{{http://www.sudplan.eu}SUDPLAN Web Page}}.
 
-  To find out more about the Scenario Management System head for the {{{about/sms.html}
+  To find out more about the Scenario Management System head for the {{{./about/sms.html}
   What is the SMS}} section on this site. You can also download binaries or sources in the
   {{{./download.html#Download_SMS_component}download section}}.
 
