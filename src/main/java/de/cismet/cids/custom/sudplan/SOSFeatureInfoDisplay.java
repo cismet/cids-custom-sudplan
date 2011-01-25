@@ -424,25 +424,23 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay {
         final Envelope envelope = (Envelope)timeseries.getTSProperty(TimeSeries.GEOMETRY);
         if (envelope == null) {
             return null;
-        }
+        } else if (envelope.contains(currentDisplayer.getMce().getxCoord(), currentDisplayer.getMce().getyCoord())) {
+            final double width = envelope.getWidth();
+            final double height = envelope.getHeight();
+            final double xCoord = currentDisplayer.getMce().getxCoord();
+            final double yCoord = currentDisplayer.getMce().getyCoord();
+            final double xRelation = ((xCoord - envelope.getMinX()) / width);
+            final double yRelation = ((yCoord - envelope.getMinY()) / height);
 
-        final double width = envelope.getWidth();
-        final double height = envelope.getHeight();
-        final double xCoord = currentDisplayer.getMce().getxCoord();
-        final double yCoord = currentDisplayer.getMce().getyCoord();
-        final double xRelation = ((xCoord - envelope.getMinX()) / width);
-        final double yRelation = ((yCoord - envelope.getMinY()) / height);
+            for (final TimeStamp ts : timeStamps) {
+                final Float[][] values = ((Float[][])timeseries.getValue(ts, valueKey));
+                // assume this is a rectangular grid
+                final int i = (int)(values.length * xRelation);
+                final int j = (int)(values[i].length * yRelation);
+                final float value = values[i][j];
+                data.add(new Day(ts.asDate()), value);
+            }
 
-        for (final TimeStamp ts : timeStamps) {
-            final Float[][] values = ((Float[][])timeseries.getValue(ts, valueKey));
-            // assume this is a rectangular grid
-            final int i = (int)(values.length * xRelation);
-            final int j = (int)(values[i].length * yRelation);
-            final float value = values[i][j];
-            data.add(new Day(ts.asDate()), value);
-        }
-
-        if (envelope.contains(currentDisplayer.getMce().getxCoord(), currentDisplayer.getMce().getyCoord())) {
             return new TimeSeriesCollection(data);
         } else {
             return null;
