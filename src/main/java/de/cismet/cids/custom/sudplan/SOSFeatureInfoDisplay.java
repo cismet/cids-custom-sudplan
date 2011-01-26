@@ -100,6 +100,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay {
     private transient String sosUrl;
     private transient int fromYear;
     private transient int toYear;
+    private transient boolean initialised;
 
     // will only be accessed from EDT
     private transient TimeSeriesDisplayer currentDisplayer;
@@ -117,12 +118,13 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay {
      */
     public SOSFeatureInfoDisplay() {
         super(new FeatureInfoDisplayKey(
-                "de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup", // NOI18N
+                SlidableWMSServiceLayerGroup.class,
                 // TODO this is no general info display for the slidable layer so we need to exactly specify where to
                 // use this
-                FeatureInfoDisplayKey.ANY,
-                FeatureInfoDisplayKey.ANY));
+                FeatureInfoDisplayKey.ANY_SERVER,
+                FeatureInfoDisplayKey.ANY_LAYER));
         initComponents();
+        initialised = false;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -179,7 +181,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay {
 
     @Override
     public void init(final Object layer, final JTabbedPane parentTabbedPane) throws InitialisationException {
-        if (layer instanceof SlidableWMSServiceLayerGroup) {
+        if (acceptLayer(layer.getClass())) {
             final SlidableWMSServiceLayerGroup layerGroup = (SlidableWMSServiceLayerGroup)layer;
 
             parseKeywords(layerGroup.getLayerInformation().getKeywords());
@@ -215,8 +217,10 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay {
                 LOG.error(message, e);
                 throw new InitialisationException(message, e);
             }
+
+            initialised = true;
         } else {
-            final String message = "invalid layer object: " + layer;    // NOI18N
+            final String message = "invalid layer object: " + layer; // NOI18N
             LOG.error(message);
             throw new InitialisationException(message);
         }
@@ -329,6 +333,10 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay {
     @Override
     public void showFeatureInfo(final MapClickedEvent mce) {
         if (EventQueue.isDispatchThread()) {
+            if (!initialised) {
+                throw new IllegalStateException("cannot process events before this instance is initialised"); // NOI18N
+            }
+
             if ((currentDisplayer == null) || currentDisplayer.isDone() || currentDisplayer.cancel(true)) {
                 currentDisplayer = new TimeSeriesDisplayer(mce);
             } else {
