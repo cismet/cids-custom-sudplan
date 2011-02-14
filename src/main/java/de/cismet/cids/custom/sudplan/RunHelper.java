@@ -7,11 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
-import Sirius.navigator.connection.SessionManager;
-import Sirius.navigator.types.treenode.RootTreeNode;
-import Sirius.navigator.ui.ComponentRegistry;
-import Sirius.navigator.ui.tree.MetaCatalogueTree;
-
 import org.apache.log4j.Logger;
 
 import java.awt.Color;
@@ -26,12 +21,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.PixelGrabber;
 
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-
 import de.cismet.cids.dynamics.CidsBean;
-
-import de.cismet.tools.BlacklistClassloading;
 
 /**
  * DOCUMENT ME!
@@ -54,91 +44,6 @@ public final class RunHelper {
     }
 
     //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   runBean  DOCUMENT ME!
-     * @param   type     DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static Manager loadManagerFromRun(final CidsBean runBean, final Manager.ManagerType type) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("loading manager for bean '" + runBean + "' and type: " + type); // NOI18N
-        }
-
-        return loadManagerFromModel((CidsBean)runBean.getProperty("model"), type); // NOI18N
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   modelBean  DOCUMENT ME!
-     * @param   type       DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  IllegalStateException  DOCUMENT ME!
-     */
-    public static Manager loadManagerFromModel(final CidsBean modelBean, final Manager.ManagerType type) {
-        final CidsBean managerBean;
-        switch (type) {
-            case INPUT: {
-                managerBean = (CidsBean)modelBean.getProperty("inputmanager");    // NOI18N
-                break;
-            }
-            case MODEL: {
-                managerBean = (CidsBean)modelBean.getProperty("modelmanager");    // NOI18N
-                break;
-            }
-            case OUTPUT: {
-                managerBean = (CidsBean)modelBean.getProperty("outputmanager");   // NOI18N
-                break;
-            }
-            default: {
-                throw new IllegalStateException("unknown manager type: " + type); // NOI18N
-            }
-        }
-
-        final String definition = (String)managerBean.getProperty("definition"); // NOI18N
-
-        final Class managerClass = BlacklistClassloading.forName(definition);
-        if (managerClass == null) {
-            throw new IllegalStateException("manager not in classpath: " + definition);          // NOI18N
-        } else if (Manager.class.isAssignableFrom(managerClass)) {
-            final Manager manager;
-            try {
-                manager = (Manager)managerClass.newInstance();
-            } catch (final Exception ex) {
-                final String message = "cannot properly create manager instance: " + definition; // NOI18N
-                LOG.error(message, ex);
-                throw new IllegalStateException(message, ex);
-            }
-
-            return manager;
-        } else {
-            throw new IllegalStateException("given class does not implement manager interface: " + definition); // NOI18N
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     */
-    public static void reloadCatalogTree() {
-        final MetaCatalogueTree tree = ComponentRegistry.getRegistry().getCatalogueTree();
-        final TreePath path = tree.getSelectionPath();
-        final DefaultTreeModel model = (DefaultTreeModel)tree.getModel();
-
-        try {
-            final RootTreeNode root = new RootTreeNode(SessionManager.getProxy().getRoots());
-            model.setRoot(root);
-            model.reload();
-            tree.exploreSubtree(path.getParentPath());
-        } catch (final Exception ex) {
-            LOG.warn("could not reload tree", ex); // NOI18N
-        }
-    }
 
     /**
      * DOCUMENT ME!

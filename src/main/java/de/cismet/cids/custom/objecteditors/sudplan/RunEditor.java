@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 
 import de.cismet.cids.custom.sudplan.Manager;
 import de.cismet.cids.custom.sudplan.RunHelper;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -282,7 +283,7 @@ public class RunEditor extends JPanel implements CidsBeanRenderer, EditorSaveLis
                         LOG.error(message, ex);
                         throw new IllegalStateException(message, ex);
                     }
-                    manager = RunHelper.loadManagerFromRun(cidsBean, Manager.ManagerType.INPUT);
+                    manager = SMSUtils.loadManagerFromRun(cidsBean, Manager.ManagerType.INPUT);
 
                     final Object input = cidsBean.getProperty("modelinput");                                           // NOI18N
                     if (input == null) {

@@ -109,7 +109,7 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
                 public void run() {
                     final StringBuilder sb = new StringBuilder();
                     try {
-                        for (final Double result : MultiplyHelper.doublesFromFile(new File(model.getLocation()))) {
+                        for (final Double result : MultiplyHelper.doublesFromFile(new File(model.getUR()))) {
                             sb.append(result).append('\n');
                         }
                         jtpResults.setText(sb.toString());
@@ -277,7 +277,7 @@ public class MultiplyOutputManagerUI extends javax.swing.JPanel {
          */
         @Override
         protected Image doInBackground() throws Exception {
-            final Double[] results = MultiplyHelper.doublesFromFile(new File(model.getLocation()));
+            final Double[] results = MultiplyHelper.doublesFromFile(new File(model.getUR()));
             final StringBuilder sb = new StringBuilder();
 
             Double max = 0d;

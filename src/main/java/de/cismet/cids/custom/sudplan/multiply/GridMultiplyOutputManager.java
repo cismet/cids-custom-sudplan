@@ -82,7 +82,7 @@ public final class GridMultiplyOutputManager implements Manager, Disposable {
      * @throws  IOException  DOCUMENT ME!
      */
     @Override
-    public URI getLocation() throws IOException {
+    public URI getUR() throws IOException {
         try {
             return new URI((String)cidsBean.getProperty("uri")); // NOI18N
         } catch (final Exception e) {
@@ -132,7 +132,7 @@ public final class GridMultiplyOutputManager implements Manager, Disposable {
      */
     Grid getMultiplierGrid() throws IOException {
         final Grid grid;
-        final File multipliersInput = new File(getLocation());
+        final File multipliersInput = new File(getUR());
 
         if (multipliersInput == null) {
             if (LOG.isInfoEnabled()) {

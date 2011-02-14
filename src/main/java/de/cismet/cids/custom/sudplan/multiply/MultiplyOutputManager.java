@@ -68,7 +68,7 @@ public class MultiplyOutputManager implements Manager {
      * @throws  IOException  DOCUMENT ME!
      */
     @Override
-    public URI getLocation() throws IOException {
+    public URI getUR() throws IOException {
         try {
             return new URI((String)cidsBean.getProperty("uri")); // NOI18N
         } catch (final Exception e) {

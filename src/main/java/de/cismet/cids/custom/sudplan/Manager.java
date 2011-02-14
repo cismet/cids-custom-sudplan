@@ -9,8 +9,6 @@ package de.cismet.cids.custom.sudplan;
 
 import java.io.IOException;
 
-import java.net.URI;
-
 import javax.swing.JComponent;
 
 import de.cismet.cids.dynamics.CidsBeanStore;
@@ -55,7 +53,7 @@ public interface Manager extends CidsBeanStore {
      *
      * @throws  IOException  DOCUMENT ME!
      */
-    URI getLocation() throws IOException;
+    Object getUR() throws IOException;
 
     /**
      * DOCUMENT ME!

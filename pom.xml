@@ -6,7 +6,7 @@
     <parent>
         <groupId>de.cismet.cids</groupId>
         <artifactId>cids-parent</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.5</version>
     </parent>
 
     <groupId>de.cismet.cids.custom.sudplan</groupId>
@@ -92,6 +92,11 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
+                <!-- exclude jts to prevent version conflicts -->
+                <exclusion>
+                    <groupId>com.vividsolutions</groupId>
+                    <artifactId>jts</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -108,12 +113,27 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
+                <!-- exclude jts to prevent version conflicts -->
+                <exclusion>
+                    <groupId>com.vividsolutions</groupId>
+                    <artifactId>jts</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>jfree</groupId>
             <artifactId>jfreechart</artifactId>
-            <version>1.0.12</version>
+            <version>1.0.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-dialogs</artifactId>
+            <version>RELEASE691</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.7.1</version>
         </dependency>
     </dependencies>
 
@@ -136,6 +156,30 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <arguments>
+                        <argument>-Xmx1024m</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/dist.xml</descriptor>
+                    </descriptors>
+                </configuration>
             </plugin>
         </plugins>
     </build>

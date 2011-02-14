@@ -78,7 +78,7 @@ public final class GridMultiplyModelManager extends MultiplyModelManager {
 //            }
         }
 
-        final File outputFile = new File(getLocation());
+        final File outputFile = new File(getUR());
         MultiplyHelper.gridToFile(outputFile, new ImmutableGrid(results, input.getGeometry()));
         fireProgressed(maxSteps, maxSteps);
         try {

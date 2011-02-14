@@ -90,7 +90,7 @@ public class MultiplyInputManager implements Manager {
     }
 
     @Override
-    public URI getLocation() throws IOException {
+    public URI getUR() throws IOException {
         final String uri = (String)modelInputBean.getProperty("uri");     // NOI18N
         if (uri == null) {
             return new File(".").toURI();                                 // NOI18N
@@ -131,7 +131,7 @@ public class MultiplyInputManager implements Manager {
      */
     Double[] getMultipliers() throws IOException {
         final Double[] multipliers;
-        final File multipliersInput = getFactorFile(new File(getLocation()), FILENAME_MULTIPLIERS, false);
+        final File multipliersInput = getFactorFile(new File(getUR()), FILENAME_MULTIPLIERS, false);
 
         if (multipliersInput == null) {
             if (LOG.isInfoEnabled()) {
@@ -153,7 +153,7 @@ public class MultiplyInputManager implements Manager {
      * @throws  IOException  DOCUMENT ME!
      */
     void setMultipliers(final Double[] multipliers) throws IOException {
-        MultiplyHelper.numbersToFile(getFactorFile(new File(getLocation()), FILENAME_MULTIPLIERS, true), multipliers);
+        MultiplyHelper.numbersToFile(getFactorFile(new File(getUR()), FILENAME_MULTIPLIERS, true), multipliers);
     }
 
     /**
@@ -165,7 +165,7 @@ public class MultiplyInputManager implements Manager {
      */
     int getMulitplicand() throws IOException {
         int multiplicand = 1;
-        final File multiplicandInput = getFactorFile(new File(getLocation()), FILENAME_MULTIPLICAND, false);
+        final File multiplicandInput = getFactorFile(new File(getUR()), FILENAME_MULTIPLICAND, false);
 
         if (multiplicandInput == null) {
             if (LOG.isInfoEnabled()) {
@@ -190,7 +190,7 @@ public class MultiplyInputManager implements Manager {
      * @throws  IOException  DOCUMENT ME!
      */
     void setMultiplicand(final int multiplicand) throws IOException {
-        MultiplyHelper.numbersToFile(getFactorFile(new File(getLocation()), FILENAME_MULTIPLICAND, true), multiplicand);
+        MultiplyHelper.numbersToFile(getFactorFile(new File(getUR()), FILENAME_MULTIPLICAND, true), multiplicand);
     }
 
     /**

@@ -127,7 +127,7 @@ public class MultiplyInputManagerUI extends javax.swing.JPanel {
 
                 jspMultiplicand.setValue(model.getMulitplicand());
 
-                txtInputLocation.setText(model.getLocation().toString());
+                txtInputLocation.setText(model.getUR().toString());
             } catch (final IOException e) {
                 LOG.error("cannot initialise components", e); // NOI18N
                 jepMultipliers.setText("initialisation failed: " + e);

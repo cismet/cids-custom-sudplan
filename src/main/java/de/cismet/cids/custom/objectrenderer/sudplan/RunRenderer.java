@@ -5,46 +5,18 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- *  Copyright (C) 2010 mscholl
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-/*
- * RunRenderer.java
- *
- * Created on Nov 11, 2010, 11:07:10 AM
- */
 package de.cismet.cids.custom.objectrenderer.sudplan;
-
-import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
-import javax.swing.JPanel;
 
 import de.cismet.cids.custom.sudplan.Manager;
-import de.cismet.cids.custom.sudplan.RunHelper;
+import de.cismet.cids.custom.sudplan.Manager.ManagerType;
 
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.editors.DefaultCustomObjectEditor;
-
-import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
 
 /**
  * DOCUMENT ME!
@@ -52,16 +24,7 @@ import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
-public class RunRenderer extends JPanel implements CidsBeanRenderer {
-
-    //~ Static fields/initializers ---------------------------------------------
-
-    private static final transient Logger LOG = Logger.getLogger(RunRenderer.class);
-
-    //~ Instance fields --------------------------------------------------------
-
-    private transient CidsBean cidsBean;
-    private transient String title;
+public class RunRenderer extends AbstractManagerRenderer {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
@@ -99,6 +62,7 @@ public class RunRenderer extends JPanel implements CidsBeanRenderer {
         lblDescription = new javax.swing.JLabel();
         jplManager = new javax.swing.JPanel();
 
+        setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
         jLabel1.setText(NbBundle.getMessage(RunRenderer.class, "RunRenderer.jLabel1.text")); // NOI18N
@@ -174,39 +138,10 @@ public class RunRenderer extends JPanel implements CidsBeanRenderer {
     } // </editor-fold>//GEN-END:initComponents
 
     @Override
-    public CidsBean getCidsBean() {
-        return cidsBean;
-    }
-
-    @Override
     public void setCidsBean(final CidsBean cidsBean) {
-        this.cidsBean = cidsBean;
-        DefaultCustomObjectEditor.setMetaClassInformationToMetaClassStoreComponentsInBindingGroup(
-            bindingGroup,
-            cidsBean);
+        super.setCidsBean(cidsBean);
         bindingGroup.unbind();
         bindingGroup.bind();
-        init();
-    }
-
-    /**
-     * DOCUMENT ME!
-     */
-    private void init() {
-        final Manager manager = RunHelper.loadManagerFromRun(cidsBean, Manager.ManagerType.MODEL);
-        manager.setCidsBean(cidsBean);
-
-        if (EventQueue.isDispatchThread()) {
-            setManagerUI(manager);
-        } else {
-            EventQueue.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        setManagerUI(manager);
-                    }
-                });
-        }
     }
 
     /**
@@ -214,7 +149,8 @@ public class RunRenderer extends JPanel implements CidsBeanRenderer {
      *
      * @param  manager  DOCUMENT ME!
      */
-    private void setManagerUI(final Manager manager) {
+    @Override
+    protected void setManagerUI(final Manager manager) {
         jplManager.removeAll();
         jplManager.add(manager.getUI(), BorderLayout.CENTER);
         jplManager.revalidate();
@@ -222,16 +158,17 @@ public class RunRenderer extends JPanel implements CidsBeanRenderer {
 
     @Override
     public void dispose() {
+        super.dispose();
         bindingGroup.unbind();
     }
 
     @Override
     public String getTitle() {
-        return "Model Execution Status of " + title;
+        return "Model Execution Status of " + super.getTitle();
     }
 
     @Override
-    public void setTitle(final String title) {
-        this.title = title;
+    ManagerType getType() {
+        return ManagerType.MODEL;
     }
 }

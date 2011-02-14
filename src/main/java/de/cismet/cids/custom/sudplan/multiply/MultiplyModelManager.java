@@ -31,6 +31,7 @@ import de.cismet.cids.custom.sudplan.ProgressEvent;
 import de.cismet.cids.custom.sudplan.ProgressListener;
 import de.cismet.cids.custom.sudplan.ProgressSupport;
 import de.cismet.cids.custom.sudplan.RunHelper;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -128,7 +129,7 @@ public class MultiplyModelManager implements Manager, Executable {
             }
         }
 
-        final File outputFile = new File(getLocation());
+        final File outputFile = new File(getUR());
         MultiplyHelper.numbersToFile(outputFile, results);
         fireProgressed(maxSteps, maxSteps);
         try {
@@ -147,7 +148,7 @@ public class MultiplyModelManager implements Manager, Executable {
      *
      * @throws  IllegalStateException  DOCUMENT ME!
      */
-    protected void fireStarted() {
+    public void fireStarted() {
         final SqlTimestampToUtilDateConverter dateConverter = new SqlTimestampToUtilDateConverter();
         try {
             cidsBean.setProperty("started", dateConverter.convertReverse(GregorianCalendar.getInstance().getTime())); // NOI18N
@@ -182,13 +183,13 @@ public class MultiplyModelManager implements Manager, Executable {
             final MetaClass modelOutputClasss = ClassCacheMultiple.getMetaClass(cidsBean.getMetaObject().getDomain(),
                     "modeloutput");                                                                                    // NOI18N
             final CidsBean modelOutputBean = modelOutputClasss.getEmptyInstance().getBean();
-            modelOutputBean.setProperty("uri", getLocation().toString());                                              // NOI18N
+            modelOutputBean.setProperty("uri", getUR().toString());                                                    // NOI18N
             modelOutputBean.setProperty("comments", "Output of the Multiply Model");
             modelOutputBean.setProperty("name", "Output from " + RunHelper.createIONameSnippet(cidsBean));             // NOI18N
             modelOutputBean.setProperty("model", cidsBean.getProperty("model"));                                       // NOI18N
             cidsBean.setProperty("modeloutput", modelOutputBean);                                                      // NOI18N
-            cidsBean.persist();
-            RunHelper.reloadCatalogTree();
+            cidsBean = cidsBean.persist();
+            SMSUtils.reloadCatalogTree();
         } catch (final Exception ex) {
             final String message = "cannot save new values in runbean";                                                // NOI18N
             LOG.error(message, ex);
@@ -245,7 +246,7 @@ public class MultiplyModelManager implements Manager, Executable {
      * @throws  IOException  DOCUMENT ME!
      */
     @Override
-    public URI getLocation() throws IOException {
+    public URI getUR() throws IOException {
         final StringBuilder sb = new StringBuilder(getInputFolderURI());
 
         if ('/' != sb.charAt(sb.length() - 1)) {

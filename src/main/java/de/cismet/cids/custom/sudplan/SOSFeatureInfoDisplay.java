@@ -8,7 +8,6 @@
 package de.cismet.cids.custom.sudplan;
 
 import at.ac.ait.enviro.tsapi.handler.DataHandler;
-import at.ac.ait.enviro.tsapi.handler.DataHandlerFactory;
 import at.ac.ait.enviro.tsapi.handler.Datapoint;
 import at.ac.ait.enviro.tsapi.timeseries.TimeDuration;
 import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
@@ -76,7 +75,7 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = FeatureInfoDisplay.class)
-public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay {
+public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWMSServiceLayerGroup> {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -180,50 +179,44 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay {
     }                                                                                                                // </editor-fold>//GEN-END:initComponents
 
     @Override
-    public void init(final Object layer, final JTabbedPane parentTabbedPane) throws InitialisationException {
-        if (acceptLayer(layer.getClass())) {
-            final SlidableWMSServiceLayerGroup layerGroup = (SlidableWMSServiceLayerGroup)layer;
+    public void init(final SlidableWMSServiceLayerGroup layer, final JTabbedPane parentTabbedPane)
+            throws InitialisationException {
+        parseKeywords(layer.getLayerInformation().getKeywords());
 
-            parseKeywords(layerGroup.getLayerInformation().getKeywords());
+        final GregorianCalendar fromCal = new GregorianCalendar(fromYear, 0, 1);
+        final GregorianCalendar toCal = new GregorianCalendar(toYear, 11, 31);
+        timeInterval = new TimeInterval(
+                TimeInterval.Openness.OPEN,
+                new TimeStamp(fromCal.getTimeInMillis()),
+                new TimeStamp(toCal.getTimeInMillis()),
+                TimeInterval.Openness.OPEN);
 
-            final GregorianCalendar fromCal = new GregorianCalendar(fromYear, 0, 1);
-            final GregorianCalendar toCal = new GregorianCalendar(toYear, 11, 31);
-            timeInterval = new TimeInterval(
-                    TimeInterval.Openness.OPEN,
-                    new TimeStamp(fromCal.getTimeInMillis()),
-                    new TimeStamp(toCal.getTimeInMillis()),
-                    TimeInterval.Openness.OPEN);
+        sosHandler = Demo.getInstance().getSOSDH(); // TODO: <- for demo
+                                                    // DataHandlerFactory.Lookup.lookup(SOS_FACTORY); // NOI18N
 
-            sosHandler = DataHandlerFactory.Lookup.lookup(SOS_FACTORY); // NOI18N
-
-            if (sosHandler == null) {
-                final String message = "cannot lookup datahander factory: " + SOS_FACTORY; // NOI18N
-                LOG.error(message);
-                throw new InitialisationException(message);
-            }
-
-            sosHandler.setId(SOS_FACTORY);
-            try {
-                final BeanInfo info = Introspector.getBeanInfo(sosHandler.getClass(), Introspector.USE_ALL_BEANINFO);
-                for (final PropertyDescriptor pd : info.getPropertyDescriptors()) {
-                    if (pd.getName().equals("endpoint")) { // NOI18N
-                        pd.getWriteMethod().invoke(sosHandler, new URL(sosUrl));
-                    }
-                }
-
-                sosHandler.open();
-            } catch (final Exception e) {
-                final String message = "cannot initialise sos handler"; // NOI18N
-                LOG.error(message, e);
-                throw new InitialisationException(message, e);
-            }
-
-            initialised = true;
-        } else {
-            final String message = "invalid layer object: " + layer; // NOI18N
+        if (sosHandler == null) {
+            final String message = "cannot lookup datahander factory: " + SOS_FACTORY; // NOI18N
             LOG.error(message);
             throw new InitialisationException(message);
         }
+
+        sosHandler.setId(SOS_FACTORY);
+        try {
+            final BeanInfo info = Introspector.getBeanInfo(sosHandler.getClass(), Introspector.USE_ALL_BEANINFO);
+            for (final PropertyDescriptor pd : info.getPropertyDescriptors()) {
+                if (pd.getName().equals("endpoint")) { // NOI18N
+                    pd.getWriteMethod().invoke(sosHandler, new URL(sosUrl));
+                }
+            }
+
+            sosHandler.open();
+        } catch (final Exception e) {
+            final String message = "cannot initialise sos handler"; // NOI18N
+            LOG.error(message, e);
+            throw new InitialisationException(message, e);
+        }
+
+        initialised = true;
     }
 
     /**

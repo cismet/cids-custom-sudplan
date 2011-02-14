@@ -59,7 +59,7 @@ public final class GridMultiplyInputManager extends MultiplyInputManager {
      */
     Grid getMultiplierGrid() throws IOException {
         final Grid grid;
-        final File multipliersInput = getFactorFile(new File(getLocation()), FILENAME_MULTIPLIERS, false);
+        final File multipliersInput = getFactorFile(new File(getUR()), FILENAME_MULTIPLIERS, false);
 
         if (multipliersInput == null) {
             if (LOG.isInfoEnabled()) {
@@ -81,6 +81,6 @@ public final class GridMultiplyInputManager extends MultiplyInputManager {
      * @throws  IOException  DOCUMENT ME!
      */
     void setMultiplierGrid(final Grid grid) throws IOException {
-        MultiplyHelper.gridToFile(getFactorFile(new File(getLocation()), FILENAME_MULTIPLIERS, true), grid);
+        MultiplyHelper.gridToFile(getFactorFile(new File(getUR()), FILENAME_MULTIPLIERS, true), grid);
     }
 }
