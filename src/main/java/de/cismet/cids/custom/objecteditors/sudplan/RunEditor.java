@@ -31,6 +31,7 @@ import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.editors.DefaultCustomObjectEditor;
+import de.cismet.cids.editors.EditorClosedEvent;
 import de.cismet.cids.editors.EditorSaveListener;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
@@ -237,8 +238,8 @@ public class RunEditor extends JPanel implements CidsBeanRenderer, EditorSaveLis
     }
 
     @Override
-    public void editorClosed(final EditorSaveStatus status) {
-        // NOOP
+    public void editorClosed(final EditorClosedEvent event) {
+        // noop
     }
 
     @Override
