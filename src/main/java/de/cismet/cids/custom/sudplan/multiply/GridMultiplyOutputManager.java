@@ -22,6 +22,7 @@ import de.cismet.cids.custom.sudplan.Grid;
 import de.cismet.cids.custom.sudplan.ImmutableGrid;
 import de.cismet.cids.custom.sudplan.Manager;
 import de.cismet.cids.custom.sudplan.RunHelper;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 import de.cismet.cids.dynamics.Disposable;
@@ -158,9 +159,9 @@ public final class GridMultiplyOutputManager implements Manager, Disposable {
         if (grid.getGeometry() == null) {
             return null;
         } else {
-            final BufferedImage image = RunHelper.toBufferedImage(RunHelper.gridToImage(grid, 0));
+//            final BufferedImage image = SMSUtils.toBufferedImage(RunHelper.gridToImage(grid, 0));
 
-            return new DefaultRasterDocumentFeature(image, grid.getGeometry());
+            return new DefaultRasterDocumentFeature(null, grid.getGeometry());
         }
     }
 }

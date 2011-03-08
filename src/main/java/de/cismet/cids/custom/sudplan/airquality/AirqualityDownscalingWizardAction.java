@@ -8,8 +8,7 @@
 package de.cismet.cids.custom.sudplan.airquality;
 
 import Sirius.navigator.connection.SessionManager;
-
-import Sirius.server.middleware.types.MetaObject;
+import Sirius.navigator.ui.ComponentRegistry;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -32,9 +31,12 @@ import java.text.MessageFormat;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
 
@@ -155,6 +157,21 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
 
         final boolean cancelled = wizard.getValue() != WizardDescriptor.FINISH_OPTION;
         if (!cancelled) {
+            try {
+                final CidsBean modelInput = createModelInput(wizard);
+                CidsBean modelRun = createModelRun(wizard, modelInput);
+
+                modelRun = modelRun.persist();
+
+                SMSUtils.executeAndShowRun(modelRun);
+            } catch (final Exception ex) {
+                final String message = "cannot perform airquality downscaling";
+                LOG.error(message, ex);
+                JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
+                    message,
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -187,42 +204,51 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
      * DOCUMENT ME!
      *
      * @param   wizard  DOCUMENT ME!
-     * @param   mo      DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      *
      * @throws  IOException  DOCUMENT ME!
      */
-    private CidsBean createModelInput(final WizardDescriptor wizard, final MetaObject mo) throws IOException {
+    private CidsBean createModelInput(final WizardDescriptor wizard) throws IOException {
         final String scenario = (String)wizard.getProperty(PROP_SCENARIO);
+        final String wizName = (String)wizard.getProperty(PROP_NAME);
+        final Date startDate = (Date)wizard.getProperty(PROP_START_DATE);
+        final Date endDate = (Date)wizard.getProperty(PROP_END_DATE);
+        final Coordinate llCoord = (Coordinate)wizard.getProperty(PROP_LL_COORD);
+        final Coordinate urCoord = (Coordinate)wizard.getProperty(PROP_UR_COORD);
+        final Integer gridSize = (Integer)wizard.getProperty(PROP_GRID_SIZE);
+        final Map<String, Set<Integer>> databases = (Map<String, Set<Integer>>)wizard.getProperty(PROP_DATABASES);
 
-        assert scenario != null : "scenario was not set"; // NOI18N
+        assert scenario != null : "scenario was not set";    // NOI18N
+        assert wizName != null : "wizname was not set";      // NOI18N
+        assert startDate != null : "startDate was not set";  // NOI18N
+        assert endDate != null : "endDate was not set";      // NOI18N
+        assert llCoord != null : "llcoord was not set";      // NOI18N
+        assert urCoord != null : "urcoord was not set";      // NOI18N
+        assert gridSize != null : "gridSize was not set";    // NOI18N
+        assert databases != null : "databases were not set"; // NOI18N
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("creating new modelinput: " // NOI18N
-                        + "scenario=" + scenario // NOI18N
-                        + " || mo=" + mo);  // NOI18N
+            LOG.debug("creating new airquality modelinput: scenario=" + scenario); // NOI18N
         }
 
         final Date created = GregorianCalendar.getInstance().getTime();
         final String user = SessionManager.getSession().getUser().getName();
-
-        final String wizName = (String)wizard.getProperty(PROP_NAME);
         final String name = "Airquality downscaling input (" + wizName + ")";
-
-        final String timeseriesName = (String)mo.getBean().getProperty("name"); // NOI18N
-        final Integer timeseriesId = mo.getId();
 
         final AirqualityDownscalingInput input = new AirqualityDownscalingInput(
                 created,
                 user,
                 name,
                 scenario,
-                null,
-                timeseriesId,
-                timeseriesName);
+                startDate,
+                endDate,
+                llCoord,
+                urCoord,
+                gridSize,
+                databases);
 
-        return SMSUtils.createModelInput(name, input, SMSUtils.Model.RF_DS);
+        return SMSUtils.createModelInput(name, input, SMSUtils.Model.AQ_DS);
     }
 
     /**
@@ -238,6 +264,9 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
     private CidsBean createModelRun(final WizardDescriptor wizard, final CidsBean inputBean) throws IOException {
         final String name = (String)wizard.getProperty(PROP_NAME);
         final String description = (String)wizard.getProperty(PROP_DESCRIPTION);
+
+        assert name != null : "name was not set";               // NOI18N
+        assert description != null : "description was not set"; // NOI18N
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("creating new modelrun: " // NOI18N
@@ -271,7 +300,7 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
 
             assert geom != null : "feature must have a geometry"; // NOI18N
 
-            if (geom.isRectangle()) {
+            if (true) {                                           // geom.isRectangle()) {
                 active = true;
             } else {
                 if (LOG.isDebugEnabled()) {

@@ -55,6 +55,7 @@ import javax.swing.JSlider;
 import javax.swing.SwingWorker;
 
 import de.cismet.cids.custom.sudplan.RunHelper;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.Disposable;
 
@@ -290,7 +291,7 @@ public class GridMultiplyOutputManagerUI extends javax.swing.JPanel implements D
                 final LinearRing ring = new LinearRing(new CoordinateArraySequence(bbox), factory);
                 geometry = factory.createPolygon(ring, new LinearRing[0]);
             }
-            final BufferedImage image = RunHelper.toBufferedImage(((ImagePanel)jplGrid).getImage());
+            final BufferedImage image = SMSUtils.toBufferedImage(((ImagePanel)jplGrid).getImage());
 
             final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
             removeFeature();
@@ -327,7 +328,7 @@ public class GridMultiplyOutputManagerUI extends javax.swing.JPanel implements D
 
         @Override
         protected Image doInBackground() throws Exception {
-            return RunHelper.gridToImage(model.getMultiplierGrid(), jslYears.getValue());
+            return null; // RunHelper.gridToImage(model.getMultiplierGrid(), jslYears.getValue());
         }
 
         @Override

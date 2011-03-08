@@ -9,8 +9,6 @@ package de.cismet.cids.custom.sudplan;
 
 import java.io.IOException;
 
-import javax.swing.JComponent;
-
 import de.cismet.cids.dynamics.CidsBeanStore;
 
 import de.cismet.cismap.commons.features.Feature;
@@ -21,7 +19,7 @@ import de.cismet.cismap.commons.features.Feature;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public interface Manager extends CidsBeanStore {
+public interface Manager extends CidsBeanStore, UIProvider {
 
     //~ Enums ------------------------------------------------------------------
 
@@ -38,13 +36,6 @@ public interface Manager extends CidsBeanStore {
     }
 
     //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    JComponent getUI();
 
     /**
      * DOCUMENT ME!

@@ -9,7 +9,6 @@ package de.cismet.cids.custom.sudplan;
 
 import at.ac.ait.enviro.tsapi.handler.DataHandler;
 import at.ac.ait.enviro.tsapi.handler.Datapoint;
-import at.ac.ait.enviro.tsapi.timeseries.TimeDuration;
 import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
@@ -17,8 +16,6 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 import com.vividsolutions.jts.geom.Envelope;
 
 import org.apache.log4j.Logger;
-
-import org.jdesktop.swingx.renderer.DefaultListRenderer;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -37,10 +34,8 @@ import org.openide.util.lookup.ServiceProvider;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
+import java.awt.Container;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -50,14 +45,11 @@ import java.net.URL;
 
 import java.text.SimpleDateFormat;
 
-import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
@@ -80,9 +72,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(SOSFeatureInfoDisplay.class);
-
-    private static final String SOS_FACTORY = "SOS-SUDPLAN-Dummy"; // NOI18N
-
+    private static final String SOS_FACTORY = "SOS-SUDPLAN-Dummy";                                     // NOI18N
     public static final String KEY_SCENARIO = "scenario";                                              // NOI18N
     public static final String KEY_SOS_URL = "sos_url";                                                // NOI18N
     public static final String KEY_OBSERVED_PROP = "observed_property";                                // NOI18N
@@ -100,11 +90,14 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private transient int fromYear;
     private transient int toYear;
     private transient boolean initialised;
+    // has to be initialised here because of the variable declaration of the GUI
+    private final transient Available<Resolution> available = new FeatureInfoAvailable();
 
     // will only be accessed from EDT
     private transient TimeSeriesDisplayer currentDisplayer;
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private final transient javax.swing.JComboBox cboResolution = new javax.swing.JComboBox();
+    private final transient javax.swing.JComboBox cboResolution =
+        new de.cismet.cids.custom.sudplan.LocalisedEnumComboBox(Resolution.class, available);
     private final transient javax.swing.JLabel lblFiller = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblResolution = new javax.swing.JLabel();
     private final transient javax.swing.JPanel pnlChart = new javax.swing.JPanel();
@@ -192,7 +185,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 TimeInterval.Openness.OPEN);
 
         sosHandler = Demo.getInstance().getSOSDH(); // TODO: <- for demo
-                                                    // DataHandlerFactory.Lookup.lookup(SOS_FACTORY); // NOI18N
+        // DataHandlerFactory.Lookup.lookup(SOS_FACTORY); // NOI18N
 
         if (sosHandler == null) {
             final String message = "cannot lookup datahander factory: " + SOS_FACTORY; // NOI18N
@@ -284,20 +277,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             LOG.error(message, e);
             throw new InitialisationException(message, e);
         }
-
-        initResolution();
-    }
-
-    /**
-     * DOCUMENT ME!
-     */
-    private void initResolution() {
-        for (final Resolution r : Resolution.values()) {
-            cboResolution.addItem(r);
-        }
-
-        cboResolution.setRenderer(new ResolutionRenderer());
-        cboResolution.addActionListener(new ResolutionActionListener());
     }
 
     /**
@@ -353,10 +332,10 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
      */
     private Datapoint createDataPoint() throws InitialisationException {
         final Properties filter = new Properties();
-        filter.put(TimeSeries.PROCEDURE, "urn:ogc:object:AIRVIRO:SMHI:2");     // NOI18N
+        filter.put(TimeSeries.PROCEDURE, "urn:ogc:object:AIRVIRO:Temp");       // NOI18N
         filter.put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:grid2"); // NOI18N
         filter.put(TimeSeries.OBSERVEDPROPERTY, OBSERVED_PROP_URN_TEMPERATURE);
-        filter.put(TimeSeries.OFFERING, "coverage-2");                         // NOI18N
+        filter.put(TimeSeries.OFFERING, "AIRVIRO-Temp-coverage");              // NOI18N
 
         final Set<Datapoint> datapoints = sosHandler.getDatapoints(filter, DataHandler.Access.READ);
         if (datapoints.size() < 1) {
@@ -451,64 +430,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
-     */
-    private TimeStamp[] getTimeStamps() {
-        final Resolution currentRes = (Resolution)cboResolution.getSelectedItem();
-
-        final ArrayList<TimeStamp> timestamps = new ArrayList<TimeStamp>();
-
-        TimeStamp current = timeInterval.getStart();
-
-        while (current != null) {
-            timestamps.add(current);
-            current = nextTimeStamp(current, currentRes);
-
-            // stop iteration if the subsequent timestamp is not within the timeinterval
-            if (current.asDate().after(timeInterval.getEnd().asDate())) {
-                current = null;
-            }
-        }
-
-        return timestamps.toArray(new TimeStamp[timestamps.size()]);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   timestamp  DOCUMENT ME!
-     * @param   r          DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  IllegalStateException  DOCUMENT ME!
-     */
-    public static TimeStamp nextTimeStamp(final TimeStamp timestamp, final Resolution r) {
-        switch (r) {
-            case DECADE: {
-                return TimeStamp.add(timestamp, new TimeDuration(TimeDuration.DurationUnit.YEARS, 10));
-            }
-            case YEAR: {
-                return TimeStamp.add(timestamp, new TimeDuration(TimeDuration.DurationUnit.YEARS, 1));
-            }
-            case MONTH: {
-                return TimeStamp.add(timestamp, new TimeDuration(TimeDuration.DurationUnit.MONTHS, 1));
-            }
-            case DAY: {
-                return TimeStamp.add(timestamp, new TimeDuration(86400000));
-            }
-            case HOUR: {
-                return TimeStamp.add(timestamp, new TimeDuration(3600000));
-            }
-            default: {
-                throw new IllegalStateException("unknown resolution"); // NOI18N
-            }
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @param   dataset  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -546,17 +467,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         return chart;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   resolution  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private boolean isAvailable(final Resolution resolution) {
-        return Resolution.DECADE.equals(resolution); // || Resolution.YEAR.equals(resolution);
-    }
-
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -564,22 +474,13 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
      *
      * @version  $Revision$, $Date$
      */
-    private final class ResolutionActionListener implements ActionListener {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private transient Resolution currentItem = (Resolution)cboResolution.getItemAt(0);
+    private static final class FeatureInfoAvailable implements Available<Resolution> {
 
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public void actionPerformed(final ActionEvent e) {
-            final Resolution selected = (Resolution)cboResolution.getSelectedItem();
-            if (isAvailable(selected)) {
-                currentItem = selected;
-            } else {
-                cboResolution.setSelectedItem(currentItem);
-            }
+        public boolean isAvailable(final Resolution type) {
+            return Resolution.DECADE.equals(type);
         }
     }
 
@@ -630,6 +531,15 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
             try {
                 pnlChart.add(new ChartPanel(get()), BorderLayout.CENTER);
+
+                Container parent = SOSFeatureInfoDisplay.this;
+                Container current = parent.getParent();
+                while (current != null) {
+                    parent = current;
+                    current = parent.getParent();
+                }
+                parent.invalidate();
+                parent.validate();
             } catch (final InterruptedException ex) {
                 final String message = "in done nothing should be interrupted anymore"; // NOI18N
                 LOG.error(message, ex);
@@ -639,75 +549,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 LOG.error(message, ex.getCause());
                 throw new IllegalStateException(message, ex.getCause());
             }
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private final class ResolutionRenderer extends DefaultListRenderer {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public Component getListCellRendererComponent(final JList list,
-                final Object value,
-                final int index,
-                final boolean isSelected,
-                final boolean cellHasFocus) {
-            final Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-            if ((value instanceof Resolution) && (c instanceof JLabel)) {
-                final Resolution resolution = (Resolution)value;
-                final JLabel label = (JLabel)c;
-
-                switch (resolution) {
-                    case DECADE: {
-                        label.setText(NbBundle.getMessage(
-                                SOSFeatureInfoDisplay.class,
-                                "SOSFeatureInfoDisplay.ResolutionRenderer.getListCellRendererComponent(JList,Object,int,boolean,boolean).tenYearly"));               // NOI18N
-                        break;
-                    }
-                    case YEAR: {
-                        label.setText(NbBundle.getMessage(
-                                SOSFeatureInfoDisplay.class,
-                                "SOSFeatureInfoDisplay.ResolutionRenderer.getListCellRendererComponent(JList,Object,int,boolean,boolean).yearly"));                  // NOI18N
-                        break;
-                    }
-                    case MONTH: {
-                        label.setText(NbBundle.getMessage(
-                                SOSFeatureInfoDisplay.class,
-                                "SOSFeatureInfoDisplay.ResolutionRenderer.getListCellRendererComponent(JList,Object,int,boolean,boolean).monthly"));                 // NOI18N
-                        break;
-                    }
-                    case DAY: {
-                        label.setText(NbBundle.getMessage(
-                                SOSFeatureInfoDisplay.class,
-                                "SOSFeatureInfoDisplay.ResolutionRenderer.getListCellRendererComponent(JList,Object,int,boolean,boolean).daily"));                   // NOI18N
-                        break;
-                    }
-                    case HOUR: {
-                        label.setText(NbBundle.getMessage(
-                                SOSFeatureInfoDisplay.class,
-                                "SOSFeatureInfoDisplay.ResolutionRenderer.getListCellRendererComponent(JList,Object,int,boolean,boolean).hourly"));                  // NOI18N
-                        break;
-                    }
-                    default: {
-                        label.setText(
-                            NbBundle.getMessage(
-                                        SOSFeatureInfoDisplay.class,
-                                        "SOSFeatureInfoDisplay.ResolutionRenderer.getListCellRendererComponent(JList,Object,int,boolean,boolean).unknownResolution") // NOI18N
-                                    + resolution);
-                        break;
-                    }
-                }
-
-                label.setEnabled(isAvailable(resolution));
-            }
-
-            return c;
         }
     }
 }

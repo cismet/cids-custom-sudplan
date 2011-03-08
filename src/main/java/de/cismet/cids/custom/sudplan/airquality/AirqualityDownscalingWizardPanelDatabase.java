@@ -13,6 +13,9 @@ import org.openide.util.HelpCtx;
 
 import java.awt.Component;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +36,8 @@ public final class AirqualityDownscalingWizardPanelDatabase implements WizardDes
     private transient WizardDescriptor wizard;
     private transient AirqualityDownscalingVisualPanelDatabase component;
     private transient Map<String, Set<Integer>> chosenDbs;
+    private transient Integer startYear;
+    private transient Integer endYear;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -78,6 +83,24 @@ public final class AirqualityDownscalingWizardPanelDatabase implements WizardDes
         return chosenDbs;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Integer getStartYear() {
+        return startYear;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Integer getEndYear() {
+        return endYear;
+    }
+
     @Override
     public HelpCtx getHelp() {
         return HelpCtx.DEFAULT_HELP;
@@ -87,6 +110,16 @@ public final class AirqualityDownscalingWizardPanelDatabase implements WizardDes
     public void readSettings(final Object settings) {
         wizard = (WizardDescriptor)settings;
         chosenDbs = (Map<String, Set<Integer>>)wizard.getProperty(AirqualityDownscalingWizardAction.PROP_DATABASES);
+
+        final Date startDate = (Date)wizard.getProperty(AirqualityDownscalingWizardAction.PROP_START_DATE);
+        final Date endDate = (Date)wizard.getProperty(AirqualityDownscalingWizardAction.PROP_END_DATE);
+        final Calendar cal = GregorianCalendar.getInstance();
+
+        cal.setTime(startDate);
+        startYear = cal.get(Calendar.YEAR);
+        cal.setTime(endDate);
+        endYear = cal.get(Calendar.YEAR);
+
         component.init();
     }
 

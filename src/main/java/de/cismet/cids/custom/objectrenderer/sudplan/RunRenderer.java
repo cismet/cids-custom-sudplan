@@ -7,16 +7,26 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.ui.ComponentRegistry;
+
+import Sirius.server.middleware.types.MetaClass;
+
 import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import de.cismet.cids.custom.sudplan.Manager;
 import de.cismet.cids.custom.sudplan.Manager.ManagerType;
+import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.SqlTimestampToStringConverter;
 
 import de.cismet.cids.dynamics.CidsBean;
 
-import de.cismet.cids.editors.DefaultCustomObjectEditor;
+import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 /**
  * DOCUMENT ME!
@@ -26,12 +36,25 @@ import de.cismet.cids.editors.DefaultCustomObjectEditor;
  */
 public class RunRenderer extends AbstractManagerRenderer {
 
+    //~ Instance fields --------------------------------------------------------
+
+    private final transient ActionListener openInputL;
+    private final transient ActionListener openOutputL;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private org.jdesktop.swingx.JXHyperlink hypInput;
+    private org.jdesktop.swingx.JXHyperlink hypOutput;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jplManager;
     private javax.swing.JLabel lblDescription;
+    private javax.swing.JLabel lblFinished;
+    private javax.swing.JLabel lblFinishedValue;
+    private javax.swing.JLabel lblInput;
     private javax.swing.JLabel lblName;
+    private javax.swing.JLabel lblOutput;
+    private javax.swing.JLabel lblStarted;
+    private javax.swing.JLabel lblStartedValue;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
@@ -41,7 +64,13 @@ public class RunRenderer extends AbstractManagerRenderer {
      * Creates new form RunRenderer.
      */
     public RunRenderer() {
+        openInputL = new OpenIOtActionListener("modelinput", SMSUtils.TABLENAME_MODELINPUT);    // NOI18N
+        openOutputL = new OpenIOtActionListener("modeloutput", SMSUtils.TABLENAME_MODELOUTPUT); // NOI18N
+
         initComponents();
+
+        hypInput.addActionListener(WeakListeners.create(ActionListener.class, openInputL, hypInput));
+        hypOutput.addActionListener(WeakListeners.create(ActionListener.class, openOutputL, hypOutput));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -61,14 +90,24 @@ public class RunRenderer extends AbstractManagerRenderer {
         jLabel2 = new javax.swing.JLabel();
         lblDescription = new javax.swing.JLabel();
         jplManager = new javax.swing.JPanel();
+        lblInput = new javax.swing.JLabel();
+        lblOutput = new javax.swing.JLabel();
+        hypInput = new org.jdesktop.swingx.JXHyperlink();
+        hypOutput = new org.jdesktop.swingx.JXHyperlink();
+        lblStarted = new javax.swing.JLabel();
+        lblFinished = new javax.swing.JLabel();
+        lblStartedValue = new javax.swing.JLabel();
+        lblFinishedValue = new javax.swing.JLabel();
 
         setOpaque(false);
+        setPreferredSize(null);
         setLayout(new java.awt.GridBagLayout());
 
         jLabel1.setText(NbBundle.getMessage(RunRenderer.class, "RunRenderer.jLabel1.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(4, 9, 4, 4);
         add(jLabel1, gridBagConstraints);
@@ -86,10 +125,9 @@ public class RunRenderer extends AbstractManagerRenderer {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.ipadx = 215;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 9);
         add(lblName, gridBagConstraints);
 
@@ -97,6 +135,7 @@ public class RunRenderer extends AbstractManagerRenderer {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(4, 9, 4, 4);
         add(jLabel2, gridBagConstraints);
@@ -114,10 +153,9 @@ public class RunRenderer extends AbstractManagerRenderer {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.ipadx = 215;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 9);
         add(lblDescription, gridBagConstraints);
 
@@ -127,12 +165,116 @@ public class RunRenderer extends AbstractManagerRenderer {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridwidth = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(4, 9, 4, 9);
         add(jplManager, gridBagConstraints);
+
+        lblInput.setText(NbBundle.getMessage(RunRenderer.class, "RunRenderer.lblInput.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 50, 4, 4);
+        add(lblInput, gridBagConstraints);
+
+        lblOutput.setText(NbBundle.getMessage(RunRenderer.class, "RunRenderer.lblOutput.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 50, 4, 4);
+        add(lblOutput, gridBagConstraints);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.modelinput.name}"),
+                hypInput,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding.setSourceNullValue("");
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 9);
+        add(hypInput, gridBagConstraints);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.modeloutput.name}"),
+                hypOutput,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding.setSourceNullValue("");
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 9);
+        add(hypOutput, gridBagConstraints);
+
+        lblStarted.setText(NbBundle.getMessage(RunRenderer.class, "RunRenderer.lblStarted.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 50, 4, 4);
+        add(lblStarted, gridBagConstraints);
+
+        lblFinished.setText(NbBundle.getMessage(RunRenderer.class, "RunRenderer.lblFinished.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 50, 4, 4);
+        add(lblFinished, gridBagConstraints);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.started}"),
+                lblStartedValue,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding.setSourceNullValue(NbBundle.getMessage(
+                RunRenderer.class,
+                "RunRenderer.lblStartedValue.text.nullValue")); // NOI18N
+        binding.setConverter(new SqlTimestampToStringConverter());
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 9);
+        add(lblStartedValue, gridBagConstraints);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.finished}"),
+                lblFinishedValue,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding.setSourceNullValue(NbBundle.getMessage(
+                RunRenderer.class,
+                "RunRenderer.lblFinishedValue.text.nullValue")); // NOI18N
+        binding.setConverter(new SqlTimestampToStringConverter());
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 9);
+        add(lblFinishedValue, gridBagConstraints);
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
@@ -170,5 +312,51 @@ public class RunRenderer extends AbstractManagerRenderer {
     @Override
     ManagerType getType() {
         return ManagerType.MODEL;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class OpenIOtActionListener implements ActionListener {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient String propertyName;
+        private final transient String tableName;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new OpenIOtActionListener object.
+         *
+         * @param  propertyName  DOCUMENT ME!
+         * @param  tableName     DOCUMENT ME!
+         */
+        public OpenIOtActionListener(final String propertyName, final String tableName) {
+            this.propertyName = propertyName;
+            this.tableName = tableName;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final Object input = cidsBean.getProperty(propertyName);
+            if (input != null) {
+                final MetaClass metaclass = ClassCacheMultiple.getMetaClass(
+                        SessionManager.getSession().getUser().getDomain(),
+                        tableName);
+
+                assert metaclass != null : "Timeseries metaclass not present"; // NOI18N
+
+                ComponentRegistry.getRegistry()
+                        .getDescriptionPane()
+                        .gotoMetaObject(metaclass, ((CidsBean)input).getMetaObject().getID(), ""); // NOI18N
+            }
+        }
     }
 }

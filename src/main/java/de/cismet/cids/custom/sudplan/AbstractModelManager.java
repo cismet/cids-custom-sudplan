@@ -195,7 +195,7 @@ public abstract class AbstractModelManager implements ModelManager, Disposable {
             cidsBean.setProperty("modeloutput", createOutputBean());                                                   // NOI18N
             cidsBean = cidsBean.persist();
 
-            SMSUtils.reloadCatalogTree();
+//            SMSUtils.reloadCatalogTree();
 
             final MetaObject outputobject = ((CidsBean)cidsBean.getProperty("modeloutput")).getMetaObject(); // NOI18N
 
@@ -218,8 +218,10 @@ public abstract class AbstractModelManager implements ModelManager, Disposable {
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
      */
-    protected abstract CidsBean createOutputBean();
+    protected abstract CidsBean createOutputBean() throws IOException;
 
     /**
      * DOCUMENT ME!

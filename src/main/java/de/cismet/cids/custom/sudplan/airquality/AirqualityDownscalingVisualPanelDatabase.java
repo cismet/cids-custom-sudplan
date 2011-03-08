@@ -87,6 +87,7 @@ public final class AirqualityDownscalingVisualPanelDatabase extends javax.swing.
                 listL,
                 lblAvailableDbs));
         btnChoose.addActionListener(WeakListeners.create(ActionListener.class, chooseYearL, btnChoose));
+        btnRemove.addActionListener(WeakListeners.create(ActionListener.class, removeL, btnRemove));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -98,6 +99,7 @@ public final class AirqualityDownscalingVisualPanelDatabase extends javax.swing.
         final Map<String, Set<Integer>> databases = model.getDatabases();
         if (databases != null) {
             final DefaultListModel dlm = (DefaultListModel)lstChosenDbs.getModel();
+            dlm.clear();
 
             for (final String key : databases.keySet()) {
                 final Set<Integer> values = databases.get(key);
@@ -113,9 +115,14 @@ public final class AirqualityDownscalingVisualPanelDatabase extends javax.swing.
 
         Arrays.sort(availableDBs);
         final DefaultListModel dlm = (DefaultListModel)lstAvailableDbs.getModel();
+        dlm.clear();
         for (final String avaliable : availableDBs) {
             dlm.addElement(avaliable);
         }
+        lstAvailableDbs.setSelectedIndex(0);
+
+        final Integer year = ((model.getEndYear() - model.getStartYear()) / 2) + model.getStartYear();
+        txtYear.setText(year.toString());
 
         btnChoose.setEnabled(buttonEnable());
 
@@ -141,7 +148,7 @@ public final class AirqualityDownscalingVisualPanelDatabase extends javax.swing.
 
             Set<Integer> years = map.get(dbname);
 
-            if (year == null) {
+            if (years == null) {
                 years = new HashSet<Integer>();
                 map.put(dbname, years);
             }

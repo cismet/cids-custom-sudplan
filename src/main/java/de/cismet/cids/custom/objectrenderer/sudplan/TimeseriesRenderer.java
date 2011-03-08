@@ -84,6 +84,7 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         setOpaque(false);
+        setPreferredSize(null);
         setLayout(new java.awt.BorderLayout());
     } // </editor-fold>//GEN-END:initComponents
 

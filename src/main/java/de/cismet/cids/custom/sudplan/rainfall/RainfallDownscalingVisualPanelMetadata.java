@@ -75,7 +75,11 @@ public final class RainfallDownscalingVisualPanelMetadata extends javax.swing.JP
         txtName.setSelectionStart(0);
         txtName.setSelectionEnd(txtName.getText().length() - 1);
 
-        txaDescription.setText(model.getDescription());
+        if (model.getDescription() == null) {
+            txaDescription.setText("This is a demo run to demonstrate rainfall downscaling.");
+        } else {
+            txaDescription.setText(model.getDescription());
+        }
 
         EventQueue.invokeLater(new Runnable() {
 

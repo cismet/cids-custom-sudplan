@@ -168,7 +168,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
      * method has been called once successfully no manipulation can be done with the chart anymore. It has turned into
      * an image. If the chart has already been cached nothing will be done.<br/>
      * <br/>
-     * NOTE: This method blocks until the caching is finished
+     * NOTE: This method does a synchronized(this) until the caching is finished
      *
      * @throws  IOException  if an error occurs during caching
      */
@@ -298,7 +298,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
 
                 final IntervalXYDataset dataset = createDataset(timeseries, config.getObsProp());
 
-                chart = createChart(dataset);
+                chart = createChart(dataset, SMSUtils.unitFromTimeseries(timeseries));
             } catch (final Exception ex) {
                 LOG.error("cannot create chart", ex);
                 throw ex;
@@ -328,8 +328,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
 
                     Container parent = TimeseriesChartPanel.this;
                     Container current = getParent();
-                    int i = 0;
-                    while ((current != null) && (i++ < 6)) {
+                    while (current != null) {
                         parent = current;
                         current = parent.getParent();
                     }
@@ -400,46 +399,41 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
          * DOCUMENT ME!
          *
          * @param   dataset  DOCUMENT ME!
+         * @param   unit     DOCUMENT ME!
          *
          * @return  DOCUMENT ME!
          *
          * @throws  IllegalStateException  DOCUMENT ME!
          */
-        private JFreeChart createChart(final IntervalXYDataset dataset) {
+        private JFreeChart createChart(final IntervalXYDataset dataset, final Unit unit) {
             final JFreeChart chart;
             final XYItemRenderer renderer;
-            switch (config.getObservedProperty()) {
-                case PRECIPITATION: {
-                    chart = ChartFactory.createXYBarChart(
-                            "Rainfall data",
-                            "Time",
-                            true,
-                            "Values",
-                            dataset,
-                            PlotOrientation.VERTICAL,
-                            true,
-                            true,
-                            false);
-                    // TODO: create sampling bar renderer
-                    renderer = new SamplingXYLineRenderer();
-                    break;
-                }
-                case TEMPERATURE: {
-                    chart = ChartFactory.createTimeSeriesChart(
-                            "Timeseries data",
-                            "Time",
-                            // TODO: is temperature always kelvin? -> metadata
-                            "Kelvin",
-                            dataset,
-                            true,
-                            true,
-                            false);
-                    renderer = new SamplingXYLineRenderer();
-                    break;
-                }
-                default: {
-                    throw new IllegalStateException("unsupported observed property");
-                }
+            final Variable observed = config.getObservedProperty();
+            if (Variable.PRECIPITATION.equals(observed)) {
+                chart = ChartFactory.createXYBarChart(
+                        "Rainfall data",
+                        "Time",
+                        true,
+                        unit.getLocalisedName(),
+                        dataset,
+                        PlotOrientation.VERTICAL,
+                        true,
+                        true,
+                        false);
+                // TODO: create sampling bar renderer
+                renderer = new SamplingXYLineRenderer();
+            } else if (Variable.TEMPERATURE.equals(observed)) {
+                chart = ChartFactory.createTimeSeriesChart(
+                        "Timeseries data",
+                        "Time",
+                        unit.getLocalisedName(),
+                        dataset,
+                        true,
+                        true,
+                        false);
+                renderer = new SamplingXYLineRenderer();
+            } else {
+                throw new IllegalStateException("unsupported variable: " + observed);
             }
 
             chart.setBackgroundPaint(getBackground());

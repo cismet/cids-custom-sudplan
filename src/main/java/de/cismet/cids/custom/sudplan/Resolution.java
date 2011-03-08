@@ -7,18 +7,46 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import org.openide.util.NbBundle;
+
+import java.io.Serializable;
+
 /**
- * DOCUMENT ME!
+ * Custom enumeration of all available Resolutions.
  *
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
-public enum Resolution {
+// TODO: refactor as soon as abstract enums are supported
+public final class Resolution extends LocalisedEnum<Resolution> implements Serializable {
 
-    //~ Enum constants ---------------------------------------------------------
+    //~ Static fields/initializers ---------------------------------------------
 
-    DECADE(86400, 3650, 3650), YEAR(8640, 365, 365), MONTH(720, 30, 30), DAY(24, 1, 1),
-    HOUR(1, 0, 0.041666666666666667);
+    public static final Resolution DECADE = new Resolution(
+            86400,
+            3650,
+            3650,
+            NbBundle.getMessage(Resolution.class, "Resolution.DECADE.localisedName")); // NOI18N
+    public static final Resolution YEAR = new Resolution(
+            8640,
+            365,
+            365,
+            NbBundle.getMessage(Resolution.class, "Resolution.YEAR.localisedName"));   // NOI18N
+    public static final Resolution MONTH = new Resolution(
+            720,
+            30,
+            30,
+            NbBundle.getMessage(Resolution.class, "Resolution.MONTH.localisedName"));  // NOI18N
+    public static final Resolution DAY = new Resolution(
+            24,
+            1,
+            1,
+            NbBundle.getMessage(Resolution.class, "Resolution.DAILY.localisedName"));  // NOI18N
+    public static final Resolution HOUR = new Resolution(
+            1,
+            0,
+            0.041666666666666667,
+            NbBundle.getMessage(Resolution.class, "Resolution.HOURLY.localisedName")); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -36,8 +64,13 @@ public enum Resolution {
      * @param  durationInHours      DOCUMENT ME!
      * @param  durationInDays       DOCUMENT ME!
      * @param  exactDurationInDays  DOCUMENT ME!
+     * @param  localisedName        DOCUMENT ME!
      */
-    private Resolution(final int durationInHours, final int durationInDays, final double exactDurationInDays) {
+    private Resolution(final int durationInHours,
+            final int durationInDays,
+            final double exactDurationInDays,
+            final String localisedName) {
+        super(localisedName);
         this.durationInHours = durationInHours;
         this.durationInDays = durationInDays;
         this.exactDurationInDays = exactDurationInDays;
@@ -70,5 +103,19 @@ public enum Resolution {
      */
     public double getExactDurationInDays() {
         return exactDurationInDays;
+    }
+
+    @Override
+    protected Resolution[] internalValues() {
+        return values();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Resolution[] values() {
+        return new Resolution[] { DECADE, YEAR, MONTH, DAY, HOUR };
     }
 }

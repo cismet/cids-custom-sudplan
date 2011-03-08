@@ -36,7 +36,7 @@ public class ModelinputRenderer extends AbstractManagerRenderer {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         setOpaque(false);
-        setPreferredSize(new java.awt.Dimension(400, 300));
+        setPreferredSize(null);
         setLayout(new java.awt.BorderLayout());
     } // </editor-fold>//GEN-END:initComponents
 

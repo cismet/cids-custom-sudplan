@@ -40,6 +40,7 @@ import de.cismet.cids.custom.sudplan.Demo;
 import de.cismet.cids.custom.sudplan.Manager;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
+import de.cismet.cids.custom.sudplan.Variable;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -63,10 +64,12 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
     private static final String ENDPOINT = "endpoint";
 
     private static final transient Logger LOG = Logger.getLogger(RainfallDownscalingModelManager.class);
-    private static final String PARAM_REF_RAIN = "param:ref_rain";                        // NOI18N
-    private static final String PARAM_RESULT_RAIN = "param:result_rain";                  // NOI18N
-    private static final String PARAM_REF_RAIN_30 = "param:result_rain_30";               // NOI18N
-    private static final String PARAM_RESULT_RAIN_30 = "param:result_rain_30_downscaled"; // NOI18N
+    private static final String PARAM_REF_RAIN = "param:reference_rain";                    // NOI18N
+    private static final String PARAM_RESULT_RAIN = "param:result_rain";                    // NOI18N
+    private static final String PARAM_REF_RAIN_30 = "param:result_rain_30";                 // NOI18N
+    private static final String PARAM_RESULT_RAIN_30 = "param:result_rain_30_downscaled";   // NOI18N
+    private static final String PARAM_REF_RAIN_1D = "param:result_rain_1day";               // NOI18N
+    private static final String PARAM_RESULT_RAIN_1D = "param:result_rain_1day_downscaled"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -137,30 +140,44 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
         final Datapoint task = spsDH.createDatapoint(taskFilter, null, DataHandler.Access.READ_WRITE);
 
         // hardcoded for the demo
-        final Properties[] props = new Properties[3];
+        final Properties[] props = new Properties[5];
         props[0] = new Properties();
         props[1] = new Properties();
         props[2] = new Properties();
+        props[3] = new Properties();
+        props[4] = new Properties();
 
-        props[0].put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz");     // NOI18N
-        props[0].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:rain:A1B");         // NOI18N
-        props[0].put(TimeSeries.OBSERVEDPROPERTY, "urn:ogc:def:property:OGC:rain"); // NOI18N
-        props[0].put(TimeSeries.OFFERING, "Station_3202_10min_Downscaled");         // NOI18N
+        props[0].put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz"); // NOI18N
+        props[0].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:prec:A1B");     // NOI18N
+        props[0].put(TimeSeries.OBSERVEDPROPERTY, Variable.PRECIPITATION.getPropertyKey());
+        props[0].put(TimeSeries.OFFERING, "Station_3202_10min_Downscaled");     // NOI18N
 
         props[1].put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz");     // NOI18N
-        props[1].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:rain:A1B");         // NOI18N
-        props[1].put(TimeSeries.OBSERVEDPROPERTY, "urn:ogc:def:property:OGC:rain"); // NOI18N
-        props[1].put(TimeSeries.OFFERING, "Station_3202_30min");                    // NOI18N
+        props[1].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:prec:A1B_30m_agg"); // NOI18N
+        props[1].put(TimeSeries.OBSERVEDPROPERTY, Variable.PRECIPITATION.getPropertyKey());
+        props[1].put(TimeSeries.OFFERING, "Station_3202_30min_Aggregated");         // NOI18N
 
-        props[2].put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz");     // NOI18N
-        props[2].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:rain:A1B");         // NOI18N
-        props[2].put(TimeSeries.OBSERVEDPROPERTY, "urn:ogc:def:property:OGC:rain"); // NOI18N
-        props[2].put(TimeSeries.OFFERING, "Station_3202_30min_Downscaled");         // NOI18N
+        props[2].put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz"); // NOI18N
+        props[2].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:prec:A1B_30m"); // NOI18N
+        props[2].put(TimeSeries.OBSERVEDPROPERTY, Variable.PRECIPITATION.getPropertyKey());
+        props[2].put(TimeSeries.OFFERING, "Station_3202_30min_Downscaled");     // NOI18N
+
+        props[3].put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz");      // NOI18N
+        props[3].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:prec:A1B_1day_agg"); // NOI18N
+        props[3].put(TimeSeries.OBSERVEDPROPERTY, Variable.PRECIPITATION.getPropertyKey());
+        props[3].put(TimeSeries.OFFERING, "Station_3202_1day_Aggregated");           // NOI18N
+
+        props[4].put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz");  // NOI18N
+        props[4].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:prec:A1B_1day"); // NOI18N
+        props[4].put(TimeSeries.OBSERVEDPROPERTY, Variable.PRECIPITATION.getPropertyKey());
+        props[4].put(TimeSeries.OFFERING, "Station_3202_1day_Downscaled");       // NOI18N
 
         final Map<String, Properties> results = new HashMap<String, Properties>(6);
         results.put(PARAM_RESULT_RAIN, props[0]);
         results.put(PARAM_REF_RAIN_30, props[1]);
         results.put(PARAM_RESULT_RAIN_30, props[2]);
+        results.put(PARAM_REF_RAIN_1D, props[3]);
+        results.put(PARAM_RESULT_RAIN_1D, props[4]);
         results.put(PARAM_REF_RAIN, input.getValue());
 
         // we register the resultprocessor for the now running task, we cannot use weak listeners because there is no
@@ -188,6 +205,8 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
             now,
             PARAM_RESULT_RAIN_30,
             SMSUtils.toTSTBCompatiblePropListing(props[2]));
+        inputTimeSeries.setValue(now, PARAM_REF_RAIN_1D, SMSUtils.toTSTBCompatiblePropListing(props[3]));
+        inputTimeSeries.setValue(now, PARAM_RESULT_RAIN_1D, SMSUtils.toTSTBCompatiblePropListing(props[4]));
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("starting the downscaling run"); // NOI18N
@@ -273,18 +292,18 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
 
         assert config != null : "invalid config"; // NOI18N
 
-        final DataHandler inputDH = Demo.getInstance().getSOSDH(); // TODO: <- for demo
-                                                                   // DataHandlerFactory.Lookup.lookup(config.getHandlerLookup());
+        final DataHandler inputDH = Demo.getInstance().getCleanSOSDH(); // TODO: <- for demo
+        // DataHandlerFactory.Lookup.lookup(config.getHandlerLookup());
         inputDH.setId(config.getHandlerLookup());
-        putInfo(inputDH, ENDPOINT, config.getSosLocation());       // NOI18N
+        putInfo(inputDH, ENDPOINT, config.getSosLocation()); // NOI18N
 
         // final Properties properties = config.getFilterProperties();
         // hardcoded for the demo
         final Properties properties = new Properties();
-        properties.put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz");     // NOI18N
-        properties.put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:rain:1");           // NOI18N
-        properties.put(TimeSeries.OBSERVEDPROPERTY, "urn:ogc:def:property:OGC:rain"); // NOI18N
-        properties.put(TimeSeries.OFFERING, "Station_3202_10min");                    // NOI18N
+        properties.put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz"); // NOI18N
+        properties.put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:prec:10m");     // NOI18N
+        properties.put(TimeSeries.OBSERVEDPROPERTY, Variable.PRECIPITATION.getPropertyKey());
+        properties.put(TimeSeries.OFFERING, "Station_3202_10min");                // NOI18N
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("upload timeseries finished: dh=" + inputDH + " || props=" + properties + " || " + this); // NOI18N
@@ -432,6 +451,14 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
                         lookup,
                         location,
                         resultFilters.get(PARAM_RESULT_RAIN_30));
+                final TimeseriesRetrieverConfig ref1dConfig = getConfig(
+                        lookup,
+                        location,
+                        resultFilters.get(PARAM_REF_RAIN_1D));
+                final TimeseriesRetrieverConfig result1dConfig = getConfig(
+                        lookup,
+                        location,
+                        resultFilters.get(PARAM_RESULT_RAIN_1D));
 
                 try {
                     final RainfallDownscalingInput input = inputFromRun(cidsBean);
@@ -454,16 +481,35 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
                                     + ")",
                             ref30Config.toTSTBUrl(),
                             refBean);
+                    CidsBean result1dBean = createResultBean(
+                            "Downscaled 1 day result("
+                                    + refBean.getProperty("name")
+                                    + ")",
+                            result1dConfig.toTSTBUrl(),
+                            refBean);
+                    CidsBean ref1dBean = createResultBean(
+                            "Reference 1 day("
+                                    + refBean.getProperty("name")
+                                    + ")",
+                            ref1dConfig.toTSTBUrl(),
+                            refBean);
 
                     resultBean = resultBean.persist();
                     result30Bean = result30Bean.persist();
                     ref30Bean = ref30Bean.persist();
+                    result1dBean = result1dBean.persist();
+                    ref1dBean = ref1dBean.persist();
 
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("created resulting timeseries"); // NOI18N
                     }
 
-                    final RainfallDownscalingOutput output = createOutput(ref30Bean, result30Bean, resultBean);
+                    final RainfallDownscalingOutput output = createOutput(
+                            ref30Bean,
+                            result30Bean,
+                            resultBean,
+                            result1dBean,
+                            ref1dBean);
 
                     modelOutput = SMSUtils.createModelOutput(
                             "Downscaling results of ("
@@ -488,12 +534,16 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
              * @param   ref30Bean     DOCUMENT ME!
              * @param   result30Bean  DOCUMENT ME!
              * @param   resultBean    DOCUMENT ME!
+             * @param   result1dBean  DOCUMENT ME!
+             * @param   ref1dBean     DOCUMENT ME!
              *
              * @return  DOCUMENT ME!
              */
             private RainfallDownscalingOutput createOutput(final CidsBean ref30Bean,
                     final CidsBean result30Bean,
-                    final CidsBean resultBean) {
+                    final CidsBean resultBean,
+                    final CidsBean result1dBean,
+                    final CidsBean ref1dBean) {
                 return new RainfallDownscalingOutput(
                         ((CidsBean)cidsBean.getProperty("modelinput")).getMetaObject().getID(),     // NOI18N
                         cidsBean.getMetaObject().getID(),
@@ -502,7 +552,11 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
                         result30Bean.getMetaObject().getID(),
                         (String)result30Bean.getProperty("name"),                                   // NOI18N
                         ref30Bean.getMetaObject().getID(),
-                        (String)ref30Bean.getProperty("name"));                                     // NOI18N
+                        (String)ref30Bean.getProperty("name"),                                      // NOI18N
+                        ref1dBean.getMetaObject().getID(),
+                        (String)ref1dBean.getProperty("name"),                                      // NOI18N
+                        result1dBean.getMetaObject().getID(),
+                        (String)result1dBean.getProperty("name"));                                  // NOI18N
             }
 
             /**

@@ -7,21 +7,11 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.airquality;
 
-import Sirius.navigator.connection.SessionManager;
-import Sirius.navigator.exception.ConnectionException;
-
-import Sirius.server.middleware.types.MetaClass;
-import Sirius.server.middleware.types.MetaObject;
-
-import org.apache.log4j.Logger;
+import com.vividsolutions.jts.geom.Coordinate;
 
 import java.util.Date;
-
-import de.cismet.cids.custom.sudplan.SMSUtils;
-
-import de.cismet.cids.dynamics.CidsBean;
-
-import de.cismet.cids.navigator.utils.ClassCacheMultiple;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * DOCUMENT ME!
@@ -31,19 +21,18 @@ import de.cismet.cids.navigator.utils.ClassCacheMultiple;
  */
 public final class AirqualityDownscalingInput {
 
-    //~ Static fields/initializers ---------------------------------------------
-
-    private static final transient Logger LOG = Logger.getLogger(AirqualityDownscalingInput.class);
-
     //~ Instance fields --------------------------------------------------------
 
     private Date created;
     private String createdBy;
     private String name;
     private String scenario;
-    private Integer targetYear;
-    private Integer timeseriesId;
-    private String timeseriesName;
+    private Date startDate;
+    private Date endDate;
+    private Coordinate llCoord;
+    private Coordinate urCoord;
+    private Integer gridSize;
+    private Map<String, Set<Integer>> databases;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -51,34 +40,43 @@ public final class AirqualityDownscalingInput {
      * Creates a new RainfallDownscalingInput object.
      */
     public AirqualityDownscalingInput() {
-        this(null, null, null, null, null, null, null);
+        this(null, null, null, null, null, null, null, null, null, null);
     }
 
     /**
      * Creates a new RainfallDownscalingInput object.
      *
-     * @param  created         DOCUMENT ME!
-     * @param  createdBy       DOCUMENT ME!
-     * @param  name            DOCUMENT ME!
-     * @param  scenario        DOCUMENT ME!
-     * @param  targetYear      DOCUMENT ME!
-     * @param  timeseriesId    DOCUMENT ME!
-     * @param  timeseriesName  DOCUMENT ME!
+     * @param  created    DOCUMENT ME!
+     * @param  createdBy  DOCUMENT ME!
+     * @param  name       DOCUMENT ME!
+     * @param  scenario   DOCUMENT ME!
+     * @param  startDate  targetYear DOCUMENT ME!
+     * @param  endDate    timeseriesId DOCUMENT ME!
+     * @param  llCoord    timeseriesName DOCUMENT ME!
+     * @param  urCoord    DOCUMENT ME!
+     * @param  gridSize   DOCUMENT ME!
+     * @param  databases  DOCUMENT ME!
      */
     public AirqualityDownscalingInput(final Date created,
             final String createdBy,
             final String name,
             final String scenario,
-            final Integer targetYear,
-            final Integer timeseriesId,
-            final String timeseriesName) {
+            final Date startDate,
+            final Date endDate,
+            final Coordinate llCoord,
+            final Coordinate urCoord,
+            final Integer gridSize,
+            final Map<String, Set<Integer>> databases) {
         this.created = created;
         this.createdBy = createdBy;
         this.name = name;
         this.scenario = scenario;
-        this.targetYear = targetYear;
-        this.timeseriesId = timeseriesId;
-        this.timeseriesName = timeseriesName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.llCoord = llCoord;
+        this.urCoord = urCoord;
+        this.gridSize = gridSize;
+        this.databases = databases;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -122,33 +120,6 @@ public final class AirqualityDownscalingInput {
     /**
      * DOCUMENT ME!
      *
-     * @param  targetYear  DOCUMENT ME!
-     */
-    public void setTargetYear(final Integer targetYear) {
-        this.targetYear = targetYear;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  timeseriesId  DOCUMENT ME!
-     */
-    public void setTimeseriesId(final Integer timeseriesId) {
-        this.timeseriesId = timeseriesId;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  timeseriesName  DOCUMENT ME!
-     */
-    public void setTimeseriesName(final String timeseriesName) {
-        this.timeseriesName = timeseriesName;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @return  DOCUMENT ME!
      */
     public Date getCreated() {
@@ -187,8 +158,17 @@ public final class AirqualityDownscalingInput {
      *
      * @return  DOCUMENT ME!
      */
-    public Integer getTargetYear() {
-        return targetYear;
+    public Map<String, Set<Integer>> getDatabases() {
+        return databases;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  databases  DOCUMENT ME!
+     */
+    public void setDatabases(final Map<String, Set<Integer>> databases) {
+        this.databases = databases;
     }
 
     /**
@@ -196,8 +176,17 @@ public final class AirqualityDownscalingInput {
      *
      * @return  DOCUMENT ME!
      */
-    public Integer getTimeseriesId() {
-        return timeseriesId;
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  endDate  DOCUMENT ME!
+     */
+    public void setEndDate(final Date endDate) {
+        this.endDate = endDate;
     }
 
     /**
@@ -205,8 +194,17 @@ public final class AirqualityDownscalingInput {
      *
      * @return  DOCUMENT ME!
      */
-    public String getTimeseriesName() {
-        return timeseriesName;
+    public Integer getGridSize() {
+        return gridSize;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  gridSize  DOCUMENT ME!
+     */
+    public void setGridSize(final Integer gridSize) {
+        this.gridSize = gridSize;
     }
 
     /**
@@ -214,17 +212,52 @@ public final class AirqualityDownscalingInput {
      *
      * @return  DOCUMENT ME!
      */
-    public CidsBean fetchTimeseries() {
-        final String domain = SessionManager.getSession().getUser().getDomain();
+    public Coordinate getLlCoord() {
+        return llCoord;
+    }
 
-        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SMSUtils.TABLENAME_TIMESERIES);
-        try {
-            final MetaObject mo = SessionManager.getProxy().getMetaObject(timeseriesId, mc.getID(), domain);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  llCoord  DOCUMENT ME!
+     */
+    public void setLlCoord(final Coordinate llCoord) {
+        this.llCoord = llCoord;
+    }
 
-            return mo.getBean();
-        } catch (final ConnectionException ex) {
-            LOG.warn("cannot get timeseries bean from server", ex); // NOI18N
-            return null;
-        }
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  startDate  DOCUMENT ME!
+     */
+    public void setStartDate(final Date startDate) {
+        this.startDate = startDate;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Coordinate getUrCoord() {
+        return urCoord;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  urCoord  DOCUMENT ME!
+     */
+    public void setUrCoord(final Coordinate urCoord) {
+        this.urCoord = urCoord;
     }
 }

@@ -34,9 +34,6 @@ import java.util.GregorianCalendar;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
-import de.cismet.cids.custom.sudplan.Executable;
-import de.cismet.cids.custom.sudplan.ExecutableThreadPool;
-import de.cismet.cids.custom.sudplan.Manager;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -152,20 +149,7 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
                     modelRun = modelRun.persist();
                     modelInput = (CidsBean)modelRun.getProperty("modelinput"); // NOI18N
 
-                    ComponentRegistry.getRegistry().getDescriptionPane().gotoMetaObject(modelInput.getMetaObject(), ""); // NOI18N
-                    ComponentRegistry.getRegistry().getDescriptionPane().gotoMetaObject(modelRun.getMetaObject(), "");   // NOI18N
-
-                    ComponentRegistry.getRegistry().showComponent(ComponentRegistry.DESCRIPTION_PANE);
-
-                    final Manager runManager = SMSUtils.loadManagerFromRun(modelRun, Manager.ManagerType.MODEL);
-
-                    if (runManager instanceof Executable) {
-                        runManager.setCidsBean(modelRun);
-                        ExecutableThreadPool.getInstance().execute((Executable)runManager);
-                    } else {
-                        throw new IllegalStateException(
-                            "modelmanagers shall be instanceof Executable, check your manager definitions"); // NOI18N
-                    }
+                    SMSUtils.executeAndShowRun(modelRun);
                 } catch (final Exception ex) {
                     final String message = "Cannot perform downscaling";
                     LOG.error(message, ex);
@@ -176,7 +160,7 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
                 }
             }
         } else {
-            LOG.warn("can only perform this action of objects of metaclass timeseries");                     // NOI18N
+            LOG.warn("can only perform this action of objects of metaclass timeseries"); // NOI18N
         }
     }
 
@@ -198,10 +182,10 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
         assert targetYear != null : "target year was not set"; // NOI18N
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("creating new modelinput: " // NOI18N
-                        + "scenario=" + scenario // NOI18N
+            LOG.debug("creating new rainfall modelinput: " // NOI18N
+                        + "scenario=" + scenario     // NOI18N
                         + " || targetYear=" + targetYear // NOI18N
-                        + " || mo=" + mo);  // NOI18N
+                        + " || mo=" + mo);           // NOI18N
         }
 
         final Date created = GregorianCalendar.getInstance().getTime();
@@ -240,8 +224,8 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
         final String description = (String)wizard.getProperty(PROP_DESCRIPTION);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("creating new modelrun: " // NOI18N
-                        + "name=" + name  // NOI18N
+            LOG.debug("creating new rainfall modelrun: " // NOI18N
+                        + "name=" + name           // NOI18N
                         + " || description=" + description // NOI18N
                         + " || cidsbean=" + inputBean); // NOI18N
         }

@@ -29,6 +29,10 @@ public final class RainfallDownscalingOutput {
     private transient String tsResult30Name;
     private transient int tsInput30Id;
     private transient String tsInput30Name;
+    private transient int tsInput1dId;
+    private transient String tsInput1dName;
+    private transient int tsResult1dId;
+    private transient String tsResult1dName;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -49,6 +53,10 @@ public final class RainfallDownscalingOutput {
      * @param  tsResult30Name  DOCUMENT ME!
      * @param  tsInput30Id     DOCUMENT ME!
      * @param  tsInput30Name   DOCUMENT ME!
+     * @param  tsInput1dId     DOCUMENT ME!
+     * @param  tsInput1dName   DOCUMENT ME!
+     * @param  tsResult1dId    DOCUMENT ME!
+     * @param  tsResult1dName  DOCUMENT ME!
      */
     public RainfallDownscalingOutput(final int modelInputId,
             final int modelRunId,
@@ -57,7 +65,11 @@ public final class RainfallDownscalingOutput {
             final int tsResult30Id,
             final String tsResult30Name,
             final int tsInput30Id,
-            final String tsInput30Name) {
+            final String tsInput30Name,
+            final int tsInput1dId,
+            final String tsInput1dName,
+            final int tsResult1dId,
+            final String tsResult1dName) {
         this.modelInputId = modelInputId;
         this.modelRunId = modelRunId;
         this.tsResultId = tsResultId;
@@ -66,6 +78,10 @@ public final class RainfallDownscalingOutput {
         this.tsResult30Name = tsResult30Name;
         this.tsInput30Id = tsInput30Id;
         this.tsInput30Name = tsInput30Name;
+        this.tsInput1dId = tsInput1dId;
+        this.tsInput1dName = tsInput1dName;
+        this.tsResult1dId = tsResult1dId;
+        this.tsResult1dName = tsResult1dName;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -239,5 +255,95 @@ public final class RainfallDownscalingOutput {
      */
     public CidsBean fetchTsResult() {
         return SMSUtils.fetchCidsBean(tsResultId, SMSUtils.TABLENAME_TIMESERIES);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getTsInput1dId() {
+        return tsInput1dId;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getTsInput1dName() {
+        return tsInput1dName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public CidsBean fetchTsInput1d() {
+        return SMSUtils.fetchCidsBean(tsInput1dId, SMSUtils.TABLENAME_TIMESERIES);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  tsInput1dId  DOCUMENT ME!
+     */
+    public void setTsInput1dId(final int tsInput1dId) {
+        this.tsInput1dId = tsInput1dId;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  tsInput1dName  DOCUMENT ME!
+     */
+    public void setTsInput1dName(final String tsInput1dName) {
+        this.tsInput1dName = tsInput1dName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getTsResult1dId() {
+        return tsResult1dId;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getTsResult1dName() {
+        return tsResult1dName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public CidsBean fetchTsResult1d() {
+        return SMSUtils.fetchCidsBean(tsResult1dId, SMSUtils.TABLENAME_TIMESERIES);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  tsResult1dId  DOCUMENT ME!
+     */
+    public void setTsResult1dId(final int tsResult1dId) {
+        this.tsResult1dId = tsResult1dId;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  tsResult1dName  DOCUMENT ME!
+     */
+    public void setTsResult1dName(final String tsResult1dName) {
+        this.tsResult1dName = tsResult1dName;
     }
 }

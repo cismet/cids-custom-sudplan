@@ -132,12 +132,12 @@ public final class TimeseriesRetrieverConfig {
      *
      * @throws  IllegalStateException  DOCUMENT ME!
      */
-    public Parameter getObservedProperty() {
+    public Variable getObservedProperty() {
         if (obsProp == null) {
             return null;
         }
 
-        for (final Parameter prop : Parameter.values()) {
+        for (final Variable prop : Variable.values()) {
             if (obsProp.equals(prop.getPropertyKey())) {
                 return prop;
             }

@@ -79,7 +79,7 @@ public final class RainfallDownscalingWizardPanelScenarios implements WizardDesc
      * @return  DOCUMENT ME!
      */
     String[] getScenarios() {
-        return new String[] { "A1B" };
+        return new String[] { "ECHAM5 A1B 3", "HADLEY A1B" };
     }
 
     @Override

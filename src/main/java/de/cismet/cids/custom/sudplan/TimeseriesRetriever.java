@@ -133,7 +133,8 @@ public final class TimeseriesRetriever {
 
             // for demo
             final DataHandler handler;
-            if (config.getOffering().contains("ownscale") && (Demo.getInstance().getDSSOSDH() != null)) {
+            if ((config.getOffering().contains("ownscale") || config.getOffering().contains("ggregate"))
+                        && (Demo.getInstance().getDSSOSDH() != null)) {
                 handler = Demo.getInstance().getDSSOSDH();
             } else {
                 handler = Demo.getInstance().getSOSDH(); // TODO: <- for demo
@@ -141,7 +142,7 @@ public final class TimeseriesRetriever {
             }
 
             if (handler == null) {
-                throw new TimeseriesRetrieverException("cannot lookup handler: " + config.getHandlerLookup());
+                throw new TimeseriesRetrieverException("cannot lookup handler: " + config.getHandlerLookup()); // NOI18N
             }
 
             if (Thread.currentThread().isInterrupted()) {

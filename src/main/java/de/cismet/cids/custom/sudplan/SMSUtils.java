@@ -9,6 +9,7 @@ package de.cismet.cids.custom.sudplan;
 
 import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.exception.ConnectionException;
+import Sirius.navigator.plugin.PluginRegistry;
 import Sirius.navigator.types.treenode.RootTreeNode;
 import Sirius.navigator.ui.ComponentRegistry;
 import Sirius.navigator.ui.tree.MetaCatalogueTree;
@@ -19,15 +20,31 @@ import Sirius.server.search.Query;
 import Sirius.server.search.SearchResult;
 import Sirius.server.sql.SystemStatement;
 
+import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
+
 import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
+
+import org.openide.util.ImageUtilities;
+
+import java.awt.Graphics;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
+import java.awt.Image;
+import java.awt.Transparency;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.PixelGrabber;
 
 import java.io.IOException;
 import java.io.StringWriter;
 
 import java.util.Properties;
 
+import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
@@ -54,6 +71,8 @@ public final class SMSUtils {
     public static final String TABLENAME_MODELOUTPUT = "MODELOUTPUT"; // NOI18N
     public static final String TABLENAME_MODELRUN = "RUN";            // NOI18N
     public static final String TABLENAME_MODEL = "MODEL";             // NOI18N
+
+    private static final String CISMAP_PLUGIN_NAME = "cismap";
 
     //~ Enums ------------------------------------------------------------------
 
@@ -285,6 +304,35 @@ public final class SMSUtils {
         return loadManagerFromModel((CidsBean)runBean.getProperty("model"), type); // NOI18N
     }
 
+//    public static Manager loadManagerFromId(final int id, final Manager.ManagerType type){
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("loading manager for id '" + id + "' and type: " + type); // NOI18N
+//        }
+//
+//        final String tableName;
+//        switch(type){
+//            case INPUT: tableName = TABLENAME_MODELINPUT; break;
+//            case MODEL: tableName = TABLENAME_MODELRUN; break;
+//            case OUTPUT: tableName = TABLENAME_MODELOUTPUT; break;
+//            default:
+//                throw new IllegalStateException("unknown type: " + type); // NOI18N
+//        }
+//
+//
+//        final String domain = SessionManager.getSession().getUser().getDomain();
+//        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, tableName);
+//
+//        assert mc != null : "unknown metaclass table name: " + tableName; // NOI18N
+//
+//        try
+//        {
+//            SessionManager.getProxy().getMetaObject(id, mc.getID(), SessionManager.getSession().getUser().getDomain());
+//        }catch(ConnectionException ex)
+//        {
+//            Exceptions.printStackTrace(ex);
+//        }
+//    }
+
     /**
      * DOCUMENT ME!
      *
@@ -439,5 +487,188 @@ public final class SMSUtils {
             LOG.warn("cannot get timeseries bean from server", ex); // NOI18N
             return null;
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   modelRun  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    public static void executeAndShowRun(final CidsBean modelRun) {
+        final CidsBean modelInput = (CidsBean)modelRun.getProperty("modelinput");                            // NOI18N
+        ComponentRegistry.getRegistry().getDescriptionPane().gotoMetaObject(modelInput.getMetaObject(), ""); // NOI18N
+        ComponentRegistry.getRegistry().getDescriptionPane().gotoMetaObject(modelRun.getMetaObject(), "");   // NOI18N
+
+        ComponentRegistry.getRegistry().showComponent(ComponentRegistry.DESCRIPTION_PANE);
+
+        final Manager runManager = SMSUtils.loadManagerFromRun(modelRun, Manager.ManagerType.MODEL);
+
+        if (runManager instanceof Executable) {
+            runManager.setCidsBean(modelRun);
+            ExecutableThreadPool.getInstance().execute((Executable)runManager);
+        } else {
+            throw new IllegalStateException(
+                "modelmanagers shall be instanceof Executable, check your manager definitions"); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public static void showMappingComponent() {
+        PluginRegistry.getRegistry()
+                .getPluginDescriptor(CISMAP_PLUGIN_NAME)
+                .getUIDescriptor(CISMAP_PLUGIN_NAME)
+                .getView()
+                .makeVisible();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   image  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static BufferedImage toBufferedImage(final Image image) {
+        if (image instanceof BufferedImage) {
+            return (BufferedImage)image;
+        }
+
+        // Determine if the image has transparent pixels
+        final boolean hasAlpha = hasAlpha(image);
+
+        // Create a buffered image with a format that's compatible with the screen
+        BufferedImage bimage = null;
+        try {
+            // Determine the type of transparency of the new buffered image
+            final int transparency;
+            if (hasAlpha) {
+                transparency = Transparency.BITMASK;
+            } else {
+                transparency = Transparency.OPAQUE;
+            }
+
+            // Create the buffered image
+            final GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            final GraphicsDevice gs = env.getDefaultScreenDevice();
+            final GraphicsConfiguration gc = gs.getDefaultConfiguration();
+            bimage = gc.createCompatibleImage(image.getWidth(null), image.getHeight(null), transparency);
+        } catch (final HeadlessException e) {
+            // The system does not have a screen
+            // Create a buffered image using the default color model
+            final int type;
+            if (hasAlpha) {
+                type = BufferedImage.TYPE_INT_ARGB;
+            } else {
+                type = BufferedImage.TYPE_INT_RGB;
+            }
+            bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
+        }
+
+        // Copy image to buffered image
+        final Graphics g = bimage.createGraphics();
+        // Paint the image onto the buffered image
+        g.drawImage(image, 0, 0, null);
+        g.dispose();
+
+        return bimage;
+    }
+
+    /**
+     * This method returns true if the specified image has transparent pixels.
+     *
+     * @param   image  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static boolean hasAlpha(final Image image) {
+        // If buffered image, the color model is readily available
+        if (image instanceof BufferedImage) {
+            final BufferedImage bimage = (BufferedImage)image;
+            return bimage.getColorModel().hasAlpha();
+        }
+
+        // Use a pixel grabber to retrieve the image's color model;
+        // grabbing a single pixel is usually sufficient
+        final PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
+        try {
+            pg.grabPixels();
+        } catch (InterruptedException e) {
+            // skip
+        }
+
+        // Get the image's color model
+        final ColorModel cm = pg.getColorModel();
+
+        return cm.hasAlpha();
+    }
+
+    /**
+     * Determines the {@link Unit} of a {@link Timeseries}.
+     *
+     * @param   timeseries  the <code>Timeseries</code> that contains the unit
+     *
+     * @return  the <code>Unit</code> of the data of the <code>Timeseries</code>, never <code>null</code>
+     *
+     * @throws  IllegalArgumentException  if the given <code>Timeseries</code> is <code>null</code>
+     * @throws  IllegalStateException     if the given <code>Timeseries</code>
+     *
+     *                                    <ul>
+     *                                      <li>has no unit property</li>
+     *                                      <li>has a unit property in an unknown format</li>
+     *                                      <li>has more than one unit</li>
+     *                                      <li>has an unknown unit</li>
+     *                                    </ul>
+     */
+    public static Unit unitFromTimeseries(final TimeSeries timeseries) {
+        if (timeseries == null) {
+            throw new IllegalArgumentException("timeseries must not be null"); // NOI18N
+        }
+
+        final Object unitValue = timeseries.getTSProperty(TimeSeries.VALUE_UNITS);
+        if (unitValue instanceof String[]) {
+            final String[] units = (String[])unitValue;
+            if (units.length == 1) {
+                final String unit = units[0];
+                for (final Unit u : Unit.values()) {
+                    if (u.getPropertyKey().equals(unit)) {
+                        return u;
+                    }
+                }
+
+                throw new IllegalStateException("unknown unit: " + unit);                                         // NOI18N
+            } else {
+                throw new IllegalStateException("more than one unit per datapoint not supported");                // NOI18N
+            }
+        } else {
+            throw new IllegalStateException("timeseries unit is not present or in unknown format: " + unitValue); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   clazz  DOCUMENT ME!
+     * @param   name   DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalArgumentException  DOCUMENT ME!
+     */
+    public static ImageIcon loadImageIcon(final Class clazz, final String name) {
+        if ((clazz == null) || (name == null) || name.isEmpty()) {
+            throw new IllegalArgumentException("class or name is null or name is empty: " + clazz + " || " + name); // NOI18N
+        }
+
+        final String path = clazz.getCanonicalName().replace(clazz.getSimpleName(), "").replace(".", "/"); // NOI18N
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("loading imageicon from path: " + path + name);
+        }
+
+        return ImageUtilities.loadImageIcon(path + name, false);
     }
 }
