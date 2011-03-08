@@ -17,9 +17,6 @@ import org.apache.log4j.Logger;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
-import sun.swing.table.DefaultTableCellHeaderRenderer;
-
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,7 +24,6 @@ import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -304,7 +300,6 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
                 final int column) {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-            final DefaultTableCellHeaderRenderer rend = new DefaultTableCellHeaderRenderer();
             if (c instanceof JLabel) {
                 final JLabel label = (JLabel)c;
                 if (column == 0) {
