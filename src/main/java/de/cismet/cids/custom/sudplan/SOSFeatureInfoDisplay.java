@@ -8,8 +8,6 @@
 package de.cismet.cids.custom.sudplan;
 
 import at.ac.ait.enviro.tsapi.handler.DataHandler;
-import at.ac.ait.enviro.tsapi.handler.Datapoint;
-import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 
@@ -20,13 +18,13 @@ import org.apache.log4j.Logger;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.ui.RectangleInsets;
 
 import org.openide.util.NbBundle;
@@ -41,13 +39,9 @@ import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
-import java.text.SimpleDateFormat;
-
-import java.util.GregorianCalendar;
-import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JTabbedPane;
@@ -66,27 +60,28 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
+// TODO: use timeserieschartpanel
 @ServiceProvider(service = FeatureInfoDisplay.class)
 public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWMSServiceLayerGroup> {
 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(SOSFeatureInfoDisplay.class);
-    private static final String SOS_FACTORY = "SOS-SUDPLAN-Dummy";                                     // NOI18N
-    public static final String KEY_SCENARIO = "scenario";                                              // NOI18N
-    public static final String KEY_SOS_URL = "sos_url";                                                // NOI18N
-    public static final String KEY_OBSERVED_PROP = "observed_property";                                // NOI18N
-    public static final String KEY_FROM_YEAR = "from_year";                                            // NOI18N
-    public static final String KEY_TO_YEAR = "to_year";                                                // NOI18N
-    public static final String OBSERVED_PROP_URN_TEMPERATURE = "urn:ogc:def:property:OGC:Temperature"; // NOI18N
+    private static final String SOS_FACTORY = "SOS-SUDPLAN-Dummy"; // NOI18N
+    public static final String KEY_SCENARIO = "scenario";          // NOI18N
+    public static final String KEY_SOS_URL = "sos_url";            // NOI18N
+    public static final String KEY_FROM_YEAR = "from_year";        // NOI18N
+    public static final String KEY_TO_YEAR = "to_year";            // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
     private transient DataHandler sosHandler;
-    private transient TimeInterval timeInterval;
     private transient String scenario;
     private transient String obsProp;
-    private transient String sosUrl;
+    private transient String procedure;
+    private transient String foi;
+    private transient String offering;
+    private transient URL sosUrl;
     private transient int fromYear;
     private transient int toYear;
     private transient boolean initialised;
@@ -95,6 +90,8 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
     // will only be accessed from EDT
     private transient TimeSeriesDisplayer currentDisplayer;
+
+    private transient TimeseriesRetrieverConfig config;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JComboBox cboResolution =
         new de.cismet.cids.custom.sudplan.LocalisedEnumComboBox(Resolution.class, available);
@@ -176,14 +173,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             throws InitialisationException {
         parseKeywords(layer.getLayerInformation().getKeywords());
 
-        final GregorianCalendar fromCal = new GregorianCalendar(fromYear, 0, 1);
-        final GregorianCalendar toCal = new GregorianCalendar(toYear, 11, 31);
-        timeInterval = new TimeInterval(
-                TimeInterval.Openness.OPEN,
-                new TimeStamp(fromCal.getTimeInMillis()),
-                new TimeStamp(toCal.getTimeInMillis()),
-                TimeInterval.Openness.OPEN);
-
         sosHandler = Demo.getInstance().getSOSDH(); // TODO: <- for demo
         // DataHandlerFactory.Lookup.lookup(SOS_FACTORY); // NOI18N
 
@@ -198,7 +187,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             final BeanInfo info = Introspector.getBeanInfo(sosHandler.getClass(), Introspector.USE_ALL_BEANINFO);
             for (final PropertyDescriptor pd : info.getPropertyDescriptors()) {
                 if (pd.getName().equals("endpoint")) { // NOI18N
-                    pd.getWriteMethod().invoke(sosHandler, new URL(sosUrl));
+                    pd.getWriteMethod().invoke(sosHandler, sosUrl);
                 }
             }
 
@@ -228,7 +217,8 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         }
 
         // clear the values to be sure they will be initialised
-        scenario = obsProp = sosUrl = null;
+        scenario = obsProp = offering = foi = procedure = null;
+        sosUrl = null;
         fromYear = toYear = -1;
 
         for (final String keyword : keywords) {
@@ -249,17 +239,29 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
                     if (KEY_SCENARIO.equals(key)) {
                         scenario = value;
-                    } else if (KEY_OBSERVED_PROP.equals(key)) {
+                    } else if (TimeSeries.OBSERVEDPROPERTY.equals(key)) {
                         obsProp = value;
+                    } else if (TimeSeries.PROCEDURE.equals(key)) {
+                        procedure = value;
+                    } else if (TimeSeries.FEATURE_OF_INTEREST.equals(key)) {
+                        foi = value;
+                    } else if (TimeSeries.OFFERING.equals(key)) {
+                        offering = value;
                     } else if (KEY_SOS_URL.equals(key)) {
-                        sosUrl = value;
+                        try {
+                            sosUrl = new URL(value);
+                        } catch (final MalformedURLException ex) {
+                            final String message = "invalid sos url: " + value; // NOI18N
+                            LOG.error(message, ex);
+                            throw new InitialisationException(message, ex);
+                        }
                     } else if (KEY_FROM_YEAR.equals(key)) {
                         fromYear = Integer.parseInt(value);
                     } else if (KEY_TO_YEAR.equals(key)) {
                         toYear = Integer.parseInt(value);
                     } else {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("unreconised key: " + key); // NOI18N
+                            LOG.debug("unreconised key: " + key);               // NOI18N
                         }
                     }
                 } else {
@@ -277,6 +279,8 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             LOG.error(message, e);
             throw new InitialisationException(message, e);
         }
+
+        config = new TimeseriesRetrieverConfig(SOS_FACTORY, sosUrl, procedure, foi, obsProp, offering, null, null);
     }
 
     /**
@@ -290,6 +294,15 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         }
         if (obsProp == null) {
             throw new IllegalStateException("observed property must not be null");                                     // NOI18N
+        }
+        if (procedure == null) {
+            throw new IllegalStateException("procedure property must not be null");                                    // NOI18N
+        }
+        if (foi == null) {
+            throw new IllegalStateException("foi property must not be null");                                          // NOI18N
+        }
+        if (offering == null) {
+            throw new IllegalStateException("offering property must not be null");                                     // NOI18N
         }
         if (sosUrl == null) {
             throw new IllegalStateException("sos url must not be null");                                               // NOI18N
@@ -326,55 +339,14 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  InitialisationException  DOCUMENT ME!
-     */
-    private Datapoint createDataPoint() throws InitialisationException {
-        final Properties filter = new Properties();
-        filter.put(TimeSeries.PROCEDURE, "urn:ogc:object:AIRVIRO:Temp");       // NOI18N
-        filter.put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:grid2"); // NOI18N
-        filter.put(TimeSeries.OBSERVEDPROPERTY, OBSERVED_PROP_URN_TEMPERATURE);
-        filter.put(TimeSeries.OFFERING, "AIRVIRO-Temp-coverage");              // NOI18N
-
-        final Set<Datapoint> datapoints = sosHandler.getDatapoints(filter, DataHandler.Access.READ);
-        if (datapoints.size() < 1) {
-            final String message = "no timeseries data offered for " // NOI18N
-                        + "scenario '" + scenario + "' and "         // NOI18N
-                        + "observed_property '" + obsProp + "'";     // NOI18N
-            LOG.error(message);
-            throw new InitialisationException(message);
-        } else if (datapoints.size() > 1) {
-            final String message = "too many offerings for "         // NOI18N
-                        + "scenario '" + scenario + "' and "         // NOI18N
-                        + "observed_property '" + obsProp + "'";     // NOI18N
-            LOG.error(message);
-            throw new InitialisationException(message);
-        }
-
-        final Datapoint datapoint = datapoints.iterator().next();
-        if (datapoint == null) {
-            final String message = "datapoint is null for "      // NOI18N
-                        + "scenario '" + scenario + "' and "     // NOI18N
-                        + "observed_property '" + obsProp + "'"; // NOI18N
-            LOG.error(message);
-            throw new InitialisationException(message);
-        }
-
-        return datapoint;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   datapoint  DOCUMENT ME!
+     * @param   timeseries  datapoint DOCUMENT ME!
+     * @param   name        DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      *
      * @throws  IllegalStateException  DOCUMENT ME!
      */
-    private XYDataset createDataset(final Datapoint datapoint) {
-        final TimeSeries timeseries = datapoint.getTimeSeries(timeInterval);
+    private IntervalXYDataset createDataset(final TimeSeries timeseries, final String name) {
         final Object valueKeyObject = timeseries.getTSProperty(TimeSeries.VALUE_KEYS);
 
         final String valueKey;
@@ -398,8 +370,8 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             throw new IllegalStateException("unknown value key type: " + valueKeyObject); // NOI18N
         }
 
-        final TimeStamp[] timeStamps = timeseries.getTimeStampsArray();                                // getTimeStamps();
-        final org.jfree.data.time.TimeSeries data = new org.jfree.data.time.TimeSeries("Temperature"); // NOI18N
+        final TimeStamp[] timeStamps = timeseries.getTimeStampsArray();                       // getTimeStamps();
+        final org.jfree.data.time.TimeSeries data = new org.jfree.data.time.TimeSeries(name); // NOI18N
 
         final Envelope envelope = (Envelope)timeseries.getTSProperty(TimeSeries.GEOMETRY);
         if (envelope == null) {
@@ -431,18 +403,38 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
      * DOCUMENT ME!
      *
      * @param   dataset  DOCUMENT ME!
+     * @param   unit     DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
      */
-    private JFreeChart createChart(final XYDataset dataset) {
-        final JFreeChart chart = ChartFactory.createTimeSeriesChart(
-                "European scale data",
-                "Years",
-                "Kelvin",
-                dataset,
-                true,
-                true,
-                false);
+    private JFreeChart createChart(final IntervalXYDataset dataset, final Unit unit) {
+        final JFreeChart chart;
+        final Variable observed = Variable.getVariable(obsProp);
+        if (Variable.PRECIPITATION.equals(observed)) {
+            chart = ChartFactory.createXYBarChart(
+                    "Rainfall data",
+                    "Time",
+                    true,
+                    unit.getLocalisedName(),
+                    dataset,
+                    PlotOrientation.VERTICAL,
+                    true,
+                    true,
+                    false);
+        } else if (Variable.TEMPERATURE.equals(observed) || Variable.O3.equals(observed)) {
+            chart = ChartFactory.createTimeSeriesChart(
+                    "Timeseries data",
+                    "Time",
+                    unit.getLocalisedName(),
+                    dataset,
+                    true,
+                    true,
+                    false);
+        } else {
+            throw new IllegalStateException("unsupported variable: " + observed);
+        }
 
         chart.setBackgroundPaint(getBackground());
 
@@ -461,8 +453,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             xyRenderer.setBaseShapesFilled(true);
         }
 
-        final DateAxis axis = (DateAxis)plot.getDomainAxis();
-        axis.setDateFormatOverride(new SimpleDateFormat("yyyy"));
+        plot.setRenderer(renderer);
 
         return chart;
     }
@@ -519,10 +510,10 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         @Override
         protected JFreeChart doInBackground() throws Exception {
-            final Datapoint datapoint = createDataPoint();
-            final XYDataset dataset = createDataset(datapoint);
+            final TimeSeries timeseries = TimeseriesRetriever.getInstance().retrieve(config).get();
+            final IntervalXYDataset dataset = createDataset(timeseries, obsProp);
 
-            return createChart(dataset);
+            return createChart(dataset, SMSUtils.unitFromTimeseries(timeseries));
         }
 
         @Override

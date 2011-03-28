@@ -87,10 +87,13 @@ public final class AirqualityDownscalingVisualPanelTargetDate extends javax.swin
         final Date endDate = model.getEndDate();
 
         if ((startDate == null) || (endDate == null)) {
-            final Date now = new GregorianCalendar().getTime();
+            // FIXME: ATR hack to pre-populate fields
+            // final Date now = new GregorianCalendar().getTime();
+            final Date start = new GregorianCalendar(1965, 0, 1, 0, 0, 0).getTime();
+            final Date end = new GregorianCalendar(2095, 11, 31, 23, 59, 59).getTime();
 
-            jdcStartDate.setDate(now);
-            jdcEndDate.setDate(now);
+            jdcStartDate.setDate(start);
+            jdcEndDate.setDate(end);
         } else {
             jdcStartDate.setDate(startDate);
             jdcEndDate.setDate(endDate);

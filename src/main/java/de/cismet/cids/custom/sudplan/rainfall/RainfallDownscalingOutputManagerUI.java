@@ -14,6 +14,7 @@ import Sirius.server.middleware.types.MetaClass;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
@@ -23,6 +24,7 @@ import java.awt.event.ActionListener;
 
 import java.net.MalformedURLException;
 
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -54,6 +56,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
 
     private final transient ActionListener runL;
     private final transient ActionListener inputL;
+    private final transient ImageIcon icon;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient org.jdesktop.swingx.JXHyperlink hypInput = new org.jdesktop.swingx.JXHyperlink();
@@ -78,6 +81,8 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         this.model = model;
         this.runL = new OpenRunActionListener();
         this.inputL = new OpenInputActionListener();
+        // FIXME: we probably want to relocate the icon source and probably want some other icon, too
+        this.icon = ImageUtilities.loadImageIcon("/de/cismet/cids/custom/sudplan/graph_16.png", false); // NOI18N
 
         initComponents();
 
@@ -110,7 +115,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         final TimeseriesChartPanel input1dTsPanel;
         final TimeseriesChartPanel result1dTsPanel;
         try {
-            // for the mockup
+            // FIXME: for the mockup
             resultTsPanel = new TimeseriesChartPanel((String)result1dTs.getProperty("uri"));   // NOI18N
             result30TsPanel = new TimeseriesChartPanel((String)result1dTs.getProperty("uri")); // NOI18N
             input30TsPanel = new TimeseriesChartPanel((String)input1dTs.getProperty("uri"));   // NOI18N
@@ -122,11 +127,11 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
             throw new IllegalStateException(message, ex);
         }
 
-        jtpResults.insertTab(model.getTsInput1dName(), null, input1dTsPanel, null, 0);
-        jtpResults.insertTab(model.getTsInput30Name(), null, input30TsPanel, null, 0);
-        jtpResults.insertTab(model.getTsResult30Name(), null, result30TsPanel, null, 0);
-        jtpResults.insertTab(model.getTsResult1dName(), null, result1dTsPanel, null, 0);
-        jtpResults.insertTab(model.getTsResultName(), null, resultTsPanel, null, 0);
+        jtpResults.insertTab(model.getTsInput1dName(), icon, input1dTsPanel, null, 0);
+        jtpResults.insertTab(model.getTsInput30Name(), icon, input30TsPanel, null, 0);
+        jtpResults.insertTab(model.getTsResult30Name(), icon, result30TsPanel, null, 0);
+        jtpResults.insertTab(model.getTsResult1dName(), icon, result1dTsPanel, null, 0);
+        jtpResults.insertTab(model.getTsResultName(), icon, resultTsPanel, null, 0);
         jtpResults.setSelectedIndex(0);
 
         final CidsBean runBean = SMSUtils.fetchCidsBean(model.getModelRunId(), SMSUtils.TABLENAME_MODELRUN);

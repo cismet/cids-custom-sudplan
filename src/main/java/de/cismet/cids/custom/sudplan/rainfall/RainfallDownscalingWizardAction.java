@@ -137,9 +137,11 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
                     RainfallDownscalingWizardAction.class,
                     "RainfallDownscalingWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
             final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
-
+            dialog.pack();
+            dialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
             dialog.setVisible(true);
             dialog.toFront();
+
             final boolean cancelled = wizard.getValue() != WizardDescriptor.FINISH_OPTION;
             if (!cancelled) {
                 try {

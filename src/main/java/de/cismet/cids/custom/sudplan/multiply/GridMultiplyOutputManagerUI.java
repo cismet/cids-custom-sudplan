@@ -54,15 +54,14 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingWorker;
 
-import de.cismet.cids.custom.sudplan.RunHelper;
-import de.cismet.cids.custom.sudplan.SMSUtils;
-
 import de.cismet.cids.dynamics.Disposable;
 
 import de.cismet.cismap.commons.features.DefaultRasterDocumentFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+
+import de.cismet.tools.gui.Static2DTools;
 
 /**
  * DOCUMENT ME!
@@ -291,7 +290,7 @@ public class GridMultiplyOutputManagerUI extends javax.swing.JPanel implements D
                 final LinearRing ring = new LinearRing(new CoordinateArraySequence(bbox), factory);
                 geometry = factory.createPolygon(ring, new LinearRing[0]);
             }
-            final BufferedImage image = SMSUtils.toBufferedImage(((ImagePanel)jplGrid).getImage());
+            final BufferedImage image = Static2DTools.toBufferedImage(((ImagePanel)jplGrid).getImage());
 
             final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
             removeFeature();

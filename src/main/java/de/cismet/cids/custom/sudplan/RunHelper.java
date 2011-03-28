@@ -23,6 +23,7 @@ import de.cismet.cids.dynamics.CidsBean;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
+// TODO: subject to remove
 public final class RunHelper {
 
     //~ Static fields/initializers ---------------------------------------------

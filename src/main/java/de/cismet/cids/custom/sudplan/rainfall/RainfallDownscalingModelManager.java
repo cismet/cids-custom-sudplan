@@ -407,6 +407,14 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
             if (COMPLETED.equals(state)) {
                 task.removeListener(ResultProcessor.this);
                 outputRunner = new CreateOutputRunner();
+
+                // FIXME: atr hack to simulate longer model run time
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ex) {
+                    LOG.warn("interrupted", ex); // NOI18N
+                }
+
                 outputRunner.start();
                 fireFinised();
             }

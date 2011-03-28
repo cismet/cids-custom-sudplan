@@ -73,9 +73,14 @@ public final class AirqualityDownscalingVisualPanelMetadata extends javax.swing.
         }
 
         txtName.setSelectionStart(0);
-        txtName.setSelectionEnd(txtName.getText().length() - 1);
+        txtName.setSelectionEnd(txtName.getText().length());
 
-        txaDescription.setText(model.getDescription());
+        // FIXME: ATR hack to pre-populate the meta information
+        if (model.getDescription() == null) {
+            txaDescription.setText("This is a demo run to demonstrate airquality downscaling.");
+        } else {
+            txaDescription.setText(model.getDescription());
+        }
 
         EventQueue.invokeLater(new Runnable() {
 

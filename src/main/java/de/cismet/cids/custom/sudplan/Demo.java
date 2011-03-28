@@ -28,6 +28,7 @@ import java.util.Properties;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
+@Deprecated
 public final class Demo {
 
     //~ Instance fields --------------------------------------------------------

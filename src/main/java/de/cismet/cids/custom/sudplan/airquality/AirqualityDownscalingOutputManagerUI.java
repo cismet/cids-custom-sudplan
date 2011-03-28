@@ -26,10 +26,14 @@ import org.openide.util.WeakListeners;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.util.Arrays;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +52,8 @@ import de.cismet.cids.custom.sudplan.Variable;
 
 import de.cismet.cids.dynamics.Disposable;
 
+import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -68,6 +74,8 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
     // these two classes have to be initialised here as they're used by the cbos defined below
     private final transient Available<Resolution> resAvailable = new ResolutionAvailable();
     private final transient Available<Variable> varAvailable = new VariableAvailable();
+    private final transient ItemListener resL;
+    private final transient ItemListener varL;
 
     private final transient ActionListener showL;
 
@@ -79,7 +87,7 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JButton btnShowInMap = new javax.swing.JButton();
-    private final transient javax.swing.JComboBox cboResolution = new LocalisedEnumComboBox(
+    private final transient javax.swing.JComboBox cboResolution = new LocalisedEnumComboBox<Resolution>(
             Resolution.class,
             resAvailable);
     private final transient javax.swing.JComboBox cboVariable = new LocalisedEnumComboBox<Variable>(
@@ -93,7 +101,10 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
     private final transient javax.swing.JLabel lblResolution = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblTo = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblVariable = new javax.swing.JLabel();
+    private final transient javax.swing.JPanel pnlDownloadAndShow = new javax.swing.JPanel();
     private final transient javax.swing.JPanel pnlProgess = new javax.swing.JPanel();
+    private final transient javax.swing.JPanel pnlTimerange = new javax.swing.JPanel();
+    private final transient javax.swing.JPanel pnlVarAndRes = new javax.swing.JPanel();
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -106,12 +117,20 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
     public AirqualityDownscalingOutputManagerUI(final AirqualityDownscalingOutputManager model) {
         this.model = model;
         this.showL = new ShowInMapListener();
+        this.resL = new ResolutionItemListener();
+        this.varL = new VariableItemListener();
 
         initComponents();
 
         init();
 
         btnShowInMap.addActionListener(WeakListeners.create(ActionListener.class, showL, btnShowInMap));
+        cboVariable.addItemListener(WeakListeners.create(ItemListener.class, varL, cboVariable));
+        cboResolution.addItemListener(WeakListeners.create(ItemListener.class, resL, cboResolution));
+
+        // FIXME: doing two subsequent changes assures that the item listener will be triggered
+        cboVariable.setSelectedItem(Variable.O3);
+        cboVariable.setSelectedItem(Variable.NO2);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -134,45 +153,56 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
+        pnlVarAndRes.setBorder(javax.swing.BorderFactory.createTitledBorder("Variable and Resolution"));
+        pnlVarAndRes.setOpaque(false);
+        pnlVarAndRes.setLayout(new java.awt.GridBagLayout());
+
         lblVariable.setText(NbBundle.getMessage(
                 AirqualityDownscalingOutputManagerUI.class,
                 "AirqualityDownscalingOutputManagerUI.lblVariable.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 4);
-        add(lblVariable, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlVarAndRes.add(lblVariable, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 4);
-        add(cboVariable, gridBagConstraints);
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlVarAndRes.add(cboVariable, gridBagConstraints);
 
         lblResolution.setText(NbBundle.getMessage(
                 AirqualityDownscalingOutputManagerUI.class,
                 "AirqualityDownscalingOutputManagerUI.lblResolution.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 4, 2, 2);
-        add(lblResolution, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 4, 2, 2);
-        add(cboResolution, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlVarAndRes.add(lblResolution, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlVarAndRes.add(cboResolution, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 6, 6);
+        add(pnlVarAndRes, gridBagConstraints);
+
+        pnlTimerange.setBorder(javax.swing.BorderFactory.createTitledBorder("Timerange"));
+        pnlTimerange.setOpaque(false);
+        pnlTimerange.setLayout(new java.awt.GridBagLayout());
 
         jdcStartDate.setEnabled(false);
         jdcStartDate.setMinimumSize(new java.awt.Dimension(130, 28));
@@ -180,53 +210,66 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
         jdcStartDate.setPreferredSize(new java.awt.Dimension(130, 28));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 4);
-        add(jdcStartDate, gridBagConstraints);
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlTimerange.add(jdcStartDate, gridBagConstraints);
 
         jdcEndDate.setEnabled(false);
         jdcEndDate.setMinimumSize(new java.awt.Dimension(130, 28));
         jdcEndDate.setOpaque(false);
         jdcEndDate.setPreferredSize(new java.awt.Dimension(130, 28));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        add(jdcEndDate, gridBagConstraints);
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlTimerange.add(jdcEndDate, gridBagConstraints);
 
         lblTo.setText(NbBundle.getMessage(
                 AirqualityDownscalingOutputManagerUI.class,
                 "AirqualityDownscalingOutputManagerUI.lblTo.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.insets = new java.awt.Insets(2, 4, 2, 2);
-        add(lblTo, gridBagConstraints);
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlTimerange.add(lblTo, gridBagConstraints);
 
         lblFrom.setText(NbBundle.getMessage(
                 AirqualityDownscalingOutputManagerUI.class,
                 "AirqualityDownscalingOutputManagerUI.lblFrom.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        add(lblFrom, gridBagConstraints);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlTimerange.add(lblFrom, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 6, 6);
+        add(pnlTimerange, gridBagConstraints);
+
+        pnlDownloadAndShow.setBorder(javax.swing.BorderFactory.createTitledBorder("Download and Show"));
+        pnlDownloadAndShow.setOpaque(false);
+        pnlDownloadAndShow.setLayout(new java.awt.GridBagLayout());
 
         btnShowInMap.setText(NbBundle.getMessage(
                 AirqualityDownscalingOutputManagerUI.class,
                 "AirqualityDownscalingOutputManagerUI.btnShowInMap.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 8, 2, 2);
-        add(btnShowInMap, gridBagConstraints);
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlDownloadAndShow.add(btnShowInMap, gridBagConstraints);
 
         pnlProgess.setOpaque(false);
         pnlProgess.setLayout(new java.awt.GridBagLayout());
@@ -252,11 +295,18 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        add(pnlProgess, gridBagConstraints);
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlDownloadAndShow.add(pnlProgess, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 6, 6);
+        add(pnlDownloadAndShow, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
     @Override
@@ -272,16 +322,54 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
      *
      * @version  $Revision$, $Date$
      */
-    private final class ShowInMapListener implements ActionListener {
+    private final class VariableItemListener implements ItemListener {
 
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public void actionPerformed(final ActionEvent e) {
-            btnShowInMap.setEnabled(false);
-            jpbDownload.setIndeterminate(true);
-            final Downloader loader = new Downloader();
-            loader.start();
+        public void itemStateChanged(final ItemEvent e) {
+            if (ItemEvent.SELECTED == e.getStateChange()) {
+                for (final Resolution r : Resolution.values()) {
+                    if (resAvailable.isAvailable(r)) {
+                        cboResolution.setSelectedItem(r);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * FIXME: atr hack to display appropriate timerange boundaries
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class ResolutionItemListener implements ItemListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void itemStateChanged(final ItemEvent e) {
+            if (ItemEvent.SELECTED == e.getStateChange()) {
+                final Resolution res = (Resolution)e.getItem();
+
+                final GregorianCalendar startCal;
+                final GregorianCalendar endCal;
+
+                if (Resolution.DECADE.equals(res)) {
+                    startCal = new GregorianCalendar(1965, 0, 1);
+                    endCal = new GregorianCalendar(2095, 11, 31);
+                } else {
+                    startCal = new GregorianCalendar(2031, 0, 1);
+                    endCal = new GregorianCalendar(2031, 11, 31);
+                }
+
+                jdcStartDate.setDate(startCal.getTime());
+                jdcEndDate.setDate(endCal.getTime());
+            } else {
+                jdcEndDate.setDate(null);
+                jdcStartDate.setDate(null);
+            }
         }
     }
 
@@ -290,7 +378,32 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
      *
      * @version  $Revision$, $Date$
      */
-    private final class Downloader extends Thread {
+    private final class ShowInMapListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            btnShowInMap.setEnabled(false);
+            jpbDownload.setIndeterminate(true);
+            if (Variable.O3.equals(cboVariable.getSelectedItem())) {
+                final DownloaderO3 loader = new DownloaderO3();
+                loader.start();
+            } else if (Variable.NO2.equals(cboVariable.getSelectedItem())) {
+                final DownloaderNO2 loader = new DownloaderNO2();
+                loader.start();
+            } else {
+                LOG.error("cannot load variable"); // NOI18N
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class DownloaderO3 extends Thread {
 
         //~ Methods ------------------------------------------------------------
 
@@ -328,7 +441,6 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                 return;
             }
 
-            final GregorianCalendar cal = new GregorianCalendar();
             final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 3021);
             final Coordinate[] bbox = new Coordinate[5];
             bbox[0] = new Coordinate(1580000, 6546000);
@@ -340,7 +452,7 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
             final Geometry geometry = factory.createPolygon(ring, new LinearRing[0]);
 
             // TODO: for demo purposes assume it is a yearly grid
-            final Map<Integer, Grid> gridmap = new HashMap<Integer, Grid>();
+            final Map<Date, Grid> gridmap = new HashMap<Date, Grid>();
             for (final TimeStamp stamp : timeseries.getTimeStamps()) {
                 final Float[][] floatData = (Float[][])timeseries.getValue(stamp, "ts:value");
                 final Double[][] doubleData = new Double[floatData.length][];
@@ -350,15 +462,22 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                         doubleData[i][j] = (double)floatData[i][j];
                     }
                 }
-                cal.setTime(stamp.asDate());
-                gridmap.put(cal.get(GregorianCalendar.YEAR), new ImmutableGrid(doubleData, geometry, "Ozone", null));
+                gridmap.put(stamp.asDate(), new ImmutableGrid(doubleData, geometry, "Ozone", "ppb"));
+            }
+            final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+            mc.getFeatureCollection().removeAllFeatures();
+            for (final Crs crs : mc.getCrsList()) {
+                if ("EPSG:3021".equals(crs.getCode())) {
+                    CismapBroker.getInstance().setSrs(crs);
+                    break;
+                }
             }
 
             final String name = (String)model.getCidsBean().getProperty("name");
-            widget = new GridSliderWidget(name, gridmap);
-            final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+            widget = new GridSliderWidget(name, gridmap, Resolution.DECADE);
             mc.addInternalWidget(name, MappingComponent.POSITION_NORTHEAST, widget);
             mc.getFeatureCollection().addFeature(widget);
+            mc.zoomToAFeatureCollection(Arrays.asList((Feature)widget), true, false);
 
             EventQueue.invokeLater(new Runnable() {
 
@@ -378,13 +497,93 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
      *
      * @version  $Revision$, $Date$
      */
-    private static final class ResolutionAvailable implements Available<Resolution> {
+    private final class DownloaderNO2 extends Thread {
 
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public boolean isAvailable(final Resolution type) {
-            return Resolution.DECADE.equals(type);
+        public void run() {
+            final TimeseriesRetrieverConfig config;
+            try {
+                config = new TimeseriesRetrieverConfig(
+                        "SOS-Dummy-Handler",                                         // NOI18N
+                        new URL("http://dummy.org"),                                 // NOI18N
+                        "urn:ogc:object:STHLM:NO2:2031-1m",                          // NOI18N
+                        "urn:MyOrg:feature:grid3",                                   // NOI18N
+                        Variable.NO2.getPropertyKey(),
+                        "STHLM-NO2-coverage-2031-1m",                                // NOI18N
+                        null,
+                        TimeInterval.ALL_INTERVAL);
+            } catch (MalformedURLException ex) {
+                final String message = "cannot create retriever config";             // NOI18N
+                LOG.error(message, ex);
+                return;
+            }
+
+            final Future<TimeSeries> tsFuture;
+            try {
+                tsFuture = TimeseriesRetriever.getInstance().retrieve(config);
+            } catch (final TimeseriesRetrieverException ex) {
+                LOG.error("error creating TS retriever for config: " + config, ex); // NOI18N
+                return;
+            }
+
+            try {
+                timeseries = tsFuture.get();
+            } catch (final Exception ex) {
+                LOG.error("error retrieving timeseries: " + config); // NOI18N
+                return;
+            }
+
+            final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 3021);
+            final Coordinate[] bbox = new Coordinate[5];
+            bbox[0] = new Coordinate(1580000, 6546000);
+            bbox[1] = new Coordinate(1580000, 6648000);
+            bbox[2] = new Coordinate(1682000, 6648000);
+            bbox[3] = new Coordinate(1682000, 6546000);
+            bbox[4] = new Coordinate(1580000, 6546000);
+            final LinearRing ring = new LinearRing(new CoordinateArraySequence(bbox), factory);
+            final Geometry geometry = factory.createPolygon(ring, new LinearRing[0]);
+
+            // TODO: for demo purposes assume it is a yearly grid
+            final Map<Date, Grid> gridmap = new HashMap<Date, Grid>();
+            for (final TimeStamp stamp : timeseries.getTimeStamps()) {
+                final Float[][] floatData = (Float[][])timeseries.getValue(stamp, "ts:value");
+                final Double[][] doubleData = new Double[floatData.length][];
+                for (int i = 0; i < floatData.length; ++i) {
+                    doubleData[i] = new Double[floatData[i].length];
+                    for (int j = 0; j < floatData[i].length; ++j) {
+                        doubleData[i][j] = (double)floatData[i][j];
+                    }
+                }
+                gridmap.put(stamp.asDate(), new ImmutableGrid(doubleData, geometry, "NO₂", "ppb"));
+            }
+
+            final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+            mc.getFeatureCollection().removeAllFeatures();
+            for (final Crs crs : mc.getCrsList()) {
+                if ("EPSG:3021".equals(crs.getCode())) {
+                    CismapBroker.getInstance().setSrs(crs);
+                    break;
+                }
+            }
+
+            final String name = (String)model.getCidsBean().getProperty("name");
+            widget = new GridSliderWidget(name, gridmap, Resolution.MONTH);
+            mc.addInternalWidget(name, MappingComponent.POSITION_NORTHEAST, widget);
+            mc.getFeatureCollection().addFeature(widget);
+            mc.zoomToAFeatureCollection(Arrays.asList((Feature)widget), true, false);
+
+            EventQueue.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        jpbDownload.setIndeterminate(false);
+                        jpbDownload.setValue(100);
+                        jpbDownload.setString("completed");
+                        SMSUtils.showMappingComponent();
+                    }
+                });
         }
     }
 
@@ -393,13 +592,39 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
      *
      * @version  $Revision$, $Date$
      */
-    private static final class VariableAvailable implements Available<Variable> {
+    private final class ResolutionAvailable implements Available<Resolution> {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public boolean isAvailable(final Resolution type) {
+//            return Resolution.DECADE.equals(type);
+            if (cboVariable == null) {
+                return false;
+            }
+
+            if (Variable.O3.equals(cboVariable.getSelectedItem())) {
+                return Resolution.DECADE.equals(type);
+            } else if (Variable.NO2.equals(cboVariable.getSelectedItem())) {
+                return Resolution.MONTH.equals(type);
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class VariableAvailable implements Available<Variable> {
 
         //~ Methods ------------------------------------------------------------
 
         @Override
         public boolean isAvailable(final Variable type) {
-            return Variable.O3.equals(type);
+            return Variable.O3.equals(type) || Variable.NO2.equals(type);
         }
     }
 }

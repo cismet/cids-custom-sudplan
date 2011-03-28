@@ -7,13 +7,15 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import java.util.EventObject;
+
 /**
  * DOCUMENT ME!
  *
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class ProgressEvent {
+public final class ProgressEvent extends EventObject {
 
     //~ Enums ------------------------------------------------------------------
 
@@ -40,20 +42,24 @@ public final class ProgressEvent {
     /**
      * Creates a new ProgressEvent object.
      *
-     * @param  state  DOCUMENT ME!
+     * @param  eventObject  DOCUMENT ME!
+     * @param  state        DOCUMENT ME!
      */
-    public ProgressEvent(final State state) {
-        this(state, 0, 0);
+    public ProgressEvent(final Object eventObject, final State state) {
+        this(eventObject, state, 0, 0);
     }
 
     /**
      * Creates a new ProgressEvent object.
      *
-     * @param  state     DOCUMENT ME!
-     * @param  step      percentFinished DOCUMENT ME!
-     * @param  maxSteps  DOCUMENT ME!
+     * @param  eventObject  DOCUMENT ME!
+     * @param  state        DOCUMENT ME!
+     * @param  step         percentFinished DOCUMENT ME!
+     * @param  maxSteps     DOCUMENT ME!
      */
-    public ProgressEvent(final State state, final int step, final int maxSteps) {
+    public ProgressEvent(final Object eventObject, final State state, final int step, final int maxSteps) {
+        super(eventObject);
+
         this.state = state;
         this.step = step;
         this.maxSteps = maxSteps;

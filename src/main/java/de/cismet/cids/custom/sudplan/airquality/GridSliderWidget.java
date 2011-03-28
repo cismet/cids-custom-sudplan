@@ -5,27 +5,6 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- *  Copyright (C) 2011 mscholl
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-/*
- * GridSliderWidget.java
- *
- * Created on Feb 21, 2011, 5:58:07 PM
- */
 package de.cismet.cids.custom.sudplan.airquality;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -40,6 +19,8 @@ import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +28,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 import de.cismet.cids.custom.sudplan.Grid;
+import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.RunHelper;
 
 import de.cismet.cismap.commons.Refreshable;
@@ -64,6 +46,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
+// FIXME: if further use is focussed this class needs large refactoring
 public class GridSliderWidget extends javax.swing.JInternalFrame implements RasterDocumentFeature,
     XStyledFeature,
     FeatureCollectionListener {
@@ -74,9 +57,9 @@ public class GridSliderWidget extends javax.swing.JInternalFrame implements Rast
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient Map<Integer, Grid> grids;
+    private final transient Map<Date, Grid> grids;
     private final transient Geometry geom;
-    private final transient Integer[] years;
+    private final transient Date[] timestamps;
 
     private transient boolean canBeSelected;
 
@@ -88,16 +71,19 @@ public class GridSliderWidget extends javax.swing.JInternalFrame implements Rast
     private final double max;
 
     private final transient String name;
-
+    private final transient Resolution resolution;
     private final transient Map<Grid, BufferedImage> imageCache;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JPanel jPanel1 = new javax.swing.JPanel();
+    private final transient javax.swing.JPanel jPanel2 = new javax.swing.JPanel();
     private final transient javax.swing.JSlider jslTime = new javax.swing.JSlider();
     private final transient javax.swing.JLabel lblAbsoluteMax = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblAbsoluteMaxValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblAbsoluteMin = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblAbsoluteMinValue = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblTimerange = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblTimerangeValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblUnit = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblUnitValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblVariableValue = new javax.swing.JLabel();
@@ -109,12 +95,13 @@ public class GridSliderWidget extends javax.swing.JInternalFrame implements Rast
     /**
      * Creates new form GridSliderWidget.
      *
-     * @param   name   DOCUMENT ME!
-     * @param   grids  DOCUMENT ME!
+     * @param   name        DOCUMENT ME!
+     * @param   grids       DOCUMENT ME!
+     * @param   resolution  DOCUMENT ME!
      *
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
-    public GridSliderWidget(final String name, final Map<Integer, Grid> grids) {
+    public GridSliderWidget(final String name, final Map<Date, Grid> grids, final Resolution resolution) {
         if (grids == null) {
             throw new IllegalArgumentException("grids must not be null");         // NOI18N
         } else if (grids.isEmpty()) {
@@ -125,6 +112,7 @@ public class GridSliderWidget extends javax.swing.JInternalFrame implements Rast
 
         this.grids = grids;
         this.name = name;
+        this.resolution = resolution;
         this.imageCache = new HashMap<Grid, BufferedImage>((int)(grids.size() / 0.75) + 1);
 
         final Grid[] gridArray = grids.values().toArray(new Grid[grids.values().size()]);
@@ -135,8 +123,8 @@ public class GridSliderWidget extends javax.swing.JInternalFrame implements Rast
         this.min = minMax[0];
         this.max = minMax[1];
 
-        years = grids.keySet().toArray(new Integer[grids.keySet().size()]);
-        Arrays.sort(years);
+        timestamps = grids.keySet().toArray(new Date[grids.keySet().size()]);
+        Arrays.sort(timestamps);
 
         initComponents();
 
@@ -151,18 +139,48 @@ public class GridSliderWidget extends javax.swing.JInternalFrame implements Rast
 
     /**
      * DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
      */
     private void init() {
-        jslTime.setMinimum(years[0]);
-        jslTime.setMaximum(years[years.length - 1]);
-        jslTime.setMajorTickSpacing(20);
-        jslTime.setMinorTickSpacing(10);
+        final int minTimestamp;
+        final int maxTimestamp;
+        final int majorSpacing;
+        final int minorSpacing;
+
+        final GregorianCalendar cal = new GregorianCalendar();
+        if (Resolution.DECADE.equals(resolution)) {
+            cal.setTime(timestamps[0]);
+            minTimestamp = cal.get(GregorianCalendar.YEAR);
+            cal.setTime(timestamps[timestamps.length - 1]);
+            maxTimestamp = cal.get(GregorianCalendar.YEAR);
+            lblTimerangeValue.setText(minTimestamp + " - " + maxTimestamp);
+            majorSpacing = 20;
+            minorSpacing = 10;
+        } else if (Resolution.MONTH.equals(resolution)) {
+            cal.setTime(timestamps[0]);
+            minTimestamp = cal.get(GregorianCalendar.MONTH) + 1;
+            cal.setTime(timestamps[timestamps.length - 1]);
+            maxTimestamp = cal.get(GregorianCalendar.MONTH) + 1;
+            lblTimerangeValue.setText(String.valueOf(cal.get(GregorianCalendar.YEAR)));
+            majorSpacing = 2;
+            minorSpacing = 1;
+        } else {
+            throw new IllegalStateException("unsupported resolution");
+        }
+
+        jslTime.setMinimum(minTimestamp);
+        jslTime.setMaximum(maxTimestamp);
+        jslTime.setMajorTickSpacing(majorSpacing);
+        jslTime.setMinorTickSpacing(minorSpacing);
 
         final Grid grid = grids.values().iterator().next();
         lblVariableValue.setText(grid.getDataType());
         lblUnitValue.setText(grid.getUnit());
-        lblAbsoluteMinValue.setText("<html><font color=\"green\">" + (Math.round(min * 100) / 100d) + "</font></html>");
-        lblAbsoluteMaxValue.setText("<html><font color=\"red\">" + (Math.round(max * 100) / 100d) + "</font></html>");
+        lblAbsoluteMinValue.setText("<html><font color=\"green\">" + (Math.round(min * 100) / 100d)
+                    + "</font></html>");
+        lblAbsoluteMaxValue.setText("<html><font color=\"red\">" + (Math.round(max * 100) / 100d)
+                    + "</font></html>");
     }
 
     /**
@@ -174,8 +192,8 @@ public class GridSliderWidget extends javax.swing.JInternalFrame implements Rast
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        setMinimumSize(new java.awt.Dimension(300, 90));
-        setPreferredSize(new java.awt.Dimension(300, 90));
+        setMinimumSize(new java.awt.Dimension(300, 112));
+        setPreferredSize(new java.awt.Dimension(300, 112));
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
@@ -194,7 +212,7 @@ public class GridSliderWidget extends javax.swing.JInternalFrame implements Rast
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 8;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
@@ -278,6 +296,37 @@ public class GridSliderWidget extends javax.swing.JInternalFrame implements Rast
         gridBagConstraints.insets = new java.awt.Insets(4, 1, 4, 4);
         jPanel1.add(lblAbsoluteMaxValue, gridBagConstraints);
 
+        jPanel2.setLayout(new java.awt.GridBagLayout());
+
+        lblTimerangeValue.setText(NbBundle.getMessage(
+                GridSliderWidget.class,
+                "GridSliderWidget.lblTimerangeValue.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(4, 1, 4, 4);
+        jPanel2.add(lblTimerangeValue, gridBagConstraints);
+
+        lblTimerange.setText(NbBundle.getMessage(GridSliderWidget.class, "GridSliderWidget.lblTimerange.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 1);
+        jPanel2.add(lblTimerange, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 8;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        jPanel1.add(jPanel2, gridBagConstraints);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -303,16 +352,40 @@ public class GridSliderWidget extends javax.swing.JInternalFrame implements Rast
 
     @Override
     public BufferedImage getRasterDocument() {
-        final Integer year = jslTime.getValue();
+        final Integer timestamp = jslTime.getValue();
+        Date stamp = null;
 
-        Grid grid = grids.get(year);
-        if (grid == null) {
-            for (final Integer i : years) {
-                if (year < i) {
-                    grid = grids.get(i);
+        if (Resolution.DECADE.equals(resolution)) {
+            stamp = new GregorianCalendar(timestamp, 0, 1).getTime();
+        } else if (Resolution.MONTH.equals(resolution)) {
+            final GregorianCalendar cal = new GregorianCalendar();
+            for (final Date date : grids.keySet()) {
+                cal.setTime(date);
+                if (cal.get(GregorianCalendar.MONTH) == (timestamp.intValue() - 1)) {
+                    stamp = date;
                     break;
                 }
             }
+        } else {
+            throw new IllegalStateException("unsupported resolution");
+        }
+
+        Grid grid = grids.get(stamp);
+
+        if (grid == null) {
+            Date candidate = null;
+            for (final Date i : timestamps) {
+                if (i.before(stamp)) {
+                    candidate = i;
+                } else if (i.after(stamp)) {
+                    // don't waste time in this loop
+                    break;
+                }
+            }
+
+            assert candidate != null : "no candidate found"; // NOI18N
+
+            grid = grids.get(candidate);
         }
 
         assert grid != null : "grid cannot be null"; // NOI18N
@@ -378,13 +451,21 @@ public class GridSliderWidget extends javax.swing.JInternalFrame implements Rast
 
     @Override
     public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
-        CismapBroker.getInstance().getMappingComponent().removeInternalWidget(getName());
+        final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+        mc.showInternalWidget(getName(), false, 3);
+        mc.removeInternalWidget(getName());
+        mc.getFeatureCollection().removeFeatureCollectionListener(this);
+        CismapBroker.getInstance().getMappingComponent().repaint();
     }
 
     @Override
     public void featuresRemoved(final FeatureCollectionEvent fce) {
         if (fce.getEventFeatures().contains(this)) {
-            CismapBroker.getInstance().getMappingComponent().removeInternalWidget(getName());
+            final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+            mc.showInternalWidget(getName(), false, 3);
+            mc.removeInternalWidget(getName());
+            mc.getFeatureCollection().removeFeatureCollectionListener(this);
+            CismapBroker.getInstance().getMappingComponent().repaint();
         }
     }
 

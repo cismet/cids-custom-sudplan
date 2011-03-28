@@ -147,6 +147,10 @@ public abstract class AbstractModelManager implements ModelManager, Disposable {
      * @throws  IllegalStateException  DOCUMENT ME!
      */
     protected void fireStarted() {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("fireStarted: " + this); // NOI18N
+        }
+
         if (isStarted()) {
             return;
         }
@@ -160,7 +164,7 @@ public abstract class AbstractModelManager implements ModelManager, Disposable {
             throw new IllegalStateException(message, ex);
         }
 
-        progressSupport.fireEvent(new ProgressEvent(ProgressEvent.State.STARTED));
+        progressSupport.fireEvent(new ProgressEvent(this, ProgressEvent.State.STARTED));
     }
 
     /**
@@ -172,11 +176,15 @@ public abstract class AbstractModelManager implements ModelManager, Disposable {
     protected void fireProgressed(final int step, final int maxSteps) {
         assert isStarted() : "cannot progress when not started yet"; // NOI18N
 
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("fireProgressed: " + this); // NOI18N
+        }
+
         if (isFinished()) {
             return;
         }
 
-        progressSupport.fireEvent(new ProgressEvent(ProgressEvent.State.PROGRESSING, step, maxSteps));
+        progressSupport.fireEvent(new ProgressEvent(this, ProgressEvent.State.PROGRESSING, step, maxSteps));
     }
 
     /**
@@ -185,6 +193,10 @@ public abstract class AbstractModelManager implements ModelManager, Disposable {
      * @throws  IllegalStateException  DOCUMENT ME!
      */
     protected void fireFinised() {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("fireFinished: " + this); // NOI18N
+        }
+
         if (isFinished()) {
             return;
         }
@@ -195,12 +207,20 @@ public abstract class AbstractModelManager implements ModelManager, Disposable {
             cidsBean.setProperty("modeloutput", createOutputBean());                                                   // NOI18N
             cidsBean = cidsBean.persist();
 
-//            SMSUtils.reloadCatalogTree();
+            // TODO: use appropriate reload sub-tree facilities
+            SMSUtils.reloadCatalogTree();
 
             final MetaObject outputobject = ((CidsBean)cidsBean.getProperty("modeloutput")).getMetaObject(); // NOI18N
 
             assert outputobject != null : "bean without metaobject";                     // NOI18N
             assert outputobject.getMetaClass() != null : "metaobject without metaclass"; // NOI18N
+
+            // FIXME: atr hack to simulate longer model run time
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                LOG.warn("interrupted", ex); // NOI18N
+            }
 
             ComponentRegistry.getRegistry()
                     .getDescriptionPane()
@@ -211,7 +231,7 @@ public abstract class AbstractModelManager implements ModelManager, Disposable {
             throw new IllegalStateException(message, ex);
         }
 
-        progressSupport.fireEvent(new ProgressEvent(ProgressEvent.State.FINISHED));
+        progressSupport.fireEvent(new ProgressEvent(this, ProgressEvent.State.FINISHED));
     }
 
     /**

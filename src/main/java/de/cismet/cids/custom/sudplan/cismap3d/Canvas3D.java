@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.cismap3d;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
 import javax.vecmath.Vector3d;
@@ -46,16 +45,16 @@ public interface Canvas3D extends UIProvider {
     /**
      * DOCUMENT ME!
      *
-     * @param  coord3d  DOCUMENT ME!
+     * @param  geom  coord3d DOCUMENT ME!
      */
-    void setCameraPosition(Coordinate coord3d);
+    void setCameraPosition(Geometry geom);
 
     /**
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    Coordinate getCameraPosition();
+    Geometry getCameraPosition();
 
     /**
      * DOCUMENT ME!

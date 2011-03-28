@@ -97,13 +97,13 @@ public final class Layer3DDFKIImpl implements Layer3D {
             }
 
             if (EventQueue.isDispatchThread()) {
-                progressL.progress(new ProgressEvent(ProgressEvent.State.STARTED));
+                progressL.progress(new ProgressEvent(this, ProgressEvent.State.STARTED));
             } else {
                 EventQueue.invokeLater(new Runnable() {
 
                         @Override
                         public void run() {
-                            progressL.progress(new ProgressEvent(ProgressEvent.State.STARTED));
+                            progressL.progress(new ProgressEvent(this, ProgressEvent.State.STARTED));
                         }
                     });
             }
@@ -122,13 +122,13 @@ public final class Layer3DDFKIImpl implements Layer3D {
             }
 
             if (EventQueue.isDispatchThread()) {
-                progressL.progress(new ProgressEvent(ProgressEvent.State.PROGRESSING));
+                progressL.progress(new ProgressEvent(this, ProgressEvent.State.PROGRESSING));
             } else {
                 EventQueue.invokeLater(new Runnable() {
 
                         @Override
                         public void run() {
-                            progressL.progress(new ProgressEvent(ProgressEvent.State.PROGRESSING));
+                            progressL.progress(new ProgressEvent(this, ProgressEvent.State.PROGRESSING));
                         }
                     });
             }
@@ -147,13 +147,13 @@ public final class Layer3DDFKIImpl implements Layer3D {
             }
 
             if (EventQueue.isDispatchThread()) {
-                progressL.progress(new ProgressEvent(ProgressEvent.State.FINISHED));
+                progressL.progress(new ProgressEvent(this, ProgressEvent.State.FINISHED));
             } else {
                 EventQueue.invokeLater(new Runnable() {
 
                         @Override
                         public void run() {
-                            progressL.progress(new ProgressEvent(ProgressEvent.State.FINISHED));
+                            progressL.progress(new ProgressEvent(this, ProgressEvent.State.FINISHED));
                         }
                     });
             }

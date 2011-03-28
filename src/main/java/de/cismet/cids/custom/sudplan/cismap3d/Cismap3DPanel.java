@@ -9,10 +9,13 @@ package de.cismet.cids.custom.sudplan.cismap3d;
 
 import Sirius.navigator.types.treenode.DefaultMetaTreeNode;
 import Sirius.navigator.types.treenode.ObjectTreeNode;
-import Sirius.navigator.ui.ComponentRegistry;
 
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 import org.apache.log4j.Logger;
 
@@ -43,6 +46,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 
+import javax.vecmath.Vector3d;
+
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.cismap3d.dfki.ProgressPanel;
 
@@ -50,6 +55,7 @@ import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.utils.interfaces.DefaultMetaTreeNodeVisualizationService;
 
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.features.FeatureCollectionAdapter;
@@ -75,13 +81,14 @@ import de.cismet.tools.gui.CustomButtonProvider;
             @ServiceProvider(service = DefaultMetaTreeNodeVisualizationService.class)
         }
 )
+// NOTE: if performance is going down, lower startup time and memory footprint by aggregating inner classes
 public class Cismap3DPanel extends javax.swing.JPanel implements BasicGuiComponentProvider,
     CustomButtonProvider,
     DefaultMetaTreeNodeVisualizationService {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String CLASSNAME_CISMAP3DCONTENT = "cismap3dcontent";
+    public static final String CLASSNAME_CISMAP3DCONTENT = "cismap3dcontent"; // NOI18N
 
     private static final transient Logger LOG = Logger.getLogger(Cismap3DPanel.class);
 
@@ -89,8 +96,17 @@ public class Cismap3DPanel extends javax.swing.JPanel implements BasicGuiCompone
 
     private final transient List<JComponent> buttons;
     private final transient ActionListener homeL;
+    private final transient ActionListener toggleCamL;
+    private final transient ActionListener eastToWestL;
+    private final transient ActionListener westToEastL;
+    private final transient ActionListener southToNorthL;
+    private final transient ActionListener northToSouthL;
+    private final transient ActionListener toBBoxL;
+    private final transient ActionListener fromBBoxL;
+
     private final transient Canvas3D canvas3D;
     private final transient Layer3D layer3D;
+    private final transient MovingCameraFeature camFeature;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblNo3d;
@@ -108,9 +124,17 @@ public class Cismap3DPanel extends javax.swing.JPanel implements BasicGuiCompone
      */
     public Cismap3DPanel() {
         homeL = new HomeListener();
+        toggleCamL = new CameraToggleListener();
+        eastToWestL = new EastToWestListener();
+        westToEastL = new WestToEastListener();
+        southToNorthL = new SouthToNorthListener();
+        northToSouthL = new NorthToSouthListener();
+        toBBoxL = new ToBBoxListener();
+        fromBBoxL = new FromBBoxListener();
         interactionModeChangeL = new InteractionModeChangeListener();
         featureRemovalL = new FeatureRemovalListener();
 
+        camFeature = new MovingCameraFeature();
         buttons = createButtons();
 
         initComponents();
@@ -132,7 +156,7 @@ public class Cismap3DPanel extends javax.swing.JPanel implements BasicGuiCompone
             add(canvas3D.getUI(), BorderLayout.CENTER);
         }
 
-        setName("Cismap 3D");
+        setName("Map 3D");
 
         final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
         mc.addPropertyChangeListener(WeakListeners.propertyChange(interactionModeChangeL, mc));
@@ -146,8 +170,17 @@ public class Cismap3DPanel extends javax.swing.JPanel implements BasicGuiCompone
     // TODO: to be removed as soon as featurecollectionlistener is weak
     @Override
     protected void finalize() throws Throwable {
-        final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
-        mc.getFeatureCollection().removeFeatureCollectionListener(featureRemovalL);
+        try {
+            final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+            mc.getFeatureCollection().removeFeatureCollectionListener(featureRemovalL);
+        } catch (final Exception e) {
+            try {
+                LOG.error("cannot finalize Cismap3DPanel", e); // NOI18N
+            } catch (final Exception ex) {
+                // if logging fails we're in big trouble and the VM should be shut down anyway. we don't throw anything
+                // so that finalization can be done on the super implementation
+            }
+        }
 
         super.finalize();
     }
@@ -160,18 +193,47 @@ public class Cismap3DPanel extends javax.swing.JPanel implements BasicGuiCompone
     private List<JComponent> createButtons() {
         final List<JComponent> list = new ArrayList<JComponent>(1);
 
-        final ImageIcon icon = SMSUtils.loadImageIcon(getClass(), "home_16.png"); // NOI18N
+        final JButton home = createButton("home_16.gif", homeL); // NOI18N
 
-        final JButton home = new JButton(icon);
-        home.setBorderPainted(false);
-        home.setFocusPainted(false);
-        home.addActionListener(WeakListeners.create(ActionListener.class, homeL, home));
+        final JButton toggleCam = createButton("camera_toggle_16.png", toggleCamL); // NOI18N
 
+        final JButton left = createButton("arrow_left_16.png", eastToWestL);   // NOI18N
+        final JButton right = createButton("arrow_right_16.png", westToEastL);
+        final JButton up = createButton("arrow_up_16.png", southToNorthL);     // NOI18N
+        final JButton down = createButton("arrow_down_16.png", northToSouthL); // NOI18N
+
+        final JButton toBBox = createButton("to_bbox_16.png", toBBoxL);       // NOI18N
+        final JButton fromBBox = createButton("from_bbox_16.png", fromBBoxL); // NOI18N
+
+        list.add(toBBox);
+        list.add(fromBBox);
+        list.add(up);
+        list.add(left);
+        list.add(down);
+        list.add(right);
+        list.add(toggleCam);
         list.add(home);
 
         return Collections.unmodifiableList(list);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   iconName  DOCUMENT ME!
+     * @param   actionL   DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private JButton createButton(final String iconName, final ActionListener actionL) {
+        final ImageIcon icon = SMSUtils.loadImageIcon(getClass(), iconName);
+        final JButton button = new JButton(icon);
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.addActionListener(WeakListeners.create(ActionListener.class, actionL, button));
+
+        return button;
+    }
     /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
      * content of this method is always regenerated by the Form Editor.
@@ -319,7 +381,7 @@ public class Cismap3DPanel extends javax.swing.JPanel implements BasicGuiCompone
      *
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
-    private CidsBean get3DBean(final MetaObject mo) {
+    public static CidsBean get3DBean(final MetaObject mo) {
         if (mo == null) {
             throw new IllegalArgumentException("metaobject must not be null"); // NOI18N
         }
@@ -345,7 +407,7 @@ public class Cismap3DPanel extends javax.swing.JPanel implements BasicGuiCompone
      * @throws  IllegalArgumentException  DOCUMENT ME!
      * @throws  IllegalStateException     DOCUMENT ME!
      */
-    private URI get3DURI(final CidsBean cids3dBean) {
+    public static URI get3DURI(final CidsBean cids3dBean) {
         if (cids3dBean == null) {
             throw new IllegalArgumentException("cids3dbean must not be null"); // NOI18N
         }
@@ -361,7 +423,175 @@ public class Cismap3DPanel extends javax.swing.JPanel implements BasicGuiCompone
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    private Geometry getCurrent2DBBox() {
+        final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+
+        final XBoundingBox bbox;
+        if (mc.getCurrentBoundingBox() instanceof XBoundingBox) {
+            bbox = (XBoundingBox)mc.getCurrentBoundingBox();
+        } else {
+            throw new IllegalStateException("MappingComponent must be capable of sending XBoundingBox"); // NOI18N
+        }
+
+        return bbox.getGeometry();
+    }
+
     //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class ToBBoxListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            canvas3D.setBoundingBox(getCurrent2DBBox());
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class FromBBoxListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+            final XBoundingBox bbox = new XBoundingBox(canvas3D.getBoundingBox());
+            mc.gotoBoundingBoxWithHistory(bbox);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class EastToWestListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            if (canvas3D != null) {
+                final Geometry bbox = getCurrent2DBBox();
+                canvas3D.setBoundingBox(bbox);
+                final Point centroid = bbox.getCentroid();
+                final Coordinate[] llur = SMSUtils.getLlAndUr(bbox);
+                final Coordinate middleEast = new Coordinate(centroid.getX() + (centroid.getX() - llur[0].x),
+                        centroid.getY());
+                final Point mep = centroid.getFactory().createPoint(middleEast);
+                canvas3D.setCameraPosition(mep);
+                canvas3D.setCameraDirection(new Vector3d(-1d, 0d, -0.5d));
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class WestToEastListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            if (canvas3D != null) {
+                final Geometry bbox = getCurrent2DBBox();
+                canvas3D.setBoundingBox(bbox);
+                canvas3D.setCameraPosition(bbox.getCentroid());
+                canvas3D.setCameraDirection(new Vector3d(1d, 0d, -0.5d));
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class SouthToNorthListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            if (canvas3D != null) {
+                final Geometry bbox = getCurrent2DBBox();
+                canvas3D.setBoundingBox(bbox);
+                canvas3D.setCameraPosition(bbox.getCentroid());
+                canvas3D.setCameraDirection(new Vector3d(0d, 1d, -0.5d));
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class NorthToSouthListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            if (canvas3D != null) {
+                final Geometry bbox = getCurrent2DBBox();
+                canvas3D.setBoundingBox(bbox);
+                canvas3D.setCameraPosition(bbox.getCentroid());
+                canvas3D.setCameraDirection(new Vector3d(0d, -1d, -0.5d));
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class CameraToggleListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+            final FeatureCollection fc = mc.getFeatureCollection();
+
+            boolean removed = false;
+            for (final Feature f : fc.getAllFeatures()) {
+                if (f.equals(camFeature)) {
+                    fc.removeFeature(camFeature);
+                    removed = true;
+                    break;
+                }
+            }
+
+            if (!removed) {
+                fc.addFeature(camFeature);
+                fc.holdFeature(camFeature);
+                mc.gotoBoundingBoxWithHistory(new XBoundingBox(canvas3D.getBoundingBox()));
+            }
+        }
+    }
 
     /**
      * DOCUMENT ME!

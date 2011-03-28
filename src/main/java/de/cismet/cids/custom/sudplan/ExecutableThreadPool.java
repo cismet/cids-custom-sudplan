@@ -80,7 +80,7 @@ public final class ExecutableThreadPool {
                     return;
                 }
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("caught exception while waiting but task not finished yet, waiting more", e);
+                    LOG.debug("caught exception while waiting but task not finished yet, waiting more", e); // NOI18N
                 }
             }
         }
@@ -93,7 +93,7 @@ public final class ExecutableThreadPool {
      */
     public void execute(final Executable executable) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("submitting executable: " + executable);
+            LOG.debug("submitting executable: " + executable); // NOI18N
         }
 
         final Future<Void> future = executor.submit(new Callable<Void>() {
@@ -165,17 +165,6 @@ public final class ExecutableThreadPool {
         } catch (InExecutionException ex) {
             throw new IllegalStateException("execution not finished despite we waited for it"); // NOI18N
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   executable  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private boolean contains(final Executable executable) {
-        return getFirst(executable) != null;
     }
 
     /**

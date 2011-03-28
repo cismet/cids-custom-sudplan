@@ -23,7 +23,7 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
     //~ Static fields/initializers ---------------------------------------------
 
     public static final Variable TEMPERATURE = new Variable(
-            "urn:ogc:def:property:OGC:Temperature", // NOI18N
+            "urn:ogc:def:property:OGC:temp", // NOI18N
             NbBundle.getMessage(Variable.class, "Variable.TEMPERATURE.localisedName")); // NOI18N
     public static final Variable PRECIPITATION = new Variable(
             "urn:ogc:def:property:OGC:prec", // NOI18N
@@ -103,6 +103,25 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
     @Override
     protected Variable[] internalValues() {
         return values();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   variable  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalArgumentException  DOCUMENT ME!
+     */
+    public static Variable getVariable(final String variable) {
+        for (final Variable v : values()) {
+            if (v.getPropertyKey().equals(variable)) {
+                return v;
+            }
+        }
+
+        throw new IllegalArgumentException("unknown variable: " + variable);
     }
 
     /**

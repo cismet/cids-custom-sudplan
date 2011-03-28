@@ -31,6 +31,8 @@ public final class AirqualityDownscalingVisualPanelScenarios extends javax.swing
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblDescription;
+    private javax.swing.JLabel lblDescriptionValue;
     private javax.swing.JLabel lblScenarios;
     private javax.swing.JList lstScenarios;
     // End of variables declaration//GEN-END:variables
@@ -82,7 +84,9 @@ public final class AirqualityDownscalingVisualPanelScenarios extends javax.swing
             listModel.addElement(scenario);
         }
 
-        if (model.getScenario() != null) {
+        if (model.getScenario() == null) {
+            lstScenarios.setSelectedIndex(0);
+        } else {
             lstScenarios.setSelectedValue(model.getScenario(), true);
         }
 
@@ -101,6 +105,8 @@ public final class AirqualityDownscalingVisualPanelScenarios extends javax.swing
         lblScenarios = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         lstScenarios = new javax.swing.JList();
+        lblDescription = new javax.swing.JLabel();
+        lblDescriptionValue = new javax.swing.JLabel();
 
         setMinimumSize(new java.awt.Dimension(200, 150));
         setPreferredSize(new java.awt.Dimension(450, 300));
@@ -132,7 +138,28 @@ public final class AirqualityDownscalingVisualPanelScenarios extends javax.swing
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(8, 20, 20, 20);
         add(jScrollPane1, gridBagConstraints);
-    } // </editor-fold>//GEN-END:initComponents
+
+        lblDescription.setText(NbBundle.getMessage(
+                AirqualityDownscalingVisualPanelScenarios.class,
+                "AirqualityDownscalingVisualPanelScenarios.lblDescription.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 20, 5, 20);
+        add(lblDescription, gridBagConstraints);
+
+        lblDescriptionValue.setText(NbBundle.getMessage(
+                AirqualityDownscalingVisualPanelScenarios.class,
+                "AirqualityDownscalingVisualPanelScenarios.lblDescriptionValue.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(5, 20, 20, 20);
+        add(lblDescriptionValue, gridBagConstraints);
+    }                                                                                   // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -148,6 +175,26 @@ public final class AirqualityDownscalingVisualPanelScenarios extends javax.swing
         @Override
         public void valueChanged(final ListSelectionEvent e) {
             model.fireChangeEvent();
+
+            // FIXME: hardcoded description
+            if ("ECHAM5 A1B 3 RCP 4.5".equals(lstScenarios.getSelectedValue())) {
+                lblDescriptionValue.setText(
+                    "<html>"
+                            + "This data was calculated using the ECHAM 5 global climate model operated by the Max-Planck-"
+                            + "Institut für Meterologie, Hamburg, Germany. The A1B greenhouse gas climate scenario in "
+                            + "variation 3 was utilised and European tracer emissions tuned to a net radiative forcing of "
+                            + "4.5 W/m² at stabilization after year 2100."
+                            + "</html>");
+            } else if ("HADLEY A1B RCP 4.5".equals(lstScenarios.getSelectedValue())) {
+                lblDescriptionValue.setText(
+                    "<html>"
+                            + "This data was calculated using the HADLEY global climate model operated by Hadley Centre, "
+                            + "Bracknell, UK. The A1B greenhouse gas climate scenario was utilised and European tracer "
+                            + "emissions tuned to a net radiative forcing of 4.5 W/m² at stabilization after year 2100."
+                            + "</html>");
+            } else {
+                lblDescriptionValue.setText(null);
+            }
         }
     }
 }

@@ -138,11 +138,15 @@
         <dependency>
             <groupId>com.dfki.av.sudplan</groupId>
             <artifactId>vis-comp</artifactId>
-            <version>0.3.1</version>
+            <version>0.6.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

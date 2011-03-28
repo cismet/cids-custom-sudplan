@@ -74,7 +74,8 @@ public final class AirqualityDownscalingVisualPanelGridSize extends javax.swing.
         final Integer gridSize = model.getGridSize();
 
         if (gridSize == null) {
-            txtMeters.setText("5000");
+            // FIXME: atr hack initial value 2000 instead of 5000
+            txtMeters.setText("2000"); // NOI18N
         } else {
             txtMeters.setText(gridSize.toString());
         }

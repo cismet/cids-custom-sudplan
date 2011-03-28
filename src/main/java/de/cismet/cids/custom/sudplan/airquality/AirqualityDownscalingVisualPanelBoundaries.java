@@ -17,6 +17,8 @@ import org.openide.util.WeakListeners;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import de.cismet.cismap.commons.CrsTransformer;
+
 /**
  * DOCUMENT ME!
  *
@@ -43,6 +45,8 @@ public final class AirqualityDownscalingVisualPanelBoundaries extends javax.swin
     private javax.swing.JLabel lblLLLeftBrace;
     private javax.swing.JLabel lblLLRightBrace;
     private javax.swing.JLabel lblLR;
+    private javax.swing.JLabel lblSrid;
+    private javax.swing.JLabel lblSridValue;
     private javax.swing.JLabel lblUL;
     private javax.swing.JLabel lblUR;
     private javax.swing.JLabel lblURComma;
@@ -112,6 +116,8 @@ public final class AirqualityDownscalingVisualPanelBoundaries extends javax.swin
         lblUR.setText(String.valueOf(model.getGridSize()));
         lblUL.setText(String.valueOf(model.getGridSize()));
 
+        lblSridValue.setText(String.valueOf(CrsTransformer.getCurrentSrid()));
+
         model.fireChangeEvent();
     }
 
@@ -174,6 +180,8 @@ public final class AirqualityDownscalingVisualPanelBoundaries extends javax.swin
         lblLLComma = new javax.swing.JLabel();
         txtLLY = new javax.swing.JTextField();
         lblLLRightBrace = new javax.swing.JLabel();
+        lblSrid = new javax.swing.JLabel();
+        lblSridValue = new javax.swing.JLabel();
         pnlURCoord = new javax.swing.JPanel();
         lblURLeftBrace = new javax.swing.JLabel();
         txtURX = new javax.swing.JTextField();
@@ -289,8 +297,10 @@ public final class AirqualityDownscalingVisualPanelBoundaries extends javax.swin
         txtLLX.setText(NbBundle.getMessage(
                 AirqualityDownscalingVisualPanelBoundaries.class,
                 "AirqualityDownscalingVisualPanelBoundaries.txtLLX.text")); // NOI18N
-        txtLLX.setPreferredSize(new java.awt.Dimension(70, 28));
-        pnlLLCoord.add(txtLLX, new java.awt.GridBagConstraints());
+        txtLLX.setPreferredSize(new java.awt.Dimension(120, 28));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.weightx = 1.0;
+        pnlLLCoord.add(txtLLX, gridBagConstraints);
 
         lblLLComma.setText(NbBundle.getMessage(
                 AirqualityDownscalingVisualPanelBoundaries.class,
@@ -300,13 +310,37 @@ public final class AirqualityDownscalingVisualPanelBoundaries extends javax.swin
         txtLLY.setText(NbBundle.getMessage(
                 AirqualityDownscalingVisualPanelBoundaries.class,
                 "AirqualityDownscalingVisualPanelBoundaries.txtLLY.text")); // NOI18N
-        txtLLY.setPreferredSize(new java.awt.Dimension(70, 28));
-        pnlLLCoord.add(txtLLY, new java.awt.GridBagConstraints());
+        txtLLY.setPreferredSize(new java.awt.Dimension(120, 28));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.weightx = 1.0;
+        pnlLLCoord.add(txtLLY, gridBagConstraints);
 
         lblLLRightBrace.setText(NbBundle.getMessage(
                 AirqualityDownscalingVisualPanelBoundaries.class,
                 "AirqualityDownscalingVisualPanelBoundaries.lblLLRightBrace.text")); // NOI18N
         pnlLLCoord.add(lblLLRightBrace, new java.awt.GridBagConstraints());
+
+        lblSrid.setText(NbBundle.getMessage(
+                AirqualityDownscalingVisualPanelBoundaries.class,
+                "AirqualityDownscalingVisualPanelBoundaries.lblSrid.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 17, 0, 0);
+        pnlLLCoord.add(lblSrid, gridBagConstraints);
+
+        lblSridValue.setText(NbBundle.getMessage(
+                AirqualityDownscalingVisualPanelBoundaries.class,
+                "AirqualityDownscalingVisualPanelBoundaries.lblSridValue.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+        pnlLLCoord.add(lblSridValue, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -327,7 +361,7 @@ public final class AirqualityDownscalingVisualPanelBoundaries extends javax.swin
                 AirqualityDownscalingVisualPanelBoundaries.class,
                 "AirqualityDownscalingVisualPanelBoundaries.txtURX.text")); // NOI18N
         txtURX.setFocusable(false);
-        txtURX.setPreferredSize(new java.awt.Dimension(70, 28));
+        txtURX.setPreferredSize(new java.awt.Dimension(120, 28));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
@@ -343,7 +377,7 @@ public final class AirqualityDownscalingVisualPanelBoundaries extends javax.swin
                 AirqualityDownscalingVisualPanelBoundaries.class,
                 "AirqualityDownscalingVisualPanelBoundaries.txtURY.text")); // NOI18N
         txtURY.setFocusable(false);
-        txtURY.setPreferredSize(new java.awt.Dimension(70, 28));
+        txtURY.setPreferredSize(new java.awt.Dimension(120, 28));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;

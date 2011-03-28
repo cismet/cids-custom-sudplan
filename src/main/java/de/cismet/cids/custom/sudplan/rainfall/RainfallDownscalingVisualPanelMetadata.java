@@ -73,8 +73,9 @@ public final class RainfallDownscalingVisualPanelMetadata extends javax.swing.JP
         }
 
         txtName.setSelectionStart(0);
-        txtName.setSelectionEnd(txtName.getText().length() - 1);
+        txtName.setSelectionEnd(txtName.getText().length());
 
+        // FIXME: ATR hack to pre-populate the meta information
         if (model.getDescription() == null) {
             txaDescription.setText("This is a demo run to demonstrate rainfall downscaling.");
         } else {

@@ -12,6 +12,7 @@ import Sirius.navigator.ui.ComponentRegistry;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Polygon;
 
 import org.apache.log4j.Logger;
 
@@ -44,8 +45,6 @@ import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.Feature;
-
-import de.cismet.cismap.navigatorplugin.CidsFeature;
 
 /**
  * DOCUMENT ME!
@@ -141,7 +140,7 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
     public void actionPerformed(final ActionEvent e) {
         assert source != null : "cannot perform action on empty source"; // NOI18N
 
-        final Coordinate[] llUr = getLlUrCoordinates();
+        final Coordinate[] llUr = SMSUtils.getLlAndUr(source.getGeometry());
 
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
         wizard.setTitleFormat(new MessageFormat("{0}"));                                         // NOI18N
@@ -152,6 +151,8 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
         wizard.putProperty(PROP_UR_COORD, llUr[1]);
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
+        dialog.pack();
+        dialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
         dialog.setVisible(true);
         dialog.toFront();
 
@@ -173,31 +174,6 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
                     JOptionPane.ERROR_MESSAGE);
             }
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private Coordinate[] getLlUrCoordinates() {
-        final Coordinate[] llUr = new Coordinate[2];
-
-        Coordinate ll = source.getGeometry().getCoordinate();
-        Coordinate ur = source.getGeometry().getCoordinate();
-
-        for (final Coordinate candidate : source.getGeometry().getCoordinates()) {
-            if ((candidate.x < ll.x) && (candidate.y < ll.y)) {
-                ll = candidate;
-            } else if ((candidate.x > ur.x) && (candidate.y > ur.y)) {
-                ur = candidate;
-            }
-        }
-
-        llUr[0] = ll;
-        llUr[1] = ur;
-
-        return llUr;
     }
 
     /**
@@ -293,22 +269,19 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
         assert source != null : "source must be set before requesting isActive"; // NOI18N
 
         boolean active;
-        if (source instanceof CidsFeature) {
-            active = false;
+        final Geometry geom = source.getGeometry();
+
+        assert geom != null : "feature must have a geometry"; // NOI18N
+
+        // assume quadrangle instead of rectangle because of coordinate transformation inaccuracy
+        if (geom.getNumPoints() == 5) {
+            active = true;
         } else {
-            final Geometry geom = source.getGeometry();
-
-            assert geom != null : "feature must have a geometry"; // NOI18N
-
-            if (true) {                                           // geom.isRectangle()) {
-                active = true;
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("action only supports rectangles"); // NOI18N
-                }
-
-                active = false;
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("action only supports quadrangles"); // NOI18N
             }
+
+            active = false;
         }
 
         return active;

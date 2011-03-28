@@ -22,22 +22,14 @@ import Sirius.server.sql.SystemStatement;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
 import org.openide.util.ImageUtilities;
-
-import java.awt.Graphics;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.HeadlessException;
-import java.awt.Image;
-import java.awt.Transparency;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.PixelGrabber;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -304,35 +296,6 @@ public final class SMSUtils {
         return loadManagerFromModel((CidsBean)runBean.getProperty("model"), type); // NOI18N
     }
 
-//    public static Manager loadManagerFromId(final int id, final Manager.ManagerType type){
-//        if (LOG.isDebugEnabled()) {
-//            LOG.debug("loading manager for id '" + id + "' and type: " + type); // NOI18N
-//        }
-//
-//        final String tableName;
-//        switch(type){
-//            case INPUT: tableName = TABLENAME_MODELINPUT; break;
-//            case MODEL: tableName = TABLENAME_MODELRUN; break;
-//            case OUTPUT: tableName = TABLENAME_MODELOUTPUT; break;
-//            default:
-//                throw new IllegalStateException("unknown type: " + type); // NOI18N
-//        }
-//
-//
-//        final String domain = SessionManager.getSession().getUser().getDomain();
-//        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, tableName);
-//
-//        assert mc != null : "unknown metaclass table name: " + tableName; // NOI18N
-//
-//        try
-//        {
-//            SessionManager.getProxy().getMetaObject(id, mc.getID(), SessionManager.getSession().getUser().getDomain());
-//        }catch(ConnectionException ex)
-//        {
-//            Exceptions.printStackTrace(ex);
-//        }
-//    }
-
     /**
      * DOCUMENT ME!
      *
@@ -396,7 +359,7 @@ public final class SMSUtils {
             final RootTreeNode root = new RootTreeNode(SessionManager.getProxy().getRoots());
             model.setRoot(root);
             model.reload();
-            tree.exploreSubtree(path.getParentPath());
+            tree.exploreSubtree(path);
         } catch (final Exception ex) {
             LOG.warn("could not reload tree", ex); // NOI18N
         }
@@ -526,87 +489,6 @@ public final class SMSUtils {
     }
 
     /**
-     * DOCUMENT ME!
-     *
-     * @param   image  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static BufferedImage toBufferedImage(final Image image) {
-        if (image instanceof BufferedImage) {
-            return (BufferedImage)image;
-        }
-
-        // Determine if the image has transparent pixels
-        final boolean hasAlpha = hasAlpha(image);
-
-        // Create a buffered image with a format that's compatible with the screen
-        BufferedImage bimage = null;
-        try {
-            // Determine the type of transparency of the new buffered image
-            final int transparency;
-            if (hasAlpha) {
-                transparency = Transparency.BITMASK;
-            } else {
-                transparency = Transparency.OPAQUE;
-            }
-
-            // Create the buffered image
-            final GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            final GraphicsDevice gs = env.getDefaultScreenDevice();
-            final GraphicsConfiguration gc = gs.getDefaultConfiguration();
-            bimage = gc.createCompatibleImage(image.getWidth(null), image.getHeight(null), transparency);
-        } catch (final HeadlessException e) {
-            // The system does not have a screen
-            // Create a buffered image using the default color model
-            final int type;
-            if (hasAlpha) {
-                type = BufferedImage.TYPE_INT_ARGB;
-            } else {
-                type = BufferedImage.TYPE_INT_RGB;
-            }
-            bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
-        }
-
-        // Copy image to buffered image
-        final Graphics g = bimage.createGraphics();
-        // Paint the image onto the buffered image
-        g.drawImage(image, 0, 0, null);
-        g.dispose();
-
-        return bimage;
-    }
-
-    /**
-     * This method returns true if the specified image has transparent pixels.
-     *
-     * @param   image  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static boolean hasAlpha(final Image image) {
-        // If buffered image, the color model is readily available
-        if (image instanceof BufferedImage) {
-            final BufferedImage bimage = (BufferedImage)image;
-            return bimage.getColorModel().hasAlpha();
-        }
-
-        // Use a pixel grabber to retrieve the image's color model;
-        // grabbing a single pixel is usually sufficient
-        final PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
-        try {
-            pg.grabPixels();
-        } catch (InterruptedException e) {
-            // skip
-        }
-
-        // Get the image's color model
-        final ColorModel cm = pg.getColorModel();
-
-        return cm.hasAlpha();
-    }
-
-    /**
      * Determines the {@link Unit} of a {@link Timeseries}.
      *
      * @param   timeseries  the <code>Timeseries</code> that contains the unit
@@ -670,5 +552,32 @@ public final class SMSUtils {
         }
 
         return ImageUtilities.loadImageIcon(path + name, false);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   bbox  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Coordinate[] getLlAndUr(final Geometry bbox) {
+        final Coordinate[] llUr = new Coordinate[2];
+
+        Coordinate ll = bbox.getCoordinate();
+        Coordinate ur = bbox.getCoordinate();
+
+        for (final Coordinate candidate : bbox.getCoordinates()) {
+            if ((candidate.x < ll.x) && (candidate.y < ll.y)) {
+                ll = candidate;
+            } else if ((candidate.x > ur.x) && (candidate.y > ur.y)) {
+                ur = candidate;
+            }
+        }
+
+        llUr[0] = ll;
+        llUr[1] = ur;
+
+        return llUr;
     }
 }

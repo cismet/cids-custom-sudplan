@@ -44,6 +44,7 @@ import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
+@Deprecated
 public class RunEditor extends JPanel implements CidsBeanRenderer, EditorSaveListener {
 
     //~ Static fields/initializers ---------------------------------------------

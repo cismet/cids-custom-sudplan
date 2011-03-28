@@ -17,6 +17,7 @@ import java.io.Serializable;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
+// TODO: refactor as soon as abstract enums are possible
 public final class Unit extends LocalisedEnum<Unit> implements Serializable {
 
     //~ Static fields/initializers ---------------------------------------------

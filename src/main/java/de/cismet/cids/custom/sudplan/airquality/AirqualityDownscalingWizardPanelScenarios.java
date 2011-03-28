@@ -79,7 +79,7 @@ public final class AirqualityDownscalingWizardPanelScenarios implements WizardDe
      * @return  DOCUMENT ME!
      */
     String[] getScenarios() {
-        return new String[] { "ECHAM5 A1B 3", "HADLEY A1B" };
+        return new String[] { "ECHAM5 A1B 3 RCP 4.5", "HADLEY A1B RCP 4.5" };
     }
 
     @Override

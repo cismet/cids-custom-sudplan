@@ -39,6 +39,14 @@ public final class AirqualityDownscalingModelManager extends AbstractModelManage
 
     @Override
     protected void internalExecute() throws IOException {
+        // FIXME: atr hack
+        fireProgressed(-1, -1);
+        try {
+            Thread.sleep(2000);
+        } catch (final Exception e) {
+            // skip
+        }
+
         fireFinised();
     }
 

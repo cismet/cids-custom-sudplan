@@ -18,6 +18,7 @@ import java.io.Serializable;
  * @version  $Revision$, $Date$
  */
 // TODO: refactor as soon as abstract enums are supported
+// TODO: accuracy of this class is questionable, consider refactoring
 public final class Resolution extends LocalisedEnum<Resolution> implements Serializable {
 
     //~ Static fields/initializers ---------------------------------------------

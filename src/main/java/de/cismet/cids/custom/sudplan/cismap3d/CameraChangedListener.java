@@ -21,6 +21,8 @@ public interface CameraChangedListener extends EventListener {
 
     /**
      * DOCUMENT ME!
+     *
+     * @param  cce  DOCUMENT ME!
      */
-    void cameraChanged();
+    void cameraChanged(CameraChangedEvent cce);
 }

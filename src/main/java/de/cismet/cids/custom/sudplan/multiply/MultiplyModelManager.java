@@ -158,7 +158,7 @@ public class MultiplyModelManager implements Manager, Executable {
             throw new IllegalStateException(message, ex);
         }
 
-        progressSupport.fireEvent(new ProgressEvent(ProgressEvent.State.STARTED));
+        progressSupport.fireEvent(new ProgressEvent(this, ProgressEvent.State.STARTED));
     }
 
     /**
@@ -168,7 +168,7 @@ public class MultiplyModelManager implements Manager, Executable {
      * @param  maxSteps  DOCUMENT ME!
      */
     protected void fireProgressed(final int step, final int maxSteps) {
-        progressSupport.fireEvent(new ProgressEvent(ProgressEvent.State.PROGRESSING, step, maxSteps));
+        progressSupport.fireEvent(new ProgressEvent(this, ProgressEvent.State.PROGRESSING, step, maxSteps));
     }
 
     /**
@@ -196,7 +196,7 @@ public class MultiplyModelManager implements Manager, Executable {
             throw new IllegalStateException(message, ex);
         }
 
-        progressSupport.fireEvent(new ProgressEvent(ProgressEvent.State.FINISHED));
+        progressSupport.fireEvent(new ProgressEvent(this, ProgressEvent.State.FINISHED));
     }
 
     /**

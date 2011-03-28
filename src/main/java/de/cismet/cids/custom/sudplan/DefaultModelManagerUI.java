@@ -92,11 +92,19 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
                         DefaultModelManagerUI.class,
                         "DefaultModelManagerUI.lblStatus.text.finished")); // NOI18N
                 btnCancel.setEnabled(false);
+                jpbStatus.setMaximum(1);
+                jpbStatus.setValue(1);
+                jpbStatus.setIndeterminate(false);
+                jpbStatus.setStringPainted(true);
             } else {
                 lblStatus.setText(NbBundle.getMessage(
                         DefaultModelManagerUI.class,
                         "DefaultModelManagerUI.lblStatus.text.running"));  // NOI18N
                 btnCancel.setEnabled(true);
+                jpbStatus.setMaximum(0);
+                jpbStatus.setValue(0);
+                jpbStatus.setIndeterminate(true);
+                jpbStatus.setStringPainted(false);
             }
         } else {
             btnRun.addActionListener(WeakListeners.create(ActionListener.class, runL, btnRun));
@@ -106,11 +114,11 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
                     "DefaultModelManagerUI.lblStatus.text.runnable")); // NOI18N
             btnRun.setEnabled(true);
             btnCancel.setEnabled(false);
+            jpbStatus.setMaximum(1);
+            jpbStatus.setValue(0);
+            jpbStatus.setIndeterminate(false);
+            jpbStatus.setStringPainted(true);
         }
-        jpbStatus.setMaximum(1);
-        jpbStatus.setValue(1);
-        jpbStatus.setStringPainted(isStarted());
-        jpbStatus.setIndeterminate(false);
     }
 
     /**

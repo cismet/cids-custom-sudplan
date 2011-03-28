@@ -25,6 +25,7 @@ import de.cismet.tools.BlacklistClassloading;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
+@Deprecated
 public final class ModeloutputExtensionFactory extends ObjectExtensionFactory {
 
     //~ Static fields/initializers ---------------------------------------------
