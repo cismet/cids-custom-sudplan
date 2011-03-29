@@ -27,10 +27,10 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
             NbBundle.getMessage(Unit.class, "Unit.MILLIMETERS.localisedName")); // NOI18N
     public static final Unit PPM = new Unit(
             "urn:ogc:def:uom:OGC:ppm", // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.PARTICLES_PER_MILLION.localisedName")); // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.PARTS_PER_MILLION.localisedName")); // NOI18N
     public static final Unit PPB = new Unit(
             "urn:ogc:def:uom:OGC:ppb", // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.PARTICLES_PER_BILLION.localisedName")); // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.PARTS_PER_BILLION.localisedName")); // NOI18N
     public static final Unit KELVIN = new Unit(
             "urn:ogc:def:uom:OGC:K", // NOI18N
             NbBundle.getMessage(Unit.class, "Unit.KELVIN.localisedName")); // NOI18N
