@@ -86,7 +86,7 @@ public abstract class LocalisedEnum<T> implements Iterable<T>, Serializable, Com
 
                 @Override
                 public void remove() {
-                    throw new UnsupportedOperationException("Not supported yet.");
+                    throw new UnsupportedOperationException("Not supported!"); // NOI18N
                 }
             };
     }

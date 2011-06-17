@@ -54,8 +54,8 @@ public final class ProgressEvent extends EventObject {
      *
      * @param  eventObject  DOCUMENT ME!
      * @param  state        DOCUMENT ME!
-     * @param  step         percentFinished DOCUMENT ME!
-     * @param  maxSteps     DOCUMENT ME!
+     * @param  step         the current step or 0 if it is indeterminate
+     * @param  maxSteps     the current maxsteps of 0 if it is indeterminate
      */
     public ProgressEvent(final Object eventObject, final State state, final int step, final int maxSteps) {
         super(eventObject);
@@ -94,9 +94,10 @@ public final class ProgressEvent extends EventObject {
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the indeterminate state of the <code>ProgressEvent</code>. An <code>ProgressEvent</code> is considered
+     * indeterminate if either {@link #getStep()} of {@link #maxSteps()} is <code>0</code>.
      *
-     * @return  DOCUMENT ME!
+     * @return  <code>true</code> if either {@link #getStep()} of {@link #maxSteps()} is <code>0</code>
      */
     public boolean indeterminate() {
         return (step == 0) || (maxSteps == 0);

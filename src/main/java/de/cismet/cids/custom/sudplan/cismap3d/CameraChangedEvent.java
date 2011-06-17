@@ -90,12 +90,30 @@ public final class CameraChangedEvent extends EventObject {
         return oldPosition;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean positionChanged() {
+        return newPosition != oldPosition;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean directionChanged() {
+        return newDirection != oldDirection;
+    }
+
     @Override
     public String toString() {
-        return super.toString() + " ["
-                    + "old Pos: " + oldPosition + " | "
-                    + "new Pos: " + newPosition + " | "
-                    + "old Dir: " + oldDirection + " | "
-                    + "new Dir: " + newDirection + " ] ";
+        return super.toString() + " ["                    // NOI18N
+                    + "old Pos: " + oldPosition + " | "   // NOI18N
+                    + "new Pos: " + newPosition + " | "   // NOI18N
+                    + "old Dir: " + oldDirection + " | "  // NOI18N
+                    + "new Dir: " + newDirection + " ] "; // NOI18N
     }
 }

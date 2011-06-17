@@ -121,7 +121,7 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
             }
         }
 
-        throw new IllegalArgumentException("unknown variable: " + variable);
+        throw new IllegalArgumentException("unknown variable: " + variable); // NOI18N
     }
 
     /**

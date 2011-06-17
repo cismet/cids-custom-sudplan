@@ -7,7 +7,7 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
-import de.cismet.cids.custom.sudplan.Manager.ManagerType;
+import de.cismet.cids.custom.sudplan.ManagerType;
 
 /**
  * DOCUMENT ME!
@@ -44,7 +44,7 @@ public class ModeloutputRenderer extends AbstractManagerRenderer {
     } // </editor-fold>//GEN-END:initComponents
 
     @Override
-    ManagerType getType() {
+    protected ManagerType getType() {
         return ManagerType.OUTPUT;
     }
 }

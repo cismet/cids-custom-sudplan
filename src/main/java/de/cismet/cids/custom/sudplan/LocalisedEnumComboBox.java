@@ -138,12 +138,12 @@ public final class LocalisedEnumComboBox<T extends LocalisedEnum<T>> extends JCo
             final Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
             if ((value != null) && (lEnum.isAssignableFrom(value.getClass())) && (c instanceof JLabel)) {
-                final T resolution = (T)value;
+                final T lEnumValue = (T)value;
                 final JLabel label = (JLabel)c;
 
-                label.setText(resolution.getLocalisedName());
+                label.setText(lEnumValue.getLocalisedName());
 
-                label.setEnabled(available.isAvailable(resolution));
+                label.setEnabled(available.isAvailable(lEnumValue));
             }
 
             return c;

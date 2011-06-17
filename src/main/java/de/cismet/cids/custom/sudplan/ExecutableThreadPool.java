@@ -24,6 +24,7 @@ import java.util.concurrent.Future;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
+@Deprecated
 public final class ExecutableThreadPool {
 
     //~ Static fields/initializers ---------------------------------------------

@@ -162,7 +162,7 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
                 }
             }
         } else {
-            LOG.warn("can only perform this action of objects of metaclass timeseries"); // NOI18N
+            LOG.warn("can only perform this action on objects of metaclass timeseries"); // NOI18N
         }
     }
 

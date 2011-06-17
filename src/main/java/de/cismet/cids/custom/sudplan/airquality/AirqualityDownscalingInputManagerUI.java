@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.airquality;
 
-import Sirius.navigator.ui.ComponentRegistry;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -103,7 +101,10 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
         lblEndDateValue.setText(model.getEndDate().toString());
         lblLLCoordValue.setText(model.getLlCoord().toString());
         lblURCoordValue.setText(model.getUrCoord().toString());
-        lblGridSizeValue.setText(String.valueOf(model.getGridSize()) + " meters");
+        lblGridSizeValue.setText(String.valueOf(model.getGridSize())
+                    + NbBundle.getMessage(
+                        AirqualityDownscalingInputManagerUI.class,
+                        "AirqualityDownscalingInputManagerUI.lblGridSizeValue.text.appendix")); // NOI18N
 
         final DefaultListModel dlm = (DefaultListModel)lstDatabases.getModel();
         for (final String db : model.getDatabases().keySet()) {

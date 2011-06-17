@@ -5,11 +5,6 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- * RainfallDownscalingInputManagerUI.java
- *
- * Created on Jan 31, 2011, 3:08:31 PM
- */
 package de.cismet.cids.custom.sudplan.rainfall;
 
 import Sirius.navigator.connection.SessionManager;

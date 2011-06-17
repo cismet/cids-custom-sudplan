@@ -9,6 +9,33 @@
 
   You can run the SMS from the web using Java Webstart. Simply click on the button below.
 
-[images/webstartsmall2_grey.gif]
+[images/webstartsmall2.gif]
 
-  INFO: Webstart not available yet
+~~ we have to insert this by hand afterwards since apt does not support link images, see: http://jira.codehaus.org/browse/DOXIA-71
+~~ <a href="http://sudplan.cismet.de/sudplanDist/client/sudplan/navigator.jnlp"><img src="images/webstartsmall2.gif"/></a>
+
+  Documentation:
+
+  * cismap WebMap Software: {{{http://www.cismet.de/en/cismapV2ReferenceManual.pdf} Reference Manual (en)}}
+
+  * cids Navigator Software: {{{http://sudplan.cismet.de/sudplanDist/cids.Navigator%20Benutzerhandbuch%20V1.0.2.pdf} Reference Manual (de)}}
+
+  * Sudplan specific doc: {{{http://sudplanwp3.cismet.de/?cat=49} SMS Video Tutorial}}
+
+  * Issue reporting: {{{https://service.projectplace.com/pp/pp.cgi/d604965796/Sudplan_SMS_Issue_Reporting_template.ppt?save_as=1} PPT template}}
+
+  []
+
+  INFO:
+
+  * This software is ALPHA
+
+  * Username and credential are available for Sudplan partners only.
+
+  * Artefacts created in a session will be deleted hourly
+
+  * Rainfall downscaling can only be performed once per Application startup (because the SOS dummy works in-memory)
+
+  * Please report issues and feature requests on {{{http://sudplanwp3.cismet.de/?cat=47} Sudplan WP3 Blog}} using the {{{https://service.projectplace.com/pp/pp.cgi/d604965796/Sudplan_SMS_Issue_Reporting_template.ppt?save_as=1} PPT template}}
+
+  []

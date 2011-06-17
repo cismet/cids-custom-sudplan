@@ -38,6 +38,7 @@ import java.util.Properties;
 import de.cismet.cids.custom.sudplan.AbstractModelManager;
 import de.cismet.cids.custom.sudplan.Demo;
 import de.cismet.cids.custom.sudplan.Manager;
+import de.cismet.cids.custom.sudplan.ManagerType;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.Variable;
@@ -277,7 +278,7 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
      */
     private Map.Entry<DataHandler, Properties> uploadTimeseries() throws IOException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("start uploading timeseries" + this);
+            LOG.debug("start uploading timeseries" + this); // NOI18N
         }
         // TODO: real SMS behaviour would now upload the timeseries of the cidsbean to the SOS
         // for the atr we only return the handle of the timeseries that comes from the dummy
@@ -346,6 +347,7 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
         if (!(resource instanceof RainfallDownscalingInput)) {
             throw new IllegalStateException("manager resource is not suited for rainfall downscaling"); // NOI18N
         }
+
         return (RainfallDownscalingInput)resource;
     }
 
@@ -360,7 +362,7 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
 
         //~ Static fields/initializers -----------------------------------------
 
-        private static final String COMPLETED = "completed";
+        private static final String COMPLETED = "completed"; // NOI18N
 
         //~ Instance fields ----------------------------------------------------
 

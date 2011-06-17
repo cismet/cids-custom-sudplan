@@ -17,8 +17,6 @@ import org.openide.util.lookup.ServiceProvider;
 
 import java.awt.EventQueue;
 
-import java.io.File;
-
 import java.net.URI;
 
 import java.util.ArrayList;
@@ -68,14 +66,14 @@ public final class Layer3DDFKIImpl implements Layer3D {
     @Override
     public void addLayer(final URI uri, final ProgressListener progressL) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("adding layer from uri: " + uri + " || progressL: " + progressL);
+            LOG.debug("adding layer from uri: " + uri + " || progressL: " + progressL); // NOI18N
         }
 
         fireStarted(progressL);
 
         if (added.containsKey(uri)) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("not adding layer from uri since it is already present: " + uri);
+                LOG.debug("not adding layer from uri since it is already present: " + uri); // NOI18N
             }
 
             fireFinished(progressL);
@@ -221,7 +219,7 @@ public final class Layer3DDFKIImpl implements Layer3D {
         protected Layer doInBackground() throws Exception {
             fireProgressed(progressL);
 
-            return IOUtils.createLayerFromFile(new File(uri));
+            return IOUtils.createLayerFromURL(uri.toURL());
         }
 
         @Override

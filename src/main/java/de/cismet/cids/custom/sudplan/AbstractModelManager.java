@@ -22,7 +22,6 @@ import java.util.GregorianCalendar;
 import javax.swing.JComponent;
 
 import de.cismet.cids.dynamics.CidsBean;
-import de.cismet.cids.dynamics.Disposable;
 
 import de.cismet.cids.editors.converters.SqlTimestampToUtilDateConverter;
 
@@ -34,7 +33,7 @@ import de.cismet.cismap.commons.features.Feature;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public abstract class AbstractModelManager implements ModelManager, Disposable {
+public abstract class AbstractModelManager implements ModelManager {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -47,8 +46,6 @@ public abstract class AbstractModelManager implements ModelManager, Disposable {
     private final transient ProgressSupport progressSupport;
 
     private transient volatile JComponent ui;
-
-    private transient Thread finisher;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -170,11 +167,15 @@ public abstract class AbstractModelManager implements ModelManager, Disposable {
     /**
      * DOCUMENT ME!
      *
-     * @param  step      percent DOCUMENT ME!
-     * @param  maxSteps  DOCUMENT ME!
+     * @param   step      percent DOCUMENT ME!
+     * @param   maxSteps  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
      */
     protected void fireProgressed(final int step, final int maxSteps) {
-        assert isStarted() : "cannot progress when not started yet"; // NOI18N
+        if (!isStarted()) {
+            throw new IllegalStateException("cannot progress when not started yet"); // NOI18N
+        }
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("fireProgressed: " + this); // NOI18N
@@ -263,12 +264,5 @@ public abstract class AbstractModelManager implements ModelManager, Disposable {
         final Timestamp ts = (Timestamp)cidsBean.getProperty("finished"); // NOI18N
 
         return ts != null;
-    }
-
-    @Override
-    public void dispose() {
-        if (finisher != null) {
-            finisher.interrupt();
-        }
     }
 }

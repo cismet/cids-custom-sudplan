@@ -288,7 +288,7 @@ public final class SMSUtils {
      *
      * @return  DOCUMENT ME!
      */
-    public static Manager loadManagerFromRun(final CidsBean runBean, final Manager.ManagerType type) {
+    public static Manager loadManagerFromRun(final CidsBean runBean, final ManagerType type) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("loading manager for bean '" + runBean + "' and type: " + type); // NOI18N
         }
@@ -306,7 +306,7 @@ public final class SMSUtils {
      *
      * @throws  IllegalStateException  DOCUMENT ME!
      */
-    public static Manager loadManagerFromModel(final CidsBean modelBean, final Manager.ManagerType type) {
+    public static Manager loadManagerFromModel(final CidsBean modelBean, final ManagerType type) {
         final CidsBean managerBean;
         switch (type) {
             case INPUT: {
@@ -466,7 +466,7 @@ public final class SMSUtils {
 
         ComponentRegistry.getRegistry().showComponent(ComponentRegistry.DESCRIPTION_PANE);
 
-        final Manager runManager = SMSUtils.loadManagerFromRun(modelRun, Manager.ManagerType.MODEL);
+        final Manager runManager = SMSUtils.loadManagerFromRun(modelRun, ManagerType.MODEL);
 
         if (runManager instanceof Executable) {
             runManager.setCidsBean(modelRun);

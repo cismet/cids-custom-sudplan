@@ -99,7 +99,7 @@ public class Cismap3DFeatureLayerAddition extends SimpleFeatureSupportingRasterL
 
                     if ((layername == null) || layername.isEmpty()) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("ignoring empty layername: " + f);
+                            LOG.debug("ignoring empty layername: " + f); // NOI18N
                         }
                     } else {
                         sb.append(layername).append(',');

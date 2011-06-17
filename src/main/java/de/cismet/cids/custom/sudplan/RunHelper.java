@@ -107,7 +107,7 @@ public final class RunHelper {
      *
      * @return  a <code>double[]</code> of length 2, first value is min, second is max, never null
      */
-    public static double[] getMinMaxValue(final Grid[] grids) {
+    public static double[] getMinMaxValue(final Grid... grids) {
         double min = Double.MAX_VALUE;
         double max = Double.MIN_VALUE;
 

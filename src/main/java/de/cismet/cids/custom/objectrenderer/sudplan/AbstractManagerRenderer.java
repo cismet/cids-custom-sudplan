@@ -12,6 +12,7 @@ import java.awt.EventQueue;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.Manager;
+import de.cismet.cids.custom.sudplan.ManagerType;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -71,7 +72,7 @@ public abstract class AbstractManagerRenderer extends AbstractCidsBeanRenderer {
      *
      * @return  DOCUMENT ME!
      */
-    abstract Manager.ManagerType getType();
+    protected abstract ManagerType getType();
 
     /**
      * DOCUMENT ME!

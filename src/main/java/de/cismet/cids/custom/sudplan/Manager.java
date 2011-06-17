@@ -21,44 +21,33 @@ import de.cismet.cismap.commons.features.Feature;
  */
 public interface Manager extends CidsBeanStore, UIProvider {
 
-    //~ Enums ------------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    public static enum ManagerType {
-
-        //~ Enum constants -----------------------------------------------------
-
-        INPUT, MODEL, OUTPUT
-    }
-
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Returns the unified resource that is attached to this <code>Manager</code>. A unified resource can be anything
+     * that is essential for the specific <code>Manager</code> implementation.
      *
-     * @return  DOCUMENT ME!
+     * @return  the unified resource attachted to this <code>Manager</code> or <code>null</code> if there is none.
      *
-     * @throws  IOException  DOCUMENT ME!
+     * @throws  IOException  if any error occurs during execution
      */
     Object getUR() throws IOException;
 
     /**
-     * DOCUMENT ME!
+     * This method shall be used to signalise a <code>Manager</code> to apply possible changes. An implementing <code>
+     * Manager</code> shall be in an consistent/persistent state after this method has returned.
      *
-     * @throws  IOException  DOCUMENT ME!
+     * @throws  IOException  if any error occurs during execution
      */
     void apply() throws IOException;
 
     /**
-     * DOCUMENT ME!
+     * Returns a {@link Feature} that is attached to this <code>Manager</code> or <code>null</code> if this manager has
+     * no attached <code>Feature</code>.
      *
-     * @return  DOCUMENT ME!
+     * @return  the attached <code>Feature</code> or <code>null</code>
      *
-     * @throws  IOException  DOCUMENT ME!
+     * @throws  IOException  if any error occurs during execution
      */
     Feature getFeature() throws IOException;
 }

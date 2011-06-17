@@ -20,7 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import de.cismet.cids.custom.sudplan.Manager;
-import de.cismet.cids.custom.sudplan.Manager.ManagerType;
+import de.cismet.cids.custom.sudplan.ManagerType;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.SqlTimestampToStringConverter;
 
@@ -316,7 +316,7 @@ public class RunRenderer extends AbstractManagerRenderer {
     }
 
     @Override
-    ManagerType getType() {
+    protected ManagerType getType() {
         return ManagerType.MODEL;
     }
 

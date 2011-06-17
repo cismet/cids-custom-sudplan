@@ -293,14 +293,14 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
                 final TimeSeries timeseries = timeseriesFuture.get();
 
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("retrieved timeseries");
+                    LOG.debug("retrieved timeseries"); // NOI18N
                 }
 
                 final IntervalXYDataset dataset = createDataset(timeseries, config.getObsProp());
 
                 chart = createChart(dataset, SMSUtils.unitFromTimeseries(timeseries));
             } catch (final Exception ex) {
-                LOG.error("cannot create chart", ex);
+                LOG.error("cannot create chart", ex); // NOI18N
                 throw ex;
             }
 

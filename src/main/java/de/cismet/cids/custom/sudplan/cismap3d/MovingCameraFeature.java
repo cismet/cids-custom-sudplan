@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.cismap3d;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
 import org.apache.log4j.Logger;
