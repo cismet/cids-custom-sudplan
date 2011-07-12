@@ -61,7 +61,7 @@ public class MultiplyInputManager implements Manager {
     @Override
     public CidsBean getCidsBean() {
         try {
-            apply();
+            finalise();
         } catch (final Exception e) {
             final String message = "could not apply changes"; // NOI18N
             LOG.error(message, e);
@@ -72,7 +72,7 @@ public class MultiplyInputManager implements Manager {
     }
 
     @Override
-    public void apply() throws IOException {
+    public void finalise() throws IOException {
         ui.store();
     }
 

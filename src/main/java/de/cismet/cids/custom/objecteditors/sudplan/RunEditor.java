@@ -251,7 +251,7 @@ public class RunEditor extends JPanel implements CidsBeanRenderer, EditorSaveLis
     @Override
     public boolean prepareForSave() {
         try {
-            manager.apply();
+            manager.finalise();
 
             return true;
         } catch (final IOException ex) {

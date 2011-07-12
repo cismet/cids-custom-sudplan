@@ -7,7 +7,13 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.wupp;
 
+import org.apache.log4j.Logger;
+
 import org.openide.util.NbBundle;
+
+import java.io.IOException;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 /**
  * DOCUMENT ME!
@@ -17,9 +23,13 @@ import org.openide.util.NbBundle;
  */
 public class RunoffInputManagerUI extends javax.swing.JPanel {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(RunoffInputManagerUI.class);
+
     //~ Instance fields --------------------------------------------------------
 
-    private final RunoffInputManager model;
+    private final transient RunoffInputManager model;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
@@ -37,9 +47,26 @@ public class RunoffInputManagerUI extends javax.swing.JPanel {
         this.model = model;
 
         initComponents();
+
+        init();
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void init() {
+        try {
+            final RunoffIO io = model.getUR();
+            final CidsBean geocpmBean = io.fetchGeocpmInput();
+
+            jedGeoCPM.setText((String)geocpmBean.getProperty("input")); // NOI18N
+        } catch (final IOException ex) {
+            jedGeoCPM.setText("ERROR: " + ex);                          // NOI18N
+            LOG.error("cannot initialise runoff input manager ui", ex); // NOI18N
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The

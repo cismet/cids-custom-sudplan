@@ -107,9 +107,14 @@ public abstract class AbstractModelManager implements ModelManager {
         return inputManager.getUR();
     }
 
+    /**
+     * This default implementation does nothing, so <code>super</code> call is not necessary.
+     *
+     * @throws  IOException  never
+     */
     @Override
-    public void apply() throws IOException {
-        // default gui does not alter the bean, nothing has to be applied
+    public void finalise() throws IOException {
+        // default gui does not alter the bean, nothing has to be done
     }
 
     @Override
@@ -186,6 +191,27 @@ public abstract class AbstractModelManager implements ModelManager {
         }
 
         progressSupport.fireEvent(new ProgressEvent(this, ProgressEvent.State.PROGRESSING, step, maxSteps));
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    protected void fireBroken() {
+        if (!isStarted()) {
+            throw new IllegalStateException("cannot be broken when not started yet"); // NOI18N
+        }
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("fireBroken: " + this); // NOI18N
+        }
+
+        if (isFinished()) {
+            return;
+        }
+
+        progressSupport.fireEvent(new ProgressEvent(this, ProgressEvent.State.BROKEN));
     }
 
     /**

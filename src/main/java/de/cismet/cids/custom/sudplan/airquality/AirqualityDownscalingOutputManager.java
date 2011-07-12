@@ -63,8 +63,8 @@ public final class AirqualityDownscalingOutputManager implements Manager, Dispos
     }
 
     @Override
-    public void apply() throws IOException {
-        // no need to apply any changes since the ui does not change anything
+    public void finalise() throws IOException {
+        // no need to finalise any changes since the ui does not change anything
     }
 
     @Override

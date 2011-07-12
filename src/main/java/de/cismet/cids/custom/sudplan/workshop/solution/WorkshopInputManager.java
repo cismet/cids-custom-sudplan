@@ -68,7 +68,7 @@ public final class WorkshopInputManager implements Manager {
     }
 
     @Override
-    public void apply() throws IOException {
+    public void finalise() throws IOException {
         final int[] newInts = getUI().getIntegers();
         final StringBuilder sb = new StringBuilder();
 

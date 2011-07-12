@@ -34,12 +34,13 @@ public interface Manager extends CidsBeanStore, UIProvider {
     Object getUR() throws IOException;
 
     /**
-     * This method shall be used to signalise a <code>Manager</code> to apply possible changes. An implementing <code>
-     * Manager</code> shall be in an consistent/persistent state after this method has returned.
+     * This method shall be used to signalise a <code>Manager</code> to signalise the manager that it is about to be
+     * unloaded and possible changes should be applied and cleanup shall be done. An implementing <code>Manager</code>
+     * shall be in an consistent/persistent state after this method has returned.
      *
      * @throws  IOException  if any error occurs during execution
      */
-    void apply() throws IOException;
+    void finalise() throws IOException;
 
     /**
      * Returns a {@link Feature} that is attached to this <code>Manager</code> or <code>null</code> if this manager has

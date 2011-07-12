@@ -286,8 +286,7 @@ public class RunRenderer extends AbstractManagerRenderer {
     } // </editor-fold>//GEN-END:initComponents
 
     @Override
-    public void setCidsBean(final CidsBean cidsBean) {
-        super.setCidsBean(cidsBean);
+    protected void init() {
         bindingGroup.unbind();
         bindingGroup.bind();
     }

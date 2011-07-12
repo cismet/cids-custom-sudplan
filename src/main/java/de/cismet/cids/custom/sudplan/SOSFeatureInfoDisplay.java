@@ -67,11 +67,11 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(SOSFeatureInfoDisplay.class);
-    private static final String SOS_FACTORY = "SOS-SUDPLAN-Dummy"; // NOI18N
-    public static final String KEY_SCENARIO = "scenario";          // NOI18N
-    public static final String KEY_SOS_URL = "sos_url";            // NOI18N
-    public static final String KEY_FROM_YEAR = "from_year";        // NOI18N
-    public static final String KEY_TO_YEAR = "to_year";            // NOI18N
+    private static final String SOS_FACTORY = "SOS-Client"; // NOI18N
+    public static final String KEY_SCENARIO = "scenario";   // NOI18N
+    public static final String KEY_SOS_URL = "sos_url";     // NOI18N
+    public static final String KEY_FROM_YEAR = "from_year"; // NOI18N
+    public static final String KEY_TO_YEAR = "to_year";     // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -175,6 +175,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         sosHandler = Demo.getInstance().getSOSDH(); // TODO: <- for demo
         // DataHandlerFactory.Lookup.lookup(SOS_FACTORY); // NOI18N
+// sosHandler = new SOSClientDataHandler();
 
         if (sosHandler == null) {
             final String message = "cannot lookup datahander factory: " + SOS_FACTORY; // NOI18N

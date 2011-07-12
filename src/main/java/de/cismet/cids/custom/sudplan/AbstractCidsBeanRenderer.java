@@ -37,7 +37,16 @@ public abstract class AbstractCidsBeanRenderer extends JPanel implements CidsBea
     @Override
     public void setCidsBean(final CidsBean cidsBean) {
         this.cidsBean = cidsBean;
+
+        init();
     }
+
+    /**
+     * The init method shall be used to initialise the renderer. It is called after the {@link CidsBean} has been set.
+     *
+     * @see  #setCidsBean(de.cismet.cids.dynamics.CidsBean)
+     */
+    protected abstract void init();
 
     @Override
     public void dispose() {

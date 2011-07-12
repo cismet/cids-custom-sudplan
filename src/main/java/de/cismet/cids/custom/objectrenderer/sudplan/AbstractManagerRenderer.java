@@ -34,22 +34,10 @@ public abstract class AbstractManagerRenderer extends AbstractCidsBeanRenderer {
 
     /**
      * DOCUMENT ME!
-     *
-     * @param  cidsBean  DOCUMENT ME!
      */
     @Override
-    public void setCidsBean(final CidsBean cidsBean) {
-        super.setCidsBean(cidsBean);
-
-        setTitle((String)cidsBean.getProperty("name")); // NOI18N
-
-        init();
-    }
-
-    /**
-     * DOCUMENT ME!
-     */
-    private void init() {
+    protected void init() {
+        setTitle((String)cidsBean.getProperty("name"));                     // NOI18N
         final CidsBean modelBean = (CidsBean)cidsBean.getProperty("model"); // NOI18N
         manager = SMSUtils.loadManagerFromModel(modelBean, getType());
         manager.setCidsBean(cidsBean);

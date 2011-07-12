@@ -42,9 +42,7 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public void setCidsBean(final CidsBean cidsBean) {
-        super.setCidsBean(cidsBean);
-
+    protected void init() {
         try {
             final TimeseriesChartPanel panel = new TimeseriesChartPanel((String)cidsBean.getProperty("uri")); // NOI18N
             add(panel, BorderLayout.CENTER);
@@ -63,7 +61,6 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         setOpaque(false);
-        setPreferredSize(null);
         setLayout(new java.awt.BorderLayout());
     } // </editor-fold>//GEN-END:initComponents
 

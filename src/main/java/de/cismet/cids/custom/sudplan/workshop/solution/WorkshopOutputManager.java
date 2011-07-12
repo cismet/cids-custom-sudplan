@@ -68,7 +68,7 @@ public final class WorkshopOutputManager implements Manager {
     }
 
     @Override
-    public void apply() throws IOException {
+    public void finalise() throws IOException {
         // nothing to do here
     }
 

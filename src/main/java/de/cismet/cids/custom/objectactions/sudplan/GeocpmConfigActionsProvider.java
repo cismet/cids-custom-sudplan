@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import de.cismet.cids.custom.sudplan.local.wupp.RunGeoCPMWizardAction;
-import de.cismet.cids.custom.sudplan.rainfall.RainfallDownscalingWizardAction;
 
 import de.cismet.cids.utils.interfaces.CidsBeanAction;
 import de.cismet.cids.utils.interfaces.CidsBeanActionsProvider;
@@ -22,14 +21,12 @@ import de.cismet.cids.utils.interfaces.CidsBeanActionsProvider;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class TimeseriesActionsProvider implements CidsBeanActionsProvider {
+public final class GeocpmConfigActionsProvider implements CidsBeanActionsProvider {
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
     public Collection<CidsBeanAction> getActions() {
-        return Arrays.asList(
-                ActionProviderFactory.getCidsBeanAction(RainfallDownscalingWizardAction.class),
-                ActionProviderFactory.getCidsBeanAction(RunGeoCPMWizardAction.class));
+        return Arrays.asList(ActionProviderFactory.getCidsBeanAction(RunGeoCPMWizardAction.class));
     }
 }

@@ -28,7 +28,7 @@ public final class ProgressEvent extends EventObject {
 
         //~ Enum constants -----------------------------------------------------
 
-        STARTED, PROGRESSING, FINISHED
+        STARTED, PROGRESSING, FINISHED, BROKEN
     }
 
     //~ Instance fields --------------------------------------------------------

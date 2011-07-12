@@ -10,12 +10,14 @@ package de.cismet.cids.custom.sudplan;
 import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.exception.ConnectionException;
 import Sirius.navigator.plugin.PluginRegistry;
+import Sirius.navigator.types.treenode.DefaultMetaTreeNode;
 import Sirius.navigator.types.treenode.RootTreeNode;
 import Sirius.navigator.ui.ComponentRegistry;
 import Sirius.navigator.ui.tree.MetaCatalogueTree;
 
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
+import Sirius.server.middleware.types.MetaObjectNode;
 import Sirius.server.search.Query;
 import Sirius.server.search.SearchResult;
 import Sirius.server.sql.SystemStatement;
@@ -79,7 +81,8 @@ public final class SMSUtils {
 
         AQ_DS("Airquality Downscaling"), // NOI18N
         RF_DS("Rainfall Downscaling"),   // NOI18N
-        HY_CAL("Hydrology Calibration"); // NOI18N
+        HY_CAL("Hydrology Calibration"), // NOI18N
+        GEOCPM("Wuppertal Abfluss Berechnung"); // NOI18N
 
         //~ Instance fields ----------------------------------------------------
 
@@ -363,6 +366,44 @@ public final class SMSUtils {
         } catch (final Exception ex) {
             LOG.warn("could not reload tree", ex); // NOI18N
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static CidsBean getParentObject() {
+        final MetaCatalogueTree tree = ComponentRegistry.getRegistry().getCatalogueTree();
+        final TreePath path = tree.getSelectionPath().getParentPath();
+
+        CidsBean bean = null;
+        for (int i = path.getPathCount() - 1; i > -1; --i) {
+            final Object element = path.getPathComponent(i);
+            if (element instanceof DefaultMetaTreeNode) {
+                final DefaultMetaTreeNode node = (DefaultMetaTreeNode)element;
+                if (node.isObjectNode()) {
+                    final Object userobject = node.getUserObject();
+
+                    assert userobject != null : "null user object in object node";                                             // NOI18N
+                    assert userobject instanceof MetaObjectNode : "user object not instance of MetaObjectNode in object node"; // NOI18N
+
+                    final MetaObject mo = ((MetaObjectNode)userobject).getObject();
+
+                    assert mo != null : "null metaobject in metaobject node"; // NOI18N
+
+                    bean = mo.getBean();
+
+                    break;
+                }
+            } else {
+                LOG.warn("path element not instance of DefaultMetaTreeNode, cannot retrieve parent object"); // NOI18N
+
+                return null;
+            }
+        }
+
+        return bean;
     }
 
     /**

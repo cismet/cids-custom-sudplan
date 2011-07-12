@@ -78,6 +78,27 @@
             cannot be used yet since maven will request for a key authorisation
             making the build interactive which is at least for hudson inacceptable
          -->
+<!--        <dependency>
+            <groupId>at.ac.ait.enviro.sudplan</groupId>
+            <artifactId>SOSClient</artifactId>
+            <version>1.0-SNAPSHOT</version>
+             exclude slf to prevent version conflicts 
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                 exclude jts to prevent version conflicts 
+                <exclusion>
+                    <groupId>com.vividsolutions</groupId>
+                    <artifactId>jts</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>-->
         <dependency>
             <groupId>at.ac.ait.enviro.sudplan</groupId>
             <artifactId>SOSDummyHandler</artifactId>
@@ -158,6 +179,11 @@
         <dependency>
             <groupId>de.cismet.cids.navigator.plugin</groupId>
             <artifactId>rm-plugin</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.cismet.cids.custom.sudplan</groupId>
+            <artifactId>geocpm-rest</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

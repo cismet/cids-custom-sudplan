@@ -7,7 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.wupp;
 
-import java.io.File;
+import org.codehaus.jackson.map.ObjectMapper;
+
 import java.io.IOException;
 
 import javax.swing.JComponent;
@@ -28,19 +29,22 @@ public final class RunoffInputManager implements Manager {
 
     //~ Instance fields --------------------------------------------------------
 
-    private transient CidsBean cidsBean;
+    private transient CidsBean modelInputBean;
     private transient volatile RunoffInputManagerUI ui;
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
     public RunoffIO getUR() throws IOException {
-        return null;
+        final String json = (String)modelInputBean.getProperty("ur"); // NOI18N
+        final ObjectMapper mapper = new ObjectMapper();
+
+        return mapper.readValue(json, RunoffIO.class);
     }
 
     @Override
-    public void apply() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void finalise() throws IOException {
+        // not needed
     }
 
     @Override
@@ -50,12 +54,12 @@ public final class RunoffInputManager implements Manager {
 
     @Override
     public CidsBean getCidsBean() {
-        return cidsBean;
+        return modelInputBean;
     }
 
     @Override
     public void setCidsBean(final CidsBean cidsBean) {
-        this.cidsBean = cidsBean;
+        this.modelInputBean = cidsBean;
     }
 
     @Override

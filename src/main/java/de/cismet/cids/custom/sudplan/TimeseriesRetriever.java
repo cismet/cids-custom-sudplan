@@ -132,7 +132,7 @@ public final class TimeseriesRetriever {
             }
 
             // for demo
-            final DataHandler handler;
+            final DataHandler handler;                   // = new SOSClientDataHandler();
             if ((config.getOffering().contains("ownscale") || config.getOffering().contains("ggregate"))
                         && (Demo.getInstance().getDSSOSDH() != null)) {
                 handler = Demo.getInstance().getDSSOSDH();

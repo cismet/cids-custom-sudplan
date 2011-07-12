@@ -79,7 +79,7 @@ public class MultiplyModelManager implements Manager, Executable {
      * @throws  IOException  DOCUMENT ME!
      */
     @Override
-    public void apply() throws IOException {
+    public void finalise() throws IOException {
     }
 
     /**
