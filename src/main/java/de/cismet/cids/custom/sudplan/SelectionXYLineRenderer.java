@@ -58,6 +58,7 @@ public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
     public SelectionXYLineRenderer(final boolean lines, final boolean shapes, final boolean selected) {
         super(lines, shapes);
         this.selected = selected;
+        
     }
 
     //~ Methods ----------------------------------------------------------------

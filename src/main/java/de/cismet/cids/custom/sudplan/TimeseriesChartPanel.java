@@ -89,6 +89,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
      */
     public TimeseriesChartPanel(final String tstburi) throws MalformedURLException {
         this(TimeseriesRetrieverConfig.fromTSTBUrl(tstburi), false, null);
+        
     }
 
     /**
