@@ -76,6 +76,7 @@ public class TimeSeriesSelectionListener implements ChartMouseListener, PlotChan
 //            final PLayer fc = mc.getTmpFeatureLayer();
         final FeatureCollection fc = mc.getFeatureCollection();
         fc.removeAllFeatures();
+        
     }
 
     //~ Methods ----------------------------------------------------------------
