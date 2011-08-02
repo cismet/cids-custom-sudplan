@@ -16,7 +16,8 @@ import org.jfree.data.time.TimeSeriesCollection;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 
 /**
- * DOCUMENT ME!
+ * This Class extends TimeSeriesCollection about the geometry. The geometry is needed to show the spatial context of the
+ * time series on map.
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
@@ -25,7 +26,6 @@ public class TimeSeriesDatasetAdapter extends TimeSeriesCollection {
 
     //~ Instance fields --------------------------------------------------------
 
-    private MapClickedEvent mce;
     private Geometry geom;
 //    private
 

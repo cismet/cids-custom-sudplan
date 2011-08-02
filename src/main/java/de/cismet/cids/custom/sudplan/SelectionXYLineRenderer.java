@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import org.bouncycastle.asn1.cms.Time;
+
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRendererState;
@@ -19,6 +21,8 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.geom.Rectangle2D;
+
+import java.util.ArrayList;
 
 /**
  * DOCUMENT ME!
@@ -35,6 +39,8 @@ public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
     private static final Font SELECTION_FONT = new Font("SansSerif", Font.BOLD, 10);
 
     //~ Instance fields --------------------------------------------------------
+
+    private ArrayList<TimeSeriesSelectionListener> listeners = new ArrayList<TimeSeriesSelectionListener>();
 
     private boolean selected;
 
@@ -58,7 +64,6 @@ public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
     public SelectionXYLineRenderer(final boolean lines, final boolean shapes, final boolean selected) {
         super(lines, shapes);
         this.selected = selected;
-        
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -80,6 +85,7 @@ public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
     public void setSelected(final boolean selected) {
         this.selected = selected;
         setPaintSelected(0);
+        fireSelectionChanged();
     }
 
     /**
@@ -121,5 +127,43 @@ public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
             final ValueAxis rangeAxis,
             final Rectangle2D dataArea) {
         super.drawPrimaryLine(state, g2, plot, dataset, pass, series, item, domainAxis, rangeAxis, dataArea);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void addTSSelectionListener(final TimeSeriesSelectionListener l) {
+        listeners.add(l);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void removeTSSeelctionListener(final TimeSeriesSelectionListener l) {
+        listeners.remove(l);
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void fireSelectionChanged() {
+        for (final TimeSeriesSelectionListener l : listeners) {
+            l.selectionChanged(this);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   l  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean containsListener(final TimeSeriesSelectionListener l) {
+        return listeners.contains(l);
     }
 }

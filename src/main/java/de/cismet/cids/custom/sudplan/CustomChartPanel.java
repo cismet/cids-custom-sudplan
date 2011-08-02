@@ -38,6 +38,7 @@ import java.awt.print.PageFormat;
 import java.io.File;
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -76,6 +77,7 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
     private boolean ignoreNextAxisChangeEvent = false;
     private DateAxis timeAxis;
     private JFreeChart chart;
+    private ArrayList<TimeSeriesRemovedListener> listeners = new ArrayList<TimeSeriesRemovedListener>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -125,12 +127,42 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
 //        slider.setExtent(scrollbar_max_val);
 //        slider.getModel().addChangeListener(this);
 //        centerPanel.add(slider, BorderLayout.SOUTH);
-
+//        final TimeSeriesChartToolBar toolbar = new TimeSeriesChartToolBar(this);
         this.setLayout(new BorderLayout());
+//        this.add(toolbar, BorderLayout.NORTH);
         this.add(new JScrollPane(centerPanel), BorderLayout.CENTER);
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  index  DOCUMENT ME!
+     */
+    public void fireTimeSeriesRemoved(final int index) {
+        for (final TimeSeriesRemovedListener l : listeners) {
+            l.timeSeriesRemoved(index);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void addTimeSeriesRemovedListener(final TimeSeriesRemovedListener l) {
+        listeners.add(l);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void removeTimeSeriesRemovedListener(final TimeSeriesRemovedListener l) {
+        listeners.remove(l);
+    }
 
     @Override
     public void axisChanged(final AxisChangeEvent event) {
@@ -909,7 +941,8 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
 
                 final RemoveTimeSeriesAction removeAction = new RemoveTimeSeriesAction(
                         tsc,
-                        (XYPlot)this.getChart().getPlot());
+                        (XYPlot)this.getChart().getPlot(),
+                        CustomChartPanel.this);
                 removeItem.setAction(removeAction);
                 removeTimeSeriesMenue.show(e.getComponent(), e.getX(), e.getY());
             } else {

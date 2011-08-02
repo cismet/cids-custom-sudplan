@@ -12,8 +12,8 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
@@ -24,6 +24,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.IntervalXYDataset;
@@ -38,23 +39,42 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Paint;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
+import de.cismet.cismap.commons.features.SignaturedFeature;
 import de.cismet.cismap.commons.gui.featureinfowidget.AbstractFeatureInfoDisplay;
 import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoDisplay;
 import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoDisplayKey;
 import de.cismet.cismap.commons.gui.featureinfowidget.InitialisationException;
+import de.cismet.cismap.commons.gui.featureinfowidget.MultipleFeatureInfoRequestsDisplay;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldFeatureChangeEvent;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldListener;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 
@@ -66,7 +86,9 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
  */
 // TODO: use timeserieschartpanel
 @ServiceProvider(service = FeatureInfoDisplay.class)
-public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWMSServiceLayerGroup> {
+public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWMSServiceLayerGroup>
+        implements MultipleFeatureInfoRequestsDisplay,
+            TimeSeriesRemovedListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -96,16 +118,23 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private transient TimeseriesRetrieverConfig config;
     private int timeseriesCount = 0;
     private TimeSeriesSelectionListener listener;
+    // End of variables declaration
+// private ArrayList<SignaturedFeature> holdFeatures = new ArrayList<SignaturedFeature>();
+    private HashMap<Integer, SignaturedFeature> holdFeatures = new HashMap<Integer, SignaturedFeature>();
+    private ArrayList<HoldListener> holdListeners = new ArrayList<HoldListener>();
+    private TimeSeriesChartToolBar toolbar;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JComboBox cboResolution =
         new de.cismet.cids.custom.sudplan.LocalisedEnumComboBox(Resolution.class, available);
     private final transient javax.swing.JPanel controlElementsPanel = new javax.swing.JPanel();
-    private javax.swing.JToggleButton holdButton;
+    private final transient javax.swing.JRadioButton holdButton = new javax.swing.JRadioButton();
     private final transient javax.swing.JPanel holdButtonPanel = new javax.swing.JPanel();
+    private final transient javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblFiller = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblFiller1 = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblResolution = new javax.swing.JLabel();
     private final transient javax.swing.JPanel pnlChart = new javax.swing.JPanel();
+    private final transient javax.swing.JPanel pnlToolbar = new javax.swing.JPanel();
     private final transient javax.swing.JPanel resolutionPanel = new javax.swing.JPanel();
     // End of variables declaration//GEN-END:variables
 
@@ -122,6 +151,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 FeatureInfoDisplayKey.ANY_SERVER,
                 FeatureInfoDisplayKey.ANY_LAYER));
         initComponents();
+        toolbar = new TimeSeriesChartToolBar();
         initialised = false;
     }
 
@@ -136,14 +166,13 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        holdButton = new javax.swing.JToggleButton();
-
         setLayout(new java.awt.GridBagLayout());
 
         lblFiller1.setText(NbBundle.getMessage(SOSFeatureInfoDisplay.class, "SOSFeatureInfoDisplay.lblFiller1.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
         add(lblFiller1, gridBagConstraints);
@@ -167,8 +196,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         holdButton.setText(org.openide.util.NbBundle.getMessage(
                 SOSFeatureInfoDisplay.class,
                 "SOSFeatureInfoDisplay.holdButton.text")); // NOI18N
-        holdButton.setAutoscrolls(true);
-        holdButton.setName("holdButton");                  // NOI18N
+        holdButton.setFocusPainted(false);
         holdButton.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
@@ -179,6 +207,14 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         holdButtonPanel.add(holdButton, new java.awt.GridBagConstraints());
 
         controlElementsPanel.add(holdButtonPanel, new java.awt.GridBagConstraints());
+
+        jLabel1.setText(org.openide.util.NbBundle.getMessage(
+                SOSFeatureInfoDisplay.class,
+                "SOSFeatureInfoDisplay.jLabel1.text")); // NOI18N
+        jLabel1.setMaximumSize(new java.awt.Dimension(10, 0));
+        jLabel1.setMinimumSize(new java.awt.Dimension(10, 0));
+        jLabel1.setPreferredSize(new java.awt.Dimension(10, 0));
+        controlElementsPanel.add(jLabel1, new java.awt.GridBagConstraints());
 
         resolutionPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -210,7 +246,18 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         controlElementsPanel.add(resolutionPanel, new java.awt.GridBagConstraints());
 
-        add(controlElementsPanel, new java.awt.GridBagConstraints());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        add(controlElementsPanel, gridBagConstraints);
+
+        pnlToolbar.setMinimumSize(new java.awt.Dimension(350, 30));
+        pnlToolbar.setPreferredSize(new java.awt.Dimension(400, 30));
+        pnlToolbar.setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        add(pnlToolbar, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
     /**
@@ -222,6 +269,14 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         // TODO add your handling code here:
     } //GEN-LAST:event_holdButtonActionPerformed
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   layer             evt DOCUMENT ME!
+     * @param   parentTabbedPane  DOCUMENT ME!
+     *
+     * @throws  InitialisationException  DOCUMENT ME!
+     */
     @Override
     public void init(final SlidableWMSServiceLayerGroup layer, final JTabbedPane parentTabbedPane)
             throws InitialisationException {
@@ -462,6 +517,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 //            dataset.setMapClickedEvent(currentDisplayer.getMce());
             return dataset;
         } else {
+            LOG.warn("time series geometry does not contain mouse click coordinates"); // NOI18N
             return null;
         }
     }
@@ -483,13 +539,13 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             chart = ChartFactory.createXYBarChart(
                     "Rainfall data",
                     "Time",
-                    true,
+                    true,                                                              // date axis
                     unit.getLocalisedName(),
                     dataset,
                     PlotOrientation.VERTICAL,
-                    true,
-                    true,
-                    false);
+                    false,                                                             // legend
+                    true,                                                              // tooltips
+                    false);                                                            // urls
         } else if (Variable.TEMPERATURE.equals(observed) || Variable.O3.equals(observed)) {
             chart = ChartFactory.createTimeSeriesChart(
                     "Timeseries data",
@@ -516,10 +572,144 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         final SelectionXYLineRenderer renderer = new SelectionXYLineRenderer();
         renderer.setBaseShapesVisible(true);
         renderer.setBaseShapesFilled(true);
-
+        final NumberAxis axis = (NumberAxis)plot.getRangeAxis();
+        axis.setAutoRangeIncludesZero(false);
         plot.setRenderer(renderer);
         listener = new TimeSeriesSelectionListener(chart.getXYPlot());
+        timeseriesCount = 0;
         return chart;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   g  DOCUMENT ME!
+     * @param   s  DOCUMENT ME!
+     * @param   p  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private SignaturedFeature createFeatureSignature(final Geometry g, final Shape s, final Paint p) {
+        final SignaturedFeature feature = new SignaturedFeature(g);
+        // create an image containing the time series shape as overlay icon
+
+        BufferedImage bi = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+        int width = 0;
+        int height = 0;
+
+        // get meta iformation for the size of the overlay
+        final Properties iconProps = new Properties();
+        try {
+            final InputStream in = getClass().getResourceAsStream(
+                    "/de/cismet/cismap/commons/gui/res/featureInfoIcon.properties");                             // NOI18N
+            if (in != null) {
+                iconProps.load(in);
+                in.close();
+            } else {
+                LOG.warn(
+                    "Could not laod featureInfoIcon.properties file. Default values for overlay area are used"); // NOI18N
+            }
+        } catch (IOException ex) {
+            LOG.error(
+                "Could not read featureInfoIcon.properties file. Default values for overlay area are used",
+                ex);                                                                                             // NOI18N
+        }
+
+        if (iconProps.isEmpty()
+                    || (!iconProps.containsKey("overlayWidth") && !iconProps.containsKey("overlayHeigth")) // NOI18N
+        ) {                                                                                                // NOI18N
+            // TODO ERROR LOG EXCPETION
+            LOG.warn(
+                "featureInfoicon.properties file does not contain all needed keys. Default values for overlay area are used"); // NOI18N
+        } else {
+            try {
+                width = Integer.parseInt((String)iconProps.get("overlayWidth"));                                               // NOI18N
+                height = Integer.parseInt((String)iconProps.get("overlayHeigth"));                                             // NOI18N
+                bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            } catch (NumberFormatException ex) {
+                LOG.error(
+                    "Error while retrieving properties for overlay area. Default values for overlay area are used",            // NOI18N
+                    ex);
+            }
+        }
+
+        final Graphics2D g2 = (Graphics2D)bi.getGraphics();
+        g2.setPaint(p);
+//        g2.drawRect(0, 0, bi.getWidth(), bi.getHeight());
+        g2.setStroke(new BasicStroke(2));
+        g2.drawLine(0, 8, 16, 8);
+        feature.setOverlayIcon(bi);
+        // paint the time series symbol
+        final AffineTransform saveXform = g2.getTransform();
+        final AffineTransform at = new AffineTransform();
+        final AffineTransform scaleTrans = new AffineTransform();
+
+        scaleTrans.scale(1.5, 1.5);
+        final Shape scaledShape = scaleTrans.createTransformedShape(s);
+//        g2.setColor(Color.red);
+//        g2.drawRect(0, 0, (int)scaledShape.getBounds().getWidth(), (int)scaledShape.getBounds().getHeight());
+        final double imageXMittelpunkt = bi.getWidth() / 2;
+        final double imageYMittelpunkt = bi.getHeight() / 2;
+        final double shapeXMittelpunkt = (scaledShape.getBounds().getWidth() / 2) - 4.5;
+        final double shapeYMittelpunkt = (scaledShape.getBounds().getHeight() / 2) - 4.5;
+        at.translate(imageXMittelpunkt - (shapeXMittelpunkt), imageYMittelpunkt - (shapeYMittelpunkt));
+        g2.transform(at);
+
+        g2.setPaint(p);
+        g2.fill(scaledShape);
+//        g2.setColor(Color.black);
+//        g2.drawRect(0, 0, (int)scaledShape.getBounds().getWidth(), (int)scaledShape.getBounds().getHeight());
+        g2.transform(saveXform);
+
+        return feature;
+//        return new SignaturedFeature(g);
+    }
+
+    @Override
+    public boolean isOnHold() {
+        return this.holdButton.isSelected();
+    }
+
+    @Override
+    public Collection<SignaturedFeature> getHoldFeautres() {
+        return this.holdFeatures.values();
+    }
+
+    @Override
+    public void addHoldListener(final HoldListener hl) {
+        holdListeners.add(hl);
+    }
+
+    @Override
+    public void removeHoldListener(final HoldListener hl) {
+        holdListeners.remove(hl);
+    }
+
+    @Override
+    public void fireHoldFeatureChanged() {
+        final ArrayList<SignaturedFeature> featureList = new ArrayList<SignaturedFeature>();
+        for (int i = 0; i <= timeseriesCount; i++) {
+            if (holdFeatures.get(i) != null) {
+                featureList.add(holdFeatures.get(i));
+            }
+        }
+        for (final HoldListener hl : holdListeners) {
+            hl.holdFeautresChanged(new HoldFeatureChangeEvent(featureList, this));
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  index  holdFeatures DOCUMENT ME!
+     */
+// public void setHoldFeatures(final ArrayList<SignaturedFeature> holdFeatures) {
+// this.holdFeatures = holdFeatures;
+// }
+    @Override
+    public void timeSeriesRemoved(final int index) {
+        // remove the corresponding feature from holdFeature Collection
+        holdFeatures.remove(index);
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -590,26 +780,34 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                     }
                 }
             }
+            if (newDataset == null) {
+                LOG.warn("Could not get a time series.  "); // NOI18N
+                timeseriesCount++;
+                return null;
+            }
 
             if (holdButton.isSelected() && chartPanelhasChart) {
                 // if holdButton pressed, modifiy the dataset and actualize the chart
                 if (existingChart.getPlot() instanceof XYPlot) {
                     timeseriesCount++;
                     final XYPlot plot = (XYPlot)existingChart.getPlot();
-                    final TimeSeriesCollection oldData = (TimeSeriesCollection)plot.getDataset();
                     final TimeSeriesCollection newData = (TimeSeriesCollection)newDataset;
                     final org.jfree.data.time.TimeSeries newTimeseries = newData.getSeries(0);
 
                     plot.setDataset(timeseriesCount, newData);
-                    plot.setRenderer(timeseriesCount, new SelectionXYLineRenderer(true, true, false));
+                    final SelectionXYLineRenderer renderer = new SelectionXYLineRenderer(true, true, false);
+                    renderer.addTSSelectionListener(listener);
+                    plot.setRenderer(timeseriesCount, renderer);
                     // if there are different units we have to create a multi axis chart
                     boolean newTSVariable = true;
                     for (int i = 0; i < (plot.getDatasetCount() - 1); i++) {
                         final TimeSeriesCollection tsCollection = (TimeSeriesCollection)plot.getDataset(i);
-                        final org.jfree.data.time.TimeSeries ts = tsCollection.getSeries(0);
-                        if (newTimeseries.getRangeDescription().equals(ts.getRangeDescription())) {
-                            newTSVariable = false;
-                            break;
+                        if (tsCollection != null) {
+                            final org.jfree.data.time.TimeSeries ts = tsCollection.getSeries(0);
+                            if (newTimeseries.getRangeDescription().equals(ts.getRangeDescription())) {
+                                newTSVariable = false;
+                                break;
+                            }
                         }
                     }
                     if (newTSVariable) {
@@ -629,14 +827,47 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         @Override
         protected void done() {
-            pnlChart.removeAll();
-
             try {
                 final JFreeChart chart = get();
+                if (chart == null) {
+                    holdFeatures.put(timeseriesCount, null);
+                    fireHoldFeatureChanged();
+                    return;
+                }
+                pnlChart.removeAll();
                 final CustomChartPanel chartPanel = new CustomChartPanel(chart);
-//                final TimeSeriesSelectionListener listener = new TimeSeriesSelectionListener(chart.getXYPlot());
                 chartPanel.addChartMouseListener(listener);
                 chart.getPlot().addChangeListener(listener);
+                chartPanel.addTimeSeriesRemovedListener(SOSFeatureInfoDisplay.this);
+                final XYPlot plot = (XYPlot)chart.getPlot();
+                toolbar.setChartPanel(chartPanel);
+                pnlToolbar.removeAll();
+                final GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
+                gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+                gridBagConstraints.anchor = GridBagConstraints.CENTER;
+                gridBagConstraints.insets = new Insets(5, 5, 5, 5);
+                pnlToolbar.add(toolbar, gridBagConstraints);
+                final XYItemRenderer renderer = plot.getRenderer(timeseriesCount);
+                final Shape s = renderer.getLegendItem(timeseriesCount, 0).getShape();
+                final Paint paint = renderer.getLegendItem(timeseriesCount, 0).getFillPaint();
+                final GeometryFactory gf = new GeometryFactory();
+                final double xCoord = getMce().getxCoord();
+                final double yCoord = getMce().getyCoord();
+                final Point pointGeom = gf.createPoint(new Coordinate(xCoord, yCoord));
+
+                if ((s != null) && (paint != null)) {
+                    if (holdButton.isSelected()) {
+//                    holdFeatures.add(createFeatureSignature(pointGeom, s, paint));
+                        holdFeatures.put(timeseriesCount, createFeatureSignature(pointGeom, s, paint));
+                    } else {
+                        holdFeatures.clear();
+//                    holdFeatures.add(createFeatureSignature(pointGeom, s, paint));
+                        holdFeatures.put(timeseriesCount, createFeatureSignature(pointGeom, s, paint));
+                    }
+                } else {
+                    holdFeatures.put(timeseriesCount, null);
+                }
+                fireHoldFeatureChanged();
                 pnlChart.add(chartPanel, BorderLayout.CENTER);
 
                 Container parent = SOSFeatureInfoDisplay.this;
@@ -647,9 +878,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 }
                 parent.invalidate();
                 parent.validate();
-//                final XYPlot plot = (XYPlot)chart.getPlot();
-//                final NumberAxis axis = (NumberAxis)plot.getDomainAxis();
-//                axis.setAutoRange(true);
             } catch (final InterruptedException ex) {
                 final String message = "in done nothing should be interrupted anymore"; // NOI18N
                 LOG.error(message, ex);

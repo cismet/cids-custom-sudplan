@@ -7,6 +7,7 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.event.PlotChangeEvent;
@@ -21,7 +22,8 @@ import java.util.HashMap;
 import javax.swing.AbstractAction;
 
 /**
- * DOCUMENT ME!
+ * Action that removes one or multiple time series from a a chart. Deletes the time series only if after the removal
+ * still one time series remains. Takes also care of multiple Axis.
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
@@ -32,41 +34,55 @@ public class RemoveTimeSeriesAction extends AbstractAction {
 
     private HashMap<Integer, TimeSeriesCollection> tsMap;
     private XYPlot plot;
+    private CustomChartPanel chartPanel;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates a new RemoveTimeSeriesAction object.
+     * Configures the action to remove one time series.
      *
-     * @param  tsCollection  DOCUMENT ME!
-     * @param  plot          DOCUMENT ME!
+     * @param  tsCollection  the time series to remove
+     * @param  plot          the plot that contains the time series
+     * @param  cp            DOCUMENT ME!
      */
-    public RemoveTimeSeriesAction(final TimeSeriesCollection tsCollection, final XYPlot plot) {
+    public RemoveTimeSeriesAction(final TimeSeriesCollection tsCollection,
+            final XYPlot plot,
+            final CustomChartPanel cp) {
         super("Remove");
         this.plot = plot;
         final int index = this.plot.indexOf(tsCollection);
         this.tsMap = new HashMap<Integer, TimeSeriesCollection>();
         this.tsMap.put(new Integer(index), tsCollection);
+        chartPanel = cp;
     }
 
     /**
-     * Creates a new RemoveTimeSeriesAction object.
+     * Configures the Action to Remove a Set of TimeSeries from the chart.
      *
-     * @param  map   DOCUMENT ME!
-     * @param  plot  DOCUMENT ME!
+     * @param  map   The map of series to remove
+     * @param  plot  The Plot which contains the series
+     * @param  cp    DOCUMENT ME!
      */
-    public RemoveTimeSeriesAction(final HashMap<Integer, TimeSeriesCollection> map, final XYPlot plot) {
+    public RemoveTimeSeriesAction(final HashMap<Integer, TimeSeriesCollection> map,
+            final XYPlot plot,
+            final CustomChartPanel cp) {
         super("Remove all selected");
         this.tsMap = map;
         this.plot = plot;
+        chartPanel = cp;
     }
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        for (final TimeSeriesCollection tsc : tsMap.values()) {
-            removeTimeSeries(tsc);
+        final int datasetCount = getNonNullDatasetCount();
+        if (datasetCount > tsMap.size()) {
+            for (final TimeSeriesCollection tsc : tsMap.values()) {
+                removeTimeSeries(tsc);
+            }
+        } else {
+            // TODO LOG
         }
     }
 
@@ -75,13 +91,15 @@ public class RemoveTimeSeriesAction extends AbstractAction {
      *
      * @param  tsc  DOCUMENT ME!
      */
-    public void removeTimeSeries(final TimeSeriesCollection tsc) {
+    private void removeTimeSeries(final TimeSeriesCollection tsc) {
         final int rangeAxisCount = plot.getRangeAxisCount();
         final String rangeDesc = tsc.getSeries(0).getRangeDescription();
         final ValueAxis axisToRemove = plot.getRangeAxisForDataset(plot.indexOf(tsc));
         // remove the time series from dataset and set the dataset to null
-        plot.setDataset(plot.indexOf(tsc), null);
+        final int index = plot.indexOf(tsc);
+        plot.setDataset(index, null);
         tsc.removeSeries(0);
+        chartPanel.fireTimeSeriesRemoved(index);
 
         if (rangeAxisCount > 1) {
             // there are multiple axis so look if the axis is still needed
@@ -99,7 +117,7 @@ public class RemoveTimeSeriesAction extends AbstractAction {
             }
 
             if (!axisNeeded) {
-                final int index = plot.getRangeAxisIndex(axisToRemove);
+                final int axisIndex = plot.getRangeAxisIndex(axisToRemove);
                 final ValueAxis primaryAxis = plot.getRangeAxis(0);
                 // take care of removing the primary (first) axis
                 if (primaryAxis.equals(axisToRemove)) {
@@ -114,10 +132,25 @@ public class RemoveTimeSeriesAction extends AbstractAction {
                         }
                     }
                 } else {
-                    plot.setRangeAxis(index, null, true);
+                    plot.setRangeAxis(axisIndex, null, true);
                 }
                 // TODO make Log that axis removing wanst succesful
             }
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private int getNonNullDatasetCount() {
+        int result = 0;
+        for (int i = 0; i < plot.getDatasetCount(); i++) {
+            if (plot.getDataset(i) != null) {
+                result++;
+            }
+        }
+        return result;
     }
 }

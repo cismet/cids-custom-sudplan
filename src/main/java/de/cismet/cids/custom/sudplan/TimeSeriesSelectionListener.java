@@ -1,15 +1,17 @@
 /***************************************************
- *
- * cismet GmbH, Saarbruecken, Germany
- *
- *              ... and it just works.
- *
- ****************************************************/
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cids.custom.sudplan;
 
 import Sirius.navigator.plugin.PluginRegistry;
 
 import com.vividsolutions.jts.geom.Geometry;
+
+import edu.umd.cs.piccolo.PLayer;
 
 import org.apache.log4j.Logger;
 
@@ -39,17 +41,21 @@ import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
+import javax.swing.SwingUtilities;
+
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
 
 import de.cismet.cismap.navigatorplugin.CismapPlugin;
 
 //TODO nicht removeAll auf FeatureCollection/ Layer der die timeseries features enthaetlt ausführen, sondern nur TimeSeriesFeatures entfernen
 /**
- * DOCUMENT ME!
+ * This class handles the selection of time series and the reflection to the map. It listen to all mouseclicks on
+ * ChartPanel but just reacts if the item that was clicked on is a XYItemEntity. The selection is rendered by a
+ * SelectionXYLineRenderer. The reflection to map is done by a TimeSeriesFeature.
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
@@ -57,12 +63,20 @@ import de.cismet.cismap.navigatorplugin.CismapPlugin;
 public class TimeSeriesSelectionListener implements ChartMouseListener, PlotChangeListener {
 
     //~ Static fields/initializers ---------------------------------------------
+
     private static final transient Logger LOG = Logger.getLogger(TimeSeriesSelectionListener.class);
+
     //~ Instance fields --------------------------------------------------------
+
     private XYPlot plot;
-    private HashMap<Integer, Feature> feautreMap;
+    private HashMap<Integer, PFeature> featureMap;
+    private final CismapPlugin cismapPlugin;
+    private final MappingComponent mc;
+    private final PLayer fc;
+//  private final FeatureCollection fc;
 
     //~ Constructors -----------------------------------------------------------
+
     /**
      * Creates a new TimeSeriesSelectionListener object.
      *
@@ -70,88 +84,60 @@ public class TimeSeriesSelectionListener implements ChartMouseListener, PlotChan
      */
     public TimeSeriesSelectionListener(final XYPlot p) {
         plot = p;
-        feautreMap = new HashMap<Integer, Feature>();
-        final CismapPlugin cismapPlugin = (CismapPlugin) PluginRegistry.getRegistry().getPlugin("cismap");// NOI18N
-        final MappingComponent mc = cismapPlugin.getMappingComponent();
-//            final PLayer fc = mc.getTmpFeatureLayer();
-        final FeatureCollection fc = mc.getFeatureCollection();
-        fc.removeAllFeatures();
-        
+        for (int i = 0; i < plot.getRendererCount(); i++) {
+            if (plot.getRenderer(i) instanceof SelectionXYLineRenderer) {
+                ((SelectionXYLineRenderer)plot.getRenderer(i)).addTSSelectionListener(this);
+            }
+        }
+        featureMap = new HashMap<Integer, PFeature>();
+        cismapPlugin = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
+        mc = cismapPlugin.getMappingComponent();
+        fc = mc.getTmpFeatureLayer();
+//      fc = mc.getFeatureCollection();
+//      fc.removeAllFeatures();
+        fc.removeAllChildren();
+        mc.repaint();
     }
 
     //~ Methods ----------------------------------------------------------------
+
     // TODO Show the geom of the selected Time Series on map
     @Override
     public void chartMouseClicked(final ChartMouseEvent event) {
         final ChartEntity entity = event.getEntity();
-//            System.out.println("ChartMouse Clicked: " + event.toString());
 
         if ((entity != null) && (entity instanceof XYItemEntity)) {
-            final XYItemEntity xyEntity = (XYItemEntity) entity;
-            Geometry geom = null;
+            final XYItemEntity xyEntity = (XYItemEntity)entity;
 
-            if (xyEntity.getDataset() instanceof TimeSeriesDatasetAdapter) {
-                final TimeSeriesDatasetAdapter adapterDataset = (TimeSeriesDatasetAdapter) xyEntity.getDataset();
-                geom = adapterDataset.getGeometry();
-            } else {
-                LOG.warn("time series chart dataset is no instance of TimeSeriesDatasetAdapter. Selection fails");// NOI18N
-                return;
-            }
-            final TimeSeriesCollection tsc = (TimeSeriesCollection) xyEntity.getDataset();
+            final TimeSeriesCollection tsc = (TimeSeriesCollection)xyEntity.getDataset();
             final XYItemRenderer renderer = plot.getRendererForDataset(tsc);
             final int index = plot.getIndexOf(renderer);
-            final SelectionXYLineRenderer selectionRenderer = (SelectionXYLineRenderer) renderer;
-            final CismapPlugin cismapPlugin = (CismapPlugin) PluginRegistry.getRegistry().getPlugin("cismap");// NOI18N
-            final MappingComponent mc = cismapPlugin.getMappingComponent();
-//            final PLayer fc = mc.getTmpFeatureLayer();
-            final FeatureCollection fc = mc.getFeatureCollection();
+            final SelectionXYLineRenderer selectionRenderer = (SelectionXYLineRenderer)renderer;
 
-            // remove the feeature that was created by clicking on map
+            // remove all feeatures
             mc.getRubberBandLayer().removeAllChildren();
+            fc.removeAllChildren();
 
             if (event.getTrigger().isControlDown()) {
                 // For Multi Selection
-                // remove all, then add for each in hashmap...
-
-//                fc.removeAllChildren();
-                fc.removeAllFeatures();
                 selectionRenderer.setSelected(!selectionRenderer.isSelected());
                 plot.setRenderer(index, selectionRenderer);
-                if (selectionRenderer.isSelected()) {
-                    // the time series is now selected so shwo it on map
-                    final Shape s = selectionRenderer.getLegendItem(index, 0).getShape();
-                    final Paint p = selectionRenderer.getLegendItem(index, 0).getFillPaint();
-                    final Feature f = createFeature(geom, s, p);
-                    feautreMap.put(index, f);
-                } else {
-                    // remove the corresponding image from map
-                    final Feature featureToRemove = feautreMap.get(new Integer(index));
-                    if (featureToRemove != null) {
-                        feautreMap.remove(index);
-                    }
-                }
-                for (final Feature f : feautreMap.values()) {
-//                    fc.addChild(((DefaultStyledFeature)f).getPointAnnotationSymbol());
-                    fc.addFeature(f);
-                }
-                return;
             } else {
                 // single selection
                 final boolean wasSelected = selectionRenderer.isSelected();
                 int multiSelection = 0;
                 // first remove the selction of all timeseries and corresponding features from map
-// fc.removeAllChildren();
-                fc.removeAllFeatures();
-                feautreMap.clear();
+                featureMap.clear();
                 for (int i = 0; i < plot.getDatasetCount(); i++) {
-                    final TimeSeriesCollection tsCollection = (TimeSeriesCollection) plot.getDataset(i);
+                    final TimeSeriesCollection tsCollection = (TimeSeriesCollection)plot.getDataset(i);
                     if (tsCollection != null) {
-                        final SelectionXYLineRenderer nonSelectionrenderer = (SelectionXYLineRenderer) plot.getRendererForDataset(tsCollection);
+                        final SelectionXYLineRenderer nonSelectionrenderer = (SelectionXYLineRenderer)
+                            plot.getRendererForDataset(tsCollection);
                         if (nonSelectionrenderer.isSelected()) {
                             multiSelection++;
+                            nonSelectionrenderer.setSelected(false);
+                            plot.setRenderer(i, nonSelectionrenderer, true);
                         }
-                        nonSelectionrenderer.setSelected(false);
-                        plot.setRenderer(i, nonSelectionrenderer, true);
                     }
                 }
 
@@ -159,13 +145,11 @@ public class TimeSeriesSelectionListener implements ChartMouseListener, PlotChan
                 if (!wasSelected || (multiSelection > 1)) {
                     selectionRenderer.setSelected(true);
                     plot.setRenderer(index, selectionRenderer);
-                    final Shape s = selectionRenderer.getLegendItem(index, 0).getShape();
-                    final Paint p = selectionRenderer.getLegendItem(index, 0).getFillPaint();
-                    final Feature f = createFeature(geom, s, p);
-//                    fc.addChild(((DefaultStyledFeature)f).getPointAnnotationSymbol());
-                    fc.addFeature(f);
-                    feautreMap.put(index, f);
                 }
+            }
+
+            for (final PFeature pf : featureMap.values()) {
+                addFeatureToMap(pf);
             }
         }
     }
@@ -178,28 +162,25 @@ public class TimeSeriesSelectionListener implements ChartMouseListener, PlotChan
     @Override
     public void plotChanged(final PlotChangeEvent event) {
         final ChartChangeEventType type = event.getType();
-        final XYPlot tmpPlot = (XYPlot) event.getPlot();
-        final CismapPlugin cismapPlugin = (CismapPlugin) PluginRegistry.getRegistry().getPlugin("cismap");// NOI18N
-        final MappingComponent mc = cismapPlugin.getMappingComponent();
-        final FeatureCollection fc = mc.getFeatureCollection();
+        final XYPlot tmpPlot = (XYPlot)event.getPlot();
 
         if (type.equals(ChartChangeEventType.DATASET_UPDATED)) {
             for (int i = 0; i < tmpPlot.getDatasetCount(); i++) {
                 final XYDataset dataset = tmpPlot.getDataset(i);
-//            tmpPlot.getRenderer(i);
                 if ((dataset == null) && (tmpPlot.getRenderer(i) != null)) {
-//                mc.getRubberBandLayer().removeAllChildren();
-                    final Feature featureToRemove = feautreMap.get(new Integer(i));
+                    final PFeature featureToRemove = featureMap.get(new Integer(i));
                     if (featureToRemove != null) {
-                        fc.removeFeature(featureToRemove);
-                        feautreMap.remove(new Integer(i));
+//                        fc.removeFeature(featureToRemove);
+                        fc.removeChild(featureToRemove);
+                        featureMap.remove(new Integer(i));
                         return;
                     }
                 }
             }
-            for (final Feature f : feautreMap.values()) {
-                fc.addFeature(f);
-            }
+//            for (final PFeature f : feautreMap.values()) {
+//                addFeatureToMap(f);
+////                fc.addFeature(f);
+//            }
         }
     }
 
@@ -219,7 +200,78 @@ public class TimeSeriesSelectionListener implements ChartMouseListener, PlotChan
         return feature;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pf  DOCUMENT ME!
+     */
+// private void removeFeatureFromMap() {
+// for (int i = 0; i < fc.getChildrenCount(); i++) {
+// if (fc.getChild(i) instanceof FeatureAnnotationSymbol) {
+// final FeatureAnnotationSymbol symb = (FeatureAnnotationSymbol)fc.getChild(i);
+// }
+// }
+//
+////        for(Feature f : fc.getAllFeatures()){
+////            if(f instanceof TimeSeriesFeature){
+////                fc.removeFeature(f);
+////            }
+////        }
+//    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pf  DOCUMENT ME!
+     */
+    private void addFeatureToMap(final PFeature pf) {
+        mc.addStickyNode(pf);
+        mc.getTmpFeatureLayer().addChild(pf);
+        mc.rescaleStickyNodes();
+//        final double s = mc.getCamera().getViewScale();
+//        pf.setScale(1 / s);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  renderer  DOCUMENT ME!
+     */
+    public void selectionChanged(final SelectionXYLineRenderer renderer) {
+        final int index = plot.getIndexOf(renderer);
+
+        if (renderer.isSelected()) {
+            Geometry geom = null;
+
+            if (plot.getDataset(index) instanceof TimeSeriesDatasetAdapter) {
+                final TimeSeriesDatasetAdapter adapterDataset = (TimeSeriesDatasetAdapter)plot.getDataset(index);
+                geom = adapterDataset.getGeometry();
+            } else {
+                LOG.warn("time series chart dataset is no instance of TimeSeriesDatasetAdapter. Selection fails"); // NOI18N
+                return;
+            }
+
+            final Shape s = renderer.getLegendItem(index, 0).getShape();
+            final Paint p = renderer.getLegendItem(index, 0).getFillPaint();
+            final Feature f = createFeature(geom, s, p);
+            final PFeature pf = new PFeature(f, mc);
+            featureMap.put(index, pf);
+        } else {
+            featureMap.remove(index);
+        }
+        SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    mc.getTmpFeatureLayer().removeAllChildren();
+                    for (final PFeature pf : featureMap.values()) {
+                        addFeatureToMap(pf);
+                    }
+                }
+            });
+    }
+
     //~ Inner Classes ----------------------------------------------------------
+
     /**
      * DOCUMENT ME!
      *
@@ -229,21 +281,21 @@ public class TimeSeriesSelectionListener implements ChartMouseListener, PlotChan
     protected final class TimeSeriesFeature extends DefaultStyledFeature {
 
         //~ Instance fields ----------------------------------------------------
+
         private final transient Logger LOG = Logger.getLogger(TimeSeriesFeature.class);
         private FeatureAnnotationSymbol featureAnnotationSymbol;
-        private Shape shape;
 
         //~ Constructors -------------------------------------------------------
+
         /**
          * Creates a new TimeSeriesFeature object.
          *
-         * @param  g  DOCUMENT ME!
-         * @param  s  DOCUMENT ME!
-         * @param  p  DOCUMENT ME!
+         * @param  g  the geometry of the time series
+         * @param  s  the time series shape (from legend)
+         * @param  p  the time series paint
          */
         public TimeSeriesFeature(final Geometry g, final Shape s, final Paint p) {
             super();
-            shape = s;
             setGeometry(g);
             BufferedImage bi = null;
             try {
@@ -253,35 +305,37 @@ public class TimeSeriesSelectionListener implements ChartMouseListener, PlotChan
                 LOG.warn("cannot load timeseries feature icon", ex);                                  // NOI18N
             }
 //        final BufferedImage bi = new BufferedImage(24, 24, BufferedImage.TYPE_INT_ARGB);
-            final Graphics2D g2 = (Graphics2D) bi.getGraphics();
+            final Graphics2D g2 = (Graphics2D)bi.getGraphics();
             // paint background circle
 
 //        g2.fillOval(6, 5, 25, 25);
             g2.setPaint(p);
             g2.setStroke(new BasicStroke(2));
-            g2.drawLine(11, 17, 27, 17);
+            g2.drawLine(12, 18, 27, 18);
 
             // paint the time series symbol
             final AffineTransform saveXform = g2.getTransform();
             final AffineTransform at = new AffineTransform();
-
-            final double shapeXMittelpunkt = (s.getBounds().getWidth() / 2) - 3;
-            final double shapeYMittelpunkt = (s.getBounds().getHeight() / 2) - 3;
-            at.translate(19 - shapeXMittelpunkt, 17 - shapeYMittelpunkt);
+            final AffineTransform scaleTrans = new AffineTransform();
+            scaleTrans.scale(1.5, 1.5);
+            final Shape scaledShape = scaleTrans.createTransformedShape(s);
+            final double shapeXMittelpunkt = (scaledShape.getBounds().getWidth() / 2) - (3 * 1.5);
+            final double shapeYMittelpunkt = (scaledShape.getBounds().getHeight() / 2) - (3 * 1.5);
+            at.translate(20 - (shapeXMittelpunkt), 18 - (shapeYMittelpunkt));
             g2.transform(at);
-            g2.scale(2, 2);
 
             g2.setPaint(p);
-            g2.fill(s);
+            g2.fill(scaledShape);
             g2.transform(saveXform);
 
             final FeatureAnnotationSymbol symb = new FeatureAnnotationSymbol(bi);
             symb.setSweetSpotX(0.5);
-            symb.setSweetSpotY(0.9);
+            symb.setSweetSpotY(0.9f);
             featureAnnotationSymbol = symb;
         }
 
         //~ Methods ------------------------------------------------------------
+
         /**
          * Creates a new TimeSeriesFeature object.
          *
