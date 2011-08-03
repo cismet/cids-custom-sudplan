@@ -592,7 +592,9 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private SignaturedFeature createFeatureSignature(final Geometry g, final Shape s, final Paint p) {
         final SignaturedFeature feature = new SignaturedFeature(g);
         // create an image containing the time series shape as overlay icon
-
+        if ((s == null) || (p == null)) {
+            return feature;
+        }
         BufferedImage bi = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
         int width = 0;
         int height = 0;
@@ -688,6 +690,8 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     @Override
     public void fireHoldFeatureChanged() {
         final ArrayList<SignaturedFeature> featureList = new ArrayList<SignaturedFeature>();
+        // TODO anderer weg um gelöschte herauszufinden, da auch null in map sein kann wenn neben envelope geklcikt
+        // wurde
         for (int i = 0; i <= timeseriesCount; i++) {
             if (holdFeatures.get(i) != null) {
                 featureList.add(holdFeatures.get(i));
@@ -827,10 +831,14 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         @Override
         protected void done() {
+            final GeometryFactory gf = new GeometryFactory();
+            final double xCoord = getMce().getxCoord();
+            final double yCoord = getMce().getyCoord();
+            final Point pointGeom = gf.createPoint(new Coordinate(xCoord, yCoord));
             try {
                 final JFreeChart chart = get();
                 if (chart == null) {
-                    holdFeatures.put(timeseriesCount, null);
+                    holdFeatures.put(timeseriesCount, createFeatureSignature(pointGeom, null, null));
                     fireHoldFeatureChanged();
                     return;
                 }
@@ -850,10 +858,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 final XYItemRenderer renderer = plot.getRenderer(timeseriesCount);
                 final Shape s = renderer.getLegendItem(timeseriesCount, 0).getShape();
                 final Paint paint = renderer.getLegendItem(timeseriesCount, 0).getFillPaint();
-                final GeometryFactory gf = new GeometryFactory();
-                final double xCoord = getMce().getxCoord();
-                final double yCoord = getMce().getyCoord();
-                final Point pointGeom = gf.createPoint(new Coordinate(xCoord, yCoord));
 
                 if ((s != null) && (paint != null)) {
                     if (holdButton.isSelected()) {
