@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import org.apache.log4j.Logger;
+
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartRenderingInfo;
@@ -21,14 +23,21 @@ import org.jfree.chart.event.ChartChangeEvent;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.OverlayChangeEvent;
 import org.jfree.chart.panel.Overlay;
+import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.time.TimeSeriesCollection;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Paint;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.HierarchyBoundsListener;
+import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -44,6 +53,7 @@ import java.util.EventListener;
 import java.util.HashMap;
 
 import javax.swing.DefaultBoundedRangeModel;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -62,7 +72,13 @@ import javax.swing.event.ChangeListener;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class CustomChartPanel extends ChartPanel implements AxisChangeListener, ChangeListener {
+public class CustomChartPanel extends ChartPanel implements AxisChangeListener,
+    ChangeListener,
+    HierarchyBoundsListener {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(SOSFeatureInfoDisplay.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -78,6 +94,8 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
     private DateAxis timeAxis;
     private JFreeChart chart;
     private ArrayList<TimeSeriesRemovedListener> listeners = new ArrayList<TimeSeriesRemovedListener>();
+    private final JPanel centerPanel;
+    private JPanel scrollbarPanel;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -89,9 +107,8 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
     public CustomChartPanel(final JFreeChart chart) {
         super(chart);
         this.chart = chart;
-        final JPanel centerPanel = new JPanel();
+        centerPanel = new JPanel();
         centerPanel.setLayout(new BorderLayout());
-
         this.innerChartPanel = new InnerChartPanel(chart);
         if (chart.getPlot() instanceof XYPlot) {
             final XYPlot plot = (XYPlot)chart.getPlot();
@@ -103,6 +120,7 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
             }
             plot.getRangeAxis().setAutoRange(true);
             plot.getRangeAxis().addChangeListener(this);
+            final DateAxis dateAxis = (DateAxis)plot.getDomainAxis();
         } else {
             // Log that zooming/scrolling functionality could not configured correctly
         }
@@ -117,7 +135,32 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
         scrollbar = new JScrollBar(JScrollBar.HORIZONTAL);
         scrollbar.setValues(0, scrollbar_max_val, 0, scrollbar_max_val);
         scrollbar.getModel().addChangeListener(this);
-        centerPanel.add(scrollbar, BorderLayout.SOUTH);
+        scrollbarPanel = new JPanel();
+        scrollbarPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
+        final JLabel lblFiller1 = new JLabel("");
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+
+        scrollbarPanel.add(lblFiller1, gridBagConstraints);
+
+        final int scrollbarMax = scrollbar.getMaximum();
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new Insets(0, 0, 5, 21);
+
+        scrollbarPanel.add(scrollbar, gridBagConstraints);
+
+        centerPanel.add(scrollbarPanel, BorderLayout.SOUTH);
+        centerPanel.add(scrollbarPanel, BorderLayout.SOUTH);
 
 //        slider = new JSlider(JSlider.HORIZONTAL);
         // TODO
@@ -134,6 +177,21 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void resizeScrollbar() {
+        final PlotRenderingInfo plotInfo = this.getChartRenderingInfo().getPlotInfo();
+        final double delta = (plotInfo.getPlotArea().getWidth() - plotInfo.getDataArea().getWidth());
+
+        scrollbar.setPreferredSize(new Dimension((int)Math.round(plotInfo.getDataArea().getWidth() - delta), 18));
+        scrollbar.setSize((int)Math.round(plotInfo.getDataArea().getWidth() - delta), 18);
+
+        this.invalidate();
+        this.validate();
+        this.repaint();
+    }
 
     /**
      * DOCUMENT ME!
@@ -784,8 +842,16 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
     }
 
     @Override
-    public void zoomOutRange(final double x, final double y) {
-        innerChartPanel.zoomOutRange(x, y);
+    public void ancestorMoved(final HierarchyEvent e) {
+//        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void ancestorResized(final HierarchyEvent e) {
+        final PlotRenderingInfo plotInfo = this.getChartRenderingInfo().getPlotInfo();
+        final double delta = (plotInfo.getPlotArea().getWidth() - plotInfo.getDataArea().getWidth());
+        scrollbar.setPreferredSize(new Dimension((int)Math.round(plotInfo.getDataArea().getWidth() - delta), 18));
+        scrollbar.setSize((int)Math.round(plotInfo.getDataArea().getWidth() - delta), 18);
     }
 
     //~ Inner Classes ----------------------------------------------------------

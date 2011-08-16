@@ -8,12 +8,9 @@
 package de.cismet.cids.custom.sudplan;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
-
-import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 
 /**
  * This Class extends TimeSeriesCollection about the geometry. The geometry is needed to show the spatial context of the
@@ -26,28 +23,11 @@ public class TimeSeriesDatasetAdapter extends TimeSeriesCollection {
 
     //~ Instance fields --------------------------------------------------------
 
+// private
     private Geometry geom;
-//    private
+    private at.ac.ait.enviro.tsapi.timeseries.TimeSeries originTimeSeries;
 
     //~ Constructors -----------------------------------------------------------
-
-    /**
-     * Creates a new TimeSeriesDatasetAdapter object.
-     *
-     * @param  g  evt DOCUMENT ME!
-     */
-// public TimeSeriesDatasetAdapter(final MapClickedEvent evt) {
-// mce = evt;
-// }
-
-    /**
-     * Creates a new TimeSeriesDatasetAdapter object.
-     *
-     * @param  g  evt DOCUMENT ME!
-     */
-    public TimeSeriesDatasetAdapter(final Geometry g) {
-        geom = g;
-    }
 
     /**
      * Creates a new TimeSeriesDatasetAdapter object.
@@ -56,6 +36,27 @@ public class TimeSeriesDatasetAdapter extends TimeSeriesCollection {
      */
     public TimeSeriesDatasetAdapter(final TimeSeries series) {
         super(series);
+    }
+
+    /**
+     * Creates a new TimeSeriesDatasetAdapter object.
+     *
+     * @param  g         evt DOCUMENT ME!
+     * @param  originTS  DOCUMENT ME!
+     */
+// public TimeSeriesDatasetAdapter(final MapClickedEvent evt) {
+// mce = evt;
+// }
+
+    /**
+     * Creates a new TimeSeriesDatasetAdapter object.
+     *
+     * @param  g         evt DOCUMENT ME!
+     * @param  originTS  DOCUMENT ME!
+     */
+    public TimeSeriesDatasetAdapter(final Geometry g, final at.ac.ait.enviro.tsapi.timeseries.TimeSeries originTS) {
+        geom = g;
+        originTimeSeries = originTS;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -89,5 +90,23 @@ public class TimeSeriesDatasetAdapter extends TimeSeriesCollection {
      */
     public Geometry getGeometry() {
         return this.geom;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public at.ac.ait.enviro.tsapi.timeseries.TimeSeries getOriginTimeSeries() {
+        return originTimeSeries;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  originTimeSeries  DOCUMENT ME!
+     */
+    public void setOriginTimeSeries(final at.ac.ait.enviro.tsapi.timeseries.TimeSeries originTimeSeries) {
+        this.originTimeSeries = originTimeSeries;
     }
 }

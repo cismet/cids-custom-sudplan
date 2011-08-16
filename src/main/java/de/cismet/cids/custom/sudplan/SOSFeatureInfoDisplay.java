@@ -60,11 +60,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.features.SignaturedFeature;
@@ -126,16 +126,17 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JComboBox cboResolution =
         new de.cismet.cids.custom.sudplan.LocalisedEnumComboBox(Resolution.class, available);
-    private final transient javax.swing.JPanel controlElementsPanel = new javax.swing.JPanel();
-    private final transient javax.swing.JRadioButton holdButton = new javax.swing.JRadioButton();
-    private final transient javax.swing.JPanel holdButtonPanel = new javax.swing.JPanel();
-    private final transient javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
+    private final transient javax.swing.JCheckBox holdCheckBox = new javax.swing.JCheckBox();
     private final transient javax.swing.JLabel lblFiller = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblFiller1 = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblFiller2 = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblFiller3 = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblResolution = new javax.swing.JLabel();
     private final transient javax.swing.JPanel pnlChart = new javax.swing.JPanel();
+    private final transient javax.swing.JPanel pnlControlElements = new javax.swing.JPanel();
+    private final transient javax.swing.JPanel pnlHoldButton = new javax.swing.JPanel();
+    private final transient javax.swing.JPanel pnlResolution = new javax.swing.JPanel();
     private final transient javax.swing.JPanel pnlToolbar = new javax.swing.JPanel();
-    private final transient javax.swing.JPanel resolutionPanel = new javax.swing.JPanel();
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -189,34 +190,29 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(pnlChart, gridBagConstraints);
 
-        controlElementsPanel.setLayout(new java.awt.GridBagLayout());
+        pnlControlElements.setLayout(new java.awt.GridBagLayout());
 
-        holdButtonPanel.setLayout(new java.awt.GridBagLayout());
+        pnlHoldButton.setLayout(new java.awt.GridBagLayout());
 
-        holdButton.setText(org.openide.util.NbBundle.getMessage(
+        holdCheckBox.setText(org.openide.util.NbBundle.getMessage(
                 SOSFeatureInfoDisplay.class,
-                "SOSFeatureInfoDisplay.holdButton.text")); // NOI18N
-        holdButton.setFocusPainted(false);
-        holdButton.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    holdButtonActionPerformed(evt);
-                }
-            });
-        holdButtonPanel.add(holdButton, new java.awt.GridBagConstraints());
-
-        controlElementsPanel.add(holdButtonPanel, new java.awt.GridBagConstraints());
-
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(
+                "SOSFeatureInfoDisplay.holdCheckBox.text"));        // NOI18N
+        holdCheckBox.setToolTipText(org.openide.util.NbBundle.getMessage(
                 SOSFeatureInfoDisplay.class,
-                "SOSFeatureInfoDisplay.jLabel1.text")); // NOI18N
-        jLabel1.setMaximumSize(new java.awt.Dimension(10, 0));
-        jLabel1.setMinimumSize(new java.awt.Dimension(10, 0));
-        jLabel1.setPreferredSize(new java.awt.Dimension(10, 0));
-        controlElementsPanel.add(jLabel1, new java.awt.GridBagConstraints());
+                "SOSFeatureInfoDisplay.holdCheckBox.toolTipText")); // NOI18N
+        pnlHoldButton.add(holdCheckBox, new java.awt.GridBagConstraints());
 
-        resolutionPanel.setLayout(new java.awt.GridBagLayout());
+        pnlControlElements.add(pnlHoldButton, new java.awt.GridBagConstraints());
+
+        lblFiller3.setText(org.openide.util.NbBundle.getMessage(
+                SOSFeatureInfoDisplay.class,
+                "SOSFeatureInfoDisplay.lblFiller3.text")); // NOI18N
+        lblFiller3.setMaximumSize(new java.awt.Dimension(10, 0));
+        lblFiller3.setMinimumSize(new java.awt.Dimension(10, 0));
+        lblFiller3.setPreferredSize(new java.awt.Dimension(10, 0));
+        pnlControlElements.add(lblFiller3, new java.awt.GridBagConstraints());
+
+        pnlResolution.setLayout(new java.awt.GridBagLayout());
 
         lblFiller.setText(NbBundle.getMessage(SOSFeatureInfoDisplay.class, "SOSFeatureInfoDisplay.lblFiller.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -224,7 +220,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        resolutionPanel.add(lblFiller, gridBagConstraints);
+        pnlResolution.add(lblFiller, gridBagConstraints);
 
         lblResolution.setText(NbBundle.getMessage(
                 SOSFeatureInfoDisplay.class,
@@ -234,7 +230,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        resolutionPanel.add(lblResolution, gridBagConstraints);
+        pnlResolution.add(lblResolution, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -242,18 +238,29 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        resolutionPanel.add(cboResolution, gridBagConstraints);
+        pnlResolution.add(cboResolution, gridBagConstraints);
 
-        controlElementsPanel.add(resolutionPanel, new java.awt.GridBagConstraints());
+        pnlControlElements.add(pnlResolution, new java.awt.GridBagConstraints());
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
-        add(controlElementsPanel, gridBagConstraints);
+        add(pnlControlElements, gridBagConstraints);
 
-        pnlToolbar.setMinimumSize(new java.awt.Dimension(350, 30));
-        pnlToolbar.setPreferredSize(new java.awt.Dimension(400, 30));
+        pnlToolbar.setMinimumSize(new java.awt.Dimension(500, 30));
+        pnlToolbar.setPreferredSize(new java.awt.Dimension(500, 30));
         pnlToolbar.setLayout(new java.awt.GridBagLayout());
+
+        lblFiller2.setText(org.openide.util.NbBundle.getMessage(
+                SOSFeatureInfoDisplay.class,
+                "SOSFeatureInfoDisplay.lblFiller2.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        pnlToolbar.add(lblFiller2, gridBagConstraints);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -263,12 +270,11 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     /**
      * DOCUMENT ME!
      *
-     * @param  evt  DOCUMENT ME!
+     * @param   layer             evt DOCUMENT ME!
+     * @param   parentTabbedPane  DOCUMENT ME!
+     *
+     * @throws  InitialisationException  DOCUMENT ME!
      */
-    private void holdButtonActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_holdButtonActionPerformed
-        // TODO add your handling code here:
-    } //GEN-LAST:event_holdButtonActionPerformed
-
     /**
      * DOCUMENT ME!
      *
@@ -485,8 +491,9 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         final Envelope envelope = (Envelope)timeseries.getTSProperty(TimeSeries.GEOMETRY);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Time Series Geometry max X / Y, min X/Y: " + envelope.getMaxX() + "/" + envelope.getMaxY() + ", "
-                        + envelope.getMinX() + "/" + envelope.getMinY());
+            LOG.debug("Time Series Geometry max X / Y, min X/Y: " + envelope.getMaxX() + "/" + envelope.getMaxY()
+                        + ", " // NOI18N
+                        + envelope.getMinX() + "/" + envelope.getMinY()); // NOI18N
         }
 
         if (envelope == null) {
@@ -510,11 +517,10 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             // set the Unit of the timeseries as the rangedescription.
             data.setRangeDescription(SMSUtils.unitFromTimeseries(timeseries).getLocalisedName());
             final TimeSeriesDatasetAdapter dataset = new TimeSeriesDatasetAdapter(data);
-            // TODO nicht das mce speichern sondern die geom..
             final GeometryFactory gf = new GeometryFactory();
             final Point p = gf.createPoint(new Coordinate(xCoord, yCoord));
             dataset.setGeometry(p);
-//            dataset.setMapClickedEvent(currentDisplayer.getMce());
+            dataset.setOriginTimeSeries(timeseries);
             return dataset;
         } else {
             LOG.warn("time series geometry does not contain mouse click coordinates"); // NOI18N
@@ -552,7 +558,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                     "Time",
                     unit.getLocalisedName(),
                     dataset,
-                    true,
+                    false,
                     true,
                     false);
         } else {
@@ -669,7 +675,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
     @Override
     public boolean isOnHold() {
-        return this.holdButton.isSelected();
+        return this.holdCheckBox.isSelected();
     }
 
     @Override
@@ -790,8 +796,8 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 return null;
             }
 
-            if (holdButton.isSelected() && chartPanelhasChart) {
-                // if holdButton pressed, modifiy the dataset and actualize the chart
+            if (holdCheckBox.isSelected() && chartPanelhasChart) {
+                // if holdCheckBox pressed, modifiy the dataset and actualize the chart
                 if (existingChart.getPlot() instanceof XYPlot) {
                     timeseriesCount++;
                     final XYPlot plot = (XYPlot)existingChart.getPlot();
@@ -844,6 +850,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 }
                 pnlChart.removeAll();
                 final CustomChartPanel chartPanel = new CustomChartPanel(chart);
+                pnlChart.addHierarchyBoundsListener(chartPanel);
                 chartPanel.addChartMouseListener(listener);
                 chart.getPlot().addChangeListener(listener);
                 chartPanel.addTimeSeriesRemovedListener(SOSFeatureInfoDisplay.this);
@@ -851,7 +858,8 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 toolbar.setChartPanel(chartPanel);
                 pnlToolbar.removeAll();
                 final GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
-                gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+                gridBagConstraints.gridx = 0;
+                gridBagConstraints.gridy = 0;
                 gridBagConstraints.anchor = GridBagConstraints.CENTER;
                 gridBagConstraints.insets = new Insets(5, 5, 5, 5);
                 pnlToolbar.add(toolbar, gridBagConstraints);
@@ -860,7 +868,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 final Paint paint = renderer.getLegendItem(timeseriesCount, 0).getFillPaint();
 
                 if ((s != null) && (paint != null)) {
-                    if (holdButton.isSelected()) {
+                    if (holdCheckBox.isSelected()) {
 //                    holdFeatures.add(createFeatureSignature(pointGeom, s, paint));
                         holdFeatures.put(timeseriesCount, createFeatureSignature(pointGeom, s, paint));
                     } else {
@@ -882,6 +890,13 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 }
                 parent.invalidate();
                 parent.validate();
+                SwingUtilities.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            chartPanel.resizeScrollbar();
+                        }
+                    });
             } catch (final InterruptedException ex) {
                 final String message = "in done nothing should be interrupted anymore"; // NOI18N
                 LOG.error(message, ex);
