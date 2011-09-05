@@ -7,7 +7,10 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import Sirius.navigator.plugin.PluginRegistry;
+
 import at.ac.ait.enviro.tsapi.handler.DataHandler;
+import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 
@@ -17,34 +20,20 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
+import edu.umd.cs.piccolo.PLayer;
+
 import org.apache.log4j.Logger;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.data.time.Day;
-import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.IntervalXYDataset;
-import org.jfree.ui.RectangleInsets;
+import org.jfree.util.Log;
 
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.Paint;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import java.beans.BeanInfo;
@@ -63,20 +52,39 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
+import javax.imageio.ImageIO;
+
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
+import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
 
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSignature;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.TimeSeriesVisualisationFactory;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.VisualisationType;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesListChangedEvent;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesListChangedListener;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionEvent;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionListener;
+
+import de.cismet.cismap.commons.features.DefaultStyledFeature;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.SignaturedFeature;
+import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.featureinfowidget.AbstractFeatureInfoDisplay;
 import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoDisplay;
 import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoDisplayKey;
 import de.cismet.cismap.commons.gui.featureinfowidget.InitialisationException;
 import de.cismet.cismap.commons.gui.featureinfowidget.MultipleFeatureInfoRequestsDisplay;
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldFeatureChangeEvent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldListener;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
+
+import de.cismet.cismap.navigatorplugin.CismapPlugin;
 
 /**
  * DOCUMENT ME!
@@ -88,7 +96,8 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 @ServiceProvider(service = FeatureInfoDisplay.class)
 public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWMSServiceLayerGroup>
         implements MultipleFeatureInfoRequestsDisplay,
-            TimeSeriesRemovedListener {
+            TimeSeriesListChangedListener,
+            TimeSeriesSelectionListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -117,19 +126,20 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private transient TimeSeriesDisplayer currentDisplayer;
     private transient TimeseriesRetrieverConfig config;
     private int timeseriesCount = 0;
-    private TimeSeriesSelectionListener listener;
     // End of variables declaration
 // private ArrayList<SignaturedFeature> holdFeatures = new ArrayList<SignaturedFeature>();
     private HashMap<Integer, SignaturedFeature> holdFeatures = new HashMap<Integer, SignaturedFeature>();
     private ArrayList<HoldListener> holdListeners = new ArrayList<HoldListener>();
-    private TimeSeriesChartToolBar toolbar;
+    private JToolBar toolbar;
+    private TimeSeriesVisualisation tsVis;
+    private int overlayWidth = 0;
+    private int overlayHeight = 0;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JComboBox cboResolution =
         new de.cismet.cids.custom.sudplan.LocalisedEnumComboBox(Resolution.class, available);
     private final transient javax.swing.JCheckBox holdCheckBox = new javax.swing.JCheckBox();
     private final transient javax.swing.JLabel lblFiller = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblFiller1 = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblFiller2 = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblFiller3 = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblResolution = new javax.swing.JLabel();
     private final transient javax.swing.JPanel pnlChart = new javax.swing.JPanel();
@@ -152,7 +162,48 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 FeatureInfoDisplayKey.ANY_SERVER,
                 FeatureInfoDisplayKey.ANY_LAYER));
         initComponents();
-        toolbar = new TimeSeriesChartToolBar();
+        tsVis = TimeSeriesVisualisationFactory.getInstance().createVisualisation(VisualisationType.SIMPLE);
+        tsVis.addTimeSeriesListChangeListener(this);
+        // try to get properties for size of the overlay
+        overlayWidth = 16;
+        overlayHeight = 16;
+        // try to get metainformation for overlay position, width, color from properties file and override the
+        // default values if succesfull
+        final Properties iconProps = new Properties();
+        try {
+            final InputStream in = getClass().getResourceAsStream(
+                    "/de/cismet/cismap/commons/gui/res/featureInfoIcon.properties");                             // NOI18N
+            if (in != null) {
+                iconProps.load(in);
+                in.close();
+            } else {
+                LOG.warn(
+                    "Could not laod featureInfoIcon.properties file. Default values for overlay area are used"); // NOI18N
+            }
+        } catch (IOException ex) {
+            LOG.error(
+                "Could not read featureInfoIcon.properties file. Default values for overlay area are used",
+                ex);                                                                                             // NOI18N
+        }
+
+        if (iconProps.isEmpty() || !(iconProps.containsKey("overlayWidth") && iconProps.containsKey("overlayHeigth"))) {       // NOI18N
+            LOG.warn(
+                "featureInfoIcon.properties file does not contain all needed keys. Default values for overlay area are used"); // NOI18N
+        } else {
+            try {
+                overlayWidth = Integer.parseInt((String)iconProps.get("overlayWidth"));                                        // NOI18N
+                overlayHeight = Integer.parseInt((String)iconProps.get("overlayHeigth"));                                      // NOI18N
+            } catch (NumberFormatException ex) {
+                Log.error(
+                    "Error while retrieving properties for overlay area. Default values for overlay area are used",            // NOI18N
+                    ex);
+            }
+        }
+
+        final TimeSeriesSelectionNotification tsn = tsVis.getLookup(TimeSeriesSelectionNotification.class);
+        if (tsn != null) {
+            tsn.addTimeSeriesSelectionListener(this);
+        }
         initialised = false;
     }
 
@@ -249,21 +300,11 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         pnlToolbar.setMinimumSize(new java.awt.Dimension(500, 30));
         pnlToolbar.setPreferredSize(new java.awt.Dimension(500, 30));
-        pnlToolbar.setLayout(new java.awt.GridBagLayout());
-
-        lblFiller2.setText(org.openide.util.NbBundle.getMessage(
-                SOSFeatureInfoDisplay.class,
-                "SOSFeatureInfoDisplay.lblFiller2.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        pnlToolbar.add(lblFiller2, gridBagConstraints);
-
+        pnlToolbar.setLayout(new java.awt.BorderLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(pnlToolbar, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
@@ -455,222 +496,17 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     /**
      * DOCUMENT ME!
      *
-     * @param   timeseries  datapoint DOCUMENT ME!
-     * @param   name        DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  IllegalStateException  DOCUMENT ME!
-     */
-    private IntervalXYDataset createDataset(final TimeSeries timeseries, final String name) {
-        final Object valueKeyObject = timeseries.getTSProperty(TimeSeries.VALUE_KEYS);
-
-        final String valueKey;
-        if (valueKeyObject instanceof String) {
-            valueKey = (String)valueKeyObject;
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("found valuekey: " + valueKey);                   // NOI18N
-            }
-        } else if (valueKeyObject instanceof String[]) {
-            final String[] valueKeys = (String[])valueKeyObject;
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("found multiple valuekeys: " + valueKeys.length); // NOI18N
-            }
-
-            if (valueKeys.length == 1) {
-                valueKey = valueKeys[0];
-            } else {
-                throw new IllegalStateException("found too many valuekeys");              // NOI18N
-            }
-        } else {
-            throw new IllegalStateException("unknown value key type: " + valueKeyObject); // NOI18N
-        }
-
-        final TimeStamp[] timeStamps = timeseries.getTimeStampsArray();                       // getTimeStamps();
-        final org.jfree.data.time.TimeSeries data = new org.jfree.data.time.TimeSeries(name); // NOI18N
-
-        final Envelope envelope = (Envelope)timeseries.getTSProperty(TimeSeries.GEOMETRY);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Time Series Geometry max X / Y, min X/Y: " + envelope.getMaxX() + "/" + envelope.getMaxY()
-                        + ", " // NOI18N
-                        + envelope.getMinX() + "/" + envelope.getMinY()); // NOI18N
-        }
-
-        if (envelope == null) {
-            return null;
-        } else if (envelope.contains(currentDisplayer.getMce().getxCoord(), currentDisplayer.getMce().getyCoord())) {
-            final double width = envelope.getWidth();
-            final double height = envelope.getHeight();
-            final double xCoord = currentDisplayer.getMce().getxCoord();
-            final double yCoord = currentDisplayer.getMce().getyCoord();
-            final double xRelation = ((xCoord - envelope.getMinX()) / width);
-            final double yRelation = ((yCoord - envelope.getMinY()) / height);
-
-            for (final TimeStamp ts : timeStamps) {
-                final Float[][] values = ((Float[][])timeseries.getValue(ts, valueKey));
-                // assume this is a rectangular grid
-                final int i = (int)(values.length * xRelation);
-                final int j = (int)(values[i].length * yRelation);
-                final float value = values[i][j];
-                data.add(new Day(ts.asDate()), value);
-            }
-            // set the Unit of the timeseries as the rangedescription.
-            data.setRangeDescription(SMSUtils.unitFromTimeseries(timeseries).getLocalisedName());
-            final TimeSeriesDatasetAdapter dataset = new TimeSeriesDatasetAdapter(data);
-            final GeometryFactory gf = new GeometryFactory();
-            final Point p = gf.createPoint(new Coordinate(xCoord, yCoord));
-            dataset.setGeometry(p);
-            dataset.setOriginTimeSeries(timeseries);
-            return dataset;
-        } else {
-            LOG.warn("time series geometry does not contain mouse click coordinates"); // NOI18N
-            return null;
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   dataset  DOCUMENT ME!
-     * @param   unit     DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  IllegalStateException  DOCUMENT ME!
-     */
-    private JFreeChart createChart(final IntervalXYDataset dataset, final Unit unit) {
-        final JFreeChart chart;
-        final Variable observed = Variable.getVariable(obsProp);
-        if (Variable.PRECIPITATION.equals(observed)) {
-            chart = ChartFactory.createXYBarChart(
-                    "Rainfall data",
-                    "Time",
-                    true,                                                              // date axis
-                    unit.getLocalisedName(),
-                    dataset,
-                    PlotOrientation.VERTICAL,
-                    false,                                                             // legend
-                    true,                                                              // tooltips
-                    false);                                                            // urls
-        } else if (Variable.TEMPERATURE.equals(observed) || Variable.O3.equals(observed)) {
-            chart = ChartFactory.createTimeSeriesChart(
-                    "Timeseries data",
-                    "Time",
-                    unit.getLocalisedName(),
-                    dataset,
-                    false,
-                    true,
-                    false);
-        } else {
-            throw new IllegalStateException("unsupported variable: " + observed);
-        }
-
-        chart.setBackgroundPaint(getBackground());
-
-        final XYPlot plot = (XYPlot)chart.getPlot();
-        plot.setBackgroundPaint(Color.WHITE);
-        plot.setDomainGridlinePaint(Color.BLUE);
-        plot.setRangeGridlinePaint(Color.BLUE);
-        plot.setAxisOffset(new RectangleInsets(15d, 15d, 15d, 15d));
-        plot.setDomainCrosshairVisible(true);
-        plot.setRangeCrosshairVisible(true);
-
-        final SelectionXYLineRenderer renderer = new SelectionXYLineRenderer();
-        renderer.setBaseShapesVisible(true);
-        renderer.setBaseShapesFilled(true);
-        final NumberAxis axis = (NumberAxis)plot.getRangeAxis();
-        axis.setAutoRangeIncludesZero(false);
-        plot.setRenderer(renderer);
-        listener = new TimeSeriesSelectionListener(chart.getXYPlot());
-        timeseriesCount = 0;
-        return chart;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   g  DOCUMENT ME!
-     * @param   s  DOCUMENT ME!
-     * @param   p  DOCUMENT ME!
+     * @param   pointGeom  DOCUMENT ME!
+     * @param   bi         DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private SignaturedFeature createFeatureSignature(final Geometry g, final Shape s, final Paint p) {
-        final SignaturedFeature feature = new SignaturedFeature(g);
-        // create an image containing the time series shape as overlay icon
-        if ((s == null) || (p == null)) {
-            return feature;
+    private SignaturedFeature createFeatureSignature(final Geometry pointGeom, final BufferedImage bi) {
+        final SignaturedFeature feature = new SignaturedFeature(pointGeom);
+        if (bi != null) {
+            feature.setOverlayIcon(bi);
         }
-        BufferedImage bi = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-        int width = 0;
-        int height = 0;
-
-        // get meta iformation for the size of the overlay
-        final Properties iconProps = new Properties();
-        try {
-            final InputStream in = getClass().getResourceAsStream(
-                    "/de/cismet/cismap/commons/gui/res/featureInfoIcon.properties");                             // NOI18N
-            if (in != null) {
-                iconProps.load(in);
-                in.close();
-            } else {
-                LOG.warn(
-                    "Could not laod featureInfoIcon.properties file. Default values for overlay area are used"); // NOI18N
-            }
-        } catch (IOException ex) {
-            LOG.error(
-                "Could not read featureInfoIcon.properties file. Default values for overlay area are used",
-                ex);                                                                                             // NOI18N
-        }
-
-        if (iconProps.isEmpty()
-                    || (!iconProps.containsKey("overlayWidth") && !iconProps.containsKey("overlayHeigth")) // NOI18N
-        ) {                                                                                                // NOI18N
-            // TODO ERROR LOG EXCPETION
-            LOG.warn(
-                "featureInfoicon.properties file does not contain all needed keys. Default values for overlay area are used"); // NOI18N
-        } else {
-            try {
-                width = Integer.parseInt((String)iconProps.get("overlayWidth"));                                               // NOI18N
-                height = Integer.parseInt((String)iconProps.get("overlayHeigth"));                                             // NOI18N
-                bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-            } catch (NumberFormatException ex) {
-                LOG.error(
-                    "Error while retrieving properties for overlay area. Default values for overlay area are used",            // NOI18N
-                    ex);
-            }
-        }
-
-        final Graphics2D g2 = (Graphics2D)bi.getGraphics();
-        g2.setPaint(p);
-//        g2.drawRect(0, 0, bi.getWidth(), bi.getHeight());
-        g2.setStroke(new BasicStroke(2));
-        g2.drawLine(0, 8, 16, 8);
-        feature.setOverlayIcon(bi);
-        // paint the time series symbol
-        final AffineTransform saveXform = g2.getTransform();
-        final AffineTransform at = new AffineTransform();
-        final AffineTransform scaleTrans = new AffineTransform();
-
-        scaleTrans.scale(1.5, 1.5);
-        final Shape scaledShape = scaleTrans.createTransformedShape(s);
-//        g2.setColor(Color.red);
-//        g2.drawRect(0, 0, (int)scaledShape.getBounds().getWidth(), (int)scaledShape.getBounds().getHeight());
-        final double imageXMittelpunkt = bi.getWidth() / 2;
-        final double imageYMittelpunkt = bi.getHeight() / 2;
-        final double shapeXMittelpunkt = (scaledShape.getBounds().getWidth() / 2) - 4.5;
-        final double shapeYMittelpunkt = (scaledShape.getBounds().getHeight() / 2) - 4.5;
-        at.translate(imageXMittelpunkt - (shapeXMittelpunkt), imageYMittelpunkt - (shapeYMittelpunkt));
-        g2.transform(at);
-
-        g2.setPaint(p);
-        g2.fill(scaledShape);
-//        g2.setColor(Color.black);
-//        g2.drawRect(0, 0, (int)scaledShape.getBounds().getWidth(), (int)scaledShape.getBounds().getHeight());
-        g2.transform(saveXform);
-
         return feature;
-//        return new SignaturedFeature(g);
     }
 
     @Override
@@ -698,28 +534,67 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         final ArrayList<SignaturedFeature> featureList = new ArrayList<SignaturedFeature>();
         // TODO anderer weg um gelöschte herauszufinden, da auch null in map sein kann wenn neben envelope geklcikt
         // wurde
-        for (int i = 0; i <= timeseriesCount; i++) {
-            if (holdFeatures.get(i) != null) {
-                featureList.add(holdFeatures.get(i));
-            }
+        for (final SignaturedFeature f : holdFeatures.values()) {
+            featureList.add(f);
         }
         for (final HoldListener hl : holdListeners) {
             hl.holdFeautresChanged(new HoldFeatureChangeEvent(featureList, this));
         }
     }
 
+    @Override
+    public void timeSeriesListChanged(final TimeSeriesListChangedEvent evt) {
+        if (evt.getID() == TimeSeriesListChangedEvent.TIME_SERIES_REMOVED) {
+            final TimeSeries ts = (TimeSeries)evt.getSource();
+            for (final Integer i : holdFeatures.keySet()) {
+                final SignaturedFeature f = holdFeatures.get(i);
+                if (f.getGeometry().equals((Geometry)ts.getTSProperty(TimeSeries.GEOMETRY))) {
+                    holdFeatures.remove(i);
+                }
+            }
+        } else if (evt.getID() == TimeSeriesListChangedEvent.TIME_SERIES_CLEARED) {
+            holdFeatures.clear();
+            timeseriesCount = 0;
+        }
+    }
+
+    @Override
+    public void selectionChanged(final TimeSeriesSelectionEvent evt) {
+        final Collection<TimeSeries> selectedTS = evt.getSelectedTs();
+        final CismapPlugin cismapPlugin = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
+        final MappingComponent mc = cismapPlugin.getMappingComponent();
+        mc.getRubberBandLayer().removeAllChildren();
+        final PLayer fc = mc.getTmpFeatureLayer();
+//      fc = mc.getFeatureCollection();
+//      fc.removeAllFeatures();
+        fc.removeAllChildren();
+        mc.repaint();
+        final TimeSeriesSignature tss = tsVis.getLookup(TimeSeriesSignature.class);
+        if (tss != null) {
+            for (final TimeSeries ts : selectedTS) {
+                final BufferedImage bi = tss.getTimeSeriesSignature(ts, overlayWidth, overlayHeight);
+                final Geometry g = (Geometry)ts.getTSProperty(TimeSeries.GEOMETRY);
+                final PFeature pf = new PFeature(createFeature(g, bi), mc);
+                mc.addStickyNode(pf);
+                mc.getTmpFeatureLayer().addChild(pf);
+                mc.rescaleStickyNodes();
+            }
+        }
+    }
+
     /**
      * DOCUMENT ME!
      *
-     * @param  index  holdFeatures DOCUMENT ME!
+     * @param   g   DOCUMENT ME!
+     * @param   bi  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-// public void setHoldFeatures(final ArrayList<SignaturedFeature> holdFeatures) {
-// this.holdFeatures = holdFeatures;
-// }
-    @Override
-    public void timeSeriesRemoved(final int index) {
-        // remove the corresponding feature from holdFeature Collection
-        holdFeatures.remove(index);
+    private Feature createFeature(final Geometry g, final BufferedImage bi) {
+//        final PureNewFeature feature = new PureNewFeature(g);
+        final TimeSeriesFeature feature = new TimeSeriesFeature(g, bi);
+//        feature.setName("timeSeries Object");
+        return feature;
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -744,7 +619,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
      *
      * @version  $Revision$, $Date$
      */
-    private final class TimeSeriesDisplayer extends SwingWorker<JFreeChart, Void> {
+    private final class TimeSeriesDisplayer extends SwingWorker<TimeSeries, Void> {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -773,66 +648,69 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         }
 
         @Override
-        protected JFreeChart doInBackground() throws Exception {
+        protected TimeSeries doInBackground() throws Exception {
             final TimeSeries timeseries = TimeseriesRetriever.getInstance().retrieve(config).get();
-            final IntervalXYDataset newDataset = createDataset(timeseries, obsProp);
-
-            JFreeChart existingChart = null;
-            CustomChartPanel chartPanel = null;
-            final Component[] components = pnlChart.getComponents();
-            boolean chartPanelhasChart = false;
-            for (int i = 0; i < components.length; i++) {
-                if (components[i] instanceof CustomChartPanel) {
-                    chartPanel = (CustomChartPanel)components[i];
-                    if (chartPanel.getChart() != null) {
-                        existingChart = chartPanel.getChart();
-                        chartPanelhasChart = true;
-                    }
-                }
+            final Object valueKeyObject = timeseries.getTSProperty(TimeSeries.VALUE_KEYS);
+            final String name = config.getObsProp();
+            String humanReadableObsProp = "";
+            if (name != null) {
+                final String[] splittedName = name.split(":");
+                humanReadableObsProp = splittedName[splittedName.length - 1];
             }
-            if (newDataset == null) {
-                LOG.warn("Could not get a time series.  "); // NOI18N
-                timeseriesCount++;
+            final String valueKey;
+            if (valueKeyObject instanceof String) {
+                valueKey = (String)valueKeyObject;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("found valuekey: " + valueKey);                   // NOI18N
+                }
+            } else if (valueKeyObject instanceof String[]) {
+                final String[] valueKeys = (String[])valueKeyObject;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("found multiple valuekeys: " + valueKeys.length); // NOI18N
+                }
+
+                if (valueKeys.length == 1) {
+                    valueKey = valueKeys[0];
+                } else {
+                    throw new IllegalStateException("found too many valuekeys");              // NOI18N
+                }
+            } else {
+                throw new IllegalStateException("unknown value key type: " + valueKeyObject); // NOI18N
+            }
+
+            final TimeStamp[] timeStamps = timeseries.getTimeStampsArray(); // getTimeStamps();
+
+            final Envelope envelope = (Envelope)timeseries.getTSProperty(TimeSeries.GEOMETRY);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Time Series Geometry max X / Y, min X/Y: " + envelope.getMaxX() + "/" + envelope.getMaxY()
+                            + ", " // NOI18N
+                            + envelope.getMinX() + "/" + envelope.getMinY()); // NOI18N
+            }
+
+            if (envelope == null) {
                 return null;
-            }
-
-            if (holdCheckBox.isSelected() && chartPanelhasChart) {
-                // if holdCheckBox pressed, modifiy the dataset and actualize the chart
-                if (existingChart.getPlot() instanceof XYPlot) {
-                    timeseriesCount++;
-                    final XYPlot plot = (XYPlot)existingChart.getPlot();
-                    final TimeSeriesCollection newData = (TimeSeriesCollection)newDataset;
-                    final org.jfree.data.time.TimeSeries newTimeseries = newData.getSeries(0);
-
-                    plot.setDataset(timeseriesCount, newData);
-                    final SelectionXYLineRenderer renderer = new SelectionXYLineRenderer(true, true, false);
-                    renderer.addTSSelectionListener(listener);
-                    plot.setRenderer(timeseriesCount, renderer);
-                    // if there are different units we have to create a multi axis chart
-                    boolean newTSVariable = true;
-                    for (int i = 0; i < (plot.getDatasetCount() - 1); i++) {
-                        final TimeSeriesCollection tsCollection = (TimeSeriesCollection)plot.getDataset(i);
-                        if (tsCollection != null) {
-                            final org.jfree.data.time.TimeSeries ts = tsCollection.getSeries(0);
-                            if (newTimeseries.getRangeDescription().equals(ts.getRangeDescription())) {
-                                newTSVariable = false;
-                                break;
-                            }
-                        }
-                    }
-                    if (newTSVariable) {
-                        // time series doesnt fit to any axisting axis, so create a new one
-                        final NumberAxis axis = new NumberAxis(newTimeseries.getRangeDescription());
-                        axis.setAutoRange(true);
-                        axis.setAutoRangeIncludesZero(false);
-//                            axis.setLabelPaint((plot.getRenderer(clickCount)).getSeriesPaint(0));
-                        plot.setRangeAxis(timeseriesCount, axis);
-                        plot.mapDatasetToRangeAxis(timeseriesCount, timeseriesCount);
-                    }
-                    return existingChart;
+            } else if (envelope.contains(
+                            currentDisplayer.getMce().getxCoord(),
+                            currentDisplayer.getMce().getyCoord())) {
+                final double width = envelope.getWidth();
+                final double height = envelope.getHeight();
+                final double xCoord = currentDisplayer.getMce().getxCoord();
+                final double yCoord = currentDisplayer.getMce().getyCoord();
+                final double xRelation = ((xCoord - envelope.getMinX()) / width);
+                final double yRelation = ((yCoord - envelope.getMinY()) / height);
+                final TimeSeries simpleTS = timeseries.slice(TimeInterval.ALL_INTERVAL);
+                simpleTS.setTSProperty(TimeSeries.OBSERVEDPROPERTY, humanReadableObsProp);
+                for (final TimeStamp ts : timeStamps) {
+                    final Float[][] values = ((Float[][])timeseries.getValue(ts, valueKey));
+                    // assume this is a rectangular grid
+                    final int i = (int)(values.length * xRelation);
+                    final int j = (int)(values[i].length * yRelation);
+                    final float value = values[i][j];
+                    simpleTS.setValue(ts, valueKey, value);
                 }
+                return simpleTS;
             }
-            return createChart(newDataset, SMSUtils.unitFromTimeseries(timeseries));
+            return null;
         }
 
         @Override
@@ -842,45 +720,41 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             final double yCoord = getMce().getyCoord();
             final Point pointGeom = gf.createPoint(new Coordinate(xCoord, yCoord));
             try {
-                final JFreeChart chart = get();
-                if (chart == null) {
-                    holdFeatures.put(timeseriesCount, createFeatureSignature(pointGeom, null, null));
+                final TimeSeries timeseries = get();
+                if (timeseries == null) {
+                    timeseriesCount++;
+                    holdFeatures.put(timeseriesCount, createFeatureSignature(pointGeom, null));
                     fireHoldFeatureChanged();
                     return;
                 }
-                pnlChart.removeAll();
-                final CustomChartPanel chartPanel = new CustomChartPanel(chart);
-                pnlChart.addHierarchyBoundsListener(chartPanel);
-                chartPanel.addChartMouseListener(listener);
-                chart.getPlot().addChangeListener(listener);
-                chartPanel.addTimeSeriesRemovedListener(SOSFeatureInfoDisplay.this);
-                final XYPlot plot = (XYPlot)chart.getPlot();
-                toolbar.setChartPanel(chartPanel);
-                pnlToolbar.removeAll();
-                final GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
-                gridBagConstraints.gridx = 0;
-                gridBagConstraints.gridy = 0;
-                gridBagConstraints.anchor = GridBagConstraints.CENTER;
-                gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-                pnlToolbar.add(toolbar, gridBagConstraints);
-                final XYItemRenderer renderer = plot.getRenderer(timeseriesCount);
-                final Shape s = renderer.getLegendItem(timeseriesCount, 0).getShape();
-                final Paint paint = renderer.getLegendItem(timeseriesCount, 0).getFillPaint();
-
-                if ((s != null) && (paint != null)) {
-                    if (holdCheckBox.isSelected()) {
-//                    holdFeatures.add(createFeatureSignature(pointGeom, s, paint));
-                        holdFeatures.put(timeseriesCount, createFeatureSignature(pointGeom, s, paint));
-                    } else {
-                        holdFeatures.clear();
-//                    holdFeatures.add(createFeatureSignature(pointGeom, s, paint));
-                        holdFeatures.put(timeseriesCount, createFeatureSignature(pointGeom, s, paint));
-                    }
-                } else {
-                    holdFeatures.put(timeseriesCount, null);
+                timeseries.setTSProperty(TimeSeries.GEOMETRY, pointGeom);
+                if (!isOnHold()) {
+                    tsVis.clearTimeSeries();
+                    timeseriesCount = 0;
                 }
-                fireHoldFeatureChanged();
-                pnlChart.add(chartPanel, BorderLayout.CENTER);
+                tsVis.addTimeSeries(timeseries);
+                timeseriesCount++;
+                final TimeSeriesSignature tss = tsVis.getLookup(TimeSeriesSignature.class);
+                if (tss != null) {
+                    final BufferedImage bi = tss.getTimeSeriesSignature(timeseries, overlayWidth, overlayHeight);
+
+                    if (!isOnHold()) {
+                        holdFeatures.clear();
+                    }
+                    holdFeatures.put(timeseriesCount, createFeatureSignature(pointGeom, bi));
+                    fireHoldFeatureChanged();
+                }
+
+                if (!pnlChart.isAncestorOf(tsVis.getVisualisationUI())) {
+                    pnlChart.removeAll();
+                    pnlChart.add(tsVis.getVisualisationUI(), BorderLayout.CENTER);
+                }
+                if (toolbar == null) {
+                    toolbar = tsVis.getToolbar();
+                    pnlToolbar.add(toolbar, BorderLayout.CENTER);
+                    pnlToolbar.invalidate();
+                    pnlToolbar.revalidate();
+                }
 
                 Container parent = SOSFeatureInfoDisplay.this;
                 Container current = parent.getParent();
@@ -890,13 +764,13 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 }
                 parent.invalidate();
                 parent.validate();
-                SwingUtilities.invokeLater(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            chartPanel.resizeScrollbar();
-                        }
-                    });
+//                SwingUtilities.invokeLater(new Runnable() {
+//
+//                        @Override
+//                        public void run() {
+//                            tsVis.resizeScrollbar();
+//                        }
+//                    });
             } catch (final InterruptedException ex) {
                 final String message = "in done nothing should be interrupted anymore"; // NOI18N
                 LOG.error(message, ex);
@@ -906,6 +780,113 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 LOG.error(message, ex.getCause());
                 throw new IllegalStateException(message, ex.getCause());
             }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @author   dmeiers
+     * @version  $Revision$, $Date$
+     */
+    protected final class TimeSeriesFeature extends DefaultStyledFeature {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient Logger LOG = Logger.getLogger(TimeSeriesFeature.class);
+        private FeatureAnnotationSymbol featureAnnotationSymbol;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new TimeSeriesFeature object.
+         *
+         * @param  g    the geometry of the time series
+         * @param  bi2  s the time series shape (from legend)
+         */
+        public TimeSeriesFeature(final Geometry g, final BufferedImage bi2) {
+            super();
+            setGeometry(g);
+            BufferedImage featureIcon = null;
+            try {
+                final InputStream is = getClass().getResourceAsStream(
+                        "/de/cismet/cismap/commons/gui/res/featureInfo.png"); // NOI18N
+                featureIcon = ImageIO.read(is);
+            } catch (final IOException ex) {
+                LOG.warn("cannot load timeseries feature icon", ex);          // NOI18N
+            }
+            // set the overlay on the lower left edge of the icon as default..
+            int xPos = featureIcon.getWidth() - overlayWidth;
+            int yPos = featureIcon.getHeight() - overlayHeight;
+            int bgR = 255;
+            int bgG = 255;
+            int bgB = 255;
+            Color standardBG = new Color(bgR, bgG, bgB);
+
+            // try to get metainformation for overlay position, width, color from properties file and override the
+            // default values if succesfull
+            final Properties iconProps = new Properties();
+            try {
+                final InputStream in = getClass().getResourceAsStream(
+                        "/de/cismet/cismap/commons/gui/res/featureInfoIcon.properties");                             // NOI18N
+                if (in != null) {
+                    iconProps.load(in);
+                    in.close();
+                } else {
+                    LOG.warn(
+                        "Could not laod featureInfoIcon.properties file. Default values for overlay area are used"); // NOI18N
+                }
+            } catch (IOException ex) {
+                LOG.error(
+                    "Could not read featureInfoIcon.properties file. Default values for overlay area are used",
+                    ex);                                                                                             // NOI18N
+            }
+
+            if (iconProps.isEmpty()
+                        || !(iconProps.containsKey("overlayPositionX")                                                             // NOI18N
+                            && iconProps.containsKey("overlayPositionY")
+                            && iconProps.containsKey("overlayBackgroundColorR")
+                            && iconProps.containsKey("overlayBackgroundColorG")
+                            && iconProps.containsKey("overlayBackgroundColorB"))) {                                                // NOI18N
+                LOG.warn(
+                    "featureInfoIcon.properties file does not contain all needed keys. Default values for overlay area are used"); // NOI18N
+            } else {
+                try {
+                    xPos = Integer.parseInt((String)iconProps.get("overlayPositionX"));                                            // NOI18N
+                    yPos = Integer.parseInt((String)iconProps.get("overlayPositionY"));                                            // NOI18N
+                    bgR = Integer.parseInt((String)iconProps.get("overlayBackgroundColorR"));
+                    bgG = Integer.parseInt((String)iconProps.get("overlayBackgroundColorG"));
+                    bgB = Integer.parseInt((String)iconProps.get("overlayBackgroundColorB"));
+                    standardBG = new Color(bgR, bgG, bgB);
+                } catch (NumberFormatException ex) {
+                    Log.error(
+                        "Error while retrieving properties for overlay area. Default values for overlay area are used",            // NOI18N
+                        ex);
+                }
+            }
+//        final BufferedImage bi = new BufferedImage(24, 24, BufferedImage.TYPE_INT_ARGB);
+            final Graphics2D g2 = (Graphics2D)featureIcon.getSubimage(xPos, yPos, overlayWidth, overlayHeight)
+                        .getGraphics();
+
+            // paint the time series symbol
+            g2.drawImage(bi2, 0, 0, standardBG, null);
+
+            final FeatureAnnotationSymbol symb = new FeatureAnnotationSymbol(featureIcon);
+            symb.setSweetSpotX(0.5);
+            symb.setSweetSpotY(0.9);
+            featureAnnotationSymbol = symb;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * Creates a new TimeSeriesFeature object.
+         *
+         * @return  DOCUMENT ME!
+         */
+        @Override
+        public FeatureAnnotationSymbol getPointAnnotationSymbol() {
+            return featureAnnotationSymbol;
         }
     }
 }

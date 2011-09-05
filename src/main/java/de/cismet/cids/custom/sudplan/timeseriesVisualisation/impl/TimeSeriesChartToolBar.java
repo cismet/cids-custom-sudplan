@@ -5,46 +5,53 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan;
+package de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl;
 
 import Sirius.navigator.plugin.PluginRegistry;
 
+import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
+
 import org.apache.log4j.Logger;
 
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.time.TimeSeriesCollection;
 
 import org.openide.util.NbBundle;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
+
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesOperationChangedEvent;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesOperationListChangedListener;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionEvent;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.TimeSeriesOperation;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 
 import de.cismet.cismap.navigatorplugin.CismapPlugin;
 
 /**
- * The time series chart toobar offers a toolbar with functions to remove Time Series from chart, make annotations,
- * reset Zoom Area and so on.
+ * Offers interaction functionality for <code>SimpleTimeSeriesVisualisation.</code>
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesChartToolBar extends JToolBar implements ItemListener {
+public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperationListChangedListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -52,7 +59,54 @@ public class TimeSeriesChartToolBar extends JToolBar implements ItemListener {
 
     //~ Instance fields --------------------------------------------------------
 
-    private ChartPanel chartPanel;
+    private final HashMap<Action, JMenuItem> operationMenuItemSet = new HashMap<Action, JMenuItem>();
+    private JMenu operationsMenu;
+    private CustomChartPanel chartPanel;
+    public Action selectAll = new AbstractAction() {
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final TimeSeriesSelectionNotification notifyier = tsVis.getLookup(
+                        TimeSeriesSelectionNotification.class);
+                final XYPlot plot = (XYPlot)chartPanel.getChart().getPlot();
+                for (int i = 0; i < plot.getRendererCount(); i++) {
+                    if (plot.getRenderer(i) instanceof SelectionXYLineRenderer) {
+                        final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer)plot.getRenderer(i);
+                        renderer.setSelected(true);
+                    }
+                }
+                if (notifyier != null) {
+                    notifyier.fireTimeSeriesSelectionChanged(new TimeSeriesSelectionEvent(
+                            tsVis,
+                            TimeSeriesSelectionEvent.TS_SELECTED,
+                            tsVis.getTimeSeriesCollection()));
+                }
+            }
+        };
+
+    public Action deselectAll = new AbstractAction() {
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final TimeSeriesSelectionNotification notifyier = tsVis.getLookup(
+                        TimeSeriesSelectionNotification.class);
+                final XYPlot plot = (XYPlot)chartPanel.getChart().getPlot();
+                for (int i = 0; i < plot.getRendererCount(); i++) {
+                    if (plot.getRenderer(i) instanceof SelectionXYLineRenderer) {
+                        final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer)plot.getRenderer(i);
+                        renderer.setSelected(false);
+                    }
+                }
+                if (notifyier != null) {
+                    notifyier.fireTimeSeriesSelectionChanged(new TimeSeriesSelectionEvent(
+                            tsVis,
+                            TimeSeriesSelectionEvent.TS_DESELECTED,
+                            new ArrayList<TimeSeries>()));
+                }
+            }
+        };
+
+    private TimeSeriesVisualisation tsVis;
     private Action resetZoom = new AbstractAction() {
 
             @Override
@@ -66,14 +120,15 @@ public class TimeSeriesChartToolBar extends JToolBar implements ItemListener {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 final XYPlot plot = chartPanel.getChart().getXYPlot();
-                final HashMap<Integer, TimeSeriesCollection> selectedTS = new HashMap<Integer, TimeSeriesCollection>();
+                final HashMap<Integer, TimeSeriesDatasetAdapter> selectedTS =
+                    new HashMap<Integer, TimeSeriesDatasetAdapter>();
 
                 for (int i = 0; i < plot.getDatasetCount(); i++) {
-                    if ((plot.getDataset(i) != null) && (plot.getDataset(i) instanceof TimeSeriesCollection)
+                    if ((plot.getDataset(i) != null) && (plot.getDataset(i) instanceof TimeSeriesDatasetAdapter)
                                 && (plot.getRenderer(i) instanceof SelectionXYLineRenderer)) {
                         final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer)plot.getRenderer(i);
                         if (renderer.isSelected()) {
-                            final TimeSeriesCollection tsc = (TimeSeriesCollection)plot.getDataset(i);
+                            final TimeSeriesDatasetAdapter tsc = (TimeSeriesDatasetAdapter)plot.getDataset(i);
                             selectedTS.put(i, tsc);
                         }
                     }
@@ -81,24 +136,8 @@ public class TimeSeriesChartToolBar extends JToolBar implements ItemListener {
                 final RemoveTimeSeriesAction removeAction = new RemoveTimeSeriesAction(
                         selectedTS,
                         plot,
-                        (CustomChartPanel)chartPanel);
+                        tsVis);
                 removeAction.actionPerformed(e);
-            }
-        };
-
-    private Action autoAdjustRange = new AbstractAction() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                chartPanel.restoreAutoRangeBounds();
-            }
-        };
-
-    private Action autoAdjustDomain = new AbstractAction() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                chartPanel.restoreAutoDomainBounds();
             }
         };
 
@@ -109,35 +148,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements ItemListener {
                 try {
                     chartPanel.doSaveAs();
                 } catch (IOException ex) {
-                    LOG.warn("Can not save as image", ex);
-                }
-            }
-        };
-
-    private Action selectAll = new AbstractAction() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                final XYPlot plot = (XYPlot)chartPanel.getChart().getPlot();
-                for (int i = 0; i < plot.getRendererCount(); i++) {
-                    if (plot.getRenderer(i) instanceof SelectionXYLineRenderer) {
-                        final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer)plot.getRenderer(i);
-                        renderer.setSelected(true);
-                    }
-                }
-            }
-        };
-
-    private Action deselectAll = new AbstractAction() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                final XYPlot plot = (XYPlot)chartPanel.getChart().getPlot();
-                for (int i = 0; i < plot.getRendererCount(); i++) {
-                    if (plot.getRenderer(i) instanceof SelectionXYLineRenderer) {
-                        final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer)plot.getRenderer(i);
-                        renderer.setSelected(false);
-                    }
+                    LOG.warn("Can not save as image", ex); // NOI18N
                 }
             }
         };
@@ -162,53 +173,53 @@ public class TimeSeriesChartToolBar extends JToolBar implements ItemListener {
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * private Action showAllTimeSeriesOnMap = new AbstractAction() { @Override public void actionPerformed(ActionEvent
-     * e) { final XYPlot plot = chartPanel.getChart().getXYPlot(); for (int i = 0; i < plot.getDatasetCount(); i++) { if
-     * ((plot.getDataset() != null) && (plot.getDataset(i) instanceof TimeSeriesCollection)) { final
-     * SelectionXYLineRenderer renderer = (SelectionXYLineRenderer)plot.getRenderer(i); final TimeSeriesCollection tsc =
-     * (TimeSeriesCollection)plot.getDataset(i); } } } }.
+     * Creates a new TimeSeriesChartToolBar object.
      */
     public TimeSeriesChartToolBar() {
-        this(null);
+        this(null, null);
     }
 
     /**
      * Creates a new TimeSeriesChartToolBar object.
      *
-     * @param  p  the ChartPanel that this Toolbar correspond to
+     * @param  p      the ChartPanel that this Toolbar correspond to
+     * @param  tsVis  the <code>TimeSeriesVisualisation</code> that this toolbar corresponds to
      */
-    public TimeSeriesChartToolBar(final ChartPanel p) {
-        super("Time Series Chart Tools"); // NOI18N
+    public TimeSeriesChartToolBar(final CustomChartPanel p, final TimeSeriesVisualisation tsVis) {
+        super(NbBundle.getMessage(
+                TimeSeriesChartToolBar.class,
+                "TimeSeriesChartToolBar.name"));                    // NOI18N
         chartPanel = p;
+        this.tsVis = tsVis;
         setRollover(true);
-        setPreferredSize(new java.awt.Dimension(500, 30));
-        this.setSize(500, 30);
+        setPreferredSize(new java.awt.Dimension(400, 30));
+        this.setSize(400, 30);
         this.addButtons();
+        final JMenuBar menubar = new JMenuBar();
+        menubar.setBorderPainted(false);
+        operationsMenu = new JMenu(NbBundle.getMessage(
+                    TimeSeriesChartToolBar.class,
+                    "TimeSeriesChartToolBar.operationsMenu.text")); // NOI18N
+        operationsMenu.setSize(operationsMenu.getWidth(), 30);
+        operationsMenu.setMinimumSize(new Dimension(0, 30));
+        menubar.add(operationsMenu);
+        menubar.setSize(menubar.getWidth(), 30);
+        this.add(menubar);
         this.setBorder(new EmptyBorder(0, 0, 0, 0));
     }
 
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * adds the configured buttons to the toolbar.
      */
     private void addButtons() {
         this.add(createResetZoomButton());
-//        this.add(createAutoAdjustRangeButton());
-//        this.add(createAutoAdjustDomainButton());
-
         this.add(createRemoveActionButton());
         this.add(createSaveAsActionButton());
         this.add(createSelectAllButton());
         this.add(createDeselectAllButton());
         this.add(createRemoveAllFromMapButton());
-        final JComboBox cb = new JComboBox();
-//        cb.addItem("Time Series Chart");//NOI18N
-//        cb.addItem("Bar Chart");
-//        cb.addItem("Point Chart");//NOI18N
-//        cb.addItemListener(this);
-//        cb.addItem("Difference Chart");
-//        this.add(cb);
     }
 
     /**
@@ -216,7 +227,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements ItemListener {
      *
      * @param  chartPanel  DOCUMENT ME!
      */
-    public void setChartPanel(final ChartPanel chartPanel) {
+    public void setChartPanel(final CustomChartPanel chartPanel) {
         this.chartPanel = chartPanel;
     }
 
@@ -295,34 +306,6 @@ public class TimeSeriesChartToolBar extends JToolBar implements ItemListener {
      *
      * @return  DOCUMENT ME!
      */
-// private JButton createAutoAdjustRangeButton() {
-// final JButton b = new JButton(autoAdjustRange);
-// b.setFocusPainted(false);
-// b.setToolTipText("Autoadjust Value Axis");
-////        b.setIcon(null);
-//        b.setText("Autoadjust value axis");
-//        return b;
-//    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-//    private JButton createAutoAdjustDomainButton() {
-//        final JButton b = new JButton(resetZoom);
-//        b.setFocusPainted(false);
-//        b.setToolTipText("Autoadjust Time Axis");
-////        b.setIcon(null);
-//        b.setText("Autoadjust Time Axis");
-//        return b;
-//    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
     private JButton createSaveAsActionButton() {
         btnSaveAs = new JButton(saveAsimage);
         btnSaveAs.setFocusPainted(false);
@@ -332,7 +315,6 @@ public class TimeSeriesChartToolBar extends JToolBar implements ItemListener {
         btnSaveAs.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cids/custom/sudplan/picture_save.png"))); // NOI18N
         btnSaveAs.setSize(16, 16);
-//        b.setText("Save As");
         return btnSaveAs;
     }
 
@@ -344,7 +326,6 @@ public class TimeSeriesChartToolBar extends JToolBar implements ItemListener {
     private JButton createRemoveAllFromMapButton() {
         btnMapRemoveAll = new JButton(removeAllFromMap);
         btnMapRemoveAll.setFocusPainted(false);
-//        b.setIcon();
         btnMapRemoveAll.setText(NbBundle.getMessage(
                 TimeSeriesChartToolBar.class,
                 "TimeSeriesChartToolBar.btnMapRemoveAll.text"));        // NOI18N
@@ -352,45 +333,30 @@ public class TimeSeriesChartToolBar extends JToolBar implements ItemListener {
                 TimeSeriesChartToolBar.class,
                 "TimeSeriesChartToolBar.btnMapRemoveAll.toolTipText")); // NOI18N
         btnMapRemoveAll.setSize(16, 16);
-//        b.setText("Save As");
         return btnMapRemoveAll;
     }
-    @Override
-    public void itemStateChanged(final ItemEvent e) {
-        final JComboBox cb = (JComboBox)e.getSource();
-        final String item = (String)cb.getSelectedItem();
-        final XYPlot plot = (XYPlot)chartPanel.getChart().getPlot();
 
-        if (item.equals("Point Chart")) { // NOI18N
-            for (int i = 0; i < plot.getRendererCount(); i++) {
-                final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer)plot.getRenderer(i);
-                renderer.setSeriesLinesVisible(0, false);
+    @Override
+    public void timeSeriesOperationChanged(final TimeSeriesOperationChangedEvent evt) {
+        final TimeSeriesOperation tsOp = (TimeSeriesOperation)evt.getSource();
+        if (evt.getID() == TimeSeriesOperationChangedEvent.OPERATION_ADD) {
+            final JMenuItem newOp = new JMenuItem(tsOp);
+            operationMenuItemSet.put(tsOp, newOp);
+            operationsMenu.add(newOp);
+        } else if (evt.getID() == TimeSeriesOperationChangedEvent.OPERATION_REMOVE) {
+            final JMenuItem toRemove = operationMenuItemSet.get(tsOp);
+            operationsMenu.remove(toRemove);
+            operationMenuItemSet.remove(tsOp);
+        } else {
+            for (final Action a : operationMenuItemSet.keySet()) {
+                final JMenuItem toRemove = operationMenuItemSet.get(a);
+                operationsMenu.remove(toRemove);
             }
+            operationMenuItemSet.clear();
         }
-//        else if (item.equals("Bar Chart")) {
-//            for (int i = 0; i < plot.getRendererCount(); i++) {
-//                final ClusteredXYBarRenderer barRenderer = new ClusteredXYBarRenderer();
-//
-//                final XYBarDataset dataset = new XYBarDataset(plot.getDataset(i), 5000000d);
-//                for (int j = 0; j < dataset.getSeriesCount(); j++) {
-//                    if (LOG.isDebugEnabled()) {
-//                        LOG.debug("Point: " + j + " start x / end x:" + dataset.getStartXValue(0, j) + "/"
-//                                    + dataset.getEndXValue(0, j));
-//
-//                        final double foo = (dataset.getEndXValue(0, j) - dataset.getStartXValue(0, j));
-//                        LOG.debug("bar width: " + foo);
-//                    }
-//                }
-//                barRenderer.setShadowVisible(false);
-//                plot.setRenderer(i, barRenderer);
-//                plot.setDataset(i, dataset);
-//            }
-//        }
-        else if (item.equals("Time Series Chart")) { // NOI18N
-            for (int i = 0; i < plot.getRendererCount(); i++) {
-                final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer)plot.getRenderer(i);
-                renderer.setSeriesLinesVisible(0, true);
-            }
-        }
+        this.updateUI();
+        this.repaint();
+        this.invalidate();
+        this.validate();
     }
 }
