@@ -15,10 +15,14 @@ import java.awt.EventQueue;
 
 import java.io.IOException;
 
+import java.util.Collections;
+import java.util.Comparator;
+
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -31,7 +35,7 @@ import de.cismet.cids.custom.sudplan.geocpmrest.io.ResultsElement;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
-public class RunoffOutputManagerUI extends javax.swing.JPanel {
+public class RunoffOutputManagerUI extends JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -45,6 +49,7 @@ public class RunoffOutputManagerUI extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JEditorPane jepInfo;
     private javax.swing.JEditorPane jepMax;
     private javax.swing.JEditorPane jepResultsElement;
@@ -96,6 +101,14 @@ public class RunoffOutputManagerUI extends javax.swing.JPanel {
                         jepMax.setText(output.geoCPMMax.content);
                         jepSubinfo.setText(output.geoCPMSubInfo.content);
 
+                        Collections.sort(output.resultsElements, new Comparator<ResultsElement>() {
+
+                                @Override
+                                public int compare(final ResultsElement o1, final ResultsElement o2) {
+                                    return o1.number - o2.number;
+                                }
+                            });
+
                         final DefaultListModel dlm = (DefaultListModel)jlsResultsElements.getModel();
                         for (final ResultsElement re : output.resultsElements) {
                             dlm.addElement(re);
@@ -141,18 +154,21 @@ public class RunoffOutputManagerUI extends javax.swing.JPanel {
         jScrollPane3 = new javax.swing.JScrollPane();
         jepMax = new javax.swing.JEditorPane();
         jplResultsElements = new javax.swing.JPanel();
+        jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane4 = new javax.swing.JScrollPane();
         jlsResultsElements = new javax.swing.JList();
         jScrollPane5 = new javax.swing.JScrollPane();
         jepResultsElement = new javax.swing.JEditorPane();
 
         setOpaque(false);
+        setPreferredSize(null);
         setLayout(new java.awt.GridBagLayout());
 
         jplInfo.setOpaque(false);
         jplInfo.setLayout(new java.awt.GridBagLayout());
 
         jepInfo.setEditable(false);
+        jepInfo.setPreferredSize(null);
         jScrollPane1.setViewportView(jepInfo);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -173,6 +189,7 @@ public class RunoffOutputManagerUI extends javax.swing.JPanel {
         jplSubinfo.setLayout(new java.awt.GridBagLayout());
 
         jepSubinfo.setEditable(false);
+        jepSubinfo.setPreferredSize(null);
         jScrollPane2.setViewportView(jepSubinfo);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -193,6 +210,7 @@ public class RunoffOutputManagerUI extends javax.swing.JPanel {
         jplMax.setLayout(new java.awt.GridBagLayout());
 
         jepMax.setEditable(false);
+        jepMax.setPreferredSize(null);
         jScrollPane3.setViewportView(jepMax);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -212,35 +230,37 @@ public class RunoffOutputManagerUI extends javax.swing.JPanel {
         jplResultsElements.setOpaque(false);
         jplResultsElements.setLayout(new java.awt.GridBagLayout());
 
+        jSplitPane1.setDividerLocation(180);
+        jSplitPane1.setOpaque(false);
+
         jlsResultsElements.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 NbBundle.getMessage(
                     RunoffOutputManagerUI.class,
                     "RunoffOutputManagerUI.jlsResultsElements.border.title"))); // NOI18N
+        jlsResultsElements.setModel(new DefaultListModel());
         jlsResultsElements.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jlsResultsElements.setPreferredSize(null);
         jScrollPane4.setViewportView(jlsResultsElements);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jplResultsElements.add(jScrollPane4, gridBagConstraints);
+        jSplitPane1.setLeftComponent(jScrollPane4);
 
         jepResultsElement.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 NbBundle.getMessage(
                     RunoffOutputManagerUI.class,
                     "RunoffOutputManagerUI.jepResultsElement.border.title"))); // NOI18N
         jepResultsElement.setEditable(false);
+        jepResultsElement.setPreferredSize(null);
         jScrollPane5.setViewportView(jepResultsElement);
 
+        jSplitPane1.setRightComponent(jScrollPane5);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jplResultsElements.add(jScrollPane5, gridBagConstraints);
+        gridBagConstraints.weighty = 1.0;
+        jplResultsElements.add(jSplitPane1, gridBagConstraints);
 
         jtpOutput.addTab(NbBundle.getMessage(
                 RunoffOutputManagerUI.class,
@@ -298,12 +318,8 @@ public class RunoffOutputManagerUI extends javax.swing.JPanel {
         @Override
         public void valueChanged(final ListSelectionEvent e) {
             if (!e.getValueIsAdjusting()) {
-                if (e.getFirstIndex() == e.getLastIndex()) {
-                    final ResultsElement re = (ResultsElement)jlsResultsElements.getSelectedValue();
-                    jepResultsElement.setText(re.content);
-                } else {
-                    jepResultsElement.setText(null);
-                }
+                final ResultsElement re = (ResultsElement)jlsResultsElements.getSelectedValue();
+                jepResultsElement.setText(re.content);
             }
         }
     }

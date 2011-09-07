@@ -8,10 +8,12 @@
 package de.cismet.cids.custom.sudplan.local.wupp;
 
 import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.exception.ConnectionException;
 import Sirius.navigator.ui.ComponentRegistry;
 
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
+import Sirius.server.newuser.User;
 
 import org.apache.log4j.Logger;
 
@@ -28,8 +30,7 @@ import java.io.IOException;
 
 import java.text.MessageFormat;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -50,13 +51,12 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String PROP_INPUT_BEAN = "__prop_input_bean__";           // NOI18N
-    public static final String PROP_TIMESERIES_BEAN = "__prop_timeseries_bean__"; // NOI18N
-    public static final String PROP_NAME = "__prop_name__";                       // NOI18N
-    public static final String PROP_DESCRIPTION = "__prop_description__";         // NOI18N
+    public static final String PROP_INPUT_BEAN = "__prop_input_bean__";         // NOI18N
+    public static final String PROP_RAINEVENT_BEAN = "__prop_rainevent_bean__"; // NOI18N
+    public static final String PROP_NAME = "__prop_name__";                     // NOI18N
+    public static final String PROP_DESCRIPTION = "__prop_description__";       // NOI18N
 
     public static final String TABLENAME_GEOCPM_CONFIG = "GEOCPM_CONFIG"; // NOI18N
-    public static final String TABLENAME_TIMESERIES = "TIMESERIES";       // NOI18N
 
     private static final transient Logger LOG = Logger.getLogger(RunGeoCPMWizardAction.class);
 
@@ -86,7 +86,7 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
                     new RunGeoCPMWizardPanelInput(),
-                    new RunGeoCPMWizardPanelTimerseries(),
+                    new RunGeoCPMWizardPanelRainevent(),
                     new RunGeoCPMWizardPanelMetadata()
                 };
 
@@ -142,8 +142,8 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
 
         if (TABLENAME_GEOCPM_CONFIG.equalsIgnoreCase(mc.getTableName())) {
             wizard.putProperty(PROP_INPUT_BEAN, cidsBean);
-        } else if (TABLENAME_TIMESERIES.equalsIgnoreCase(mc.getTableName())) {
-            wizard.putProperty(PROP_TIMESERIES_BEAN, cidsBean);
+        } else if (SMSUtils.TABLENAME_RAINEVENT.equalsIgnoreCase(mc.getTableName())) {
+            wizard.putProperty(PROP_RAINEVENT_BEAN, cidsBean);
         }
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
@@ -161,6 +161,8 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
                 modelRun = modelRun.persist();
                 modelInput = (CidsBean)modelRun.getProperty("modelinput"); // NOI18N
 
+                attachScenario(modelRun, wizard);
+
                 SMSUtils.executeAndShowRun(modelRun);
             } catch (final Exception ex) {
                 final String message = "Cannot perform geocpm run";
@@ -176,6 +178,29 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
     /**
      * DOCUMENT ME!
      *
+     * @param   modelRun  DOCUMENT ME!
+     * @param   wizard    DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
+    private void attachScenario(final CidsBean modelRun, final WizardDescriptor wizard) throws IOException {
+        final CidsBean input = (CidsBean)wizard.getProperty(PROP_INPUT_BEAN);
+        final CidsBean iaBean = (CidsBean)input.getProperty("investigation_area"); // NOI18N
+
+        final List<CidsBean> scenarios = (List)iaBean.getProperty("scenarios"); // NOI18N
+        scenarios.add(modelRun);
+
+        try {
+            iaBean.persist();
+        } catch (final Exception ex) {
+            final String message = "cannot attach modelrun to investigation area"; // NOI18N
+            throw new IOException(message, ex);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   wizard  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -184,29 +209,27 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
      */
     private CidsBean createModelInput(final WizardDescriptor wizard) throws IOException {
         final CidsBean input = (CidsBean)wizard.getProperty(PROP_INPUT_BEAN);
-        final CidsBean timeseries = (CidsBean)wizard.getProperty(PROP_TIMESERIES_BEAN);
+        final CidsBean rainevent = (CidsBean)wizard.getProperty(PROP_RAINEVENT_BEAN);
 
-        assert input != null : "input was not set";           // NOI18N
-        assert timeseries != null : "timeseries was not set"; // NOI18N
+        assert input != null : "input was not set";         // NOI18N
+        assert rainevent != null : "rainevent was not set"; // NOI18N
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("creating new geocpm modelinput: " // NOI18N
                         + "input=" + input         // NOI18N
-                        + " || timeseries=" + timeseries); // NOI18N
+                        + " || rainevent=" + rainevent); // NOI18N
         }
-
-        final Date created = GregorianCalendar.getInstance().getTime();
-        final String user = SessionManager.getSession().getUser().getName();
 
         final String wizName = (String)wizard.getProperty(PROP_NAME);
         final String name = "GeoCPM run input (" + wizName + ")";
 
         final RunoffIO runoffIO = new RunoffIO();
         runoffIO.setGeocpmInput(input.getMetaObject().getID());
-        runoffIO.setTimeseries(timeseries.getMetaObject().getID());
+        runoffIO.setRainevent(rainevent.getMetaObject().getID());
 
-        return SMSUtils.createModelInput(name, input, SMSUtils.Model.GEOCPM);
+        return SMSUtils.createModelInput(name, runoffIO, SMSUtils.Model.GEOCPM);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -231,15 +254,24 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
         return SMSUtils.createModelRun(name, description, inputBean);
     }
 
-    // FIXME: better action enable
     @Override
     public boolean isEnabled() {
-        if (getCidsBean() == null) {
-            LOG.warn("source == null, geocpm run action disabled"); // NOI18N
+        boolean isEnabled = false;
 
-            return false;
+        if (getCidsBean() == null) {
+            LOG.warn("source == null, geocpm run action disabled");                                                    // NOI18N
         } else {
-            return SessionManager.getSession().getUser().getUserGroup().getName().equalsIgnoreCase("Wuppertal");
+            final User user = SessionManager.getSession().getUser();
+            try {
+                isEnabled = SessionManager.getProxy().hasConfigAttr(user, "sudplan.local.wupp.runGeoCPM");             // NOI18N
+            } catch (final ConnectionException ex) {
+                final String message = "cannot check for config attr 'sudplan.local.wupp.runGeoCPM', action disabled"; // NOI18N
+                LOG.warn(message, ex);
+            }
         }
+
+        setEnabled(isEnabled);
+
+        return isEnabled;
     }
 }

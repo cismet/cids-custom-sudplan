@@ -37,10 +37,13 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import java.util.Properties;
+import java.util.concurrent.Future;
 
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -61,6 +64,7 @@ public final class SMSUtils {
     private static final transient Logger LOG = Logger.getLogger(SMSUtils.class);
 
     public static final String TABLENAME_TIMESERIES = "TIMESERIES";   // NOI18N
+    public static final String TABLENAME_RAINEVENT = "RAINEVENT";     // NOI18N
     public static final String TABLENAME_MODELINPUT = "MODELINPUT";   // NOI18N
     public static final String TABLENAME_MODELOUTPUT = "MODELOUTPUT"; // NOI18N
     public static final String TABLENAME_MODELRUN = "RUN";            // NOI18N
@@ -261,7 +265,6 @@ public final class SMSUtils {
             throw new IllegalArgumentException("modelinput must not be null and shall contain a corresponding model"); // NOI18N
         }
 
-        // TODO: is the userdomain the correct one?
         final MetaClass modelinputClass = ClassCacheMultiple.getMetaClass(
                 SessionManager.getSession().getUser().getDomain(),
                 TABLENAME_MODELRUN);
@@ -352,8 +355,10 @@ public final class SMSUtils {
 
     /**
      * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    public static void reloadCatalogTree() {
+    public static Future reloadCatalogTree() {
         final MetaCatalogueTree tree = ComponentRegistry.getRegistry().getCatalogueTree();
         final TreePath path = tree.getSelectionPath();
         final DefaultTreeModel model = (DefaultTreeModel)tree.getModel();
@@ -362,20 +367,45 @@ public final class SMSUtils {
             final RootTreeNode root = new RootTreeNode(SessionManager.getProxy().getRoots());
             model.setRoot(root);
             model.reload();
-            tree.exploreSubtree(path);
+
+            return tree.exploreSubtree(path);
         } catch (final Exception ex) {
             LOG.warn("could not reload tree", ex); // NOI18N
         }
+
+        return null;
     }
 
     /**
-     * DOCUMENT ME!
+     * Searches for {@link CidsBean}s upwards the {@link TreePath} of the currently selected node of the catalogue tree.
+     * If a type {@link MetaClass} is given the search will continue until a {@link MetaObject} is found whose <code>
+     * MetaClass</code> is equal to the given <code>MetaClass</code>. If the given type is <code>null</code> the first
+     * parent <code>MetaObject</code> will be returned regardless of its type.
      *
-     * @return  DOCUMENT ME!
+     * @param   type  whether a parent object of that particular type shall be searched for
+     *
+     * @return  the <code>CidsBean</code> of the found <code>MetaObject</code> or <code>null</code> if the search was
+     *          not successful for any reason
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
      */
-    public static CidsBean getParentObject() {
+    public static CidsBean getParentObject(final MetaClass type) {
         final MetaCatalogueTree tree = ComponentRegistry.getRegistry().getCatalogueTree();
-        final TreePath path = tree.getSelectionPath().getParentPath();
+        final TreePath selectionPath = tree.getSelectionPath();
+
+        if (selectionPath == null) {
+            LOG.warn("currently no node selected in catalog tree, no parent can be determined");
+
+            return null;
+        }
+
+        final TreePath path = selectionPath.getParentPath();
+
+        if (path == null) {
+            LOG.warn("no parent path available for currently selected node"); // NOI18N
+
+            return null;
+        }
 
         CidsBean bean = null;
         for (int i = path.getPathCount() - 1; i > -1; --i) {
@@ -388,13 +418,40 @@ public final class SMSUtils {
                     assert userobject != null : "null user object in object node";                                             // NOI18N
                     assert userobject instanceof MetaObjectNode : "user object not instance of MetaObjectNode in object node"; // NOI18N
 
-                    final MetaObject mo = ((MetaObjectNode)userobject).getObject();
+                    final MetaObjectNode mon = (MetaObjectNode)userobject;
 
-                    assert mo != null : "null metaobject in metaobject node"; // NOI18N
+                    final MetaObject mo;
+                    if (mon.getObject() == null) {
+                        try {
+                            mo = SessionManager.getProxy()
+                                        .getMetaObject(mon.getObjectId(),
+                                                mon.getClassId(),
+                                                SessionManager.getSession().getUser().getDomain());
+                        } catch (final ConnectionException ex) {
+                            final String message =
+                                "MetoObject not present in MetaObjectNode and cannot fetch meta object from server"; // NOI18N
+                            LOG.error(message, ex);
+                            throw new IllegalStateException(message, ex);
+                        }
+                    } else {
+                        mo = mon.getObject();
+                    }
 
-                    bean = mo.getBean();
+                    if (type == null) {
+                        bean = mo.getBean();
 
-                    break;
+                        break;
+                    } else {
+                        final MetaClass moType = mo.getMetaClass();
+
+                        assert moType != null : "metaclass of found object is null"; // NOI18N
+
+                        if (moType.equals(type)) {
+                            bean = mo.getBean();
+
+                            break;
+                        }
+                    }
                 }
             } else {
                 LOG.warn("path element not instance of DefaultMetaTreeNode, cannot retrieve parent object"); // NOI18N

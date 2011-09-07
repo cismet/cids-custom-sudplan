@@ -18,7 +18,6 @@ import javax.swing.JComponent;
 import de.cismet.cids.custom.sudplan.Manager;
 
 import de.cismet.cids.dynamics.CidsBean;
-import de.cismet.cids.dynamics.Disposable;
 
 import de.cismet.cismap.commons.features.Feature;
 
@@ -28,7 +27,7 @@ import de.cismet.cismap.commons.features.Feature;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class AirqualityDownscalingOutputManager implements Manager, Disposable {
+public final class AirqualityDownscalingOutputManager implements Manager {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -64,7 +63,7 @@ public final class AirqualityDownscalingOutputManager implements Manager, Dispos
 
     @Override
     public void finalise() throws IOException {
-        // no need to finalise any changes since the ui does not change anything
+        ui.dispose();
     }
 
     @Override
@@ -82,10 +81,5 @@ public final class AirqualityDownscalingOutputManager implements Manager, Dispos
     @Override
     public void setCidsBean(final CidsBean cidsBean) {
         this.modelOutputBean = cidsBean;
-    }
-
-    @Override
-    public void dispose() {
-        ui.dispose();
     }
 }

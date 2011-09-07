@@ -9,14 +9,17 @@ package de.cismet.cids.custom.sudplan.local.wupp;
 
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
+import org.codehaus.jackson.map.ObjectMapper;
 
-import de.cismet.cids.custom.sudplan.AbstractModelManager;
+import java.io.IOException;
+import java.io.StringWriter;
+
+import de.cismet.cids.custom.sudplan.AbstractAsyncModelManager;
+import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.concurrent.ProgressWatch;
 import de.cismet.cids.custom.sudplan.geocpmrest.GeoCPMRestClient;
 import de.cismet.cids.custom.sudplan.geocpmrest.io.GeoCPMInput;
-import de.cismet.cids.custom.sudplan.geocpmrest.io.GeoCPMOutput;
-import de.cismet.cids.custom.sudplan.geocpmrest.io.Status;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -26,39 +29,13 @@ import de.cismet.cids.dynamics.CidsBean;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class RunoffModelManager extends AbstractModelManager {
+public final class RunoffModelManager extends AbstractAsyncModelManager {
 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(RunoffModelManager.class);
 
-    //~ Instance fields --------------------------------------------------------
-
-    private final transient PollAndDownload poller;
-    private final transient GeoCPMRestClient client;
-
-    private transient String runId;
-
-    //~ Constructors -----------------------------------------------------------
-
-    /**
-     * Creates a new RunoffModelManager object.
-     *
-     * @throws  IOException  DOCUMENT ME!
-     */
-    public RunoffModelManager() throws IOException {
-        if (isFinished()) {
-            client = null;
-            poller = null;
-        } else {
-            client = new GeoCPMRestClient("http://192.168.100.12:9986/GeoCPM"); // NOI18N
-            runId = ((RunoffIO)getUR()).getRunId();
-
-            poller = new PollAndDownload();
-            poller.setPriority(4);
-            poller.start();
-        }
-    }
+    private static final String CLIENT_URL = "http://192.168.100.12:9986/GeoCPM"; // NOI18N
 
     //~ Methods ----------------------------------------------------------------
 
@@ -70,17 +47,30 @@ public final class RunoffModelManager extends AbstractModelManager {
 
         final RunoffIO io = (RunoffIO)getUR();
         final CidsBean geocpmBean = io.fetchGeocpmInput();
+        final CidsBean rainevent = io.fetchRainevent();
         final GeoCPMInput input = new GeoCPMInput();
 
-        input.content = (String)geocpmBean.getProperty("input"); // NOI18N
+        input.configName = (String)geocpmBean.getProperty("filename"); // NOI18N
+        input.rainevent = (String)rainevent.getProperty("data");       // NOI18N
 
-        runId = client.runGeoCPM(input);
-        io.setRunId(runId);
-    }
+        final GeoCPMRestClient client = new GeoCPMRestClient(CLIENT_URL);
+        final String runId = client.runGeoCPM(input);
+        final GeoCPMRunInfo runinfo = new GeoCPMRunInfo(runId, CLIENT_URL);
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            final StringWriter writer = new StringWriter();
 
-    @Override
-    public void finalise() throws IOException {
-        poller.interrupt();
+            mapper.writeValue(writer, runinfo);
+
+            cidsBean.setProperty("runinfo", writer.toString()); // NOI18N
+            cidsBean = cidsBean.persist();
+
+            ProgressWatch.getWatch().submit(createWatchable());
+        } catch (final Exception ex) {
+            final String message = "cannot store runinfo: " + runId; // NOI18N
+            LOG.error(message, ex);
+            throw new IOException(message, ex);
+        }
     }
 
     @Override
@@ -89,19 +79,21 @@ public final class RunoffModelManager extends AbstractModelManager {
             throw new IllegalStateException("cannot create outputbean when not finished yet"); // NOI18N
         }
 
-        if (runId == null) {
-            throw new IllegalStateException("cannot create output if there is no runId: null"); // NOI18N
+        if (!(getWatchable() instanceof GeoCPMWatchable)) {
+            throw new IllegalStateException("cannot create output if there is no valid watchable"); // NOI18N
         }
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("creating output bean for run: " + cidsBean); // NOI18N
         }
 
-        try {
-            poller.join();
+        final GeoCPMWatchable watch = (GeoCPMWatchable)getWatchable();
 
+        final String runId = watch.getRunId();
+
+        try {
             final CidsBean modelOutput = SMSUtils.createModelOutput("Output of Run: " + runId, // NOI18N
-                    poller.output,
+                    watch.getOutput(),
                     SMSUtils.Model.GEOCPM);
 
             return modelOutput.persist();
@@ -112,70 +104,24 @@ public final class RunoffModelManager extends AbstractModelManager {
         }
     }
 
-    //~ Inner Classes ----------------------------------------------------------
+    @Override
+    protected boolean needsDownload() {
+        return true;
+    }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private final class PollAndDownload extends Thread {
+    @Override
+    public AbstractModelRunWatchable createWatchable() throws IOException {
+        final ObjectMapper mapper = new ObjectMapper();
+        final String info = (String)cidsBean.getProperty("runinfo"); // NOI18N
 
-        //~ Instance fields ----------------------------------------------------
+        try {
+            final GeoCPMRunInfo runInfo = mapper.readValue(info, GeoCPMRunInfo.class);
 
-        transient GeoCPMOutput output;
-
-        private final transient Logger LOG = Logger.getLogger(PollAndDownload.class);
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new StatusPoller object.
-         */
-        public PollAndDownload() {
-            super("GeoCPM status poller and downloader " + RunoffModelManager.this.toString()); // NOI18N
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public void run() {
-            while (!isInterrupted()) {
-                try {
-                    if (runId == null) {
-                        Thread.sleep(1000);
-                    } else {
-                        final Status status = client.getStatus(runId);
-                        switch (status.status) {
-                            case Status.STATUS_RUNNING: {
-                                Thread.sleep(1000);
-                                break;
-                            }
-                            case Status.STATUS_BROKEN: {
-                                RunoffModelManager.this.fireBroken();
-                                interrupt();
-                                break;
-                            }
-                            case Status.STATUS_FINISHED: {
-                                RunoffModelManager.this.fireFinised();
-                                output = client.getResults(runId);
-                                interrupt();
-                                break;
-                            }
-                            default: {
-                                RunoffModelManager.this.fireBroken();
-                                interrupt();
-                                throw new IllegalStateException("illegal run status for run '" + runId + "': " // NOI18N
-                                            + status.status);
-                            }
-                        }
-                    }
-                } catch (final InterruptedException ex) {
-                    // loop will be interrupted
-                } catch (final Exception e) {
-                    LOG.warn("error in status poller and downloader: " + runId, e); // NOI18N
-                }
-            }
+            return new GeoCPMWatchable(cidsBean, new GeoCPMRestClient(runInfo.getClientUrl()), runInfo.getRunId());
+        } catch (final Exception ex) {
+            final String message = "cannot read runInfo from run: " + cidsBean; // NOI18N
+            LOG.error(message, ex);
+            throw new IOException(message, ex);
         }
     }
 }

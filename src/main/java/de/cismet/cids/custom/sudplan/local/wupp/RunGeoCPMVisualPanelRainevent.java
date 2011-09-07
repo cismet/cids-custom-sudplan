@@ -28,6 +28,8 @@ import javax.swing.JList;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import de.cismet.cids.custom.sudplan.SMSUtils;
+
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
@@ -38,7 +40,7 @@ import de.cismet.cids.navigator.utils.ClassCacheMultiple;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
-public class RunGeoCPMVisualPanelTimeseries extends javax.swing.JPanel {
+public class RunGeoCPMVisualPanelRainevent extends javax.swing.JPanel {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -46,13 +48,13 @@ public class RunGeoCPMVisualPanelTimeseries extends javax.swing.JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient RunGeoCPMWizardPanelTimerseries model;
+    private final transient RunGeoCPMWizardPanelRainevent model;
 
     private final transient ListSelectionListener listL;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JList jlsAvailableTimeseries;
+    private final transient javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
+    private final transient javax.swing.JList jlsAvailableRainevents = new javax.swing.JList();
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -64,15 +66,20 @@ public class RunGeoCPMVisualPanelTimeseries extends javax.swing.JPanel {
      *
      * @throws  WizardInitialisationException  DOCUMENT ME!
      */
-    public RunGeoCPMVisualPanelTimeseries(final RunGeoCPMWizardPanelTimerseries model)
+    public RunGeoCPMVisualPanelRainevent(final RunGeoCPMWizardPanelRainevent model)
             throws WizardInitialisationException {
         this.model = model;
         listL = new SelectionListener();
 
+        // name of the wizard step
+        this.setName(NbBundle.getMessage(
+                RunGeoCPMVisualPanelRainevent.class,
+                "RunGeoCPMVisualPanelTimeseries.this.name")); // NOI18N
+
         initComponents();
 
         // TODO: create default bindable jlist
-        initTimeseriesList();
+        initRaineventsList();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -82,9 +89,9 @@ public class RunGeoCPMVisualPanelTimeseries extends javax.swing.JPanel {
      *
      * @throws  WizardInitialisationException  DOCUMENT ME!
      */
-    private void initTimeseriesList() throws WizardInitialisationException {
+    private void initRaineventsList() throws WizardInitialisationException {
         final String domain = SessionManager.getSession().getUser().getDomain();
-        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, RunGeoCPMWizardAction.TABLENAME_TIMESERIES);
+        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SMSUtils.TABLENAME_RAINEVENT);
 
         if (mc == null) {
             throw new WizardInitialisationException("cannot fetch timeseries metaclass"); // NOI18N
@@ -114,22 +121,24 @@ public class RunGeoCPMVisualPanelTimeseries extends javax.swing.JPanel {
             dlm.addElement(metaObjects[i].getBean());
         }
 
-        jlsAvailableTimeseries.setModel(dlm);
-        jlsAvailableTimeseries.setCellRenderer(new NameRenderer());
-        jlsAvailableTimeseries.addListSelectionListener(WeakListeners.create(
+        jlsAvailableRainevents.setModel(dlm);
+        jlsAvailableRainevents.setCellRenderer(new NameRenderer());
+        jlsAvailableRainevents.addListSelectionListener(WeakListeners.create(
                 ListSelectionListener.class,
                 listL,
-                jlsAvailableTimeseries));
+                jlsAvailableRainevents));
     }
 
     /**
      * DOCUMENT ME!
      */
     void init() {
-        final DefaultListModel dlm = (DefaultListModel)jlsAvailableTimeseries.getModel();
-        if (dlm.contains(model.getTimeseries())) {
-            jlsAvailableTimeseries.setSelectedValue(model.getTimeseries(), true);
+        if (model.getRainevent() == null) {
+            jlsAvailableRainevents.getSelectionModel().clearSelection();
         }
+
+        // why is this not sufficient to clear the selection if rainevent is null
+        jlsAvailableRainevents.setSelectedValue(model.getRainevent(), true);
     }
 
     /**
@@ -141,18 +150,15 @@ public class RunGeoCPMVisualPanelTimeseries extends javax.swing.JPanel {
     private void initComponents() {
         final java.awt.GridBagConstraints gridBagConstraints;
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jlsAvailableTimeseries = new javax.swing.JList();
-
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        jlsAvailableTimeseries.setBorder(javax.swing.BorderFactory.createTitledBorder(
+        jlsAvailableRainevents.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 NbBundle.getMessage(
-                    RunGeoCPMVisualPanelTimeseries.class,
-                    "RunGeoCPMVisualPanelTimeseries.jlsAvailableTimeseries.border.title"))); // NOI18N
-        jlsAvailableTimeseries.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jScrollPane1.setViewportView(jlsAvailableTimeseries);
+                    RunGeoCPMVisualPanelRainevent.class,
+                    "RunGeoCPMVisualPanelRainevent.jlsAvailableRainevents.border.title"))); // NOI18N
+        jlsAvailableRainevents.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane1.setViewportView(jlsAvailableRainevents);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -178,9 +184,7 @@ public class RunGeoCPMVisualPanelTimeseries extends javax.swing.JPanel {
         @Override
         public void valueChanged(final ListSelectionEvent e) {
             if (!e.getValueIsAdjusting()) {
-                if (e.getFirstIndex() == e.getLastIndex()) {
-                    model.setTimeseries((CidsBean)jlsAvailableTimeseries.getSelectedValue());
-                }
+                model.setRainevent((CidsBean)jlsAvailableRainevents.getSelectedValue());
             }
         }
     }

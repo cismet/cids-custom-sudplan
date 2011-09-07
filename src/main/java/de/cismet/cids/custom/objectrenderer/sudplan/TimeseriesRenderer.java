@@ -16,8 +16,6 @@ import java.net.MalformedURLException;
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
 
-import de.cismet.cids.dynamics.CidsBean;
-
 /**
  * DOCUMENT ME!
  *

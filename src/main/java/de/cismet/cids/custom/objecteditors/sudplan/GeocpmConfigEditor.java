@@ -15,13 +15,14 @@ import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
 
-import java.util.List;
+import javax.swing.JOptionPane;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 
+import de.cismet.cids.editors.DefaultCustomObjectEditor;
 import de.cismet.cids.editors.EditorClosedEvent;
 import de.cismet.cids.editors.EditorSaveListener;
 
@@ -44,9 +45,13 @@ public class GeocpmConfigEditor extends AbstractCidsBeanRenderer implements Edit
     private transient CidsBean parentBean;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private final transient javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
-    private final transient javax.swing.JEditorPane jepGeocpmInput = new javax.swing.JEditorPane();
+    private final transient de.cismet.cids.editors.DefaultBindableReferenceCombo cboInvestigationArea =
+        new de.cismet.cids.editors.DefaultBindableReferenceCombo();
+    private final transient javax.swing.JLabel lblFileName = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblInvestigationArea = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblName = new javax.swing.JLabel();
+    private final transient javax.swing.JPanel pnlFiller = new javax.swing.JPanel();
+    private final transient javax.swing.JTextField txtFileName = new javax.swing.JTextField();
     private final transient javax.swing.JTextField txtName = new javax.swing.JTextField();
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
@@ -68,16 +73,35 @@ public class GeocpmConfigEditor extends AbstractCidsBeanRenderer implements Edit
     public GeocpmConfigEditor(final boolean editable) {
         initComponents();
 
-        jepGeocpmInput.setEditable(editable);
         txtName.setEditable(editable);
+        txtFileName.setEditable(editable);
+        cboInvestigationArea.setEnabled(editable);
     }
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
     protected void init() {
-        parentBean = SMSUtils.getParentObject();
+        final String domain = SessionManager.getSession().getUser().getDomain();
+        final MetaClass iaClass = ClassCacheMultiple.getMetaClass(domain, "investigation_area"); // NOI18N
 
+        parentBean = SMSUtils.getParentObject(iaClass);
+
+        if (parentBean == null) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("cannot fetch parent object for cidsbean: " + cidsBean); // NOI18N
+            }
+        } else {
+            try {
+                cidsBean.setProperty("investigation_area", parentBean);           // NOI18N
+            } catch (final Exception ex) {
+                LOG.warn("cannot preset investigation area", ex);                 // NOI18N
+            }
+        }
+
+        DefaultCustomObjectEditor.setMetaClassInformationToMetaClassStoreComponentsInBindingGroup(
+            bindingGroup,
+            cidsBean);
         bindingGroup.unbind();
         bindingGroup.bind();
     }
@@ -100,38 +124,16 @@ public class GeocpmConfigEditor extends AbstractCidsBeanRenderer implements Edit
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        jepGeocpmInput.setBorder(javax.swing.BorderFactory.createTitledBorder(
-                NbBundle.getMessage(GeocpmConfigEditor.class, "GeocpmConfigEditor.jepGeoCPMInput.border.title"))); // NOI18N
-
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.input}"),
-                jepGeocpmInput,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        bindingGroup.addBinding(binding);
-
-        jScrollPane1.setViewportView(jepGeocpmInput);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jScrollPane1, gridBagConstraints);
-
         lblName.setText(NbBundle.getMessage(GeocpmConfigEditor.class, "GeocpmConfigEditor.lblName.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 6, 5, 5);
         add(lblName, gridBagConstraints);
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.name}"),
@@ -147,42 +149,89 @@ public class GeocpmConfigEditor extends AbstractCidsBeanRenderer implements Edit
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 3);
         add(txtName, gridBagConstraints);
 
+        lblFileName.setText(NbBundle.getMessage(GeocpmConfigEditor.class, "GeocpmConfigEditor.lblFileName.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 6, 5, 5);
+        add(lblFileName, gridBagConstraints);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.filename}"),
+                txtFileName,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 3);
+        add(txtFileName, gridBagConstraints);
+
+        pnlFiller.setOpaque(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 1.0;
+        add(pnlFiller, gridBagConstraints);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.investigation_area}"),
+                cboInvestigationArea,
+                org.jdesktop.beansbinding.BeanProperty.create("selectedItem"));
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 3);
+        add(cboInvestigationArea, gridBagConstraints);
+
+        lblInvestigationArea.setText(NbBundle.getMessage(
+                GeocpmConfigEditor.class,
+                "GeocpmConfigEditor.lblInvestigationArea.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.insets = new java.awt.Insets(5, 6, 5, 5);
+        add(lblInvestigationArea, gridBagConstraints);
+
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
 
     @Override
     public void editorClosed(final EditorClosedEvent event) {
+        // noop
     }
 
     @Override
     public boolean prepareForSave() {
-        if (parentBean == null) {
-            LOG.warn("cannot fetch parent object for cidsbean: " + cidsBean); // NOI18N
+        if (cidsBean.getProperty("investigation_area") == null) {                       // NOI18N
+            JOptionPane.showMessageDialog(
+                this,
+                NbBundle.getMessage(
+                    GeocpmConfigEditor.class,
+                    "GeocpmConfigEditor.prepareForSave().noInvestigationArea.message"), // NOI18N
+                NbBundle.getMessage(
+                    GeocpmConfigEditor.class,
+                    "GeocpmConfigEditor.prepareForSave().noInvestigationArea.title"),   // NOI18N
+                JOptionPane.INFORMATION_MESSAGE);
 
             return false;
-        } else {
-            final MetaClass moClass = parentBean.getMetaObject().getMetaClass();
-            final String domain = SessionManager.getSession().getUser().getDomain();
-
-            final MetaClass iaClass = ClassCacheMultiple.getMetaClass(domain, "investigation_area"); // NOI18N
-
-            if (moClass.equals(iaClass)) {
-                final List<CidsBean> configs = (List)parentBean.getProperty("geocpm_configs"); // NOI18N
-                configs.add(cidsBean);
-                try {
-                    parentBean.persist();
-
-                    return true;
-                } catch (final Exception ex) {
-                    LOG.warn("cannot persist parent bean", ex); // NOI18N
-
-                    return false;
-                }
-            } else {
-                LOG.warn("cannot link config to investigation area"); // NOI18N
-
-                return false;
-            }
         }
+
+        return true;
     }
 }

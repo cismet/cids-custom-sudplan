@@ -8,24 +8,38 @@
 package de.cismet.cids.custom.sudplan;
 
 import Sirius.navigator.ui.ComponentRegistry;
+import Sirius.navigator.ui.DescriptionPane;
 
 import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
+
+import java.awt.EventQueue;
 
 import java.io.IOException;
 
 import java.sql.Timestamp;
 
 import java.util.GregorianCalendar;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.editors.converters.SqlTimestampToUtilDateConverter;
 
+import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
+
 import de.cismet.cismap.commons.features.Feature;
+
+import de.cismet.tools.CismetThreadPool;
 
 /**
  * DOCUMENT ME!
@@ -47,6 +61,8 @@ public abstract class AbstractModelManager implements ModelManager {
 
     private transient volatile JComponent ui;
 
+    private final ExecutorService progressDispatcher;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -54,6 +70,8 @@ public abstract class AbstractModelManager implements ModelManager {
      */
     public AbstractModelManager() {
         progressSupport = new ProgressSupport();
+        progressDispatcher = Executors.newSingleThreadExecutor(
+                SudplanConcurrency.createThreadFactory("model-progress-dispatcher")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -114,7 +132,7 @@ public abstract class AbstractModelManager implements ModelManager {
      */
     @Override
     public void finalise() throws IOException {
-        // default gui does not alter the bean, nothing has to be done
+        progressDispatcher.shutdown();
     }
 
     @Override
@@ -149,24 +167,36 @@ public abstract class AbstractModelManager implements ModelManager {
      * @throws  IllegalStateException  DOCUMENT ME!
      */
     protected void fireStarted() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("fireStarted: " + this); // NOI18N
-        }
+        final Runnable fireStarted = new Runnable() {
 
-        if (isStarted()) {
-            return;
-        }
+                @Override
+                public void run() {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("fireStarted: " + AbstractModelManager.this); // NOI18N
+                    }
 
-        final SqlTimestampToUtilDateConverter dateConverter = new SqlTimestampToUtilDateConverter();
-        try {
-            cidsBean.setProperty("started", dateConverter.convertReverse(GregorianCalendar.getInstance().getTime())); // NOI18N
-        } catch (final Exception ex) {
-            final String message = "cannot set started flag in runbean";                                              // NOI18N
-            LOG.error(message, ex);
-            throw new IllegalStateException(message, ex);
-        }
+                    if (isStarted()) {
+                        return;
+                    }
 
-        progressSupport.fireEvent(new ProgressEvent(this, ProgressEvent.State.STARTED));
+                    final SqlTimestampToUtilDateConverter dateConverter = new SqlTimestampToUtilDateConverter();
+                    try {
+                        cidsBean.setProperty(
+                            "started", // NOI18N
+                            dateConverter.convertReverse(GregorianCalendar.getInstance().getTime()));
+                    } catch (final Exception ex) {
+                        final String message = "cannot set started flag in runbean"; // NOI18N
+                        LOG.error(message, ex);
+                        throw new IllegalStateException(message, ex);
+                    }
+
+                    progressSupport.fireEvent(new ProgressEvent(
+                            AbstractModelManager.this,
+                            ProgressEvent.State.STARTED));
+                }
+            };
+
+        progressDispatcher.submit(fireStarted);
     }
 
     /**
@@ -182,15 +212,27 @@ public abstract class AbstractModelManager implements ModelManager {
             throw new IllegalStateException("cannot progress when not started yet"); // NOI18N
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("fireProgressed: " + this); // NOI18N
-        }
+        final Runnable fireProgressed = new Runnable() {
 
-        if (isFinished()) {
-            return;
-        }
+                @Override
+                public void run() {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("fireProgressed: " + AbstractModelManager.this); // NOI18N
+                    }
 
-        progressSupport.fireEvent(new ProgressEvent(this, ProgressEvent.State.PROGRESSING, step, maxSteps));
+                    if (isFinished()) {
+                        return;
+                    }
+
+                    progressSupport.fireEvent(new ProgressEvent(
+                            AbstractModelManager.this,
+                            ProgressEvent.State.PROGRESSING,
+                            step,
+                            maxSteps));
+                }
+            };
+
+        progressDispatcher.submit(fireProgressed);
     }
 
     /**
@@ -203,15 +245,30 @@ public abstract class AbstractModelManager implements ModelManager {
             throw new IllegalStateException("cannot be broken when not started yet"); // NOI18N
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("fireBroken: " + this); // NOI18N
-        }
+        final Runnable fireBroken = new Runnable() {
 
-        if (isFinished()) {
-            return;
-        }
+                @Override
+                public void run() {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("fireBroken: " + AbstractModelManager.this); // NOI18N
+                    }
 
-        progressSupport.fireEvent(new ProgressEvent(this, ProgressEvent.State.BROKEN));
+                    if (isFinished()) {
+                        return;
+                    }
+
+                    JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
+                        "Run '"
+                                + cidsBean.getProperty("name")
+                                + "' is broken!",
+                        "Run broken",
+                        JOptionPane.WARNING_MESSAGE);
+
+                    progressSupport.fireEvent(new ProgressEvent(AbstractModelManager.this, ProgressEvent.State.BROKEN));
+                }
+            };
+
+        progressDispatcher.submit(fireBroken);
     }
 
     /**
@@ -220,45 +277,101 @@ public abstract class AbstractModelManager implements ModelManager {
      * @throws  IllegalStateException  DOCUMENT ME!
      */
     protected void fireFinised() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("fireFinished: " + this); // NOI18N
-        }
+        final Runnable fireFinished = new Runnable() {
 
-        if (isFinished()) {
-            return;
-        }
+                @Override
+                public void run() {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("fireFinished: " + AbstractModelManager.this); // NOI18N
+                    }
 
-        final SqlTimestampToUtilDateConverter dateConverter = new SqlTimestampToUtilDateConverter();
-        try {
-            cidsBean.setProperty("finished", dateConverter.convertReverse(GregorianCalendar.getInstance().getTime())); // NOI18N
-            cidsBean.setProperty("modeloutput", createOutputBean());                                                   // NOI18N
-            cidsBean = cidsBean.persist();
+                    if (isFinished()) {
+                        return;
+                    }
 
-            // TODO: use appropriate reload sub-tree facilities
-            SMSUtils.reloadCatalogTree();
+                    final SqlTimestampToUtilDateConverter dateConverter = new SqlTimestampToUtilDateConverter();
+                    try {
+                        cidsBean.setProperty(
+                            "finished", // NOI18N
+                            dateConverter.convertReverse(GregorianCalendar.getInstance().getTime()));
+                        cidsBean.setProperty("modeloutput", createOutputBean()); // NOI18N
+                        cidsBean = cidsBean.persist();
 
-            final MetaObject outputobject = ((CidsBean)cidsBean.getProperty("modeloutput")).getMetaObject(); // NOI18N
+                        final MetaObject outputobject = ((CidsBean)cidsBean.getProperty("modeloutput")).getMetaObject(); // NOI18N
 
-            assert outputobject != null : "bean without metaobject";                     // NOI18N
-            assert outputobject.getMetaClass() != null : "metaobject without metaclass"; // NOI18N
+                        assert outputobject != null : "bean without metaobject";                     // NOI18N
+                        assert outputobject.getMetaClass() != null : "metaobject without metaclass"; // NOI18N
 
-            // FIXME: atr hack to simulate longer model run time
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
-                LOG.warn("interrupted", ex); // NOI18N
-            }
+                        final ComponentRegistry reg = ComponentRegistry.getRegistry();
 
-            ComponentRegistry.getRegistry()
-                    .getDescriptionPane()
-                    .gotoMetaObject(outputobject.getMetaClass(), outputobject.getID(), ""); // NOI18N
-        } catch (final Exception ex) {
-            final String message = "cannot save new values in runbean";                     // NOI18N
-            LOG.error(message, ex);
-            throw new IllegalStateException(message, ex);
-        }
+                        final CidsBeanRenderer currentRenderer = reg.getDescriptionPane().currentRenderer();
+                        if (currentRenderer == null) {
+                            LOG.warn("cannot fetch current renderer, won't reflect bean changes to ui"); // NOI18N
+                        } else {
+                            final CidsBean currentBean = currentRenderer.getCidsBean();
+                            if ((cidsBean.getMetaObject().getClassID() == currentBean.getMetaObject().getClassID())
+                                        && (cidsBean.getMetaObject().getID() == currentBean.getMetaObject().getID())) {
+                                EventQueue.invokeLater(new Runnable() {
 
-        progressSupport.fireEvent(new ProgressEvent(this, ProgressEvent.State.FINISHED));
+                                        @Override
+                                        public void run() {
+                                            currentRenderer.setCidsBean(cidsBean);
+                                        }
+                                    });
+                            }
+                        }
+
+                        // TODO: use appropriate reload sub-tree facilities
+// final Future f = SMSUtils.reloadCatalogTree();
+//
+// if (f != null) {
+// f.get(5, TimeUnit.SECONDS);
+// }
+
+                        if (currentRenderer != null) {
+                            CismetThreadPool.execute(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        EventQueue.invokeLater(new Runnable() {
+
+                                                @Override
+                                                public void run() {
+                                                    reg.getDescriptionPane()
+                                                            .gotoMetaObject(
+                                                                currentRenderer.getCidsBean().getMetaObject(),
+                                                                null);
+                                                }
+                                            });
+                                    }
+                                });
+                        }
+
+                        final int answer = JOptionPane.showConfirmDialog(
+                                reg.getMainWindow(),
+                                "Run '"
+                                        + cidsBean.getProperty("name")
+                                        + "' is completely finished. Do you want to view the results?",
+                                "Run finished",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.QUESTION_MESSAGE);
+
+                        if (JOptionPane.YES_OPTION == answer) {
+                            reg.getDescriptionPane().gotoMetaObject(outputobject, ""); // NOI18N
+                        }
+                    } catch (final Exception ex) {
+                        final String message = "cannot save new values in runbean";    // NOI18N
+                        LOG.error(message, ex);
+                        throw new IllegalStateException(message, ex);
+                    }
+
+                    progressSupport.fireEvent(new ProgressEvent(
+                            AbstractModelManager.this,
+                            ProgressEvent.State.FINISHED));
+                }
+            };
+
+        progressDispatcher.submit(fireFinished);
     }
 
     /**

@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import Sirius.navigator.ui.RequestsFullSizeComponent;
+
 import de.cismet.cids.custom.sudplan.ManagerType;
 
 /**
@@ -15,7 +17,7 @@ import de.cismet.cids.custom.sudplan.ManagerType;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
-public class ModeloutputRenderer extends AbstractManagerRenderer {
+public class ModeloutputRenderer extends AbstractManagerRenderer implements RequestsFullSizeComponent {
 
     //~ Constructors -----------------------------------------------------------
 
@@ -39,7 +41,6 @@ public class ModeloutputRenderer extends AbstractManagerRenderer {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         setOpaque(false);
-        setPreferredSize(null);
         setLayout(new java.awt.BorderLayout());
     } // </editor-fold>//GEN-END:initComponents
 

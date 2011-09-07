@@ -25,7 +25,7 @@ import de.cismet.cids.dynamics.CidsBean;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class RunGeoCPMWizardPanelTimerseries implements WizardDescriptor.Panel {
+public final class RunGeoCPMWizardPanelRainevent implements WizardDescriptor.Panel {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -36,16 +36,16 @@ public final class RunGeoCPMWizardPanelTimerseries implements WizardDescriptor.P
     private final transient ChangeSupport changeSupport;
 
     private transient WizardDescriptor wizard;
-    private transient CidsBean timeseries;
+    private transient CidsBean rainevent;
 
-    private transient volatile RunGeoCPMVisualPanelTimeseries component;
+    private transient volatile RunGeoCPMVisualPanelRainevent component;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RunGeoCPMWizardPanelInput object.
      */
-    public RunGeoCPMWizardPanelTimerseries() {
+    public RunGeoCPMWizardPanelRainevent() {
         changeSupport = new ChangeSupport(this);
     }
 
@@ -56,8 +56,8 @@ public final class RunGeoCPMWizardPanelTimerseries implements WizardDescriptor.P
      *
      * @return  DOCUMENT ME!
      */
-    public CidsBean getTimeseries() {
-        return timeseries;
+    public CidsBean getRainevent() {
+        return rainevent;
     }
 
     /**
@@ -65,8 +65,8 @@ public final class RunGeoCPMWizardPanelTimerseries implements WizardDescriptor.P
      *
      * @param  input  DOCUMENT ME!
      */
-    public void setTimeseries(final CidsBean input) {
-        this.timeseries = input;
+    public void setRainevent(final CidsBean input) {
+        this.rainevent = input;
         changeSupport.fireChange();
     }
 
@@ -76,7 +76,7 @@ public final class RunGeoCPMWizardPanelTimerseries implements WizardDescriptor.P
             synchronized (this) {
                 if (component == null) {
                     try {
-                        component = new RunGeoCPMVisualPanelTimeseries(this);
+                        component = new RunGeoCPMVisualPanelRainevent(this);
                     } catch (final WizardInitialisationException ex) {
                         LOG.error("cannot create wizard panel component", ex); // NOI18N
                     }
@@ -95,9 +95,9 @@ public final class RunGeoCPMWizardPanelTimerseries implements WizardDescriptor.P
     @Override
     public void readSettings(final Object settings) {
         wizard = (WizardDescriptor)settings;
-        final CidsBean timeseriesBean = (CidsBean)wizard.getProperty(RunGeoCPMWizardAction.PROP_TIMESERIES_BEAN);
+        final CidsBean raineventBean = (CidsBean)wizard.getProperty(RunGeoCPMWizardAction.PROP_RAINEVENT_BEAN);
 
-        setTimeseries(timeseriesBean);
+        setRainevent(raineventBean);
 
         component.init();
     }
@@ -105,12 +105,12 @@ public final class RunGeoCPMWizardPanelTimerseries implements WizardDescriptor.P
     @Override
     public void storeSettings(final Object settings) {
         wizard = (WizardDescriptor)settings;
-        wizard.putProperty(RunGeoCPMWizardAction.PROP_TIMESERIES_BEAN, timeseries);
+        wizard.putProperty(RunGeoCPMWizardAction.PROP_RAINEVENT_BEAN, rainevent);
     }
 
     @Override
     public boolean isValid() {
-        return timeseries != null;
+        return rainevent != null;
     }
 
     @Override

@@ -9,8 +9,6 @@ package de.cismet.cids.custom.sudplan.multiply;
 
 import org.apache.log4j.Logger;
 
-import java.awt.image.BufferedImage;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -21,11 +19,8 @@ import javax.swing.JComponent;
 import de.cismet.cids.custom.sudplan.Grid;
 import de.cismet.cids.custom.sudplan.ImmutableGrid;
 import de.cismet.cids.custom.sudplan.Manager;
-import de.cismet.cids.custom.sudplan.RunHelper;
-import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
-import de.cismet.cids.dynamics.Disposable;
 
 import de.cismet.cismap.commons.features.DefaultRasterDocumentFeature;
 import de.cismet.cismap.commons.features.Feature;
@@ -36,7 +31,7 @@ import de.cismet.cismap.commons.features.Feature;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class GridMultiplyOutputManager implements Manager, Disposable {
+public final class GridMultiplyOutputManager implements Manager {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -100,7 +95,7 @@ public final class GridMultiplyOutputManager implements Manager, Disposable {
      */
     @Override
     public void finalise() throws IOException {
-        // NOOP
+        ui.dispose();
     }
 
     /**
@@ -145,11 +140,6 @@ public final class GridMultiplyOutputManager implements Manager, Disposable {
         }
 
         return grid;
-    }
-
-    @Override
-    public void dispose() {
-        ui.dispose();
     }
 
     @Override
