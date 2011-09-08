@@ -20,7 +20,7 @@ import org.jfree.data.time.TimeSeriesCollection;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesDatasetAdapter extends TimeSeriesCollection { 
+public class TimeSeriesDatasetAdapter extends TimeSeriesCollection {
 
     //~ Instance fields --------------------------------------------------------
 

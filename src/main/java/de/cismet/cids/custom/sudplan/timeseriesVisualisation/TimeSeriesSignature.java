@@ -21,7 +21,7 @@ import java.awt.image.BufferedImage;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public interface TimeSeriesSignature { 
+public interface TimeSeriesSignature {
 
     //~ Methods ----------------------------------------------------------------
 

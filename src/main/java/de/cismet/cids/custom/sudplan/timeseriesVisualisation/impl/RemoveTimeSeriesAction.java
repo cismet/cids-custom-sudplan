@@ -23,7 +23,7 @@ import java.util.HashMap;
 
 import javax.swing.AbstractAction;
 
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation; 
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
 
 /**
  * Removes one or multiple time series from a a chart. Deletes the time series only if after the removal still one time

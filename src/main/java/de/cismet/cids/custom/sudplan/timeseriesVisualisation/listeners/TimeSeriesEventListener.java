@@ -15,7 +15,7 @@ import java.util.EventListener;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public interface TimeSeriesEventListener extends EventListener { 
+public interface TimeSeriesEventListener extends EventListener {
 
     //~ Methods ----------------------------------------------------------------
 

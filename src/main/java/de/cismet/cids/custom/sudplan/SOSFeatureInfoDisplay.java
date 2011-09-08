@@ -85,6 +85,7 @@ import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 
 import de.cismet.cismap.navigatorplugin.CismapPlugin;
+import org.openide.util.WeakListeners;
 
 /**
  * DOCUMENT ME!
@@ -163,7 +164,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 FeatureInfoDisplayKey.ANY_LAYER));
         initComponents();
         tsVis = TimeSeriesVisualisationFactory.getInstance().createVisualisation(VisualisationType.SIMPLE);
-        tsVis.addTimeSeriesListChangeListener(this);
+        tsVis.addTimeSeriesListChangeListener(WeakListeners.create(TimeSeriesListChangedListener.class, this, tsVis));
         // try to get properties for size of the overlay
         overlayWidth = 16;
         overlayHeight = 16;
@@ -202,7 +203,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         final TimeSeriesSelectionNotification tsn = tsVis.getLookup(TimeSeriesSelectionNotification.class);
         if (tsn != null) {
-            tsn.addTimeSeriesSelectionListener(this);
+            tsn.addTimeSeriesSelectionListener(WeakListeners.create(TimeSeriesSelectionListener.class, this, tsVis));
         }
         initialised = false;
     }

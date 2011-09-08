@@ -57,12 +57,16 @@ public abstract class AbstractTimeSeriesOperation extends AbstractAction impleme
     /**
      * Creates a new AbstractTimeSeriesOperation object.
      *
-     * @param  name  the title of the <code>TimeSeriesOperation</code>
-     * @param  icon  the icon of the <code>TimeSeriesOperation</code>
-     * @param  tsv   the <code>TimeSeriesVisualisation</code> this is used to determine the parent frame of the <code>
-     *               DefaultParamOderUI</code>
+     * @param  paramCount  DOCUMENT ME!
+     * @param  name        the title of the <code>TimeSeriesOperation</code>
+     * @param  icon        the icon of the <code>TimeSeriesOperation</code>
+     * @param  tsv         the <code>TimeSeriesVisualisation</code> this is used to determine the parent frame of the
+     *                     <code>DefaultParamOderUI</code>
      */
-    public AbstractTimeSeriesOperation(final int paramCount, final String name, final Icon icon, final TimeSeriesVisualisation tsv) {
+    public AbstractTimeSeriesOperation(final int paramCount,
+            final String name,
+            final Icon icon,
+            final TimeSeriesVisualisation tsv) {
         super(name, icon);
         params = new TimeSeries[paramCount];
         tsVis = tsv;

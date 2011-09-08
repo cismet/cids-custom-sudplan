@@ -31,7 +31,7 @@ import java.util.ArrayList;
 
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionEvent; 
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionEvent;
 
 /**
  * A customised ChartMouseListener that takes care of the selection of <code>TimeSeriesDatasetAdapter</code>. Each
@@ -40,8 +40,8 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSerie
  * ways. JFreeChart only detects clicks on the data items of a <code>TimeSeriesDatasetAdapter</code>. If such a data
  * item was clicked the corresponding renderer is set selected. In fact that a selection should also be possible if a
  * click on the line between two data items was performed, The <code>SelectionXYLineRenderer</code> of each dataset
- * calculated the distance between the click and their data points If this distance is minimal it calls the method <code>
- * checkIfClickWasOnDataline</code> which checks if the click lies on the line between two data items and sets the
+ * calculated the distance between the click and their data points If this distance is minimal it calls the method
+ * <code>checkIfClickWasOnDataline</code> which checks if the click lies on the line between two data items and sets the
  * corresponding renderer to paint the dataset selected<br>
  * If a selection or deselection was performed it notifies all listeners of the corresponding <code>
  * TimeSeriesVisualisation</code>
@@ -131,7 +131,7 @@ public class SelectionChartMouseListener implements ChartMouseListener {
                     this,
                     TimeSeriesSelectionEvent.TS_DESELECTED,
                     selectedTS);
-            selectionNotifier.fireTimeSeriesSelectionChanged(evt);
+            ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(evt);
         }
     }
 
@@ -203,8 +203,8 @@ public class SelectionChartMouseListener implements ChartMouseListener {
     }
 
     /**
-     * performs a selection operation on the <code>TimeSeriesDatasetAdapter</code>. Distinguish between Multi/single
-     * and selection / deselection. Notifies all <code>TimeSeriesSelectionListener</code> of the corresponding <code>
+     * performs a selection operation on the <code>TimeSeriesDatasetAdapter</code>. Distinguish between Multi/single and
+     * selection / deselection. Notifies all <code>TimeSeriesSelectionListener</code> of the corresponding <code>
      * TimeSeriesVisualisation</code>
      *
      * @param  ctrDown  the flag for single or multi selection
@@ -226,7 +226,7 @@ public class SelectionChartMouseListener implements ChartMouseListener {
                             tsVis,
                             TimeSeriesSelectionEvent.TS_SELECTED,
                             selectedTS);
-                    selectionNotifier.fireTimeSeriesSelectionChanged(evt);
+                    ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(evt);
                 }
             } else {
                 if (selectedTS.contains(tsc.getOriginTimeSeries())) {
@@ -236,7 +236,7 @@ public class SelectionChartMouseListener implements ChartMouseListener {
                                 tsVis,
                                 TimeSeriesSelectionEvent.TS_DESELECTED,
                                 selectedTS);
-                        selectionNotifier.fireTimeSeriesSelectionChanged(evt);
+                        ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(evt);
                     }
                 } else {
                     LOG.warn("time series " + tsc.getOriginTimeSeries() // NOI18N
@@ -272,7 +272,7 @@ public class SelectionChartMouseListener implements ChartMouseListener {
                             this,
                             TimeSeriesSelectionEvent.TS_SELECTED,
                             selectedTS);
-                    selectionNotifier.fireTimeSeriesSelectionChanged(evt);
+                    ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(evt);
                 }
             }
         }

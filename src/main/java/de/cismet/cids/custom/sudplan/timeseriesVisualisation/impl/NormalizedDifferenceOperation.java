@@ -29,7 +29,7 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.
  * @version  $Revision$, $Date$
  */
 //TODO reference zu TimeSeriesVisualisation wird gebraucht um Frame zu ermitteln... geht das auch anders?
-public class NormalizedDifferenceOperation extends AbstractTimeSeriesOperation { 
+public class NormalizedDifferenceOperation extends AbstractTimeSeriesOperation {
 
     //~ Constructors -----------------------------------------------------------
 
@@ -39,7 +39,9 @@ public class NormalizedDifferenceOperation extends AbstractTimeSeriesOperation {
      * @param  tsv  the <code>TimeSeriesVisualisation</code> that this operation relies to.
      */
     public NormalizedDifferenceOperation(final TimeSeriesVisualisation tsv) {
-        super(2,NbBundle.getMessage(
+        super(
+            2,
+            NbBundle.getMessage(
                 NormalizedDifferenceOperation.class,
                 "NormalizedDifferenceOperation.opName"), // NOI18N
             null,

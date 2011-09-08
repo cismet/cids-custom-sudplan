@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners;
 
-
 import java.util.EventObject;
 
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.TimeSeriesOperation;

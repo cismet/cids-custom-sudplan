@@ -18,7 +18,7 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSerie
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public interface TimeSeriesSelectionNotification { 
+public interface TimeSeriesSelectionNotification {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -35,10 +35,5 @@ public interface TimeSeriesSelectionNotification {
      */
     void removeTimeSeriesSelectionListener(TimeSeriesSelectionListener l);
 
-    /**
-     * notifies all managed <code>TimeSeriesSelectionListener</code> about the <code>TimeSeriesSelectionEvent.</code>
-     *
-     * @param  evt  the <code>TimeSeriesSelectioEvent</code>
-     */
-    void fireTimeSeriesSelectionChanged(TimeSeriesSelectionEvent evt);
+  
 }

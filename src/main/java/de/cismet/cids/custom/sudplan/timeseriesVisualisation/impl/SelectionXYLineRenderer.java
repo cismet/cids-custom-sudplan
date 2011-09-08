@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class SelectionXYLineRenderer extends XYLineAndShapeRenderer { 
+public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
 
     //~ Static fields/initializers ---------------------------------------------
 

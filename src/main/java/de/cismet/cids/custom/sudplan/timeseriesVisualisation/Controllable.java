@@ -78,8 +78,8 @@ public interface Controllable {
     boolean isZoomEnabled();
 
     /**
-     * enables selection of time series. adds or remove button for deleting selected time series, select all and deselect
-     * all button default true
+     * enables selection of time series. adds or remove button for deleting selected time series, select all and
+     * deselect all button default true
      *
      * @param  aFlag  the flag
      */

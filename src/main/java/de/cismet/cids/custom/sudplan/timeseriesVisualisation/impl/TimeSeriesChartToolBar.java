@@ -51,7 +51,7 @@ import de.cismet.cismap.navigatorplugin.CismapPlugin;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperationListChangedListener { 
+public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperationListChangedListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -76,7 +76,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
                     }
                 }
                 if (notifyier != null) {
-                    notifyier.fireTimeSeriesSelectionChanged(new TimeSeriesSelectionEvent(
+                    ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(new TimeSeriesSelectionEvent(
                             tsVis,
                             TimeSeriesSelectionEvent.TS_SELECTED,
                             tsVis.getTimeSeriesCollection()));
@@ -98,7 +98,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
                     }
                 }
                 if (notifyier != null) {
-                    notifyier.fireTimeSeriesSelectionChanged(new TimeSeriesSelectionEvent(
+                    ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(new TimeSeriesSelectionEvent(
                             tsVis,
                             TimeSeriesSelectionEvent.TS_DESELECTED,
                             new ArrayList<TimeSeries>()));

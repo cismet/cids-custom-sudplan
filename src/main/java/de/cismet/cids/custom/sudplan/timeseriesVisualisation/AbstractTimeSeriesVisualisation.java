@@ -1,48 +1,51 @@
-/*
- * Copyright (C) 2011 cismet GmbH
+/***************************************************
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * cismet GmbH, Saarbruecken, Germany
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *              ... and it just works.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+ ****************************************************/
 package de.cismet.cids.custom.sudplan.timeseriesVisualisation;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
+
+import java.beans.PropertyChangeListener;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Properties;
+
+import javax.swing.JComponent;
+import javax.swing.JToolBar;
+
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesListChangedEvent;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesListChangedListener;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesOperationChangedEvent;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesOperationListChangedListener;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.TimeSeriesOperation;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Properties;
-import javax.swing.JComponent;
-import javax.swing.JToolBar;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldListener;
+import java.awt.EventQueue;
+import java.util.Iterator;
 
 /**
+ * DOCUMENT ME!
  *
- * @author dmeiers
+ * @author   dmeiers
+ * @version  $Revision$, $Date$
  */
 public abstract class AbstractTimeSeriesVisualisation implements TimeSeriesVisualisation {
 
+    //~ Instance fields --------------------------------------------------------
     protected final Properties props = new Properties();
-    protected final ArrayList<TimeSeriesListChangedListener> tsListeners = new ArrayList<TimeSeriesListChangedListener>();
+    protected final ArrayList<TimeSeriesListChangedListener> tsListeners =
+            new ArrayList<TimeSeriesListChangedListener>();
     protected final ArrayList<PropertyChangeListener> propListener = new ArrayList<PropertyChangeListener>();
     protected final ArrayList<TimeSeriesOperationListChangedListener> operationListeners =
             new ArrayList<TimeSeriesOperationListChangedListener>();
 
+    //~ Methods ----------------------------------------------------------------
     @Override
-    public  void addTimeSeriesListChangeListener(final TimeSeriesListChangedListener l) {
+    public void addTimeSeriesListChangeListener(final TimeSeriesListChangedListener l) {
         tsListeners.add(l);
     }
 
@@ -51,7 +54,6 @@ public abstract class AbstractTimeSeriesVisualisation implements TimeSeriesVisua
         tsListeners.remove(l);
     }
 
-    
     @Override
     public abstract void addTimeSeries(TimeSeries ts);
 
@@ -86,9 +88,9 @@ public abstract class AbstractTimeSeriesVisualisation implements TimeSeriesVisua
 
     @Override
     public abstract void addTimeSeriesOperation(TimeSeriesOperation op);
-    
+
     @Override
-    public abstract void removeTimeSeriesOperation(TimeSeriesOperation op) ;
+    public abstract void removeTimeSeriesOperation(TimeSeriesOperation op);
 
     @Override
     public abstract void clearTimeSeriesOperations();
@@ -102,15 +104,27 @@ public abstract class AbstractTimeSeriesVisualisation implements TimeSeriesVisua
     public void removeTimeSeriesOperationListListener(final TimeSeriesOperationListChangedListener l) {
         operationListeners.remove(l);
     }
-    
-        /**
+
+    /**
      * notifies all registered <code>TimeSeriesOperationListChangedListener <code>about the event.</code></code>
      *
      * @param  evt  the event occurred
      */
     protected void fireTSOperationsChanged(final TimeSeriesOperationChangedEvent evt) {
-        for (final TimeSeriesOperationListChangedListener l : operationListeners) {
-            l.timeSeriesOperationChanged(evt);
+        final Iterator<TimeSeriesOperationListChangedListener> it;
+        synchronized (tsListeners) {
+            it = new ArrayList<TimeSeriesOperationListChangedListener>(operationListeners).iterator();
+        }    
+        
+        while(it.hasNext()){
+            final TimeSeriesOperationListChangedListener listener = it.next();
+            EventQueue.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                   listener.timeSeriesOperationChanged(evt);
+                }
+            });
         }
     }
 
@@ -118,19 +132,32 @@ public abstract class AbstractTimeSeriesVisualisation implements TimeSeriesVisua
     public abstract <T> T getLookup(Class<T> clazz);
 
     @Override
-    public abstract JComponent getVisualisationUI() ;
+    public abstract JComponent getVisualisationUI();
 
     @Override
-    public abstract JToolBar getToolbar() ;
+    public abstract JToolBar getToolbar();
 
     /**
      * notifies all <code>TimeSeriesListChangedListener</code> about the event.
      *
-     * @param  evt  the event occured
+     * @param  evt  the event occurred
      */
     protected void fireTimeSeriesChanged(final TimeSeriesListChangedEvent evt) {
-        for (final TimeSeriesListChangedListener l : tsListeners) {
-            l.timeSeriesListChanged(evt);
+
+        final Iterator<TimeSeriesListChangedListener> it;
+        synchronized (tsListeners) {
+            it = new ArrayList<TimeSeriesListChangedListener>(tsListeners).iterator();
+        }    
+        
+        while(it.hasNext()){
+            final TimeSeriesListChangedListener listener = it.next();
+            EventQueue.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                   listener.timeSeriesListChanged(evt);
+                }
+            });
         }
     }
 }

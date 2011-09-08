@@ -27,18 +27,20 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public interface TimeSeriesVisualisation { 
+public interface TimeSeriesVisualisation {
 
-    //~ Instance fields --------------------------------------------------------
+    //~ Static fields/initializers ---------------------------------------------
 
-    /** Property key for the title of the visualisation*/
-    public static final String TITLE_KEY = "VisualisationTitle";
-    /** Property key for the x axis title of the visualisation*/
-    public static final String X_AXIS_TITLE = "TimeAxisTitle";
+    /** Property key for the title of the visualisation. */
+    String TITLE_KEY = "VisualisationTitle";
+    /** Property key for the x axis title of the visualisation. */
+    String X_AXIS_TITLE = "TimeAxisTitle";
+
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * adds a <code>TimeSeries</code> object to the visualisation. Notifies all registered TimeSeriesListChangedListeners
+     * adds a <code>TimeSeries</code> object to the visualisation. Notifies all registered
+     * TimeSeriesListChangedListeners
      *
      * @param  ts  a <code>TimeSeries</code> object
      */

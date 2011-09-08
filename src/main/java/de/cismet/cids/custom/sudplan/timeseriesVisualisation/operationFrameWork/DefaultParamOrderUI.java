@@ -325,7 +325,7 @@ public class DefaultParamOrderUI extends javax.swing.JDialog {
      *
      * @param  evt  a ActionEvent
      */
-    private void okButtonActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
+    private void okButtonActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_okButtonActionPerformed
         final TimeSeries[] paramArray = new TimeSeries[paramCount];
         for (int i = 0; i < paramCount; i++) {
             final JComboBox cb = paramList.get(i);
@@ -343,25 +343,25 @@ public class DefaultParamOrderUI extends javax.swing.JDialog {
 
         operation.setParameters(paramArray);
         doClose(RET_OK);
-    }//GEN-LAST:event_okButtonActionPerformed
+    } //GEN-LAST:event_okButtonActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cancelButtonActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+    private void cancelButtonActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cancelButtonActionPerformed
         doClose(RET_CANCEL);
-    }//GEN-LAST:event_cancelButtonActionPerformed
+    }                                                                                //GEN-LAST:event_cancelButtonActionPerformed
 
     /**
      * Closes the dialog.
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void closeDialog(final java.awt.event.WindowEvent evt) {//GEN-FIRST:event_closeDialog
+    private void closeDialog(final java.awt.event.WindowEvent evt) { //GEN-FIRST:event_closeDialog
         doClose(RET_CANCEL);
-    }//GEN-LAST:event_closeDialog
+    }                                                                //GEN-LAST:event_closeDialog
 
     /**
      * DOCUMENT ME!

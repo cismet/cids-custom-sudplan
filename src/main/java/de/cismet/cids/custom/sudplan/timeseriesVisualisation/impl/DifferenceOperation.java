@@ -29,7 +29,7 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class DifferenceOperation extends AbstractTimeSeriesOperation { 
+public class DifferenceOperation extends AbstractTimeSeriesOperation {
 
     //~ Constructors -----------------------------------------------------------
 
@@ -62,7 +62,7 @@ public class DifferenceOperation extends AbstractTimeSeriesOperation {
      * @param  tsv   the <code>TimeSeriesVisualisation</code> this operation relies to
      */
     private DifferenceOperation(final String name, final Icon icon, final TimeSeriesVisualisation tsv) {
-        super(2,name, icon, tsv);
+        super(2, name, icon, tsv);
     }
 
     //~ Methods ----------------------------------------------------------------

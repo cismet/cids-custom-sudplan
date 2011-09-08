@@ -14,7 +14,7 @@ package de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public enum VisualisationType { 
+public enum VisualisationType {
 
     //~ Enum constants ---------------------------------------------------------
 

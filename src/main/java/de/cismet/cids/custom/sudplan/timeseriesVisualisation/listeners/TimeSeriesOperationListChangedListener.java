@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners;
 
+import java.util.EventListener;
+
 /**
  * Represents a Listener that is notified whenever the set of managed <code>TimeSeriesOperations</code> within a <code>
  * TimeSeriesVisualisation</code> has changed.
@@ -14,7 +16,7 @@ package de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public interface TimeSeriesOperationListChangedListener {
+public interface TimeSeriesOperationListChangedListener extends EventListener {
 
     //~ Methods ----------------------------------------------------------------
 
