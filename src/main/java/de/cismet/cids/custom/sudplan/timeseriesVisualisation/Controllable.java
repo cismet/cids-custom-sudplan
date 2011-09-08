@@ -11,7 +11,7 @@ package de.cismet.cids.custom.sudplan.timeseriesVisualisation;
  * Offers the capability to control the behaviour of a <code>TimeSeriesVisualisation</code>. Use the <code>
  * getLookup()</code> method to find out if the <code>TimeSeriesVisualisation</code> implements this Interface. This
  * Interface was designed for the use in <code>SimpleTSVisualisation</code> and the there used JFreeChart API. Feel free
- * to extend this interface with your own controlling features by subclassing it
+ * to extend this interface with your own controlling features by sub classing it
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
@@ -21,18 +21,18 @@ public interface Controllable {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * enables a context menue for the visualisation.
+     * enables a context menu for the visualisation.
      *
      * @param  aFlag  a flag
      */
     void enableContextMenu(boolean aFlag);
 
     /**
-     * get method fot the state of the context menue.
+     * get method for the state of the context menu.
      *
      * @return  true if the ContextMenue is enabled, false otherwise
      */
-    boolean iscontextMenuEnabled();
+    boolean isContextMenuEnabled();
 
     /**
      * sets a flag that determines if the visualisation shows a legend default value true.
@@ -49,22 +49,22 @@ public interface Controllable {
     boolean islegendVisible();
 
     /**
-     * enables tooltips for the visualisation default value false in fact of perfomace reasons default false.
+     * enables tool tips for the visualisation default value false in fact of performance reasons default false.
      *
      * @param  aFlag  the flag
      */
     void enableToolTips(boolean aFlag);
 
     /**
-     * get method for the enabled state of tooltips.
+     * get method for the enabled state of tool tips.
      *
      * @return  returns true if ToolTips are enabled, false otherwise
      */
-    boolean istoolTipsEnabled();
+    boolean isToolTipsEnabled();
 
     /**
      * enables zoom functionality which allows the user a more detailed view of the data. adds or removes the button for
-     * resetting the zoom from toolbar default value true
+     * resetting the zoom from tool bar default value true
      *
      * @param  aFlag  the flag
      */
@@ -78,7 +78,7 @@ public interface Controllable {
     boolean isZoomEnabled();
 
     /**
-     * enables selection of time series. adds or remove button for deleting selected timeseries, select all and deselect
+     * enables selection of time series. adds or remove button for deleting selected time series, select all and deselect
      * all button default true
      *
      * @param  aFlag  the flag

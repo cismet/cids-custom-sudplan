@@ -10,17 +10,17 @@ package de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners;
 import java.util.EventListener;
 
 /**
- * A generic listener that is responsible all events that need notitification.
+ * A generic listener that is responsible all events that need notification.
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public interface TimeSeriesEventListener extends EventListener {
+public interface TimeSeriesEventListener extends EventListener { 
 
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * called whenever a <code>TimeSeriesEvent</code> occured.
+     * called whenever a <code>TimeSeriesEvent</code> occurs.
      *
      * @param  evt  The TimeSeriesEvent
      */

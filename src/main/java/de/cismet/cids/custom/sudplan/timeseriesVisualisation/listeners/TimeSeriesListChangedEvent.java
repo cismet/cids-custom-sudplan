@@ -7,7 +7,7 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners;
 
-import java.awt.AWTEvent;
+import java.util.EventObject;
 
 /**
  * Event that contains all needed information about the changed set of <code>TimeSeries</code>. Used as parameter in
@@ -16,16 +16,34 @@ import java.awt.AWTEvent;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesListChangedEvent extends AWTEvent {
+public class TimeSeriesListChangedEvent extends EventObject {
 
     //~ Static fields/initializers ---------------------------------------------
 
     /** Event ID if an <code>TimeSeries</code> was added. */
-    public static final int TIME_SERIES_REMOVED = AWTEvent.RESERVED_ID_MAX + 1;
+    public static final ID TIME_SERIES_REMOVED = ID.REMOVE;
     /** Event ID if an <code>TimeSeries</code> was removed. */
-    public static final int TIME_SERIES_ADDED = AWTEvent.RESERVED_ID_MAX + 2;
+    public static final ID TIME_SERIES_ADDED = ID.ADD;
     /** Event ID if the set of <code>TimeSeriesOperation</code> were cleared. */
-    public static final int TIME_SERIES_CLEARED = AWTEvent.RESERVED_ID_MAX + 3;
+    public static final ID TIME_SERIES_CLEARED = ID.CLEAR;
+
+    //~ Enums ------------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    protected enum ID {
+
+        //~ Enum constants -----------------------------------------------------
+
+        REMOVE, ADD, CLEAR
+    }
+
+    //~ Instance fields --------------------------------------------------------
+
+    private ID eventID;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -37,7 +55,19 @@ public class TimeSeriesListChangedEvent extends AWTEvent {
      *             Else the affected <code>TimeSeries</code>
      * @param  id  the event type
      */
-    public TimeSeriesListChangedEvent(final Object ts, final int id) {
-        super(ts, id);
+    public TimeSeriesListChangedEvent(final Object ts, final ID id) {
+        super(ts);
+        eventID = id;
+    }
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public ID getID() {
+        return eventID;
     }
 }

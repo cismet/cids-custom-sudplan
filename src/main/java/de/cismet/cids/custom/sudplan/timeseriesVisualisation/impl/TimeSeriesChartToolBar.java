@@ -51,7 +51,7 @@ import de.cismet.cismap.navigatorplugin.CismapPlugin;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperationListChangedListener {
+public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperationListChangedListener { 
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -182,8 +182,8 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * Creates a new TimeSeriesChartToolBar object.
      *
-     * @param  p      the ChartPanel that this Toolbar correspond to
-     * @param  tsVis  the <code>TimeSeriesVisualisation</code> that this toolbar corresponds to
+     * @param  p      the ChartPanel that this tool bar correspond to
+     * @param  tsVis  the <code>TimeSeriesVisualisation</code> that this tool bar corresponds to
      */
     public TimeSeriesChartToolBar(final CustomChartPanel p, final TimeSeriesVisualisation tsVis) {
         super(NbBundle.getMessage(
@@ -211,7 +211,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * adds the configured buttons to the toolbar.
+     * adds the configured buttons to the tool bar.
      */
     private void addButtons() {
         this.add(createResetZoomButton());

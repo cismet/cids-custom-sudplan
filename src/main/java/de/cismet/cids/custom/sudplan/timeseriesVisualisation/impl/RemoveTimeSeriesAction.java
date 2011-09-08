@@ -23,12 +23,12 @@ import java.util.HashMap;
 
 import javax.swing.AbstractAction;
 
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation; 
 
 /**
  * Removes one or multiple time series from a a chart. Deletes the time series only if after the removal still one time
  * series remains. Deletes Axes that are no longer necessary. Is used in <code>TimeSeriesChartToolbar</code> and the
- * customized context menue in <code>CustomChartPanel</code>
+ * customised context menu in <code>CustomChartPanel</code>
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$

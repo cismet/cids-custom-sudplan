@@ -31,17 +31,17 @@ import java.util.ArrayList;
 
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionEvent;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionEvent; 
 
 /**
- * A customized ChartMouseListener that takes care of the selection of <code>TimeSeriesDatasetAdapter</code>. Each
+ * A customised ChartMouseListener that takes care of the selection of <code>TimeSeriesDatasetAdapter</code>. Each
  * <code>TimeSeriesDatasetAdapter</code> is rendered by an instance of <code>SelectionXYLineRenderer</code> which
  * controls the flag of the selection and the visualisation of the selection. The selection is detected by two different
  * ways. JFreeChart only detects clicks on the data items of a <code>TimeSeriesDatasetAdapter</code>. If such a data
  * item was clicked the corresponding renderer is set selected. In fact that a selection should also be possible if a
  * click on the line between two data items was performed, The <code>SelectionXYLineRenderer</code> of each dataset
- * calculated the distance between the click and their datapoints If this distance is minimal it calls the method <code>
- * checkIfClickWasOnDataline</code> which checks if the click lies on the line beetween two dataitems and sets the
+ * calculated the distance between the click and their data points If this distance is minimal it calls the method <code>
+ * checkIfClickWasOnDataline</code> which checks if the click lies on the line between two data items and sets the
  * corresponding renderer to paint the dataset selected<br>
  * If a selection or deselection was performed it notifies all listeners of the corresponding <code>
  * TimeSeriesVisualisation</code>
@@ -141,7 +141,7 @@ public class SelectionChartMouseListener implements ChartMouseListener {
      * It ensures that a selection is only done once.
      *
      * @param  dataset    the dataset that gets selected eventually!
-     * @param  itemIndex  the closest item index to the last mouseclick!
+     * @param  itemIndex  the closest item index to the last mouse click!
      */
     public void checkIfCklickWasOnDataLine(final XYDataset dataset, final int itemIndex) {
         // this ensures that the selection is done only onces, in fact that this method is called mulitple times
@@ -203,8 +203,8 @@ public class SelectionChartMouseListener implements ChartMouseListener {
     }
 
     /**
-     * performs a selection operation on the <code>TimeSeriesDatasetAdapter</code>. Distinguishs between Multi/single
-     * and selection / deselection. Notifies all <code>TimeSeriesSelectionListener</code> of the corresponging <code>
+     * performs a selection operation on the <code>TimeSeriesDatasetAdapter</code>. Distinguish between Multi/single
+     * and selection / deselection. Notifies all <code>TimeSeriesSelectionListener</code> of the corresponding <code>
      * TimeSeriesVisualisation</code>
      *
      * @param  ctrDown  the flag for single or multi selection

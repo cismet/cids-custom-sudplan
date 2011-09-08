@@ -21,15 +21,15 @@ import java.awt.image.BufferedImage;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public interface TimeSeriesSignature {
+public interface TimeSeriesSignature { 
 
     //~ Methods ----------------------------------------------------------------
 
     /**
      * determines a Symbol of a time series as visual Signature.
      *
-     * @param   timeseries  the timeseries for that the signature shall be determined
-     * @param   heigth      the heigth of the returned Image
+     * @param   timeseries  the time series for that the signature shall be determined
+     * @param   heigth      the height of the returned Image
      * @param   width       the width of the returned Image
      *
      * @return  the signature symbol of the time series

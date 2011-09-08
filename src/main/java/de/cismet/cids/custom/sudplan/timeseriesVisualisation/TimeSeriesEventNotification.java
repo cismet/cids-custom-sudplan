@@ -10,7 +10,7 @@ package de.cismet.cids.custom.sudplan.timeseriesVisualisation;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesEventListener;
 
 /**
- * Interface for generic event notification. The event ist determined by the event type.
+ * Interface for generic event notification. The event is determined by the event type.
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$

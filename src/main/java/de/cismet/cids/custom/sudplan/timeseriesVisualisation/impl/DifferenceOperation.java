@@ -24,12 +24,12 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.TimeSeriesOperation;
 
 /**
- * Operation that substract two <code>TimeSeries</code> objects from each other.
+ * Operation that calculates the difference of two <code>TimeSeries</code> objects.
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class DifferenceOperation extends AbstractTimeSeriesOperation {
+public class DifferenceOperation extends AbstractTimeSeriesOperation { 
 
     //~ Constructors -----------------------------------------------------------
 
@@ -52,18 +52,17 @@ public class DifferenceOperation extends AbstractTimeSeriesOperation {
             NbBundle.getMessage(
                 DifferenceOperation.class,
                 "DifferenceOperation.opExpr"));            // NOI18N
-        paramCount = 2;
     }
 
     /**
      * Creates a new DifferenceOperation object.
      *
      * @param  name  the op
-     * @param  icon  the opertaions icon
+     * @param  icon  the operations icon
      * @param  tsv   the <code>TimeSeriesVisualisation</code> this operation relies to
      */
     private DifferenceOperation(final String name, final Icon icon, final TimeSeriesVisualisation tsv) {
-        super(name, icon, tsv);
+        super(2,name, icon, tsv);
     }
 
     //~ Methods ----------------------------------------------------------------

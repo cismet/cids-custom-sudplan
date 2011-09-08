@@ -20,7 +20,7 @@ import org.jfree.data.time.TimeSeriesCollection;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesDatasetAdapter extends TimeSeriesCollection {
+public class TimeSeriesDatasetAdapter extends TimeSeriesCollection { 
 
     //~ Instance fields --------------------------------------------------------
 
@@ -62,7 +62,7 @@ public class TimeSeriesDatasetAdapter extends TimeSeriesCollection {
     /**
      * get the <code>TimeSeries</code> object this adapter relies to.
      *
-     * @return  the orign <code>TimeSeries</code>
+     * @return  the origin <code>TimeSeries</code>
      */
     public at.ac.ait.enviro.tsapi.timeseries.TimeSeries getOriginTimeSeries() {
         return originTimeSeries;
@@ -71,7 +71,7 @@ public class TimeSeriesDatasetAdapter extends TimeSeriesCollection {
     /**
      * sets the <code>TimeSeries</code> object this adapter relies to.
      *
-     * @param  originTimeSeries  the orign <code>TimeSeries</code>
+     * @param  originTimeSeries  the origin <code>TimeSeries</code>
      */
     public void setOriginTimeSeries(final at.ac.ait.enviro.tsapi.timeseries.TimeSeries originTimeSeries) {
         this.originTimeSeries = originTimeSeries;

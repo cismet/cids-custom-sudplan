@@ -12,7 +12,6 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import java.util.Collection;
 
 import javax.swing.Action;
-import javax.swing.JDialog;
 
 /**
  * Represents a operation on <code>TimeSeries</code> objects. a TimeSeriesOperation always returns an Array of

@@ -9,9 +9,8 @@ package de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
-import java.awt.AWTEvent;
-
 import java.util.Collection;
+import java.util.EventObject;
 
 /**
  * Event that contains all needed information about the selection. Used as parameter in listener method <code>
@@ -20,18 +19,33 @@ import java.util.Collection;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesSelectionEvent extends AWTEvent {
+public class TimeSeriesSelectionEvent extends EventObject {
 
     //~ Static fields/initializers ---------------------------------------------
 
     /** Event ID for events as result of a selection. */
-    public static final int TS_SELECTED = AWTEvent.RESERVED_ID_MAX + 1;
-    /** Event ID for eventes as result of a deselection. */
-    public static final int TS_DESELECTED = AWTEvent.RESERVED_ID_MAX + 2;
+    public static final ID TS_SELECTED = ID.SELECTED;
+    /** Event ID for events as result of a deselection. */
+    public static final ID TS_DESELECTED = ID.DESELECTED;
+
+    //~ Enums ------------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    protected static enum ID {
+
+        //~ Enum constants -----------------------------------------------------
+
+        SELECTED, DESELECTED
+    }
 
     //~ Instance fields --------------------------------------------------------
 
     private Collection<TimeSeries> selectedTs;
+    private final ID eventID;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -43,8 +57,9 @@ public class TimeSeriesSelectionEvent extends AWTEvent {
      * @param  selectedTs  a Collection of all current selected <code>TimeSeries</code>. Empty if no <code>
      *                     TimeSeries</code> is selected.
      */
-    public TimeSeriesSelectionEvent(final Object source, final int id, final Collection<TimeSeries> selectedTs) {
-        super(source, id);
+    public TimeSeriesSelectionEvent(final Object source, final ID id, final Collection<TimeSeries> selectedTs) {
+        super(source);
+        eventID = id;
         this.selectedTs = selectedTs;
     }
 
@@ -58,5 +73,14 @@ public class TimeSeriesSelectionEvent extends AWTEvent {
      */
     public Collection<TimeSeries> getSelectedTs() {
         return selectedTs;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public ID getID() {
+        return eventID;
     }
 }

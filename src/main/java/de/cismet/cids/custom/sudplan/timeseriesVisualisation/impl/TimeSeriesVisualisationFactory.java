@@ -9,7 +9,6 @@ package de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl;
 
 import org.openide.util.NbBundle;
 
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesChartProperty;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.TimeSeriesOperation;
 
@@ -60,7 +59,7 @@ public class TimeSeriesVisualisationFactory {
         if (t.equals(VisualisationType.SIMPLE)) {
             final SimpleTSVisualisation simpleVis = new SimpleTSVisualisation();
             simpleVis.setProperty(
-                TimeSeriesChartProperty.TITLE_KEY,
+                TimeSeriesVisualisation.TITLE_KEY,
                 NbBundle.getMessage(
                     TimeSeriesVisualisationFactory.class,
                     "TimeSeriesVisualisationFactory.title")); // NOI18N

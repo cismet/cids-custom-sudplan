@@ -8,13 +8,13 @@
 package de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl;
 
 /**
- * Defines constans to distinguish what concrete <code>TimeSeriesVisualisation</code> is genereated from the <code>
+ * Defines constants to distinguish what concrete <code>TimeSeriesVisualisation</code> is generated from the <code>
  * TimeSeriesVisualisationFactory.</code>
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public enum VisualisationType {
+public enum VisualisationType { 
 
     //~ Enum constants ---------------------------------------------------------
 

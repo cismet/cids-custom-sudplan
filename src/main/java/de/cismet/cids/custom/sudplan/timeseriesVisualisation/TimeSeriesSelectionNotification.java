@@ -11,14 +11,14 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSerie
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionListener;
 
 /**
- * Offers the capability to notifiy a set of <code>TimeSeriesSelectionListeners</code> about selection events within a
+ * Offers the capability to notify a set of <code>TimeSeriesSelectionListeners</code> about selection events within a
  * <code>TimeSeriesVisualisation</code>. Use the <code>getLookup()</code> method to find out if the <code>
  * TimeSeriesVisualisation</code> implements this Interface.
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public interface TimeSeriesSelectionNotification {
+public interface TimeSeriesSelectionNotification { 
 
     //~ Methods ----------------------------------------------------------------
 

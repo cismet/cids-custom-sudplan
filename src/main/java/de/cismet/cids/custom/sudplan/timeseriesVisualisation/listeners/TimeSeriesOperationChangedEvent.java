@@ -7,7 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners;
 
-import java.awt.AWTEvent;
+
+import java.util.EventObject;
 
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.TimeSeriesOperation;
 
@@ -19,16 +20,34 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesOperationChangedEvent extends AWTEvent {
+public class TimeSeriesOperationChangedEvent extends EventObject {
 
     //~ Static fields/initializers ---------------------------------------------
 
     /** Event ID if an <code>TimeSeriesOperation</code> was added. */
-    public static final int OPERATION_ADD = AWTEvent.RESERVED_ID_MAX + 1;
+    public static final ID OPERATION_ADD = ID.ADD;
     /** Event ID if an <code>TimeSeriesOperation</code> was removed. */
-    public static final int OPERATION_REMOVE = AWTEvent.RESERVED_ID_MAX + 2;
+    public static final ID OPERATION_REMOVE = ID.REMOVE;
     /** Event ID if the set of <code>TimeSeriesOperation</code> were cleared. */
-    public static final int OPERATIONS_CLEARED = AWTEvent.RESERVED_ID_MAX + 3;
+    public static final ID OPERATIONS_CLEARED = ID.CLEAR;
+
+    //~ Enums ------------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    protected static enum ID {
+
+        //~ Enum constants -----------------------------------------------------
+
+        ADD, REMOVE, CLEAR
+    }
+
+    //~ Instance fields --------------------------------------------------------
+
+    private ID eventID;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -36,9 +55,21 @@ public class TimeSeriesOperationChangedEvent extends AWTEvent {
      * Creates a new TimeSeriesOperationChangedEvent object.
      *
      * @param  ts  the affected <code>TimeSeriesOperation</code>
-     * @param  id  the event type
+     * @param  id  ID the event type
      */
-    public TimeSeriesOperationChangedEvent(final TimeSeriesOperation ts, final int id) {
-        super(ts, id);
+    public TimeSeriesOperationChangedEvent(final TimeSeriesOperation ts, final ID id) {
+        super(ts);
+        eventID = id;
+    }
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public ID getID() {
+        return eventID;
     }
 }

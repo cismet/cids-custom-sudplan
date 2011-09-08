@@ -26,13 +26,13 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 /**
- * A SelectionXYLineRenderer is ever related to exact one <code>TimeSeriesDatasetAdapter</code>. It controlls the visual
+ * A SelectionXYLineRenderer is ever related to exact one <code>TimeSeriesDatasetAdapter</code>. It controls the visual
  * appearance of the dataset in the chart.
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
+public class SelectionXYLineRenderer extends XYLineAndShapeRenderer { 
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -78,7 +78,7 @@ public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
     }
 
     /**
-     * set the selcetion state of the renderer.
+     * set the selection state of the renderer.
      *
      * @param  selected  a flag
      */
@@ -88,7 +88,7 @@ public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
     }
 
     /**
-     * sets the paramets how the related dataset shall be drawn.
+     * sets the parameters how the related dataset shall be drawn.
      *
      * @param  index  the index of the series - ever 0
      */
@@ -103,7 +103,7 @@ public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
     }
 
     /**
-     * adds a SelectionChartMouseListener that is notified whenever the closest dataitem in fact of a mouseclick was
+     * adds a SelectionChartMouseListener that is notified whenever the closest data item in fact of a mouse click was
      * found.
      *
      * @param  l  a <code>SelectionChartMouseListener</code>
@@ -113,9 +113,9 @@ public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
     }
 
     /**
-     * During the rendering of the dataset, JFreeChart calculates the closest dataitem for the crosshair point If this
-     * dataitem was found we notify all registers <code>SeelctionChartMouseListeners</code> to check if the last
-     * mouseClick lies on the line beetween the new crosshairpoint and the one before or after that.
+     * During the rendering of the dataset, JFreeChart calculates the closest data item for the cross hair point If this
+     * data item was found we notify all registers <code>SeelctionChartMouseListeners</code> to check if the last
+     * mouseClick lies on the line between the new cross hair point and the one before or after that.
      *
      * @param  g2              DOCUMENT ME!
      * @param  plot            DOCUMENT ME!

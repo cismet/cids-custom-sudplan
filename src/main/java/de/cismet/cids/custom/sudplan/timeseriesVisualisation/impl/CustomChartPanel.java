@@ -32,7 +32,7 @@ import org.openide.util.NbBundle;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.Graphics; 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -72,8 +72,8 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisa
 /**
  * A CustomChartPanel extends the org.jfree.ChartPanel with the functionality of a scrollbar that makes it possible to
  * scroll the data on time axis. Additional features like multiple time series with multiple axes in one chart,
- * selection / deselcetion and removing time series are also implemented. Time series can be removed by right clicking
- * on a time series shape.Contains a ChartPanel to which all Overriden Methods are delegated to It represents the UI of
+ * selection / deselection and removing time series are also implemented. Time series can be removed by right clicking
+ * on a time series shape.Contains a ChartPanel to which all Overridden Methods are delegated to It represents the UI of
  * a <code>SimpleTSVisualisation</code>
  *
  * @author   dmeiers
@@ -644,8 +644,8 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
     /**
      * Creates a new CustomChartPanel object.
      *
-     * @param  chart  the chart tha this chartPanel contains
-     * @param  tsv    the <code>TimeSeriesVisualisation</code> that this chartpanel is related to
+     * @param  chart  the chart that this chartPanel contains
+     * @param  tsv    the <code>TimeSeriesVisualisation</code> that this chart panel is related to
      */
     public CustomChartPanel(final JFreeChart chart, final TimeSeriesVisualisation tsv) {
         super(chart);
@@ -713,7 +713,7 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * adpots the size of the scrollbar to the data area of the chart this chartpanel includes.
+     * adopts the size of the scrollbar to the data area of the chart this chart panel includes.
      */
     private void resizeScrollbar() {
         final PlotRenderingInfo plotInfo = this.getChartRenderingInfo().getPlotInfo();

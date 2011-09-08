@@ -23,13 +23,13 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.TimeSeriesOperation;
 
 /**
- * Operation that calculates the nomalized difference ob two <code>TimeSeries</code> objects.
+ * Operation that calculates the normalised difference of two <code>TimeSeries</code> objects.
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
 //TODO reference zu TimeSeriesVisualisation wird gebraucht um Frame zu ermitteln... geht das auch anders?
-public class NormalizedDifferenceOperation extends AbstractTimeSeriesOperation {
+public class NormalizedDifferenceOperation extends AbstractTimeSeriesOperation { 
 
     //~ Constructors -----------------------------------------------------------
 
@@ -39,7 +39,7 @@ public class NormalizedDifferenceOperation extends AbstractTimeSeriesOperation {
      * @param  tsv  the <code>TimeSeriesVisualisation</code> that this operation relies to.
      */
     public NormalizedDifferenceOperation(final TimeSeriesVisualisation tsv) {
-        super(NbBundle.getMessage(
+        super(2,NbBundle.getMessage(
                 NormalizedDifferenceOperation.class,
                 "NormalizedDifferenceOperation.opName"), // NOI18N
             null,
@@ -54,7 +54,6 @@ public class NormalizedDifferenceOperation extends AbstractTimeSeriesOperation {
             NbBundle.getMessage(
                 NormalizedDifferenceOperation.class,
                 "NormalizedDifferenceOperation.opExpr")); // NOI18N
-        paramCount = 2;
     }
 
     //~ Methods ----------------------------------------------------------------

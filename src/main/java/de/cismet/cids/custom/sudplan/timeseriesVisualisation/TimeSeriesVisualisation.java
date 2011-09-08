@@ -21,22 +21,24 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSerie
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.TimeSeriesOperation;
 
 /**
- * Central class of the TimeSeriesVisualiation Framework. This Interface can be seen as datamodel and controller of a
+ * Central class of the TimeSeriesVisualiation Framework. This Interface can be seen as data model and controller of a
  * TimeSeriesVisualisation.
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public interface TimeSeriesVisualisation {
+public interface TimeSeriesVisualisation { 
 
     //~ Instance fields --------------------------------------------------------
 
-    TimeSeriesChartProperty properties = new TimeSeriesChartProperty();
-
+    /** Property key for the title of the visualisation*/
+    public static final String TITLE_KEY = "VisualisationTitle";
+    /** Property key for the x axis title of the visualisation*/
+    public static final String X_AXIS_TITLE = "TimeAxisTitle";
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * adds a <code>TimeSeries</code> object to the visualisation. Notifies all registerd TimeSeriesListChangedListeners
+     * adds a <code>TimeSeries</code> object to the visualisation. Notifies all registered TimeSeriesListChangedListeners
      *
      * @param  ts  a <code>TimeSeries</code> object
      */
@@ -59,7 +61,7 @@ public interface TimeSeriesVisualisation {
     /**
      * get method for the set of stored <code>TimeSeriesObjects.</code>
      *
-     * @return  a Collection that contains all stored <code>TimeSeries</code> objetcs
+     * @return  a Collection that contains all stored <code>TimeSeries</code> objects
      */
     Collection<TimeSeries> getTimeSeriesCollection();
 
@@ -167,7 +169,7 @@ public interface TimeSeriesVisualisation {
     /**
      * returns <code>JToolbar</code> for the visualisation.
      *
-     * @return  the visualisations toolbar null if the visualisation does not define a toolbar
+     * @return  the visualisations tool bar null if the visualisation does not define a tool bar
      */
     JToolBar getToolbar();
 }

@@ -43,7 +43,6 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
-import java.beans.PropertyChangeListener;
 
 import java.text.DecimalFormat;
 
@@ -58,8 +57,8 @@ import javax.swing.SwingUtilities;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.Unit;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.AbstractTimeSeriesVisualisation;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.Controllable;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesChartProperty;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesEventNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSignature;
@@ -67,7 +66,6 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisa
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesEvent;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesEventListener;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesListChangedEvent;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesListChangedListener;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesOperationChangedEvent;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesOperationListChangedListener;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionEvent;
@@ -82,12 +80,11 @@ import de.cismet.cismap.commons.features.SignaturedFeature;
  * Visualises the <code>TimeSeries</code> objects with a JFreeChart TimeSeriesChart. Implements also the Interface
  * <code>TimeSeriesSelectionNotification</code> to notify registered Listeners about selection events. The selection of
  * time series is done by a <code>SelectionChartMouseListener</code> which also fires the event.<br>
- * The Interface Controllable defi
  *
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class SimpleTSVisualisation implements TimeSeriesVisualisation,
+public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation implements 
     TimeSeriesSelectionNotification,
     TimeSeriesEventNotification,
     Controllable,
@@ -96,18 +93,17 @@ public class SimpleTSVisualisation implements TimeSeriesVisualisation,
 
     //~ Static fields/initializers ---------------------------------------------
 
-    /** limit to control if the shaped for dataitema are drawn or not. */
+    /** limit to control if the shaped for data items are drawn or not. */
     public static final int ITEM_LIMIT = 20;
     private static final transient Logger LOG = Logger.getLogger(SimpleTSVisualisation.class);
 
     //~ Instance fields --------------------------------------------------------
 
     private final ArrayList<TimeSeries> tsList = new ArrayList<TimeSeries>();
-    private final ArrayList<TimeSeriesListChangedListener> tsListeners = new ArrayList<TimeSeriesListChangedListener>();
+    
     private final ArrayList<TimeSeriesOperation> operationList = new ArrayList<TimeSeriesOperation>();
-    private final ArrayList<TimeSeriesOperationListChangedListener> operationListeners =
-        new ArrayList<TimeSeriesOperationListChangedListener>();
-    private final ArrayList<PropertyChangeListener> propListener = new ArrayList<PropertyChangeListener>();
+
+    
     private final ArrayList<TimeSeriesEventListener> eventListeners = new ArrayList<TimeSeriesEventListener>();
     private final ArrayList<TimeSeriesSelectionListener> selectionListeners =
         new ArrayList<TimeSeriesSelectionListener>();
@@ -129,8 +125,8 @@ public class SimpleTSVisualisation implements TimeSeriesVisualisation,
     public SimpleTSVisualisation() {
         chartPanel = null;
         toolbar = null;
-        properties.put(
-            TimeSeriesChartProperty.TITLE_KEY,
+        props.put(
+            TimeSeriesVisualisation.TITLE_KEY,
             NbBundle.getMessage(
                 SimpleTSVisualisation.class,
                 "SimpleTSVisualisation.title")); // NOI18N
@@ -307,47 +303,6 @@ public class SimpleTSVisualisation implements TimeSeriesVisualisation,
     }
 
     @Override
-    public void addTimeSeriesListChangeListener(final TimeSeriesListChangedListener l) {
-        tsListeners.add(l);
-    }
-
-    @Override
-    public void removeTimeSeriesListChangeListener(final TimeSeriesListChangedListener l) {
-        tsListeners.remove(l);
-    }
-
-    /**
-     * notifies all <code>TimeSeriesListChangedListener</code> about the event.
-     *
-     * @param  evt  the event occured
-     */
-    private void fireTimeSeriesChanged(final TimeSeriesListChangedEvent evt) {
-        for (final TimeSeriesListChangedListener l : tsListeners) {
-            l.timeSeriesListChanged(evt);
-        }
-    }
-
-    @Override
-    public void setProperty(final String key, final String value) {
-        properties.put(key, value);
-    }
-
-    @Override
-    public String getProperty(final String key) {
-        return properties.getProperty(key);
-    }
-
-    @Override
-    public void addPropertyChangeListener(final PropertyChangeListener l) {
-        propListener.add(l);
-    }
-
-    @Override
-    public void removePropertyChangeListener(final PropertyChangeListener l) {
-        propListener.remove(l);
-    }
-
-    @Override
     public void addTimeSeriesOperation(final TimeSeriesOperation op) {
         operationList.add(op);
         op.addTimeSeriesOperationResultListener(this);
@@ -371,27 +326,6 @@ public class SimpleTSVisualisation implements TimeSeriesVisualisation,
         fireTSOperationsChanged(new TimeSeriesOperationChangedEvent(
                 null,
                 TimeSeriesOperationChangedEvent.OPERATIONS_CLEARED));
-    }
-
-    @Override
-    public void addTimeSeriesOperationListListener(final TimeSeriesOperationListChangedListener l) {
-        operationListeners.add(l);
-    }
-
-    @Override
-    public void removeTimeSeriesOperationListListener(final TimeSeriesOperationListChangedListener l) {
-        operationListeners.remove(l);
-    }
-
-    /**
-     * notifies all registered <code>TimeSeriesOperationListChangedListener <code>about the event.</code></code>
-     *
-     * @param  evt  the event occured
-     */
-    private void fireTSOperationsChanged(final TimeSeriesOperationChangedEvent evt) {
-        for (final TimeSeriesOperationListChangedListener l : operationListeners) {
-            l.timeSeriesOperationChanged(evt);
-        }
     }
 
     @Override
@@ -479,19 +413,19 @@ public class SimpleTSVisualisation implements TimeSeriesVisualisation,
      * creates a chart with the first added <code>TimeSeries <code>as dataset.</code></code>
      *
      * @param   tsc   the dataset
-     * @param   unit  the unit of the underlaying <code>TimeSeries</code> for the y-axis title
+     * @param   unit  the unit of the underlying <code>TimeSeries</code> for the y-axis title
      *
      * @return  DOCUMENT ME!
      */
     private JFreeChart createChart(final TimeSeriesCollection tsc, final Unit unit) {
         final JFreeChart chart;
         chart = ChartFactory.createTimeSeriesChart(
-                this.getProperty(TimeSeriesChartProperty.TITLE_KEY), // title
+                this.getProperty(TimeSeriesVisualisation.TITLE_KEY), // title
                 "Time",                  // time axis label
                 unit.getLocalisedName(), // value axis label
                 tsc,                     // dataset
                 islegendVisible(),       // legend
-                istoolTipsEnabled(),     // tooltips
+                isToolTipsEnabled(),     // tooltips
                 false);                  // urls
 
         final XYPlot plot = (XYPlot)chart.getPlot();
@@ -623,7 +557,7 @@ public class SimpleTSVisualisation implements TimeSeriesVisualisation,
     public void enableContextMenu(final boolean aFlag) {
         contextMenuEnabled = aFlag;
         if (chartPanel != null) {
-            if (iscontextMenuEnabled()) {
+            if (isContextMenuEnabled()) {
                 chartPanel.setEnableContextMenu(true);
             } else {
                 chartPanel.setEnableContextMenu(false);
@@ -632,7 +566,7 @@ public class SimpleTSVisualisation implements TimeSeriesVisualisation,
     }
 
     @Override
-    public boolean iscontextMenuEnabled() {
+    public boolean isContextMenuEnabled() {
         return contextMenuEnabled;
     }
 
@@ -659,7 +593,7 @@ public class SimpleTSVisualisation implements TimeSeriesVisualisation,
     public void enableToolTips(final boolean aFlag) {
         toolTipsEnabled = aFlag;
         if (chartPanel != null) {
-            if (istoolTipsEnabled()) {
+            if (isToolTipsEnabled()) {
                 final XYPlot plot = (XYPlot)chartPanel.getChart().getPlot();
                 final XYToolTipGenerator toolTipGenerator = new DateValueToolTipGenerator();
                 for (int i = 0; i < plot.getDatasetCount(); i++) {
@@ -677,7 +611,7 @@ public class SimpleTSVisualisation implements TimeSeriesVisualisation,
     }
 
     @Override
-    public boolean istoolTipsEnabled() {
+    public boolean isToolTipsEnabled() {
         return toolTipsEnabled;
     }
 
@@ -819,7 +753,7 @@ public class SimpleTSVisualisation implements TimeSeriesVisualisation,
     //~ Inner Classes ----------------------------------------------------------
 
     /**
-     * Customized ToolTipGenerator which shows the x axis value as Date and the y axis value as Number if tooltips are
+     * Customised ToolTipGenerator which shows the x axis value as Date and the y axis value as Number if tool tips are
      * enabled.
      *
      * @version  $Revision$, $Date$

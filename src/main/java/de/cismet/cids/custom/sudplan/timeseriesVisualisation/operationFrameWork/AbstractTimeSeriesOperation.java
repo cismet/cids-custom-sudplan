@@ -45,7 +45,7 @@ public abstract class AbstractTimeSeriesOperation extends AbstractAction impleme
 
     /** represents the Number of needed parameters to execute this operation. */
     protected int paramCount;
-    /** represenst a Collection of all availble time series. */
+    /** represents a Collection of all available time series. */
     protected Collection<TimeSeries> tsList;
     private ArrayList<TimeSeriesOperationResultListener> resultListeners =
         new ArrayList<TimeSeriesOperationResultListener>();
@@ -62,10 +62,11 @@ public abstract class AbstractTimeSeriesOperation extends AbstractAction impleme
      * @param  tsv   the <code>TimeSeriesVisualisation</code> this is used to determine the parent frame of the <code>
      *               DefaultParamOderUI</code>
      */
-    public AbstractTimeSeriesOperation(final String name, final Icon icon, final TimeSeriesVisualisation tsv) {
+    public AbstractTimeSeriesOperation(final int paramCount, final String name, final Icon icon, final TimeSeriesVisualisation tsv) {
         super(name, icon);
         params = new TimeSeries[paramCount];
         tsVis = tsv;
+        this.paramCount = paramCount;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -150,7 +151,7 @@ public abstract class AbstractTimeSeriesOperation extends AbstractAction impleme
     }
 
     /**
-     * This method is called to determine the result of the operation calulation.
+     * This method is called to determine the result of the operation calculation.
      *
      * @param   params  DOCUMENT ME!
      *
