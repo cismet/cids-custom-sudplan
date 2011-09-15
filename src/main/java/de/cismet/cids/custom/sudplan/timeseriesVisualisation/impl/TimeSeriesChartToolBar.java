@@ -32,6 +32,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
@@ -39,6 +40,7 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisa
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesOperationChangedEvent;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesOperationListChangedListener;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionEvent;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionListener;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.TimeSeriesOperation;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -51,7 +53,8 @@ import de.cismet.cismap.navigatorplugin.CismapPlugin;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperationListChangedListener {
+public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperationListChangedListener,
+    TimeSeriesSelectionListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -137,7 +140,13 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
                         selectedTS,
                         plot,
                         tsVis);
-                removeAction.actionPerformed(e);
+                SwingUtilities.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            removeAction.actionPerformed(e);
+                        }
+                    });
             }
         };
 
@@ -271,6 +280,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
      * @return  DOCUMENT ME!
      */
     private JButton createRemoveActionButton() {
+        removeAllSelectedTimeseries.setEnabled(false);
         btnRemove = new JButton(removeAllSelectedTimeseries);
         btnRemove.setFocusPainted(false);
         btnRemove.setToolTipText(NbBundle.getMessage(
@@ -358,5 +368,17 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         this.repaint();
         this.invalidate();
         this.validate();
+    }
+
+    @Override
+    public void selectionChanged(final TimeSeriesSelectionEvent evt) {
+        if (evt.getSelectedTs().size() >= 1) {
+            final TimeSeriesVisualisation tsVis = (TimeSeriesVisualisation)evt.getSource();
+            if (tsVis.getTimeSeriesCollection().size() > 1) {
+                removeAllSelectedTimeseries.setEnabled(true);
+                return;
+            }
+        }
+        removeAllSelectedTimeseries.setEnabled(false);
     }
 }

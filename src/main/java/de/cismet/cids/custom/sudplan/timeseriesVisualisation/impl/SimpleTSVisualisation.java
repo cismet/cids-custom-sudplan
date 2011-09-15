@@ -1,10 +1,10 @@
 /***************************************************
- *
- * cismet GmbH, Saarbruecken, Germany
- *
- *              ... and it just works.
- *
- ****************************************************/
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
@@ -34,9 +34,11 @@ import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 
 import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
@@ -49,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 
 import javax.swing.JComponent;
 import javax.swing.JToolBar;
@@ -73,10 +76,6 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.TimeSeriesOperationResultListener;
 
 import de.cismet.cismap.commons.features.SignaturedFeature;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldListener;
-import java.awt.EventQueue;
-import java.util.Iterator;
-import org.openide.util.WeakListeners;
 
 /**
  * <code>TimeSeriesVisualisation</code> for simple time series (for each time t exists only a simple value v, no grid).
@@ -88,21 +87,24 @@ import org.openide.util.WeakListeners;
  * @version  $Revision$, $Date$
  */
 public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation implements TimeSeriesSelectionNotification,
-        TimeSeriesEventNotification,
-        Controllable,
-        TimeSeriesSignature,
-        TimeSeriesOperationResultListener {
+    TimeSeriesEventNotification,
+    Controllable,
+    TimeSeriesSignature,
+    TimeSeriesOperationResultListener {
 
     //~ Static fields/initializers ---------------------------------------------
+
     /** limit to control if the shaped for data items are drawn or not. */
     public static final int ITEM_LIMIT = 20;
     private static final transient Logger LOG = Logger.getLogger(SimpleTSVisualisation.class);
+
     //~ Instance fields --------------------------------------------------------
+
     private final ArrayList<TimeSeries> tsList = new ArrayList<TimeSeries>();
     private final ArrayList<TimeSeriesOperation> operationList = new ArrayList<TimeSeriesOperation>();
     private final ArrayList<TimeSeriesEventListener> eventListeners = new ArrayList<TimeSeriesEventListener>();
     private final ArrayList<TimeSeriesSelectionListener> selectionListeners =
-            new ArrayList<TimeSeriesSelectionListener>();
+        new ArrayList<TimeSeriesSelectionListener>();
     private CustomChartPanel chartPanel;
     private TimeSeriesChartToolBar toolbar;
     private boolean contextMenuEnabled;
@@ -114,6 +116,7 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
     private LegendTitle legend;
 
     //~ Constructors -----------------------------------------------------------
+
     /**
      * Creates a new SimpleTSVisualisation object.
      */
@@ -121,13 +124,14 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         chartPanel = null;
         toolbar = null;
         props.put(
-                TimeSeriesVisualisation.TITLE_KEY,
-                NbBundle.getMessage(
+            TimeSeriesVisualisation.TITLE_KEY,
+            NbBundle.getMessage(
                 SimpleTSVisualisation.class,
                 "SimpleTSVisualisation.title")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
+
     @Override
     public void addTimeSeries(final TimeSeries ts) {
         if (!checkTimeSeriesFormat(ts)) {
@@ -135,35 +139,36 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         }
         tsList.add(ts);
         // add the new time series to chartpanel
-        final TimeSeriesCollection tsc = createJFreeDataset(ts);
+        final TimeSeriesDatasetAdapter tsc = createJFreeDataset(ts);
         // if this is the first time series being added, create the chart
         if (chartPanel == null) {
             final JFreeChart chart = createChart(tsc, SMSUtils.unitFromTimeseries(ts));
             // sets the color list for the chart
             final XYPlot plot = chart.getXYPlot();
-            final Paint[] paintSequence = new Paint[]{
-                new Color(0xFF, 0x55, 0x55),
-                new Color(0x55, 0x55, 0xFF),
-                new Color(0x55, 0xFF, 0x55),
-                new Color(0xFF, 0x55, 0xFF),
-                Color.pink,
-                Color.gray,
-                ChartColor.DARK_RED,
-                ChartColor.DARK_BLUE,
-                ChartColor.DARK_GREEN,
-                ChartColor.DARK_MAGENTA,
-                ChartColor.DARK_CYAN,
-                Color.darkGray,
-                ChartColor.LIGHT_RED,
-                ChartColor.LIGHT_BLUE,
-                ChartColor.VERY_DARK_RED,
-                ChartColor.VERY_DARK_BLUE,
-                ChartColor.VERY_DARK_GREEN,
-                ChartColor.VERY_DARK_YELLOW,
-                ChartColor.VERY_DARK_MAGENTA,
-                ChartColor.VERY_DARK_CYAN,
-                ChartColor.VERY_LIGHT_RED,
-                ChartColor.VERY_LIGHT_MAGENTA,};
+            final Paint[] paintSequence = new Paint[] {
+                    new Color(0xFF, 0x55, 0x55),
+                    new Color(0x55, 0x55, 0xFF),
+                    new Color(0x55, 0xFF, 0x55),
+                    new Color(0xFF, 0x55, 0xFF),
+                    Color.pink,
+                    Color.gray,
+                    ChartColor.DARK_RED,
+                    ChartColor.DARK_BLUE,
+                    ChartColor.DARK_GREEN,
+                    ChartColor.DARK_MAGENTA,
+                    ChartColor.DARK_CYAN,
+                    Color.darkGray,
+                    ChartColor.LIGHT_RED,
+                    ChartColor.LIGHT_BLUE,
+                    ChartColor.VERY_DARK_RED,
+                    ChartColor.VERY_DARK_BLUE,
+                    ChartColor.VERY_DARK_GREEN,
+                    ChartColor.VERY_DARK_YELLOW,
+                    ChartColor.VERY_DARK_MAGENTA,
+                    ChartColor.VERY_DARK_CYAN,
+                    ChartColor.VERY_LIGHT_RED,
+                    ChartColor.VERY_LIGHT_MAGENTA,
+                };
             plot.setDrawingSupplier(new DefaultDrawingSupplier(
                     paintSequence,
                     DefaultDrawingSupplier.DEFAULT_OUTLINE_PAINT_SEQUENCE,
@@ -187,7 +192,14 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
             legend.setPosition(RectangleEdge.BOTTOM);
             if (toolbar == null) {
                 toolbar = new TimeSeriesChartToolBar(chartPanel, this);
-                this.addTimeSeriesOperationListListener(WeakListeners.create(TimeSeriesOperationListChangedListener.class, toolbar, this));
+                this.addTimeSeriesOperationListListener(WeakListeners.create(
+                        TimeSeriesOperationListChangedListener.class,
+                        toolbar,
+                        this));
+                this.addTimeSeriesSelectionListener(WeakListeners.create(
+                        TimeSeriesSelectionListener.class,
+                        toolbar,
+                        this));
                 for (final TimeSeriesOperation op : operationList) {
                     // to notify the toolbar about the operations...
                     fireTSOperationsChanged(new TimeSeriesOperationChangedEvent(
@@ -201,7 +213,7 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
             }
 
             // setting selection listener to renderer for custom selecteion detection...
-            final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer) plot.getRendererForDataset(tsc);
+            final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer)plot.getRendererForDataset(tsc);
             renderer.addSelectionChartMouseListener(listener);
 
             // this is needed to make sure, that just a limited number of shapes are drawn for that series
@@ -211,10 +223,8 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
             }
         } else {
             if (chartPanel.getChart().getPlot() instanceof XYPlot) {
-                final XYPlot plot = (XYPlot) chartPanel.getChart().getPlot();
+                final XYPlot plot = (XYPlot)chartPanel.getChart().getPlot();
                 final org.jfree.data.time.TimeSeries newTimeseries = tsc.getSeries(0);
-
-                plot.setDataset(tsList.size() - 1, tsc);
                 final SelectionXYLineRenderer renderer = new SelectionXYLineRenderer(true, false, false);
                 renderer.addSelectionChartMouseListener(listener);
                 // this is needed to make sure, that just a limited number of shapes are drawn for that series
@@ -222,12 +232,30 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
                     renderer.setBaseShapesVisible(true);
                     renderer.setBaseShapesFilled(true);
                 }
-                plot.setRenderer(tsList.size() - 1, renderer);
+                /*
+                 * if a dataset was removed it can happen that a dataset in the plots list is null therefore put the new
+                 * timeseries in the first null dataset. if no time series was deleted add to the end of the list
+                 */
+                final int datasetCount = plot.getDatasetCount();
+                boolean tsDeleted = false;
+                for (int i = 0; i < datasetCount; i++) {
+                    if (plot.getDataset(i) == null) {
+                        tsDeleted = true;
+
+                        plot.setDataset(i, tsc);
+                        plot.setRenderer(i, renderer);
+                        break;
+                    }
+                }
+                if (!tsDeleted) {
+                    plot.setDataset(datasetCount, tsc);
+                    plot.setRenderer(datasetCount, renderer);
+                }
 
                 // if there are different units we have to create a multi axis chart
                 boolean newTSVariable = true;
                 for (int i = 0; i < (plot.getDatasetCount() - 1); i++) {
-                    final TimeSeriesCollection tsCollection = (TimeSeriesCollection) plot.getDataset(i);
+                    final TimeSeriesCollection tsCollection = (TimeSeriesCollection)plot.getDataset(i);
                     if (tsCollection != null) {
                         final org.jfree.data.time.TimeSeries timeSeries = tsCollection.getSeries(0);
                         if (newTimeseries.getRangeDescription().equals(timeSeries.getRangeDescription())) {
@@ -243,9 +271,11 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
                 if (newTSVariable) {
                     // time series doesnt fit to any axisting axis, so create a new one
                     final NumberAxis axis = new NumberAxis(newTimeseries.getRangeDescription());
+                    axis.setLabel(tsc.getOriginTimeSeries().getTSProperty(TimeSeries.OBSERVEDPROPERTY) + " in "
+                                + newTimeseries.getRangeDescription());
                     axis.setAutoRange(true);
                     axis.setAutoRangeIncludesZero(false);
-//                            axis.setLabelPaint((plot.getRenderer(clickCount)).getSeriesPaint(0));
+                    axis.setLabelFont(plot.getRangeAxis(0).getLabelFont());
                     final int axisIndex = plot.getRangeAxisCount();
                     plot.setRangeAxis(axisIndex, axis);
                     plot.mapDatasetToRangeAxis(tsList.size() - 1, axisIndex);
@@ -261,12 +291,14 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         if (tsList.contains(ts)) {
             final org.jfree.data.time.TimeSeriesCollection toRemoveCollection = createJFreeDataset(ts);
             final JFreeChart chart = chartPanel.getChart();
-            final XYPlot plot = (XYPlot) chart.getPlot();
+            final XYPlot plot = (XYPlot)chart.getPlot();
             boolean tscRemoved = false;
             for (int i = 0; i < plot.getDatasetCount(); i++) {
                 if ((plot.getDataset(i) != null) && plot.getDataset(i).equals(toRemoveCollection)) {
                     plot.setDataset(i, null);
+                    plot.setRenderer(i, null);
                     tscRemoved = true;
+                    break;
                 }
             }
             if (!tscRemoved && LOG.isDebugEnabled()) {
@@ -349,9 +381,9 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
      *
      * @throws  IllegalStateException  DOCUMENT ME!
      */
-    private TimeSeriesCollection createJFreeDataset(final TimeSeries ts) {
+    private TimeSeriesDatasetAdapter createJFreeDataset(final TimeSeries ts) {
         final TimeStamp[] timeStamps = ts.getTimeStampsArray();
-        String name = (String) ts.getTSProperty(TimeSeries.OBSERVEDPROPERTY);
+        String name = (String)ts.getTSProperty(TimeSeries.OBSERVEDPROPERTY);
         if (name == null) {
             LOG.error("Could not relate the time series with an name");     // NOI18N
             name = "notFound";                                              // NOI18N
@@ -359,12 +391,12 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         final Object valueKeyObject = ts.getTSProperty(TimeSeries.VALUE_KEYS);
         final String valueKey;
         if (valueKeyObject instanceof String) {
-            valueKey = (String) valueKeyObject;
+            valueKey = (String)valueKeyObject;
             if (LOG.isDebugEnabled()) {
                 LOG.debug("found valuekey: " + valueKey);                   // NOI18N
             }
         } else if (valueKeyObject instanceof String[]) {
-            final String[] valueKeys = (String[]) valueKeyObject;
+            final String[] valueKeys = (String[])valueKeyObject;
             if (LOG.isDebugEnabled()) {
                 LOG.debug("found multiple valuekeys: " + valueKeys.length); // NOI18N
             }
@@ -382,18 +414,18 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         final org.jfree.data.time.TimeSeries data = new org.jfree.data.time.TimeSeries(name); // NOI18N
         data.setRangeDescription(SMSUtils.unitFromTimeseries(ts).getLocalisedName());
         for (final TimeStamp stamp : timeStamps) {
-            final Float value = (Float) ts.getValue(stamp, valueKey);
+            final Float value = (Float)ts.getValue(stamp, valueKey);
             data.add(new Millisecond(stamp.asDate()), value);
         }
 
         final TimeSeriesDatasetAdapter dataset = new TimeSeriesDatasetAdapter(data);
         Geometry g = null;
         if (ts.getTSProperty(TimeSeries.GEOMETRY) instanceof Envelope) {
-            final Envelope e = (Envelope) ts.getTSProperty(TimeSeries.GEOMETRY);
+            final Envelope e = (Envelope)ts.getTSProperty(TimeSeries.GEOMETRY);
             final GeometryFactory gf = new GeometryFactory();
             g = gf.createPoint(new Coordinate(e.getMinX(), e.getMinY()));
         } else {
-            g = (Geometry) ts.getTSProperty(TimeSeries.GEOMETRY);
+            g = (Geometry)ts.getTSProperty(TimeSeries.GEOMETRY);
         }
 
         dataset.setGeometry(g);
@@ -410,24 +442,26 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
      *
      * @return  DOCUMENT ME!
      */
-    private JFreeChart createChart(final TimeSeriesCollection tsc, final Unit unit) {
+    private JFreeChart createChart(final TimeSeriesDatasetAdapter tsc, final Unit unit) {
         final JFreeChart chart;
+        final String yAxisLabel = tsc.getOriginTimeSeries().getTSProperty(TimeSeries.OBSERVEDPROPERTY) + " in "
+                    + tsc.getSeries(0).getRangeDescription();
         chart = ChartFactory.createTimeSeriesChart(
                 this.getProperty(TimeSeriesVisualisation.TITLE_KEY), // title
-                "Time", // time axis label
-                unit.getLocalisedName(), // value axis label
-                tsc, // dataset
-                islegendVisible(), // legend
+                "Time",              // time axis label
+                yAxisLabel,          // value axis label
+                tsc,                 // dataset
+                islegendVisible(),   // legend
                 isToolTipsEnabled(), // tooltips
-                false);                  // urls
+                false);              // urls
 
-        final XYPlot plot = (XYPlot) chart.getPlot();
+        final XYPlot plot = (XYPlot)chart.getPlot();
         plot.setBackgroundPaint(Color.WHITE);
         plot.setDomainGridlinePaint(Color.BLUE);
         plot.setRangeGridlinePaint(Color.BLUE);
         plot.setAxisOffset(new RectangleInsets(15d, 15d, 15d, 15d));
         // setting cusotmized Stroke for crosshair and background data grid
-        final float[] dash = {5f};
+        final float[] dash = { 5f };
         final BasicStroke crosshairStroke = new BasicStroke(
                 0.7f,
                 BasicStroke.CAP_BUTT,
@@ -447,7 +481,7 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         final SelectionXYLineRenderer renderer = new SelectionXYLineRenderer();
         renderer.setBaseShapesVisible(false);
         renderer.setBaseShapesFilled(false);
-        final NumberAxis axis = (NumberAxis) plot.getRangeAxis();
+        final NumberAxis axis = (NumberAxis)plot.getRangeAxis();
         axis.setAutoRangeIncludesZero(false);
         plot.setRenderer(renderer);
         return chart;
@@ -483,11 +517,11 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
             final TimeSeriesSelectionListener selectionListener = it.next();
             EventQueue.invokeLater(new Runnable() {
 
-                @Override
-                public void run() {
-                    selectionListener.selectionChanged(evt);
-                }
-            });
+                    @Override
+                    public void run() {
+                        selectionListener.selectionChanged(evt);
+                    }
+                });
         }
     }
 
@@ -505,7 +539,7 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         String valueKey = null;
         // check if just one valueKey
         if (valueKeyObject instanceof String[]) {
-            final String[] valueKeyArr = (String[]) valueKeyObject;
+            final String[] valueKeyArr = (String[])valueKeyObject;
             if (valueKeyArr.length > 1) {
                 return false;
             }
@@ -515,7 +549,7 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
                 valueKey = valueKeyArr[0];
             }
         } else {
-            valueKey = (String) valueKeyObject;
+            valueKey = (String)valueKeyObject;
             if (valueKey == null) {
                 return false;
             }
@@ -525,7 +559,7 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
             final Object value = timeseries.getValue(ts, valueKey);
             if (value != null) {
                 try {
-                    final Float val = (Float) value;
+                    final Float val = (Float)value;
                 } catch (ClassCastException e) {
                     return false;
                 }
@@ -533,12 +567,12 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         }
 
         // check properties
-        if (timeseries.getTSProperty(TimeSeries.GEOMETRY) == null) {
-            return false;
-        }
-//        else if (timeseries.getTSProperty(TimeSeries.UNIT) == null) {
-//            return false;
-//        }
+// if (timeseries.getTSProperty(TimeSeries.GEOMETRY) == null) {
+// return false;
+// }
+// else if (timeseries.getTSProperty(TimeSeries.UNIT) == null) {
+// return false;
+// }
 
         return true;
     }
@@ -569,11 +603,11 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
             final TimeSeriesEventListener timeSeriesEventListener = it.next();
             EventQueue.invokeLater(new Runnable() {
 
-                @Override
-                public void run() {
-                    timeSeriesEventListener.timeSeriesEventOccured(evt);
-                }
-            });
+                    @Override
+                    public void run() {
+                        timeSeriesEventListener.timeSeriesEventOccured(evt);
+                    }
+                });
         }
     }
 
@@ -618,14 +652,14 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         toolTipsEnabled = aFlag;
         if (chartPanel != null) {
             if (isToolTipsEnabled()) {
-                final XYPlot plot = (XYPlot) chartPanel.getChart().getPlot();
+                final XYPlot plot = (XYPlot)chartPanel.getChart().getPlot();
                 final XYToolTipGenerator toolTipGenerator = new DateValueToolTipGenerator();
                 for (int i = 0; i < plot.getDatasetCount(); i++) {
                     plot.getRenderer(i).setBaseToolTipGenerator(toolTipGenerator);
                 }
                 chartPanel.setDisplayToolTips(true);
             } else {
-                final XYPlot plot = (XYPlot) chartPanel.getChart().getPlot();
+                final XYPlot plot = (XYPlot)chartPanel.getChart().getPlot();
                 for (int i = 0; i < plot.getDatasetCount(); i++) {
                     plot.getRenderer(i).setBaseToolTipGenerator(null);
                 }
@@ -689,13 +723,13 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
 
     @Override
     public BufferedImage getTimeSeriesSignature(final TimeSeries timeseries, final int heigth, final int width) {
-        final TimeSeriesDatasetAdapter requestTSC = (TimeSeriesDatasetAdapter) createJFreeDataset(timeseries);
+        final TimeSeriesDatasetAdapter requestTSC = (TimeSeriesDatasetAdapter)createJFreeDataset(timeseries);
         final XYPlot plot = chartPanel.getChart().getXYPlot();
         for (int i = 0; i < plot.getDatasetCount(); i++) {
             if (plot.getDataset(i) != null) {
-                final TimeSeriesDatasetAdapter tsc = (TimeSeriesDatasetAdapter) plot.getDataset(i);
+                final TimeSeriesDatasetAdapter tsc = (TimeSeriesDatasetAdapter)plot.getDataset(i);
                 if ((tsc != null) && tsc.equals(requestTSC) && tsc.getOriginTimeSeries().equals(timeseries)) {
-                    final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer) plot.getRendererForDataset(tsc);
+                    final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer)plot.getRendererForDataset(tsc);
                     final Shape s = renderer.getLegendItem(i, 0).getShape();
                     final Paint paint = renderer.getLegendItem(i, 0).getFillPaint();
                     final SignaturedFeature tsFeature = createFeatureSignature(tsc.getGeometry(),
@@ -708,7 +742,7 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
             }
         }
         throw new IllegalStateException(
-                "Could not create TimeSeriesSignature. Timeseries was not found in JFreeDataSet"); // NOI18N
+            "Could not create TimeSeriesSignature. Timeseries was not found in JFreeDataSet"); // NOI18N
     }
 
     /**
@@ -735,7 +769,7 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         }
         final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
-        final Graphics2D g2 = (Graphics2D) bi.getGraphics();
+        final Graphics2D g2 = (Graphics2D)bi.getGraphics();
         g2.setPaint(p);
         g2.setStroke(new BasicStroke(2));
         g2.drawLine(0, height / 2, width, height / 2);
@@ -766,15 +800,16 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         for (final TimeSeries ts : result) {
             SwingUtilities.invokeLater(new Runnable() {
 
-                @Override
-                public void run() {
-                    SimpleTSVisualisation.this.addTimeSeries(ts);
-                }
-            });
+                    @Override
+                    public void run() {
+                        SimpleTSVisualisation.this.addTimeSeries(ts);
+                    }
+                });
         }
     }
 
     //~ Inner Classes ----------------------------------------------------------
+
     /**
      * Customised ToolTipGenerator which shows the x axis value as Date and the y axis value as Number if tool tips are
      * enabled.
@@ -784,13 +819,14 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
     protected final class DateValueToolTipGenerator implements XYToolTipGenerator {
 
         //~ Methods ------------------------------------------------------------
+
         @Override
         public String generateToolTip(final XYDataset dataset, final int series, final int item) {
             String result = "";
             if (dataset instanceof TimeSeriesDatasetAdapter) {
-                final TimeSeriesDatasetAdapter tsc = (TimeSeriesDatasetAdapter) dataset;
+                final TimeSeriesDatasetAdapter tsc = (TimeSeriesDatasetAdapter)dataset;
                 final TimeSeries timeseries = tsc.getOriginTimeSeries();
-                final String obsProp = (String) timeseries.getTSProperty(TimeSeries.OBSERVEDPROPERTY);
+                final String obsProp = (String)timeseries.getTSProperty(TimeSeries.OBSERVEDPROPERTY);
                 if (obsProp != null) {
                     result += obsProp + ", ";                                                                    // NOI18N
                 }

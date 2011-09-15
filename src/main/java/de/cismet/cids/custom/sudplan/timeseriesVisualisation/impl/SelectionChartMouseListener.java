@@ -128,7 +128,7 @@ public class SelectionChartMouseListener implements ChartMouseListener {
         selectedTS.clear();
         if (isSelectionNotifier) {
             final TimeSeriesSelectionEvent evt = new TimeSeriesSelectionEvent(
-                    this,
+                    tsVis,
                     TimeSeriesSelectionEvent.TS_DESELECTED,
                     selectedTS);
             ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(evt);
@@ -269,11 +269,17 @@ public class SelectionChartMouseListener implements ChartMouseListener {
                 selectedTS.add(tsc.getOriginTimeSeries());
                 if (isSelectionNotifier) {
                     final TimeSeriesSelectionEvent evt = new TimeSeriesSelectionEvent(
-                            this,
+                            tsVis,
                             TimeSeriesSelectionEvent.TS_SELECTED,
                             selectedTS);
                     ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(evt);
                 }
+            } else {
+                final TimeSeriesSelectionEvent evt = new TimeSeriesSelectionEvent(
+                        tsVis,
+                        TimeSeriesSelectionEvent.TS_DESELECTED,
+                        selectedTS);
+                ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(evt);
             }
         }
     }

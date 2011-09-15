@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import org.jfree.util.Log;
 
 import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.awt.BorderLayout;
@@ -49,6 +50,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
@@ -85,7 +87,6 @@ import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 
 import de.cismet.cismap.navigatorplugin.CismapPlugin;
-import org.openide.util.WeakListeners;
 
 /**
  * DOCUMENT ME!
@@ -129,10 +130,10 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private int timeseriesCount = 0;
     // End of variables declaration
 // private ArrayList<SignaturedFeature> holdFeatures = new ArrayList<SignaturedFeature>();
-    private HashMap<Integer, SignaturedFeature> holdFeatures = new HashMap<Integer, SignaturedFeature>();
-    private ArrayList<HoldListener> holdListeners = new ArrayList<HoldListener>();
+    private final HashMap<Integer, SignaturedFeature> holdFeatures = new HashMap<Integer, SignaturedFeature>();
+    private final ArrayList<HoldListener> holdListeners = new ArrayList<HoldListener>();
     private JToolBar toolbar;
-    private TimeSeriesVisualisation tsVis;
+    private final TimeSeriesVisualisation tsVis;
     private int overlayWidth = 0;
     private int overlayHeight = 0;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -547,15 +548,28 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     public void timeSeriesListChanged(final TimeSeriesListChangedEvent evt) {
         if (evt.getID() == TimeSeriesListChangedEvent.TIME_SERIES_REMOVED) {
             final TimeSeries ts = (TimeSeries)evt.getSource();
-            for (final Integer i : holdFeatures.keySet()) {
+            boolean holdFeaturesChanged = false;
+            // TODO prevent concurrent modification
+
+            final Iterator<Integer> it;
+            synchronized (holdFeatures) {
+                it = holdFeatures.keySet().iterator();
+            }
+            int featureToRemove = -1;
+            while (it.hasNext()) {
+                final Integer i = it.next();
                 final SignaturedFeature f = holdFeatures.get(i);
                 if (f.getGeometry().equals((Geometry)ts.getTSProperty(TimeSeries.GEOMETRY))) {
-                    holdFeatures.remove(i);
+                    featureToRemove = i;
+                    holdFeaturesChanged = true;
+                    break;
                 }
             }
-        } else if (evt.getID() == TimeSeriesListChangedEvent.TIME_SERIES_CLEARED) {
-            holdFeatures.clear();
-            timeseriesCount = 0;
+
+            if (holdFeaturesChanged) {
+                holdFeatures.remove(featureToRemove);
+                fireHoldFeatureChanged();
+            }
         }
     }
 

@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.timeseriesVisualisation;
 
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionEvent;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionListener;
 
 /**
@@ -34,6 +33,4 @@ public interface TimeSeriesSelectionNotification {
      * @param  l  the TimeSeriesSelectionListener to remove
      */
     void removeTimeSeriesSelectionListener(TimeSeriesSelectionListener l);
-
-  
 }

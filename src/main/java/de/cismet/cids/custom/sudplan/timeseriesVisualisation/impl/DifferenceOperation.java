@@ -106,7 +106,9 @@ public class DifferenceOperation extends AbstractTimeSeriesOperation {
             throw new IllegalStateException(
                 "value key for a parameter time series is null or the value keys are not equal"); // NOI18N
         }
-
+        if (!paramA.getTSProperty(TimeSeries.GEOMETRY).equals(paramB.getTSProperty(TimeSeries.GEOMETRY))) {
+            result.setTSProperty(TimeSeries.GEOMETRY, null);
+        }
         // do the calculation
         for (final TimeStamp ts : clonedStamps) {
             final Float a = (Float)paramA.getValue(ts, paramAKey);

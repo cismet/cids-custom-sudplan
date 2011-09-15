@@ -683,6 +683,7 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
         scrollbar.getModel().addChangeListener(this);
         scrollbarPanel = new JPanel();
         scrollbarPanel.setLayout(new GridBagLayout());
+
         GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
         final JLabel lblFiller1 = new JLabel(""); // NOI18N
         gridBagConstraints.gridx = 0;
@@ -717,14 +718,48 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
      */
     private void resizeScrollbar() {
         final PlotRenderingInfo plotInfo = this.getChartRenderingInfo().getPlotInfo();
-        final double delta = (plotInfo.getPlotArea().getWidth() - plotInfo.getDataArea().getWidth());
-
-        scrollbar.setPreferredSize(new Dimension((int)Math.round(plotInfo.getDataArea().getWidth() - delta), 18));
-        scrollbar.setSize((int)Math.round(plotInfo.getDataArea().getWidth() - delta), 18);
-
+        final int delta = (int)(plotInfo.getDataArea().getX() - plotInfo.getPlotArea().getX());
+        final int width = plotInfo.getDataArea().getBounds().width - delta;
+        scrollbar.setPreferredSize(new Dimension(width, 18));
+        scrollbar.setSize(width, 18);
+        layoutScrollbar();
         this.invalidate();
         this.validate();
         this.repaint();
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void layoutScrollbar() {
+        final PlotRenderingInfo plotInfo = this.getChartRenderingInfo().getPlotInfo();
+        final double plotX = plotInfo.getPlotArea().getX() + plotInfo.getPlotArea().getWidth();
+        final double dataX = plotInfo.getDataArea().getX() + plotInfo.getDataArea().getWidth();
+        final double scrollBarInset = plotX - dataX;
+        final GridBagLayout scrollbarLayout = (GridBagLayout)scrollbarPanel.getLayout();
+
+        scrollbarPanel.removeAll();
+        GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
+        final JLabel lblFiller1 = new JLabel(""); // NOI18N
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+
+        scrollbarPanel.add(lblFiller1, gridBagConstraints);
+
+        gridBagConstraints = scrollbarLayout.getConstraints(scrollbar);
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new Insets(0, 0, 5, (int)Math.round(scrollBarInset) + 5);
+
+        scrollbarPanel.add(scrollbar, gridBagConstraints);
+        this.invalidate();
+        this.validate();
     }
 
     /**
