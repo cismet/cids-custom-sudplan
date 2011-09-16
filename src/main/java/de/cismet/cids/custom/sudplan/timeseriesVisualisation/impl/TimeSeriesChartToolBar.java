@@ -374,7 +374,10 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     public void selectionChanged(final TimeSeriesSelectionEvent evt) {
         if (evt.getSelectedTs().size() >= 1) {
             final TimeSeriesVisualisation tsVis = (TimeSeriesVisualisation)evt.getSource();
-            if (tsVis.getTimeSeriesCollection().size() > 1) {
+            if (evt.getSelectedTs().size() == tsVis.getTimeSeriesCollection().size()) {
+                removeAllSelectedTimeseries.setEnabled(false);
+                return;
+            } else if (tsVis.getTimeSeriesCollection().size() > 1) {
                 removeAllSelectedTimeseries.setEnabled(true);
                 return;
             }

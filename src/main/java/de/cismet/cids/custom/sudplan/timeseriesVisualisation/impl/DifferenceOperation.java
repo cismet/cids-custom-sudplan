@@ -11,6 +11,8 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.openide.util.NbBundle;
 
 import java.util.ArrayList;
@@ -75,6 +77,7 @@ public class DifferenceOperation extends AbstractTimeSeriesOperation {
         final ArrayList<TimeSeries> resultList = new ArrayList<TimeSeries>();
 
         final TimeSeries result = new TimeSeriesImpl();
+
         // copy the properties to the new created result time series
         for (final String key : params[0].getTSKeys()) {
             result.setTSProperty(key, params[0].getTSProperty(key));
@@ -106,7 +109,10 @@ public class DifferenceOperation extends AbstractTimeSeriesOperation {
             throw new IllegalStateException(
                 "value key for a parameter time series is null or the value keys are not equal"); // NOI18N
         }
-        if (!paramA.getTSProperty(TimeSeries.GEOMETRY).equals(paramB.getTSProperty(TimeSeries.GEOMETRY))) {
+
+        final Geometry geomA = (Geometry)paramA.getTSProperty(TimeSeries.GEOMETRY);
+        final Geometry geomB = (Geometry)paramB.getTSProperty(TimeSeries.GEOMETRY);
+        if ((geomA != null) && (geomB != null) && !(geomA.equals(geomB))) {
             result.setTSProperty(TimeSeries.GEOMETRY, null);
         }
         // do the calculation

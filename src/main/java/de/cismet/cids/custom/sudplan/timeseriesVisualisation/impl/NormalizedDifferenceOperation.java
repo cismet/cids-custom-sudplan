@@ -11,6 +11,8 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.openide.util.NbBundle;
 
 import java.util.ArrayList;
@@ -110,7 +112,9 @@ public class NormalizedDifferenceOperation extends AbstractTimeSeriesOperation {
                 "value key for a parameter time series is null or the value keys are not equal"); // NOI18N
         }
 
-        if (!paramA.getTSProperty(TimeSeries.GEOMETRY).equals(paramB.getTSProperty(TimeSeries.GEOMETRY))) {
+        final Geometry geomA = (Geometry)paramA.getTSProperty(TimeSeries.GEOMETRY);
+        final Geometry geomB = (Geometry)paramB.getTSProperty(TimeSeries.GEOMETRY);
+        if ((geomA != null) && (geomB != null) && !(geomA.equals(geomB))) {
             result.setTSProperty(TimeSeries.GEOMETRY, null);
         }
         // do the subtraction

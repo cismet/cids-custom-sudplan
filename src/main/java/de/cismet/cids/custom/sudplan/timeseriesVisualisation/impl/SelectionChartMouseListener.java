@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesEvent;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionEvent;
 
 /**
@@ -203,6 +204,21 @@ public class SelectionChartMouseListener implements ChartMouseListener {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  selected  DOCUMENT ME!
+     */
+    private void fireSelectionChanged(final boolean selected) {
+        if (isSelectionNotifier) {
+            final TimeSeriesSelectionEvent evt = new TimeSeriesSelectionEvent(
+                    tsVis,
+                    selected ? TimeSeriesSelectionEvent.TS_SELECTED : TimeSeriesSelectionEvent.TS_DESELECTED,
+                    selectedTS);
+            ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(evt);
+        }
+    }
+
+    /**
      * performs a selection operation on the <code>TimeSeriesDatasetAdapter</code>. Distinguish between Multi/single and
      * selection / deselection. Notifies all <code>TimeSeriesSelectionListener</code> of the corresponding <code>
      * TimeSeriesVisualisation</code>
@@ -221,27 +237,27 @@ public class SelectionChartMouseListener implements ChartMouseListener {
             plot.setRenderer(index, selectionRenderer);
             if (selectionRenderer.isSelected()) {
                 selectedTS.add(tsc.getOriginTimeSeries());
-                if (isSelectionNotifier) {
-                    final TimeSeriesSelectionEvent evt = new TimeSeriesSelectionEvent(
-                            tsVis,
-                            TimeSeriesSelectionEvent.TS_SELECTED,
-                            selectedTS);
-                    ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(evt);
-                }
+                fireSelectionChanged(true);
             } else {
                 if (selectedTS.contains(tsc.getOriginTimeSeries())) {
                     selectedTS.remove(tsc.getOriginTimeSeries());
-                    if (isSelectionNotifier) {
-                        final TimeSeriesSelectionEvent evt = new TimeSeriesSelectionEvent(
-                                tsVis,
-                                TimeSeriesSelectionEvent.TS_DESELECTED,
-                                selectedTS);
-                        ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(evt);
-                    }
                 } else {
-                    LOG.warn("time series " + tsc.getOriginTimeSeries() // NOI18N
-                                + " could not be removed from selection collection"); // NOI18N
+                    if (LOG.isDebugEnabled()) {
+                        // this could only happen if a selectAll Action in TimeSeriesChartToolBar was performed
+                        LOG.debug("time series " + tsc.getOriginTimeSeries() // NOI18N
+                                    + " could not be removed from selection collection"); // NOI18N
+                    }
+                    selectedTS.clear();
+                    final int datasetCount = plot.getDatasetCount();
+                    for (int i = 0; i < datasetCount; i++) {
+                        final SelectionXYLineRenderer r = (SelectionXYLineRenderer)plot.getRenderer(i);
+                        if (r.isSelected()) {
+                            final TimeSeriesDatasetAdapter dataset = (TimeSeriesDatasetAdapter)plot.getDataset(i);
+                            selectedTS.add(dataset.getOriginTimeSeries());
+                        }
+                    }
                 }
+                fireSelectionChanged(false);
             }
         } else {
             // single selection
@@ -267,19 +283,9 @@ public class SelectionChartMouseListener implements ChartMouseListener {
                 selectionRenderer.setSelected(true);
                 plot.setRenderer(index, selectionRenderer);
                 selectedTS.add(tsc.getOriginTimeSeries());
-                if (isSelectionNotifier) {
-                    final TimeSeriesSelectionEvent evt = new TimeSeriesSelectionEvent(
-                            tsVis,
-                            TimeSeriesSelectionEvent.TS_SELECTED,
-                            selectedTS);
-                    ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(evt);
-                }
+                fireSelectionChanged(true);
             } else {
-                final TimeSeriesSelectionEvent evt = new TimeSeriesSelectionEvent(
-                        tsVis,
-                        TimeSeriesSelectionEvent.TS_DESELECTED,
-                        selectedTS);
-                ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(evt);
+                fireSelectionChanged(false);
             }
         }
     }

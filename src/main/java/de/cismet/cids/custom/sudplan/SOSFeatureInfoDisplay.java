@@ -578,12 +578,8 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         final Collection<TimeSeries> selectedTS = evt.getSelectedTs();
         final CismapPlugin cismapPlugin = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
         final MappingComponent mc = cismapPlugin.getMappingComponent();
-        mc.getRubberBandLayer().removeAllChildren();
-        final PLayer fc = mc.getTmpFeatureLayer();
-//      fc = mc.getFeatureCollection();
-//      fc.removeAllFeatures();
-        fc.removeAllChildren();
-        mc.repaint();
+        mc.getTmpFeatureLayer().removeAllChildren();
+
         final TimeSeriesSignature tss = tsVis.getLookup(TimeSeriesSignature.class);
         if (tss != null) {
             for (final TimeSeries ts : selectedTS) {
@@ -592,8 +588,9 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 final PFeature pf = new PFeature(createFeature(g, bi), mc);
                 mc.addStickyNode(pf);
                 mc.getTmpFeatureLayer().addChild(pf);
-                mc.rescaleStickyNodes();
             }
+            mc.rescaleStickyNodes();
+            mc.repaint();
         }
     }
 
