@@ -136,6 +136,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private final TimeSeriesVisualisation tsVis;
     private int overlayWidth = 0;
     private int overlayHeight = 0;
+    private boolean displayVisible = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JComboBox cboResolution =
         new de.cismet.cids.custom.sudplan.LocalisedEnumComboBox(Resolution.class, available);
@@ -532,15 +533,30 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     }
 
     @Override
-    public void fireHoldFeatureChanged() {
-        final ArrayList<SignaturedFeature> featureList = new ArrayList<SignaturedFeature>();
-        // TODO anderer weg um gelöschte herauszufinden, da auch null in map sein kann wenn neben envelope geklcikt
-        // wurde
-        for (final SignaturedFeature f : holdFeatures.values()) {
-            featureList.add(f);
+    public void setDisplayVisble(final boolean aFlag) {
+        displayVisible = aFlag;
+        if (displayVisible) {
+            fireHoldFeatureChanged();
         }
-        for (final HoldListener hl : holdListeners) {
-            hl.holdFeautresChanged(new HoldFeatureChangeEvent(featureList, this));
+    }
+
+    @Override
+    public boolean isDisplayVisible() {
+        return displayVisible;
+    }
+
+    @Override
+    public void fireHoldFeatureChanged() {
+        if (displayVisible) {
+            final ArrayList<SignaturedFeature> featureList = new ArrayList<SignaturedFeature>();
+            // TODO anderer weg um gelöschte herauszufinden, da auch null in map sein kann wenn neben envelope geklcikt
+            // wurde
+            for (final SignaturedFeature f : holdFeatures.values()) {
+                featureList.add(f);
+            }
+            for (final HoldListener hl : holdListeners) {
+                hl.holdFeautresChanged(new HoldFeatureChangeEvent(featureList, this));
+            }
         }
     }
 
@@ -579,6 +595,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         final CismapPlugin cismapPlugin = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
         final MappingComponent mc = cismapPlugin.getMappingComponent();
         mc.getTmpFeatureLayer().removeAllChildren();
+        mc.getRubberBandLayer().removeAllChildren();
 
         final TimeSeriesSignature tss = tsVis.getLookup(TimeSeriesSignature.class);
         if (tss != null) {
