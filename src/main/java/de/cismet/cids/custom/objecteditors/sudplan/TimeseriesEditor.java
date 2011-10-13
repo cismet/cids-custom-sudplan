@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.objecteditors.sudplan;
 
+import org.apache.log4j.Logger;
+
 import org.openide.util.NbBundle;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -25,6 +27,10 @@ import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
  */
 public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRenderer, EditorSaveListener {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(TimeseriesEditor.class);
+
     //~ Instance fields --------------------------------------------------------
 
     private transient CidsBean cidsBean;
@@ -34,14 +40,17 @@ public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRend
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient de.cismet.cids.editors.DefaultBindableReferenceCombo defaultBindableReferenceCombo1 =
         new de.cismet.cids.editors.DefaultBindableReferenceCombo();
+    private final transient javax.swing.JCheckBox jCheckBox1 = new javax.swing.JCheckBox();
     private final transient javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
     private final transient javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
     private final transient javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
     private final transient javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel jLabel5 = new javax.swing.JLabel();
     private final transient javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
     private final transient javax.swing.JTextArea jTextArea1 = new javax.swing.JTextArea();
     private final transient javax.swing.JTextField jTextField1 = new javax.swing.JTextField();
     private final transient javax.swing.JTextField jTextField2 = new javax.swing.JTextField();
+    private final transient javax.swing.JTextField jTextField3 = new javax.swing.JTextField();
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
@@ -72,6 +81,7 @@ public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRend
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jLabel1, gridBagConstraints);
@@ -87,7 +97,7 @@ public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRend
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -97,6 +107,7 @@ public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRend
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jLabel2, gridBagConstraints);
@@ -112,7 +123,7 @@ public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRend
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -121,7 +132,8 @@ public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRend
         jLabel3.setText(NbBundle.getMessage(TimeseriesEditor.class, "TimeseriesEditor.jLabel3.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jLabel3, gridBagConstraints);
@@ -136,8 +148,8 @@ public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRend
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -146,7 +158,8 @@ public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRend
         jLabel4.setText(NbBundle.getMessage(TimeseriesEditor.class, "TimeseriesEditor.jLabel4.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jLabel4, gridBagConstraints);
@@ -166,7 +179,7 @@ public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRend
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -174,6 +187,56 @@ public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRend
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jScrollPane1, gridBagConstraints);
+
+        jCheckBox1.setText(NbBundle.getMessage(TimeseriesEditor.class, "TimeseriesEditor.jCheckBox1.text")); // NOI18N
+        jCheckBox1.setContentAreaFilled(false);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.forecast}"),
+                jCheckBox1,
+                org.jdesktop.beansbinding.BeanProperty.create("selected"),
+                "forecastBind");
+        binding.setSourceNullValue(false);
+        binding.setSourceUnreadableValue(false);
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+        add(jCheckBox1, gridBagConstraints);
+
+        jLabel5.setText(NbBundle.getMessage(TimeseriesEditor.class, "TimeseriesEditor.jLabel5.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(jLabel5, gridBagConstraints);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.converter}"),
+                jTextField3,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding.setSourceNullValue("<no converter>");
+        binding.setSourceUnreadableValue("<unreadable source>");
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(jTextField3, gridBagConstraints);
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
@@ -200,7 +263,7 @@ public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRend
 
     @Override
     public String getTitle() {
-        return "Timeseries Editor: " + title; // NOI18N
+        return "Timeseries Editor: " + title;
     }
 
     @Override
@@ -215,6 +278,17 @@ public class TimeseriesEditor extends javax.swing.JPanel implements CidsBeanRend
 
     @Override
     public boolean prepareForSave() {
+        if (cidsBean.getProperty("forecast") == null) {                     // NOI18N
+            try {
+                cidsBean.setProperty("forecast", Boolean.FALSE);            // NOI18N
+            } catch (final Exception ex) {
+                final String message = "cannot set default forecast value"; // NOI18N
+                LOG.error(message, ex);
+
+                return false;
+            }
+        }
+
         return true;
     }
 }

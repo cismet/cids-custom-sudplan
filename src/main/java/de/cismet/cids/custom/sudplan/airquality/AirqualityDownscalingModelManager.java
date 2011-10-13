@@ -59,6 +59,7 @@ public final class AirqualityDownscalingModelManager extends AbstractModelManage
         final TimeseriesRetrieverConfig config;
         try {
             config = new TimeseriesRetrieverConfig(
+                    TimeseriesRetrieverConfig.PROTOCOL_TSTB,
                     "SOS-Dummy-Handler",                                 // NOI18N
                     new URL("http://dummy.org"),                         // NOI18N
                     "urn:ogc:object:AIRVIRO:O3",                         // NOI18N

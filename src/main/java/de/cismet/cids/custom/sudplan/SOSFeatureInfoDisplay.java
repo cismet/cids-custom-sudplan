@@ -20,8 +20,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
-import edu.umd.cs.piccolo.PLayer;
-
 import org.apache.log4j.Logger;
 
 import org.jfree.util.Log;
@@ -440,7 +438,16 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             throw new InitialisationException(message, e);
         }
 
-        config = new TimeseriesRetrieverConfig(SOS_FACTORY, sosUrl, procedure, foi, obsProp, offering, null, null);
+        config = new TimeseriesRetrieverConfig(
+                TimeseriesRetrieverConfig.PROTOCOL_TSTB,
+                SOS_FACTORY,
+                sosUrl,
+                procedure,
+                foi,
+                obsProp,
+                offering,
+                null,
+                null);
     }
 
     /**
@@ -518,7 +525,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     }
 
     @Override
-    public Collection<SignaturedFeature> getHoldFeautres() {
+    public Collection<SignaturedFeature> getHoldFeatures() {
         return this.holdFeatures.values();
     }
 
@@ -545,7 +552,9 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         return displayVisible;
     }
 
-    @Override
+    /**
+     * DOCUMENT ME!
+     */
     public void fireHoldFeatureChanged() {
         if (displayVisible) {
             final ArrayList<SignaturedFeature> featureList = new ArrayList<SignaturedFeature>();

@@ -29,7 +29,7 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.
  */
 public interface TimeSeriesVisualisation {
 
-    //~ Static fields/initializers ---------------------------------------------
+    //~ Instance fields --------------------------------------------------------
 
     /** Property key for the title of the visualisation. */
     String TITLE_KEY = "VisualisationTitle";

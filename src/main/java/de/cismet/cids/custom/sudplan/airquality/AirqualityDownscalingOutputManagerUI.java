@@ -412,6 +412,7 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
             final TimeseriesRetrieverConfig config;
             try {
                 config = new TimeseriesRetrieverConfig(
+                        TimeseriesRetrieverConfig.PROTOCOL_TSTB,
                         "SOS-Dummy-Handler",                                        // NOI18N
                         new URL("http://dummy.org"),                                // NOI18N
                         "urn:ogc:object:STHLM:O3:A1B3:10y",                         // NOI18N
@@ -506,6 +507,7 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
             final TimeseriesRetrieverConfig config;
             try {
                 config = new TimeseriesRetrieverConfig(
+                        TimeseriesRetrieverConfig.PROTOCOL_TSTB,
                         "SOS-Dummy-Handler",                                         // NOI18N
                         new URL("http://dummy.org"),                                 // NOI18N
                         "urn:ogc:object:STHLM:NO2:2031-1m",                          // NOI18N

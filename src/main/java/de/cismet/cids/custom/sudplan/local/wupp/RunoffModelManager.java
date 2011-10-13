@@ -72,7 +72,7 @@ public final class RunoffModelManager extends AbstractModelManager {
         final CidsBean geocpmBean = io.fetchGeocpmInput();
         final GeoCPMInput input = new GeoCPMInput();
 
-        input.content = (String)geocpmBean.getProperty("input"); // NOI18N
+//        input.content = (String)geocpmBean.getProperty("input"); // NOI18N
 
         runId = client.runGeoCPM(input);
         io.setRunId(runId);

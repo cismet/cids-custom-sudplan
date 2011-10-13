@@ -34,12 +34,14 @@ public final class TimeseriesRetrieverConfig {
 
     private static final transient Logger LOG = Logger.getLogger(TimeseriesRetrieverConfig.class);
 
-    public static final String TSTB_TOKEN = "tstb"; // NOI18N
+    public static final String PROTOCOL_TSTB = "tstb"; // NOI18N
+    public static final String PROTOCOL_DAV = "dav";   // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
+    private final String protocol;
     private final String handlerLookup;
-    private final URL sosLocation;
+    private final URL location;
 
     private final String procedure;
     private final String foi;
@@ -54,8 +56,9 @@ public final class TimeseriesRetrieverConfig {
     /**
      * Creates a new TimeseriesRetrieverConfig object.
      *
+     * @param   protocol       DOCUMENT ME!
      * @param   handlerLookup  DOCUMENT ME!
-     * @param   sosLocation    DOCUMENT ME!
+     * @param   location       DOCUMENT ME!
      * @param   procedure      DOCUMENT ME!
      * @param   foi            DOCUMENT ME!
      * @param   obsProp        DOCUMENT ME!
@@ -65,20 +68,22 @@ public final class TimeseriesRetrieverConfig {
      *
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
-    public TimeseriesRetrieverConfig(final String handlerLookup,
-            final URL sosLocation,
+    public TimeseriesRetrieverConfig(final String protocol,
+            final String handlerLookup,
+            final URL location,
             final String procedure,
             final String foi,
             final String obsProp,
             final String offering,
             final Geometry geometry,
             final TimeInterval interval) {
-        if ((handlerLookup == null) || (sosLocation == null)) {
+        if ((protocol == null) || (location == null)) {
             throw new IllegalArgumentException("handlerLookup or sosLocation must not be null"); // NOI18N
         }
 
+        this.protocol = protocol;
         this.handlerLookup = handlerLookup;
-        this.sosLocation = sosLocation;
+        this.location = location;
         this.procedure = procedure;
         this.foi = foi;
         this.obsProp = obsProp;
@@ -94,8 +99,17 @@ public final class TimeseriesRetrieverConfig {
      *
      * @return  DOCUMENT ME!
      */
-    public URL getSosLocation() {
-        return sosLocation;
+    public String getProtocol() {
+        return protocol;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public URL getLocation() {
+        return location;
     }
 
     /**
@@ -143,7 +157,7 @@ public final class TimeseriesRetrieverConfig {
             }
         }
 
-        throw new IllegalStateException("unknown observed property: " + obsProp);
+        throw new IllegalStateException("unknown observed property: " + obsProp); // NOI18N
     }
 
     /**
@@ -219,109 +233,172 @@ public final class TimeseriesRetrieverConfig {
      * @throws  MalformedURLException  DOCUMENT ME!
      */
     public static TimeseriesRetrieverConfig fromTSTBUrl(final String tstbUrl) throws MalformedURLException {
-        if ((tstbUrl == null) || tstbUrl.isEmpty()) {
+        return fromUrl(tstbUrl, PROTOCOL_TSTB);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   davUrl  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  MalformedURLException  DOCUMENT ME!
+     */
+    public static TimeseriesRetrieverConfig fromDavUrl(final String davUrl) throws MalformedURLException {
+        return fromUrl(davUrl, PROTOCOL_DAV);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   url  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  MalformedURLException  DOCUMENT ME!
+     */
+    public static TimeseriesRetrieverConfig fromUrl(final String url) throws MalformedURLException {
+        if (url == null) {
+            return null;
+        }
+
+        if (url.startsWith(PROTOCOL_TSTB)) {
+            return fromUrl(url, PROTOCOL_TSTB);
+        } else if (url.startsWith(PROTOCOL_DAV)) {
+            return fromUrl(url, PROTOCOL_DAV);
+        } else {
+            throw new MalformedURLException("unknown protocol: " + url); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   url    DOCUMENT ME!
+     * @param   token  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  MalformedURLException  DOCUMENT ME!
+     */
+    private static TimeseriesRetrieverConfig fromUrl(final String url, final String token)
+            throws MalformedURLException {
+        if ((url == null) || url.isEmpty()) {
             return null;
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug("processing: " + tstbUrl);
+            LOG.debug("processing: " + url);
         }
 
-        final String[] tstbToken = tstbUrl.split(":", 2);                   // NOI18N
-        if ((tstbToken.length < 2) || !tstbToken[0].equals(TSTB_TOKEN)) {   // NOI18N
-            throw new MalformedURLException("invalid tstburl: " + tstbUrl); // NOI18N
+        final String[] tstbToken = url.split(":", 2);                                      // NOI18N
+        if ((tstbToken.length < 2) || !tstbToken[0].equals(token)) {                       // NOI18N
+            throw new MalformedURLException("invalid url: " + url + " | token: " + token); // NOI18N
         }
 
         final TimeseriesRetrieverConfig config;
-        final String[] lookupToken = tstbToken[1].split("@", 2);     // NOI18N
-        if (lookupToken.length == 2) {
-            final String handlerLookup = lookupToken[0];
+        final String[] lookupToken = tstbToken[1].split("@", 2); // NOI18N
+        final String handlerLookup;
+        final String remaining;
+        if (lookupToken.length == 1) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("found handler lookup: " + handlerLookup); // NOI18N
+                LOG.debug("no handler lookup present");          // NOI18N
             }
 
-            final String[] locationToken = lookupToken[1].split("\\?", 2);                              // NOI18N
-            if (locationToken.length == 1) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("creating new config from handler lookup and localtion: " + handlerLookup // NOI18N
-                                + " || "                                                                // NOI18N
-                                + locationToken[0]);
-                }
-
-                config = new TimeseriesRetrieverConfig(
-                        handlerLookup,
-                        new URL(locationToken[0]),
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null);
-            } else if (locationToken.length == 2) {
-                final String location = locationToken[0];
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("found location: " + location);
-                }
-
-                final String[] params = locationToken[1].split("&"); // NOI18N
-                String procedure = null;
-                String foi = null;
-                String obsProp = null;
-                String offering = null;
-                Geometry geometry = null;
-                final TimeInterval interval = null;
-                for (final String param : params) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("found param: " + param);          // NOI18N
-                    }
-
-                    final String[] kvSplit = param.split("=", 2);                                                      // NOI18N
-                    final String key;
-                    final String value;
-                    if (kvSplit.length == 2) {
-                        key = kvSplit[0];
-                        value = kvSplit[1];
-                    } else {
-                        throw new MalformedURLException("invalid tstburl, invalid param '" + param + "': " + tstbUrl); // NOI18N
-                    }
-
-                    if (TimeSeries.PROCEDURE.equals(key)) {
-                        procedure = value;
-                    } else if (TimeSeries.FEATURE_OF_INTEREST.equals(key)) {
-                        foi = value;
-                    } else if (TimeSeries.OBSERVEDPROPERTY.equals(key)) {
-                        obsProp = value;
-                    } else if (TimeSeries.OFFERING.equals(key)) {
-                        offering = value;
-                    } else if (TimeSeries.GEOMETRY.equals(key)) {
-                        final WKTReader reader = new WKTReader(new GeometryFactory());
-                        try {
-                            geometry = reader.read(value);
-                        } catch (final ParseException ex) {
-                            final String message = "cannot read geometry from value: " + ex; // NOI18N
-                            LOG.error(message, ex);
-                            throw new MalformedURLException(message);
-                        }
-                    } else if (false) {
-                        // TODO: add TimeInterval support
-                    } else {
-                        throw new MalformedURLException("invalid tstburl, invalid token '" + key + "': " + tstbUrl); // NOI18N
-                    }
-                }
-
-                config = new TimeseriesRetrieverConfig(
-                        handlerLookup,
-                        new URL(location),
-                        procedure,
-                        foi,
-                        obsProp,
-                        offering,
-                        geometry,
-                        interval);
-            } else {
-                throw new MalformedURLException("invalid tstburl: " + tstbUrl); // NOI18N
+            handlerLookup = null;
+            remaining = lookupToken[0];
+        } else if (lookupToken.length == 2) {
+            handlerLookup = lookupToken[0];
+            remaining = lookupToken[1];
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("found handler lookup: " + handlerLookup);                       // NOI18N
             }
         } else {
-            throw new MalformedURLException("invalid tstburl, missing handler lookup: " + tstbUrl); // NOI18N
+            throw new MalformedURLException("invalid url: " + url + " | token: " + token); // NOI18N
+        }
+
+        final String[] locationToken = remaining.split("\\?", 2);                                  // NOI18N
+        if (locationToken.length == 1) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("creating new config from handler lookup and location: " + handlerLookup // NOI18N
+                            + " || "                                                               // NOI18N
+                            + locationToken[0]);
+            }
+
+            config = new TimeseriesRetrieverConfig(
+                    token,
+                    handlerLookup,
+                    new URL(locationToken[0]),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null);
+        } else if (locationToken.length == 2) {
+            final String location = locationToken[0];
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("found location: " + location);
+            }
+
+            final String[] params = locationToken[1].split("&"); // NOI18N
+            String procedure = null;
+            String foi = null;
+            String obsProp = null;
+            String offering = null;
+            Geometry geometry = null;
+            final TimeInterval interval = null;
+            for (final String param : params) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("found param: " + param);          // NOI18N
+                }
+
+                final String[] kvSplit = param.split("=", 2);                                                  // NOI18N
+                final String key;
+                final String value;
+                if (kvSplit.length == 2) {
+                    key = kvSplit[0];
+                    value = kvSplit[1];
+                } else {
+                    throw new MalformedURLException("invalid tstburl, invalid param '" + param + "': " + url); // NOI18N
+                }
+
+                if (TimeSeries.PROCEDURE.equals(key)) {
+                    procedure = value;
+                } else if (TimeSeries.FEATURE_OF_INTEREST.equals(key)) {
+                    foi = value;
+                } else if (TimeSeries.OBSERVEDPROPERTY.equals(key)) {
+                    obsProp = value;
+                } else if (TimeSeries.OFFERING.equals(key)) {
+                    offering = value;
+                } else if (TimeSeries.GEOMETRY.equals(key)) {
+                    final WKTReader reader = new WKTReader(new GeometryFactory());
+                    try {
+                        geometry = reader.read(value);
+                    } catch (final ParseException ex) {
+                        final String message = "cannot read geometry from value: " + ex; // NOI18N
+                        LOG.error(message, ex);
+                        throw new MalformedURLException(message);
+                    }
+                } else if (false) {
+                    // TODO: add TimeInterval support
+                } else {
+                    throw new MalformedURLException("invalid tstburl, invalid token '" + key + "': " + url); // NOI18N
+                }
+            }
+
+            config = new TimeseriesRetrieverConfig(
+                    token,
+                    handlerLookup,
+                    new URL(location),
+                    procedure,
+                    foi,
+                    obsProp,
+                    offering,
+                    geometry,
+                    interval);
+        } else {
+            throw new MalformedURLException("invalid url: " + url + " | token: " + token); // NOI18N
         }
 
         return config;
@@ -333,9 +410,9 @@ public final class TimeseriesRetrieverConfig {
      * @return  DOCUMENT ME!
      */
     public String toTSTBUrl() {
-        final StringBuilder sb = new StringBuilder(TSTB_TOKEN);
+        final StringBuilder sb = new StringBuilder(PROTOCOL_TSTB);
         sb.append(':').append(handlerLookup);
-        sb.append('@').append(sosLocation);
+        sb.append('@').append(location);
         if (!((procedure == null) && (foi == null) && (obsProp == null) && (offering == null) && (geometry == null))) {
             sb.append('?');
             if (procedure != null) {

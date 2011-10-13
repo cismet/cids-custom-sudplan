@@ -1,0 +1,13 @@
+<sml:SensorML xmlns:sml="http://www.opengis.net/sensorML/1.0.1"
+            xmlns:swe="http://www.opengis.net/swe/1.0.1"
+            xmlns:gml="http://www.opengis.net/gml"
+            xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0.1"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.opengis.net/sensorML/1.0.1 
+                                http://schemas.opengis.net/sensorML/1.0.1/sensorML.xsd ">
+    <sml:member>
+        <sml:System gml:id="SUDPLAN_RF_CS">
+            <gml:description>Rainfall downscaling CS</gml:description>
+        </sml:System>
+    </sml:member>
+</sml:SensorML>
