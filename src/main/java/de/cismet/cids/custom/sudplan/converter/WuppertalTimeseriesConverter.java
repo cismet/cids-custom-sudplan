@@ -15,7 +15,6 @@ import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -127,17 +126,10 @@ public final class WuppertalTimeseriesConverter extends TimeseriesConverter {
             final String message = "cannot convert from input stream"; // NOI18N
             LOG.error(message, ex);
             throw new ConversionException(message, ex);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (final IOException e) {
-                    LOG.warn("cannot close reader", e);                // NOI18N
-                }
-            }
         }
     }
 
+   
     /**
      * DOCUMENT ME!
      *

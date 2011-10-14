@@ -54,6 +54,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
@@ -525,7 +526,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     }
 
     @Override
-    public Collection<SignaturedFeature> getHoldFeatures() {
+    public Collection<SignaturedFeature> getHoldFeautres() {
         return this.holdFeatures.values();
     }
 
@@ -555,6 +556,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     /**
      * DOCUMENT ME!
      */
+    @Override
     public void fireHoldFeatureChanged() {
         if (displayVisible) {
             final ArrayList<SignaturedFeature> featureList = new ArrayList<SignaturedFeature>();
@@ -785,7 +787,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
                 if (!pnlChart.isAncestorOf(tsVis.getVisualisationUI())) {
                     pnlChart.removeAll();
-                    pnlChart.add(tsVis.getVisualisationUI(), BorderLayout.CENTER);
+                    pnlChart.add(new JScrollPane(tsVis.getVisualisationUI()), BorderLayout.CENTER);
                 }
                 if (toolbar == null) {
                     toolbar = tsVis.getToolbar();

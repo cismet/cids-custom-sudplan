@@ -95,7 +95,7 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
     //~ Static fields/initializers ---------------------------------------------
 
     /** limit to control if the shaped for data items are drawn or not. */
-    public static final int ITEM_LIMIT = 20;
+    public static final int ITEM_LIMIT = 50;
     private static final transient Logger LOG = Logger.getLogger(SimpleTSVisualisation.class);
 
     //~ Instance fields --------------------------------------------------------

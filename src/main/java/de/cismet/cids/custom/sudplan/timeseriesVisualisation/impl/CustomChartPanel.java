@@ -631,6 +631,7 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
     private final long timeSeriesMaxVal;
     private final long timeSeriesInterval;
     private final int scrollbar_max_val;
+    private final float scrollbarInterVal;
     private boolean ignoreNextStateChangeEvent = false;
     private boolean ignoreNextAxisChangeEvent = false;
     private DateAxis timeAxis;
@@ -676,8 +677,13 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
         timeSeriesMaxVal = timeAxis.getMaximumDate().getTime();
         timeSeriesMinVal = timeAxis.getMinimumDate().getTime();
         timeSeriesInterval = timeSeriesMaxVal - timeSeriesMinVal;
-        scrollbar_max_val = (int)(timeSeriesInterval / Integer.MAX_VALUE);
-
+        if (timeSeriesInterval <= Integer.MAX_VALUE) {
+            scrollbar_max_val = (int)timeSeriesInterval;
+        } else {
+//            scrollbar_max_val = (int)(timeSeriesInterval / Integer.MAX_VALUE);
+            scrollbar_max_val = Integer.MAX_VALUE;
+        }
+        scrollbarInterVal = (timeSeriesInterval / (scrollbar_max_val * 1f));
         scrollbar = new JScrollBar(JScrollBar.HORIZONTAL);
         scrollbar.setValues(0, scrollbar_max_val, 0, scrollbar_max_val);
         scrollbar.getModel().addChangeListener(this);
@@ -705,10 +711,11 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
         scrollbarPanel.add(scrollbar, gridBagConstraints);
 
         centerPanel.add(scrollbarPanel, BorderLayout.SOUTH);
-        centerPanel.add(scrollbarPanel, BorderLayout.SOUTH);
+//        centerPanel.add(scrollbarPanel, BorderLayout.SOUTH);
 
         this.setLayout(new BorderLayout());
-        this.add(new JScrollPane(centerPanel), BorderLayout.CENTER);
+        this.add(centerPanel, BorderLayout.CENTER);
+//        this.add(new JScrollPane(centerPanel), BorderLayout.CENTER);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -806,9 +813,9 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
              * zoom is limited in fact that BoundedRangemodel is based on int values, so we have to take care that the
              * whole dataset is reachable with scrolling.
              */
-            if ((maxDate - minDate) < (timeSeriesInterval / scrollbar_max_val)) {
+            if (((maxDate - minDate) < scrollbarInterVal)) {
                 ignoreNextAxisChangeEvent = true;
-                axis.setMaximumDate(new Date(minDate + (timeSeriesInterval / scrollbar_max_val)));
+                axis.setMaximumDate(new Date(minDate + (int)scrollbarInterVal));
                 ignoreNextStateChangeEvent = true;
                 scrollbar.setValues(getScaledScrollbarValue(minDate),
                     0,
@@ -859,7 +866,7 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
      * @return  DOCUMENT ME!
      */
     private int getScaledScrollbarValue(final long l) {
-        return (int)(((l - timeSeriesMinVal) * scrollbar_max_val) / timeSeriesInterval);
+        return (int)((l - timeSeriesMinVal) / scrollbarInterVal);
     }
 
     /**
@@ -870,7 +877,7 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
      * @return  DOCUMENT ME!
      */
     private long getOrignalforScaledValue(final int i) {
-        return ((i * timeSeriesInterval / scrollbar_max_val) + timeSeriesMinVal);
+        return (long)((i * scrollbarInterVal) + timeSeriesMinVal);
     }
 
     /**

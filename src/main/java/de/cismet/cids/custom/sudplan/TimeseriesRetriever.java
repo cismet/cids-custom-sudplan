@@ -53,7 +53,6 @@ public final class TimeseriesRetriever {
     //~ Instance fields --------------------------------------------------------
 
     private final transient ExecutorService executor;
-
     private final transient Map<String, HttpClient> clientCache;
 
     //~ Constructors -----------------------------------------------------------
@@ -281,10 +280,14 @@ public final class TimeseriesRetriever {
                 if (Thread.currentThread().isInterrupted()) {
                     throw new TimeseriesRetrieverException("execution was interrupted"); // NOI18N
                 }
+                final TimeSeries ts = converter.convertForward(bis);
 
-                return converter.convertForward(bis);
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new TimeseriesRetrieverException("execution was interrupted"); // NOI18N
+                }
+                return ts;
             } catch (final Exception ex) {
-                final String message = "cannot fetch timeseries from dav: " + config; // NOI18N
+                final String message = "cannot fetch timeseries from dav: " + config;    // NOI18N
                 LOG.error(message, ex);
 
                 get.abort();

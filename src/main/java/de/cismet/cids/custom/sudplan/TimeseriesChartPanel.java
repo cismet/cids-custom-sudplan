@@ -13,7 +13,6 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 import org.apache.log4j.Logger;
 
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -24,6 +23,7 @@ import org.jfree.data.time.Minute;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.ui.RectangleInsets;
+import org.jfree.util.Log;
 
 import org.openide.util.NbBundle;
 
@@ -48,9 +48,14 @@ import javax.imageio.ImageIO;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.Controllable;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.TimeSeriesVisualisationFactory;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.VisualisationType;
 
 import de.cismet.cids.dynamics.Disposable;
 
@@ -72,18 +77,15 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
 
     private final transient TimeseriesRetrieverConfig config;
     private final transient TimeseriesConverter converter;
-
     private transient JFreeChart chart;
     private transient BufferedImage image;
-
     private transient volatile Boolean cached;
     private final transient Refreshable refreshable;
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel pnlLoading;
-    // End of variables declaration//GEN-END:variables
-
+    // End of variables declaration
     private final transient TimeseriesDisplayer displayer;
+    private TimeSeriesVisualisation tsVis;
+    // Variables declaration - do not modify
+    private javax.swing.JLabel pnlLoading;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -174,7 +176,9 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
         this.converter = converter;
 
         initComponents();
-
+        tsVis = TimeSeriesVisualisationFactory.getInstance().createVisualisation(VisualisationType.SIMPLE);
+        final Controllable tsVisController = tsVis.getLookup(Controllable.class);
+        tsVisController.enableSelection(false);
         cached = cacheImmedialtely;
 
         displayer = new TimeseriesDisplayer();
@@ -317,20 +321,29 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
             try {
                 tsFuture = TimeseriesRetriever.getInstance().retrieve(config, converter);
                 final TimeSeries timeseries = tsFuture.get();
-
+                final String name = config.getObsProp();
+                String humanReadableObsProp = "";
+                if (name != null) {
+                    final String[] splittedName = name.split(":");
+                    humanReadableObsProp = splittedName[splittedName.length - 1];
+                }
+                timeseries.setTSProperty(TimeSeries.OBSERVEDPROPERTY, humanReadableObsProp);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("retrieved timeseries"); // NOI18N
                 }
 
-                final IntervalXYDataset dataset = createDataset(timeseries, config.getObsProp());
-
-                chart = createChart(dataset, SMSUtils.unitFromTimeseries(timeseries));
+                tsVis.clearTimeSeries();
+                tsVis.addTimeSeries(timeseries);
             } catch (final InterruptedException ex) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("chartpanel was interrupted, cancelling retriever future", ex); // NOI18N
                 }
 
-                tsFuture.cancel(true);
+                final boolean flag = tsFuture.cancel(true);
+
+                if (!flag) {
+                    Log.error("Can not abort TimeSeries Retriever");
+                }
 
                 throw ex;
             } catch (final Exception ex) {
@@ -356,7 +369,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
         protected void done() {
             try {
                 if (!cached) {
-                    final JComponent comp = new ChartPanel(chart, true);
+                    final JComponent comp = tsVis.getVisualisationUI();
                     remove(pnlLoading);
                     add(comp, BorderLayout.CENTER);
 
