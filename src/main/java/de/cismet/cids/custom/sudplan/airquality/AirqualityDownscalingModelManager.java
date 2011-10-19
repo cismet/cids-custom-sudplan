@@ -90,4 +90,9 @@ public final class AirqualityDownscalingModelManager extends AbstractModelManage
             throw new IOException(message, e);
         }
     }
+
+    @Override
+    protected String getReloadId() {
+        return null;
+    }
 }

@@ -159,4 +159,9 @@ public final class WorkshopModelManager extends AbstractModelManager {
             throw new IOException(message, ex);
         }
     }
+
+    @Override
+    protected String getReloadId() {
+        return null;
+    }
 }

@@ -351,6 +351,11 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
         return (RainfallDownscalingInput)resource;
     }
 
+    @Override
+    protected String getReloadId() {
+        return null;
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**

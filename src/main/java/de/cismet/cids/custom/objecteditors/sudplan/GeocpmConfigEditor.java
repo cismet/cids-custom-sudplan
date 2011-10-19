@@ -7,26 +7,15 @@
 ****************************************************/
 package de.cismet.cids.custom.objecteditors.sudplan;
 
-import Sirius.navigator.connection.SessionManager;
-
-import Sirius.server.middleware.types.MetaClass;
-
-import org.apache.log4j.Logger;
-
 import org.openide.util.NbBundle;
 
 import javax.swing.JOptionPane;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
-import de.cismet.cids.custom.sudplan.SMSUtils;
-
-import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.editors.DefaultCustomObjectEditor;
 import de.cismet.cids.editors.EditorClosedEvent;
 import de.cismet.cids.editors.EditorSaveListener;
-
-import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 /**
  * DOCUMENT ME!
@@ -35,14 +24,6 @@ import de.cismet.cids.navigator.utils.ClassCacheMultiple;
  * @version  $Revision$, $Date$
  */
 public class GeocpmConfigEditor extends AbstractCidsBeanRenderer implements EditorSaveListener {
-
-    //~ Static fields/initializers ---------------------------------------------
-
-    private static final transient Logger LOG = Logger.getLogger(GeocpmConfigEditor.class);
-
-    //~ Instance fields --------------------------------------------------------
-
-    private transient CidsBean parentBean;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient de.cismet.cids.editors.DefaultBindableReferenceCombo cboInvestigationArea =
@@ -82,23 +63,6 @@ public class GeocpmConfigEditor extends AbstractCidsBeanRenderer implements Edit
 
     @Override
     protected void init() {
-        final String domain = SessionManager.getSession().getUser().getDomain();
-        final MetaClass iaClass = ClassCacheMultiple.getMetaClass(domain, "investigation_area"); // NOI18N
-
-        parentBean = SMSUtils.getParentObject(iaClass);
-
-        if (parentBean == null) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("cannot fetch parent object for cidsbean: " + cidsBean); // NOI18N
-            }
-        } else {
-            try {
-                cidsBean.setProperty("investigation_area", parentBean);           // NOI18N
-            } catch (final Exception ex) {
-                LOG.warn("cannot preset investigation area", ex);                 // NOI18N
-            }
-        }
-
         DefaultCustomObjectEditor.setMetaClassInformationToMetaClassStoreComponentsInBindingGroup(
             bindingGroup,
             cidsBean);

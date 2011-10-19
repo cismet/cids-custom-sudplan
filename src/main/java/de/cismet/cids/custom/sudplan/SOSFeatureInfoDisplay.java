@@ -515,7 +515,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     }
 
     @Override
-    public Collection<SignaturedFeature> getHoldFeautres() {
+    public Collection<SignaturedFeature> getHoldFeatures() {
         return this.holdFeatures.values();
     }
 
@@ -529,8 +529,10 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         holdListeners.remove(hl);
     }
 
-    @Override
-    public void fireHoldFeatureChanged() {
+    /**
+     * DOCUMENT ME!
+     */
+    private void fireHoldFeatureChanged() {
         final ArrayList<SignaturedFeature> featureList = new ArrayList<SignaturedFeature>();
         // TODO anderer weg um gelöschte herauszufinden, da auch null in map sein kann wenn neben envelope geklcikt
         // wurde
@@ -595,6 +597,16 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         final TimeSeriesFeature feature = new TimeSeriesFeature(g, bi);
 //        feature.setName("timeSeries Object");
         return feature;
+    }
+
+    @Override
+    public void setDisplayVisble(final boolean aFlag) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isDisplayVisible() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     //~ Inner Classes ----------------------------------------------------------

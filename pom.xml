@@ -14,7 +14,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>cids Custom Sudplan</name>
+    <name>cids Custom Sudplan [Wuppertal branch]</name>
     <description>cids Navigator customisation for the SUDPLAN FP7 project</description>
 
     <developers>
@@ -87,7 +87,7 @@
             <groupId>at.ac.ait.enviro.sudplan</groupId>
             <artifactId>SOSClient</artifactId>
             <version>1.0-SNAPSHOT</version>
-             exclude slf to prevent version conflicts 
+             exclusions to prevent version conflicts 
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -97,10 +97,17 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
-                 exclude jts to prevent version conflicts 
                 <exclusion>
                     <groupId>com.vividsolutions</groupId>
                     <artifactId>jts</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>-->
@@ -108,7 +115,7 @@
             <groupId>at.ac.ait.enviro.sudplan</groupId>
             <artifactId>SOSDummyHandler</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <!-- exclude slf to prevent version conflicts -->
+<!--             exclude slf to prevent version conflicts -->
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -118,7 +125,7 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
-                <!-- exclude jts to prevent version conflicts -->
+<!--                 exclude jts to prevent version conflicts -->
                 <exclusion>
                     <groupId>com.vividsolutions</groupId>
                     <artifactId>jts</artifactId>
@@ -175,11 +182,6 @@
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>java3d</groupId>
-            <artifactId>vecmath</artifactId>
-            <version>1.3.1</version>
         </dependency>
         <dependency>
             <groupId>de.cismet.cids.navigator.plugin</groupId>

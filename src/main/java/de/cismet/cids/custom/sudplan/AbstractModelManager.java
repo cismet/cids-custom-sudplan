@@ -8,7 +8,6 @@
 package de.cismet.cids.custom.sudplan;
 
 import Sirius.navigator.ui.ComponentRegistry;
-import Sirius.navigator.ui.DescriptionPane;
 
 import Sirius.server.middleware.types.MetaObject;
 
@@ -23,8 +22,6 @@ import java.sql.Timestamp;
 import java.util.GregorianCalendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -38,8 +35,6 @@ import de.cismet.cids.editors.converters.SqlTimestampToUtilDateConverter;
 import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
 
 import de.cismet.cismap.commons.features.Feature;
-
-import de.cismet.tools.CismetThreadPool;
 
 /**
  * DOCUMENT ME!
@@ -95,7 +90,14 @@ public abstract class AbstractModelManager implements ModelManager {
 
         internalExecute();
 
-        // execution
+        final String reloadId = getReloadId();
+        if (reloadId == null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("won't perform reload after model run started, since no id is provided"); // NOI18N
+            }
+        } else {
+            ComponentRegistry.getRegistry().getCatalogueTree().requestRefreshNode(reloadId);
+        }
     }
 
     /**
@@ -321,30 +323,13 @@ public abstract class AbstractModelManager implements ModelManager {
                             }
                         }
 
-                        // TODO: use appropriate reload sub-tree facilities
-// final Future f = SMSUtils.reloadCatalogTree();
-//
-// if (f != null) {
-// f.get(5, TimeUnit.SECONDS);
-// }
-
-                        if (currentRenderer != null) {
-                            CismetThreadPool.execute(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        EventQueue.invokeLater(new Runnable() {
-
-                                                @Override
-                                                public void run() {
-                                                    reg.getDescriptionPane()
-                                                            .gotoMetaObject(
-                                                                currentRenderer.getCidsBean().getMetaObject(),
-                                                                null);
-                                                }
-                                            });
-                                    }
-                                });
+                        final String reloadId = getReloadId();
+                        if (reloadId == null) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("won't perform reload after model run finished, since no id is provided"); // NOI18N
+                            }
+                        } else {
+                            reg.getCatalogueTree().requestRefreshNode(reloadId);
                         }
 
                         final int answer = JOptionPane.showConfirmDialog(
@@ -382,6 +367,15 @@ public abstract class AbstractModelManager implements ModelManager {
      * @throws  IOException  DOCUMENT ME!
      */
     protected abstract CidsBean createOutputBean() throws IOException;
+
+    /**
+     * This method shall return an artificial id that can be used to reload the appropriate node in the catalogue tree
+     * that is related to this model run. So the underlying implementation is aware of its relative position in the
+     * catalogue tree and thus can generate the appropriate artificial id that shall be reloaded.
+     *
+     * @return  the artificial id used to reload the catalogue tree or null if there is nothing to reload
+     */
+    protected abstract String getReloadId();
 
     /**
      * DOCUMENT ME!
