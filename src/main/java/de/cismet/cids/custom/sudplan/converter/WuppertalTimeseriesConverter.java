@@ -129,7 +129,6 @@ public final class WuppertalTimeseriesConverter extends TimeseriesConverter {
         }
     }
 
-   
     /**
      * DOCUMENT ME!
      *

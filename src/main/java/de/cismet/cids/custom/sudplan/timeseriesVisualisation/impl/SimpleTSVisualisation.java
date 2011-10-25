@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 
 import org.jfree.chart.ChartColor;
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
@@ -33,6 +34,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
@@ -43,7 +45,13 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 
 import java.text.DecimalFormat;
 
@@ -52,6 +60,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
+
+import javax.imageio.ImageIO;
 
 import javax.swing.JComponent;
 import javax.swing.JToolBar;
@@ -609,6 +619,40 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
                     }
                 });
         }
+    }
+
+    @Override
+    public BufferedImage getImage() {
+        PipedOutputStream pos = null;
+        BufferedInputStream bis = null;
+        BufferedImage image = null;
+        try {
+            pos = new PipedOutputStream();
+            bis = new BufferedInputStream(new PipedInputStream(pos));
+
+            final Rectangle2D chartSize = chartPanel.getChartRenderingInfo().getChartArea();
+            ChartUtilities.writeChartAsPNG(
+                pos,
+                chartPanel.getChart(),
+                (int)chartSize.getWidth(),
+                (int)chartSize.getHeight());
+            image = ImageIO.read(bis);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        } finally {
+            try {
+                if (pos != null) {
+                    pos.close();
+                }
+
+                if (bis != null) {
+                    bis.close();
+                }
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+        return image;
     }
 
     @Override

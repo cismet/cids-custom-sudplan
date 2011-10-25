@@ -526,7 +526,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     }
 
     @Override
-    public Collection<SignaturedFeature> getHoldFeautres() {
+    public Collection<SignaturedFeature> getHoldFeatures() {
         return this.holdFeatures.values();
     }
 
@@ -556,8 +556,8 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     /**
      * DOCUMENT ME!
      */
-    @Override
-    public void fireHoldFeatureChanged() {
+
+    private void fireHoldFeatureChanged() {
         if (displayVisible) {
             final ArrayList<SignaturedFeature> featureList = new ArrayList<SignaturedFeature>();
             // TODO anderer weg um gelöschte herauszufinden, da auch null in map sein kann wenn neben envelope geklcikt

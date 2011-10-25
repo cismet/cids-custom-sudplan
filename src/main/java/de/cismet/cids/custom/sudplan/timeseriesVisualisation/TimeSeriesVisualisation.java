@@ -9,6 +9,8 @@ package de.cismet.cids.custom.sudplan.timeseriesVisualisation;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
+import java.awt.image.BufferedImage;
+
 import java.beans.PropertyChangeListener;
 
 import java.util.Collection;
@@ -174,4 +176,11 @@ public interface TimeSeriesVisualisation {
      * @return  the visualisations tool bar null if the visualisation does not define a tool bar
      */
     JToolBar getToolbar();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    BufferedImage getImage();
 }
