@@ -42,6 +42,8 @@ import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
+
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
@@ -568,6 +570,46 @@ public final class SMSUtils {
             }
         } else {
             throw new IllegalStateException("timeseries unit is not present or in unknown format: " + unitValue); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   tsBean  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalArgumentException  DOCUMENT ME!
+     * @throws  IllegalStateException     DOCUMENT ME!
+     */
+    public static TimeseriesConverter loadConverter(final CidsBean tsBean) {
+        if (tsBean == null) {
+            throw new IllegalArgumentException("timeseries must not be null"); // NOI18N
+        }
+
+        final String className = (String)tsBean.getProperty("converter");       // NOI18N
+        if (className == null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("converter class not set for timeseries: " + tsBean); // NOI18N
+            }
+
+            return null;
+        } else {
+            try {
+                final Class converterClass = Class.forName(className);
+                if (TimeseriesConverter.class.isAssignableFrom(converterClass)) {
+                    return (TimeseriesConverter)converterClass.newInstance();
+                } else {
+                    throw new IllegalStateException(
+                        "converter class of timeseries not instanceof TimeseriesConverter: " // NOI18N
+                                + tsBean);
+                }
+            } catch (final Exception e) {
+                final String message = "cannot create instance of TimeseriesConverter for timeseries: " + tsBean; // NOI18N
+                LOG.error(message, e);
+                throw new IllegalStateException(message, e);
+            }
         }
     }
 

@@ -15,8 +15,10 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import de.cismet.cids.custom.sudplan.commons.CismetExecutors;
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 /**
  * DOCUMENT ME!
@@ -44,7 +46,8 @@ public final class ExecutableThreadPool {
      * Creates a new ExecutableThreadPool object.
      */
     private ExecutableThreadPool() {
-        executor = Executors.newCachedThreadPool();
+        executor = CismetExecutors.newCachedThreadPool(
+                SudplanConcurrency.createThreadFactory("model-exec", new ModelExecutionExceptionHandler()));
         execStates = new ArrayList<ExecutionState>();
     }
 
@@ -207,6 +210,31 @@ public final class ExecutableThreadPool {
      *
      * @version  $Revision$, $Date$
      */
+    private static final class ModelExecutionExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+        //~ Static fields/initializers -----------------------------------------
+
+        private static final transient Logger LOG = Logger.getLogger(ModelExecutionExceptionHandler.class);
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void uncaughtException(final Thread t, final Throwable e) {
+            if (e instanceof Error) {
+                LOG.fatal("encountered error during model execution in thread: " + t, e); // NOI18N
+
+                throw (Error)e;
+            } else {
+                LOG.error("unexpected exception during model execution in thread: " + t, e); // NOI18N
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
     private static final class ExecutionState implements Map.Entry<Executable, Future<Void>> {
 
         //~ Instance fields ----------------------------------------------------
@@ -255,5 +283,13 @@ public final class ExecutableThreadPool {
         //~ Static fields/initializers -----------------------------------------
 
         private static final ExecutableThreadPool INSTANCE = new ExecutableThreadPool();
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new LazyInititaliser object.
+         */
+        private LazyInititaliser() {
+        }
     }
 }

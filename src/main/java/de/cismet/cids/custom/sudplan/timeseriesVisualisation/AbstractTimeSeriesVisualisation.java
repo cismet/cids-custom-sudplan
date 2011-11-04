@@ -10,6 +10,7 @@ package de.cismet.cids.custom.sudplan.timeseriesVisualisation;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
 import java.awt.EventQueue;
+import java.awt.image.BufferedImage;
 
 import java.beans.PropertyChangeListener;
 
@@ -154,4 +155,7 @@ public abstract class AbstractTimeSeriesVisualisation implements TimeSeriesVisua
                 });
         }
     }
+
+    @Override
+    public abstract BufferedImage getImage();
 }

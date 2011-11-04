@@ -20,8 +20,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
-import edu.umd.cs.piccolo.PLayer;
-
 import org.apache.log4j.Logger;
 
 import org.jfree.util.Log;
@@ -56,6 +54,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
@@ -440,7 +439,16 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             throw new InitialisationException(message, e);
         }
 
-        config = new TimeseriesRetrieverConfig(SOS_FACTORY, sosUrl, procedure, foi, obsProp, offering, null, null);
+        config = new TimeseriesRetrieverConfig(
+                TimeseriesRetrieverConfig.PROTOCOL_TSTB,
+                SOS_FACTORY,
+                sosUrl,
+                procedure,
+                foi,
+                obsProp,
+                offering,
+                null,
+                null);
     }
 
     /**
@@ -518,7 +526,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     }
 
     @Override
-    public Collection<SignaturedFeature> getHoldFeautres() {
+    public Collection<SignaturedFeature> getHoldFeatures() {
         return this.holdFeatures.values();
     }
 
@@ -545,8 +553,11 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         return displayVisible;
     }
 
-    @Override
-    public void fireHoldFeatureChanged() {
+    /**
+     * DOCUMENT ME!
+     */
+
+    private void fireHoldFeatureChanged() {
         if (displayVisible) {
             final ArrayList<SignaturedFeature> featureList = new ArrayList<SignaturedFeature>();
             // TODO anderer weg um gelöschte herauszufinden, da auch null in map sein kann wenn neben envelope geklcikt
@@ -776,7 +787,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
                 if (!pnlChart.isAncestorOf(tsVis.getVisualisationUI())) {
                     pnlChart.removeAll();
-                    pnlChart.add(tsVis.getVisualisationUI(), BorderLayout.CENTER);
+                    pnlChart.add(new JScrollPane(tsVis.getVisualisationUI()), BorderLayout.CENTER);
                 }
                 if (toolbar == null) {
                     toolbar = tsVis.getToolbar();

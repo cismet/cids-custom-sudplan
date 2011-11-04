@@ -11,8 +11,8 @@ import Sirius.navigator.connection.SessionManager;
 
 import Sirius.server.middleware.types.MetaClass;
 
+import at.ac.ait.enviro.sudplan.util.PropertyNames;
 import at.ac.ait.enviro.tsapi.handler.DataHandler;
-import at.ac.ait.enviro.tsapi.handler.DataHandlerFactory;
 import at.ac.ait.enviro.tsapi.handler.Datapoint;
 import at.ac.ait.enviro.tsapi.handler.DatapointListener;
 import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
@@ -20,32 +20,41 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.apache.log4j.Logger;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Future;
 
 import de.cismet.cids.custom.sudplan.AbstractModelManager;
-import de.cismet.cids.custom.sudplan.Demo;
+import de.cismet.cids.custom.sudplan.DataHandlerCache;
+import de.cismet.cids.custom.sudplan.DataHandlerCacheException;
 import de.cismet.cids.custom.sudplan.Manager;
 import de.cismet.cids.custom.sudplan.ManagerType;
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
-import de.cismet.cids.custom.sudplan.Variable;
+import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
+
+import de.cismet.cismap.commons.CrsTransformer;
 
 /**
  * DOCUMENT ME!
@@ -71,6 +80,16 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
     private static final String PARAM_RESULT_RAIN_30 = "param:result_rain_30_downscaled";   // NOI18N
     private static final String PARAM_REF_RAIN_1D = "param:result_rain_1day";               // NOI18N
     private static final String PARAM_RESULT_RAIN_1D = "param:result_rain_1day_downscaled"; // NOI18N
+
+    public static final String PARAM_CLIMATE_SCENARIO = "climate_scenario";
+    public static final String PARAM_SOURCE_RAIN = "source_rain";
+    public static final String PARAM_CENTER_TIME = "center_time";
+
+    private static final String RF_SOS_LOOKUP = "rainfall_sos_lookup";           // NOI18N
+    private static final String RF_SPS_LOOKUP = "rainfall_sps_lookup";           // NOI18N
+    private static final String RF_SOS_URL = "http://enviro3.ait.ac.at:8081/";   // NOI18N
+    private static final String RF_SPS_URL = "http://enviro3.ait.ac.at:8082/";   // NOI18N
+    private static final String RF_DS_PROCEDURE = "Rain_Timeseries_Downscaling"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -129,116 +148,41 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
             LOG.debug("preparing downscaling run"); // NOI18N
         }
 
-        // TODO: for real usage we have to lookup the config from somewhere else
-        final DataHandler spsDH = DataHandlerFactory.Lookup.lookup("SPS-SUDPLAN-Dummy"); // NOI18N
-        putInfo(spsDH, "sourceDH", input.getKey());                                      // NOI18N
-        putInfo(spsDH, "targetDH", output);                                              // NOI18N
-        spsDH.open();
-        Demo.getInstance().setDSSOSDH(output);
-
-        final Properties taskFilter = new Properties();
-        taskFilter.put(PROP_MODEL_ID, RAIN_TIMESERIES_DOWNSCALING_ID);
-        final Datapoint task = spsDH.createDatapoint(taskFilter, null, DataHandler.Access.READ_WRITE);
-
-        // hardcoded for the demo
-        final Properties[] props = new Properties[5];
-        props[0] = new Properties();
-        props[1] = new Properties();
-        props[2] = new Properties();
-        props[3] = new Properties();
-        props[4] = new Properties();
-
-        props[0].put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz"); // NOI18N
-        props[0].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:prec:A1B");     // NOI18N
-        props[0].put(TimeSeries.OBSERVEDPROPERTY, Variable.PRECIPITATION.getPropertyKey());
-        props[0].put(TimeSeries.OFFERING, "Station_3202_10min_Downscaled");     // NOI18N
-
-        props[1].put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz");     // NOI18N
-        props[1].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:prec:A1B_30m_agg"); // NOI18N
-        props[1].put(TimeSeries.OBSERVEDPROPERTY, Variable.PRECIPITATION.getPropertyKey());
-        props[1].put(TimeSeries.OFFERING, "Station_3202_30min_Aggregated");         // NOI18N
-
-        props[2].put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz"); // NOI18N
-        props[2].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:prec:A1B_30m"); // NOI18N
-        props[2].put(TimeSeries.OBSERVEDPROPERTY, Variable.PRECIPITATION.getPropertyKey());
-        props[2].put(TimeSeries.OFFERING, "Station_3202_30min_Downscaled");     // NOI18N
-
-        props[3].put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz");      // NOI18N
-        props[3].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:prec:A1B_1day_agg"); // NOI18N
-        props[3].put(TimeSeries.OBSERVEDPROPERTY, Variable.PRECIPITATION.getPropertyKey());
-        props[3].put(TimeSeries.OFFERING, "Station_3202_1day_Aggregated");           // NOI18N
-
-        props[4].put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz");  // NOI18N
-        props[4].put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:prec:A1B_1day"); // NOI18N
-        props[4].put(TimeSeries.OBSERVEDPROPERTY, Variable.PRECIPITATION.getPropertyKey());
-        props[4].put(TimeSeries.OFFERING, "Station_3202_1day_Downscaled");       // NOI18N
-
-        final Map<String, Properties> results = new HashMap<String, Properties>(6);
-        results.put(PARAM_RESULT_RAIN, props[0]);
-        results.put(PARAM_REF_RAIN_30, props[1]);
-        results.put(PARAM_RESULT_RAIN_30, props[2]);
-        results.put(PARAM_REF_RAIN_1D, props[3]);
-        results.put(PARAM_RESULT_RAIN_1D, props[4]);
-        results.put(PARAM_REF_RAIN, input.getValue());
-
-        // we register the resultprocessor for the now running task, we cannot use weak listeners because there is no
-        // place to hold strong reference to it
-        task.addListener(new ResultProcessor(results, task, output, cidsBean));
-
-        // unique id of the task
-        final String taskId = task.getFilter().getProperty(PROP_TASK_ID);
-
-        final TimeSeries inputTimeSeries = new TimeSeriesImpl(task.getProperties());
-        final TimeStamp now = new TimeStamp();
-
-        final RainfallDownscalingInput rfInput = inputFromRun(cidsBean);
-
-        inputTimeSeries.setValue(now, "param:climate_scenario", rfInput.getScenario());
-        inputTimeSeries.setValue(now, "param:reference_rain", SMSUtils.toTSTBCompatiblePropListing(input.getValue()));
-        inputTimeSeries.setValue(
-            now,
-            "param:center_time",
-            new TimeStamp(new GregorianCalendar(rfInput.getTargetYear(), 0, 1).getTime()).toString());
-
-        inputTimeSeries.setValue(now, PARAM_RESULT_RAIN, SMSUtils.toTSTBCompatiblePropListing(props[0]));
-        inputTimeSeries.setValue(now, PARAM_REF_RAIN_30, SMSUtils.toTSTBCompatiblePropListing(props[1]));
-        inputTimeSeries.setValue(
-            now,
-            PARAM_RESULT_RAIN_30,
-            SMSUtils.toTSTBCompatiblePropListing(props[2]));
-        inputTimeSeries.setValue(now, PARAM_REF_RAIN_1D, SMSUtils.toTSTBCompatiblePropListing(props[3]));
-        inputTimeSeries.setValue(now, PARAM_RESULT_RAIN_1D, SMSUtils.toTSTBCompatiblePropListing(props[4]));
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("starting the downscaling run"); // NOI18N
-        }
-
-        inputTimeSeries.setValue(now, "action", "start");
-        task.putTimeSeries(inputTimeSeries);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   bean   DOCUMENT ME!
-     * @param   where  DOCUMENT ME!
-     * @param   what   DOCUMENT ME!
-     *
-     * @throws  IOException  DOCUMENT ME!
-     */
-    private static void putInfo(final Object bean, final String where, final Object what) throws IOException {
+        final DataHandler spsHandler;
         try {
-            final BeanInfo info = Introspector.getBeanInfo(bean.getClass(), Introspector.USE_ALL_BEANINFO);
-            for (final PropertyDescriptor pd : info.getPropertyDescriptors()) {
-                if (pd.getName().equals(where)) {
-                    pd.getWriteMethod().invoke(bean, what);
-                }
-            }
-        } catch (final Exception exception) {
-            final String message = "cannot put info"; // NOI18N
-            LOG.error(message, exception);
-            throw new IOException(message, exception);
+            spsHandler = DataHandlerCache.getInstance().getSPSDataHandler(RF_SPS_LOOKUP, new URL(RF_SPS_URL));
+        } catch (final MalformedURLException ex) {
+            final String message = "invalid rainfall sos url: " + RF_SOS_URL; // NOI18N
+            LOG.error(message, ex);
+            throw new IOException(message, ex);
+        } catch (final DataHandlerCacheException ex) {
+            final String message = "cannot fetch datahandler";                // NOI18N
+            LOG.error(message, ex);
+            throw new IOException(message, ex);
         }
+
+        final Properties filter = new Properties();
+        filter.put(TimeSeries.PROCEDURE, RF_DS_PROCEDURE);
+
+        final Datapoint dp = spsHandler.createDatapoint(filter, null, DataHandler.Access.READ_WRITE);
+
+        final TimeSeries ts = new TimeSeriesImpl(dp.getProperties());
+        final TimeStamp now = new TimeStamp();
+        ts.setValue(now, PARAM_CLIMATE_SCENARIO, "climate_echam5a1b3_prec_30m");
+        ts.setValue(now, PARAM_SOURCE_RAIN, input.getValue().getProperty(TimeSeries.OFFERING));
+        ts.setValue(now, PARAM_CENTER_TIME, "2050-11-05T10:10:10-00:00");
+        ts.setValue(now, PropertyNames.TaskAction, PropertyNames.TaskActionStart);
+
+        dp.putTimeSeries(ts);
+
+        final TimeInterval ti = new TimeInterval(
+                TimeInterval.Openness.OPEN,
+                TimeStamp.NEGATIVE_INFINITY,
+                TimeStamp.POSITIVE_INFINITY,
+                TimeInterval.Openness.OPEN);
+        final TimeSeries status = dp.getTimeSeries(ti);
+
+        final int i = 1 + 1;
     }
 
     /**
@@ -288,24 +232,73 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
 
         assert tsBean != null : "timeseries is null"; // NOI18N
 
-        final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromTSTBUrl((String)tsBean.getProperty(
-                    "uri")); // NOI18N
+        final String tsUri = (String)tsBean.getProperty("uri");                 // NOI18N
+        final TimeseriesRetrieverConfig config;
+        if (tsUri == null) {
+            final String message = "cannot read timeseries from uri, uri null"; // NOI18N
+            LOG.error(message);                                                 // NOI18N
+            throw new IOException(message);
+        } else {
+            config = TimeseriesRetrieverConfig.fromUrl(tsUri);
+        }
 
-        assert config != null : "invalid config"; // NOI18N
+        assert config != null : "invalid must not be null"; // NOI18N
 
-        final DataHandler inputDH = Demo.getInstance().getCleanSOSDH(); // TODO: <- for demo
-        // DataHandlerFactory.Lookup.lookup(config.getHandlerLookup());
-        inputDH.setId(config.getHandlerLookup());
-        putInfo(inputDH, ENDPOINT, config.getSosLocation()); // NOI18N
+        final DataHandler inputDH;
+        try {
+            inputDH = DataHandlerCache.getInstance().getSOSDataHandler(RF_SOS_LOOKUP, new URL(RF_SOS_URL));
+        } catch (final MalformedURLException ex) {
+            final String message = "invalid rainfall sos url: " + RF_SOS_URL; // NOI18N
+            LOG.error(message, ex);
+            throw new IOException(message, ex);
+        } catch (final DataHandlerCacheException ex) {
+            final String message = "cannot fetch datahandler";                // NOI18N
+            LOG.error(message, ex);
+            throw new IOException(message, ex);
+        }
 
-        // final Properties properties = config.getFilterProperties();
-        // hardcoded for the demo
-        final Properties properties = new Properties();
-        properties.put(TimeSeries.FEATURE_OF_INTEREST, "urn:MyOrg:feature:linz"); // NOI18N
-        properties.put(TimeSeries.PROCEDURE, "urn:ogc:object:LINZ:prec:10m");     // NOI18N
-        properties.put(TimeSeries.OBSERVEDPROPERTY, Variable.PRECIPITATION.getPropertyKey());
-        properties.put(TimeSeries.OFFERING, "Station_3202_10min");                // NOI18N
+        final Map<String, Object> dpProps = new HashMap<String, Object>();
 
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("loading sensor ml"); // NOI18N
+        }
+
+        final String sensorML = readResource("rainfallCSSensorML.xml"); // NOI18N
+        dpProps.put(TimeSeries.SENSORML, sensorML);                     // NOI18N
+
+        final TimeSeries ts;
+        try {
+            final TimeseriesConverter converter = SMSUtils.loadConverter(tsBean);
+            final Future<TimeSeries> tsFuture = TimeseriesRetriever.getInstance().retrieve(config, converter);
+
+            ts = tsFuture.get();
+
+            final CidsBean stationBean = (CidsBean)tsBean.getProperty("station");                        // NOI18N
+            if (stationBean != null) {
+                final CidsBean geomBean = (CidsBean)stationBean.getProperty("geom");                     // NOI18N
+                if (geomBean != null) {
+                    final Geometry geom = (Geometry)geomBean.getProperty("geo_field");                   // NOI18N
+                    if (geom != null) {
+                        final Geometry epsgGeom = CrsTransformer.transformToGivenCrs(geom, "EPSG:4326"); // NOI18N
+                        ts.setTSProperty(TimeSeries.GEOMETRY, epsgGeom.getEnvelopeInternal());
+                    }
+                }
+            }
+
+            ts.setTSProperty(PropertyNames.SPATIAL_RESOLUTION, new Integer[] { 1, 1 });
+            ts.setTSProperty(PropertyNames.TEMPORAL_RESOLUTION, "NONE");            // NOI18N
+            ts.setTSProperty(PropertyNames.COORDINATE_SYSTEM, "EPSG:4326");         // NOI18N
+        } catch (final Exception ex) {
+            final String message = "cannot fetch timeseries for config: " + config; // NOI18N
+            LOG.error(message, ex);
+            throw new IOException(message, ex);
+        }
+
+        final Datapoint dp = inputDH.createDatapoint(new Properties(), dpProps, DataHandler.Access.READ_WRITE);
+
+        dp.putTimeSeries(ts);
+
+        final Properties properties = dp.getFilter();
         if (LOG.isDebugEnabled()) {
             LOG.debug("upload timeseries finished: dh=" + inputDH + " || props=" + properties + " || " + this); // NOI18N
         }
@@ -327,6 +320,47 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
                     throw new UnsupportedOperationException("immutable entry"); // NOI18N
                 }
             };
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   name  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    public String readResource(final String name) {
+        final InputStream is = this.getClass().getResourceAsStream(name);
+        if (is == null) {
+            throw new IllegalStateException("cannot get resource as stream: " + name); // NOI18N
+        }
+
+        final BufferedInputStream bis = new BufferedInputStream(is);
+        final StringBuilder sb = new StringBuilder(1024);
+        final byte[] chars = new byte[1024];
+        int bytesRead = 0;
+        try {
+            bytesRead = bis.read(chars);
+            while (bytesRead > -1) {
+                sb.append(new String(chars, 0, bytesRead));
+                bytesRead = bis.read(chars);
+            }
+
+            return sb.toString();
+        } catch (final IOException ex) {
+            final String message = "cannot read from resource: " + name; // NOI18N
+            LOG.error(message, ex);
+
+            throw new IllegalStateException(message, ex);
+        } finally {
+            try {
+                bis.close();
+            } catch (final IOException e) {
+                LOG.warn("cannot close input stream", e);
+            }
+        }
     }
 
     /**
@@ -621,6 +655,7 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
                 final String proc = props.getProperty(TimeSeries.PROCEDURE);
 
                 return new TimeseriesRetrieverConfig(
+                        TimeseriesRetrieverConfig.PROTOCOL_TSTB,
                         lookup,
                         location,
                         proc,
