@@ -269,7 +269,7 @@ public final class RainfallDownscalingModelManager extends AbstractModelManager 
         final TimeSeries ts;
         try {
             final TimeseriesConverter converter = SMSUtils.loadConverter(tsBean);
-            final Future<TimeSeries> tsFuture = TimeseriesRetriever.getInstance().retrieve(config, converter);
+            final Future<TimeSeries> tsFuture = TimeseriesRetriever.getInstance().retrieve(config);
 
             ts = tsFuture.get();
 

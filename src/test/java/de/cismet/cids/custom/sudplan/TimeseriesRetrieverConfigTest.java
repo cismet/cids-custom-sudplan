@@ -60,7 +60,7 @@ public class TimeseriesRetrieverConfigTest
 
         assertNotNull("result is null", result);
         assertEquals("illegal handler lookup", "SOS-SUDPLAN-Dummy", result.getHandlerLookup());
-        assertEquals("illegal location", new URL("http://dummy.org"), result.getLocation());
+        assertEquals("illegal location", new URL("http://dummy.org"), result.getSosLocation());
         assertEquals("illegal procedure", "urn:ogc:object:LINZ:rain:1", result.getProcedure());
         assertEquals("illegal foi", "urn:MyOrg:feature:linz", result.getFoi());
         assertEquals("illegal obsprop", "urn:ogc:def:property:OGC:rain", result.getObsProp());

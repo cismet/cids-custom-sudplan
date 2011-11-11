@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import at.ac.ait.enviro.sudplan.sosclient.SOSClientHandler;
+import at.ac.ait.enviro.sudplan.util.EnvelopeQueryParameter;
 import at.ac.ait.enviro.tsapi.handler.DataHandler;
 import at.ac.ait.enviro.tsapi.handler.Datapoint;
 import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
@@ -32,10 +34,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import de.cismet.cids.custom.sudplan.commons.CismetExecutors;
-import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 
 /**
@@ -54,6 +55,7 @@ public final class TimeseriesRetriever {
 
     private final transient ExecutorService executor;
     private final transient Map<String, HttpClient> clientCache;
+    private final transient Map<String, DataHandler> dhCache;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -61,8 +63,9 @@ public final class TimeseriesRetriever {
      * Creates a new TimeseriesRetriever object.
      */
     private TimeseriesRetriever() {
-        executor = CismetExecutors.newCachedThreadPool(SudplanConcurrency.createThreadFactory("timeseries-retriever")); // NOI18N
+        executor = Executors.newCachedThreadPool();
         clientCache = new HashMap<String, HttpClient>();
+        dhCache = new HashMap<String, DataHandler>();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -108,10 +111,19 @@ public final class TimeseriesRetriever {
      */
     private void validateConfig(final TimeseriesRetrieverConfig config) throws TimeseriesRetrieverException {
         if (config == null) {
-            throw new TimeseriesRetrieverException("config must not be null");   // NOI18N
-        } else if (config.getLocation() == null) {
-            throw new TimeseriesRetrieverException("location must not be null"); // NOI18N
+            throw new TimeseriesRetrieverException("config must not be null");       // NOI18N
+        } else if (config.getSosLocation() == null) {
+            throw new TimeseriesRetrieverException("sos location must not be null"); // NOI18N
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static TimeseriesRetriever getInstance() {
+        return LazyInitialiser.INSTANCE;
     }
 
     /**
@@ -142,15 +154,6 @@ public final class TimeseriesRetriever {
         return clientCache.get(host);
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static TimeseriesRetriever getInstance() {
-        return LazyInitialiser.INSTANCE;
-    }
-
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -158,7 +161,7 @@ public final class TimeseriesRetriever {
      *
      * @version  $Revision$, $Date$
      */
-    private static final class RetrieverFuture implements Callable<TimeSeries> {
+    private final class RetrieverFuture implements Callable<TimeSeries> {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -207,15 +210,33 @@ public final class TimeseriesRetriever {
          * @throws  TimeseriesRetrieverException  DOCUMENT ME!
          */
         private TimeSeries fromTSTB() throws TimeseriesRetrieverException {
-            final DataHandler handler;
-            try {
-                handler = DataHandlerCache.getInstance()
-                            .getSOSDataHandler(config.getHandlerLookup(), config.getLocation());
-            } catch (DataHandlerCacheException ex) {
-                final String message = "cannot create data handler"; // NOI18N
-                LOG.error(message, ex);
-                throw new TimeseriesRetrieverException(message, ex);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("starting timeseries retrieval for config: " + config);
             }
+
+            if (Thread.currentThread().isInterrupted()) {
+                throw new TimeseriesRetrieverException("execution was interrupted"); // NOI18N
+            }
+
+            // FIXME: for demo
+            final String key = config.getHandlerLookup() + "-" + config.getSosLocation().toString(); // NOI18N
+            if (!dhCache.containsKey(key)) {
+                final SOSClientHandler handler = new SOSClientHandler();
+
+                handler.setId(config.getHandlerLookup());
+                try {
+                    handler.getConnector().connect(config.getSosLocation().toExternalForm());
+                    handler.open();
+                } catch (final Exception e) {
+                    final String message = "cannot initialise handler"; // NOI18N
+                    LOG.error(message, e);
+                    throw new TimeseriesRetrieverException(message, e);
+                }
+
+                dhCache.put(key, handler);
+            }
+
+            final DataHandler handler = dhCache.get(key);
 
             if (handler == null) {
                 throw new TimeseriesRetrieverException("cannot lookup handler: " + config.getHandlerLookup()); // NOI18N
@@ -250,9 +271,10 @@ public final class TimeseriesRetriever {
                 interval = config.getInterval();
             }
 
-            // TODO: spatial query
+            final EnvelopeQueryParameter point = new EnvelopeQueryParameter();
+            point.setEnvelope(config.getGeometry().getEnvelopeInternal());
 
-            return datapoint.getTimeSeries(interval);
+            return datapoint.getTimeSeries(interval, point);
         }
 
         /**
@@ -269,8 +291,8 @@ public final class TimeseriesRetriever {
 
             // we don't use the cismet dav client as its "care-less" implementation leads to unpleasant behaviour in
             // case of exception/about etc.
-            final HttpClient client = TimeseriesRetriever.getInstance().getClient(config.getLocation().getHost());
-            final GetMethod get = new GetMethod(config.getLocation().toExternalForm());
+            final HttpClient client = TimeseriesRetriever.getInstance().getClient(config.getSosLocation().getHost());
+            final GetMethod get = new GetMethod(config.getSosLocation().toExternalForm());
             BufferedInputStream bis = null;
             try {
                 client.executeMethod(get);

@@ -9,16 +9,18 @@ package de.cismet.cids.custom.sudplan;
 
 import Sirius.navigator.plugin.PluginRegistry;
 
-import at.ac.ait.enviro.tsapi.handler.DataHandler;
 import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
+import at.ac.ait.enviro.util.text.ISO8601DateFormat;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+
+import edu.umd.cs.piccolo.PLayer;
 
 import org.apache.log4j.Logger;
 
@@ -35,21 +37,27 @@ import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-
 import java.io.IOException;
 import java.io.InputStream;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.ParseException;
+
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
@@ -82,6 +90,7 @@ import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldFeatureChangeEvent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldListener;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 
@@ -96,22 +105,22 @@ import de.cismet.cismap.navigatorplugin.CismapPlugin;
 // TODO: use timeserieschartpanel
 @ServiceProvider(service = FeatureInfoDisplay.class)
 public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWMSServiceLayerGroup>
-        implements MultipleFeatureInfoRequestsDisplay,
-            TimeSeriesListChangedListener,
-            TimeSeriesSelectionListener {
+        implements MultipleFeatureInfoRequestsDisplay {
 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(SOSFeatureInfoDisplay.class);
-    private static final String SOS_FACTORY = "SOS-Client"; // NOI18N
-    public static final String KEY_SCENARIO = "scenario";   // NOI18N
-    public static final String KEY_SOS_URL = "sos_url";     // NOI18N
-    public static final String KEY_FROM_YEAR = "from_year"; // NOI18N
-    public static final String KEY_TO_YEAR = "to_year";     // NOI18N
+    private static final String SOS_FACTORY = "SOSClientDataHandler"; // NOI18N
+    public static final String KEY_SCENARIO = "scenario";             // NOI18N
+    public static final String KEY_SOS_URL = "sos_url";               // NOI18N
+    public static final String KEY_FROM_YEAR = "from_year";           // NOI18N
+    public static final String KEY_TO_YEAR = "to_year";               // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
-    private transient DataHandler sosHandler;
+// private transient SOSClientHandler sosHandler;
+    // NOI18N
+// private transient SOSClientHandler sosHandler;
     private transient String scenario;
     private transient String obsProp;
     private transient String procedure;
@@ -125,14 +134,14 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private final transient Available<Resolution> available = new FeatureInfoAvailable();
     // will only be accessed from EDT
     private transient TimeSeriesDisplayer currentDisplayer;
-    private transient TimeseriesRetrieverConfig config;
     private int timeseriesCount = 0;
     // End of variables declaration
-// private ArrayList<SignaturedFeature> holdFeatures = new ArrayList<SignaturedFeature>();
-    private final HashMap<Integer, SignaturedFeature> holdFeatures = new HashMap<Integer, SignaturedFeature>();
-    private final ArrayList<HoldListener> holdListeners = new ArrayList<HoldListener>();
+    private final transient Map<Integer, SignaturedFeature> holdFeatures;
+    private final transient Set<HoldListener> holdListeners;
+    private final transient TimeSeriesVisualisation tsVis;
+    private final transient TimeSeriesListChangedListener tsListChangedL;
+    private final transient TimeSeriesSelectionListener tsSelectionL;
     private JToolBar toolbar;
-    private final TimeSeriesVisualisation tsVis;
     private int overlayWidth = 0;
     private int overlayHeight = 0;
     private boolean displayVisible = false;
@@ -163,9 +172,17 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 // use this
                 FeatureInfoDisplayKey.ANY_SERVER,
                 FeatureInfoDisplayKey.ANY_LAYER));
+
+        holdFeatures = new HashMap<Integer, SignaturedFeature>();
+        holdListeners = new HashSet<HoldListener>();
+        tsListChangedL = new TimeServiesListChangedListenerImpl();
+
         initComponents();
+
         tsVis = TimeSeriesVisualisationFactory.getInstance().createVisualisation(VisualisationType.SIMPLE);
-        tsVis.addTimeSeriesListChangeListener(WeakListeners.create(TimeSeriesListChangedListener.class, this, tsVis));
+        tsVis.addTimeSeriesListChangeListener(
+            WeakListeners.create(TimeSeriesListChangedListener.class, tsListChangedL, tsVis));
+
         // try to get properties for size of the overlay
         overlayWidth = 16;
         overlayHeight = 16;
@@ -182,7 +199,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 LOG.warn(
                     "Could not laod featureInfoIcon.properties file. Default values for overlay area are used"); // NOI18N
             }
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             LOG.error(
                 "Could not read featureInfoIcon.properties file. Default values for overlay area are used",
                 ex);                                                                                             // NOI18N
@@ -203,9 +220,14 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         }
 
         final TimeSeriesSelectionNotification tsn = tsVis.getLookup(TimeSeriesSelectionNotification.class);
-        if (tsn != null) {
-            tsn.addTimeSeriesSelectionListener(WeakListeners.create(TimeSeriesSelectionListener.class, this, tsVis));
+        if (tsn == null) {
+            tsSelectionL = null;
+        } else {
+            tsSelectionL = new TimeSeriesSelectionListenerImpl();
+            tsn.addTimeSeriesSelectionListener(
+                WeakListeners.create(TimeSeriesSelectionListener.class, tsSelectionL, tsn));
         }
+
         initialised = false;
     }
 
@@ -318,44 +340,29 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
      *
      * @throws  InitialisationException  DOCUMENT ME!
      */
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   layer             evt DOCUMENT ME!
-     * @param   parentTabbedPane  DOCUMENT ME!
-     *
-     * @throws  InitialisationException  DOCUMENT ME!
-     */
     @Override
     public void init(final SlidableWMSServiceLayerGroup layer, final JTabbedPane parentTabbedPane)
             throws InitialisationException {
         parseKeywords(layer.getLayerInformation().getKeywords());
 
-        sosHandler = Demo.getInstance().getSOSDH(); // TODO: <- for demo
-        // DataHandlerFactory.Lookup.lookup(SOS_FACTORY); // NOI18N
-// sosHandler = new SOSClientDataHandler();
-
-        if (sosHandler == null) {
-            final String message = "cannot lookup datahander factory: " + SOS_FACTORY; // NOI18N
-            LOG.error(message);
-            throw new InitialisationException(message);
-        }
-
-        sosHandler.setId(SOS_FACTORY);
-        try {
-            final BeanInfo info = Introspector.getBeanInfo(sosHandler.getClass(), Introspector.USE_ALL_BEANINFO);
-            for (final PropertyDescriptor pd : info.getPropertyDescriptors()) {
-                if (pd.getName().equals("endpoint")) { // NOI18N
-                    pd.getWriteMethod().invoke(sosHandler, sosUrl);
-                }
-            }
-
-            sosHandler.open();
-        } catch (final Exception e) {
-            final String message = "cannot initialise sos handler"; // NOI18N
-            LOG.error(message, e);
-            throw new InitialisationException(message, e);
-        }
+//        final DataHandler dh = DataHandlerFactory.Lookup.lookup(SOS_FACTORY);
+//        sosHandler = new SOSClientHandler();
+//
+//        if (sosHandler == null) {
+//            final String message = "cannot lookup datahander factory: " + SOS_FACTORY; // NOI18N
+//            LOG.error(message);
+//            throw new InitialisationException(message);
+//        }
+//
+//        sosHandler.setId(sosUrl.toString());
+//        try {
+//            sosHandler.setEndpoint(sosUrl);
+//            sosHandler.open();
+//        } catch (final Exception e) {
+//            final String message = "cannot initialise sos client handler"; // NOI18N
+//            LOG.error(message, e);
+//            throw new InitialisationException(message, e);
+//        }
 
         initialised = true;
     }
@@ -396,9 +403,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                         LOG.debug("found key: '" + key + "' and value: '" + value + "'"); // NOI18N
                     }
 
-                    if (KEY_SCENARIO.equals(key)) {
-                        scenario = value;
-                    } else if (TimeSeries.OBSERVEDPROPERTY.equals(key)) {
+                    if (TimeSeries.OBSERVEDPROPERTY.equals(key)) {
                         obsProp = value;
                     } else if (TimeSeries.PROCEDURE.equals(key)) {
                         procedure = value;
@@ -406,21 +411,47 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                         foi = value;
                     } else if (TimeSeries.OFFERING.equals(key)) {
                         offering = value;
+                        final String[] split = offering.split("_");                                      // NOI18N
+                        if (split.length == 4) {
+                            scenario = split[1];
+                        } else {
+                            throw new InitialisationException("invalid offering encoding: " + offering); // NOI18N
+                        }
                     } else if (KEY_SOS_URL.equals(key)) {
                         try {
                             sosUrl = new URL(value);
                         } catch (final MalformedURLException ex) {
-                            final String message = "invalid sos url: " + value; // NOI18N
+                            final String message = "invalid sos url: " + value;                          // NOI18N
                             LOG.error(message, ex);
                             throw new InitialisationException(message, ex);
                         }
-                    } else if (KEY_FROM_YEAR.equals(key)) {
-                        fromYear = Integer.parseInt(value);
-                    } else if (KEY_TO_YEAR.equals(key)) {
-                        toYear = Integer.parseInt(value);
+                    } else if (TimeSeries.AVAILABLE_DATA_MIN.equals(key)) {
+                        try {
+                            final DateFormat df = new ISO8601DateFormat();
+                            final Date date = df.parse(value);
+                            final Calendar cal = GregorianCalendar.getInstance();
+                            cal.setTime(date);
+                            fromYear = cal.get(Calendar.YEAR);
+                        } catch (final ParseException ex) {
+                            final String message = "invalid available data minimum: " + value;           // NOI18N
+                            LOG.error(message, ex);
+                            throw new InitialisationException(message, ex);
+                        }
+                    } else if (TimeSeries.AVAILABLE_DATA_MAX.equals(key)) {
+                        try {
+                            final DateFormat df = new ISO8601DateFormat();
+                            final Date date = df.parse(value);
+                            final Calendar cal = GregorianCalendar.getInstance();
+                            cal.setTime(date);
+                            toYear = cal.get(Calendar.YEAR);
+                        } catch (final ParseException ex) {
+                            final String message = "invalid available data maximum: " + value;           // NOI18N
+                            LOG.error(message, ex);
+                            throw new InitialisationException(message, ex);
+                        }
                     } else {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("unreconised key: " + key);               // NOI18N
+                            LOG.debug("unreconised key: " + key);                                        // NOI18N
                         }
                     }
                 } else {
@@ -439,16 +470,16 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             throw new InitialisationException(message, e);
         }
 
-        config = new TimeseriesRetrieverConfig(
-                TimeseriesRetrieverConfig.PROTOCOL_TSTB,
-                SOS_FACTORY,
-                sosUrl,
-                procedure,
-                foi,
-                obsProp,
-                offering,
-                null,
-                null);
+//        config = new TimeseriesRetrieverConfig(
+//                TimeseriesRetrieverConfig.PROTOCOL_TSTB,
+//                SOS_FACTORY,
+//                sosUrl,
+//                procedure,
+//                foi,
+//                obsProp,
+//                offering,
+//                null,
+//                null);
     }
 
     /**
@@ -525,6 +556,11 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         return this.holdCheckBox.isSelected();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Collection<SignaturedFeature> getHoldFeatures() {
         return this.holdFeatures.values();
@@ -532,12 +568,63 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
     @Override
     public void addHoldListener(final HoldListener hl) {
-        holdListeners.add(hl);
+        if (hl != null) {
+            synchronized (holdListeners) {
+                holdListeners.add(hl);
+            }
+        }
     }
 
     @Override
     public void removeHoldListener(final HoldListener hl) {
-        holdListeners.remove(hl);
+        if (hl != null) {
+            synchronized (holdListeners) {
+                holdListeners.remove(hl);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void fireHoldFeatureChanged() {
+        if (isDisplayVisible()) {
+            final Iterator<HoldListener> it;
+
+            synchronized (holdListeners) {
+                it = holdListeners.iterator();
+            }
+
+            final HoldFeatureChangeEvent event = new HoldFeatureChangeEvent(holdFeatures.values(), this);
+
+            while (it.hasNext()) {
+                final HoldListener listener = it.next();
+                EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            listener.holdFeaturesChanged(
+                                new HoldFeatureChangeEvent(
+                                    SOSFeatureInfoDisplay.this.holdFeatures.values(),
+                                    SOSFeatureInfoDisplay.this));
+                        }
+                    });
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   g   DOCUMENT ME!
+     * @param   bi  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Feature createFeature(final Geometry g, final BufferedImage bi) {
+        final TimeSeriesFeature feature = new TimeSeriesFeature(g, bi);
+
+        return feature;
     }
 
     @Override
@@ -553,91 +640,76 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         return displayVisible;
     }
 
+    //~ Inner Classes ----------------------------------------------------------
+
     /**
      * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
      */
+    private final class TimeSeriesSelectionListenerImpl implements TimeSeriesSelectionListener {
 
-    private void fireHoldFeatureChanged() {
-        if (displayVisible) {
-            final ArrayList<SignaturedFeature> featureList = new ArrayList<SignaturedFeature>();
-            // TODO anderer weg um gelöschte herauszufinden, da auch null in map sein kann wenn neben envelope geklcikt
-            // wurde
-            for (final SignaturedFeature f : holdFeatures.values()) {
-                featureList.add(f);
-            }
-            for (final HoldListener hl : holdListeners) {
-                hl.holdFeautresChanged(new HoldFeatureChangeEvent(featureList, this));
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void selectionChanged(final TimeSeriesSelectionEvent evt) {
+            final Collection<TimeSeries> selectedTS = evt.getSelectedTs();
+            final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+            mc.getRubberBandLayer().removeAllChildren();
+            mc.getTmpFeatureLayer().removeAllChildren();
+            mc.repaint();
+            final TimeSeriesSignature tss = tsVis.getLookup(TimeSeriesSignature.class);
+            if (tss != null) {
+                for (final TimeSeries ts : selectedTS) {
+                    final BufferedImage bi = tss.getTimeSeriesSignature(ts, overlayWidth, overlayHeight);
+                    final Geometry g = (Geometry)ts.getTSProperty(TimeSeries.GEOMETRY);
+                    final PFeature pf = new PFeature(createFeature(g, bi), mc);
+                    mc.addStickyNode(pf);
+                    mc.getTmpFeatureLayer().addChild(pf);
+                }
+                mc.rescaleStickyNodes();
             }
         }
     }
 
-    @Override
-    public void timeSeriesListChanged(final TimeSeriesListChangedEvent evt) {
-        if (evt.getID() == TimeSeriesListChangedEvent.TIME_SERIES_REMOVED) {
-            final TimeSeries ts = (TimeSeries)evt.getSource();
-            boolean holdFeaturesChanged = false;
-            // TODO prevent concurrent modification
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class TimeServiesListChangedListenerImpl implements TimeSeriesListChangedListener {
 
-            final Iterator<Integer> it;
-            synchronized (holdFeatures) {
-                it = holdFeatures.keySet().iterator();
-            }
-            int featureToRemove = -1;
-            while (it.hasNext()) {
-                final Integer i = it.next();
-                final SignaturedFeature f = holdFeatures.get(i);
-                if (f.getGeometry().equals((Geometry)ts.getTSProperty(TimeSeries.GEOMETRY))) {
-                    featureToRemove = i;
-                    holdFeaturesChanged = true;
-                    break;
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void timeSeriesListChanged(final TimeSeriesListChangedEvent evt) {
+            if (evt.getID() == TimeSeriesListChangedEvent.TIME_SERIES_REMOVED) {
+                final TimeSeries ts = (TimeSeries)evt.getSource();
+                boolean holdFeaturesChanged = false;
+                // TODO prevent concurrent modification
+
+                final Iterator<Integer> it;
+                synchronized (holdFeatures) {
+                    it = holdFeatures.keySet().iterator();
+                }
+                int featureToRemove = -1;
+                while (it.hasNext()) {
+                    final Integer i = it.next();
+                    final SignaturedFeature f = holdFeatures.get(i);
+                    if (f.getGeometry().equals((Geometry)ts.getTSProperty(TimeSeries.GEOMETRY))) {
+                        featureToRemove = i;
+                        holdFeaturesChanged = true;
+                        break;
+                    }
+                }
+
+                if (holdFeaturesChanged) {
+                    holdFeatures.remove(featureToRemove);
+                    fireHoldFeatureChanged();
                 }
             }
-
-            if (holdFeaturesChanged) {
-                holdFeatures.remove(featureToRemove);
-                fireHoldFeatureChanged();
-            }
         }
     }
-
-    @Override
-    public void selectionChanged(final TimeSeriesSelectionEvent evt) {
-        final Collection<TimeSeries> selectedTS = evt.getSelectedTs();
-        final CismapPlugin cismapPlugin = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
-        final MappingComponent mc = cismapPlugin.getMappingComponent();
-        mc.getTmpFeatureLayer().removeAllChildren();
-        mc.getRubberBandLayer().removeAllChildren();
-
-        final TimeSeriesSignature tss = tsVis.getLookup(TimeSeriesSignature.class);
-        if (tss != null) {
-            for (final TimeSeries ts : selectedTS) {
-                final BufferedImage bi = tss.getTimeSeriesSignature(ts, overlayWidth, overlayHeight);
-                final Geometry g = (Geometry)ts.getTSProperty(TimeSeries.GEOMETRY);
-                final PFeature pf = new PFeature(createFeature(g, bi), mc);
-                mc.addStickyNode(pf);
-                mc.getTmpFeatureLayer().addChild(pf);
-            }
-            mc.rescaleStickyNodes();
-            mc.repaint();
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   g   DOCUMENT ME!
-     * @param   bi  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private Feature createFeature(final Geometry g, final BufferedImage bi) {
-//        final PureNewFeature feature = new PureNewFeature(g);
-        final TimeSeriesFeature feature = new TimeSeriesFeature(g, bi);
-//        feature.setName("timeSeries Object");
-        return feature;
-    }
-
-    //~ Inner Classes ----------------------------------------------------------
 
     /**
      * DOCUMENT ME!
@@ -689,9 +761,24 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         @Override
         protected TimeSeries doInBackground() throws Exception {
+            // TODO: crs transform to WGS84
+            final GeometryFactory factory = new GeometryFactory();
+            final Geometry point = factory.createPoint(new Coordinate(mce.getxCoord(), mce.getyCoord()));
+
+            final TimeseriesRetrieverConfig config = new TimeseriesRetrieverConfig(
+                    TimeseriesRetrieverConfig.PROTOCOL_TSTB,
+                    SOS_FACTORY,
+                    sosUrl,
+                    procedure,
+                    foi,
+                    obsProp,
+                    offering,
+                    point,
+                    TimeInterval.ALL_INTERVAL);
+
             final TimeSeries timeseries = TimeseriesRetriever.getInstance().retrieve(config).get();
             final Object valueKeyObject = timeseries.getTSProperty(TimeSeries.VALUE_KEYS);
-            final String name = config.getObsProp();
+            final String name = obsProp;
             String humanReadableObsProp = "";
             if (name != null) {
                 final String[] splittedName = name.split(":");
@@ -741,15 +828,17 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 final TimeSeries simpleTS = timeseries.slice(TimeInterval.ALL_INTERVAL);
                 simpleTS.setTSProperty(TimeSeries.OBSERVEDPROPERTY, humanReadableObsProp);
                 for (final TimeStamp ts : timeStamps) {
-                    final Float[][] values = ((Float[][])timeseries.getValue(ts, valueKey));
-                    // assume this is a rectangular grid
-                    final int i = (int)(values.length * xRelation);
-                    final int j = (int)(values[i].length * yRelation);
-                    final float value = values[i][j];
-                    simpleTS.setValue(ts, valueKey, value);
+//                    final Float[][] values = ((Float[][])timeseries.getValue(ts, valueKey));
+//                    // assume this is a rectangular grid
+//                    final int i = (int)(values.length * xRelation);
+//                    final int j = (int)(values[i].length * yRelation);
+//                    final float value = values[i][j];
+                    simpleTS.setValue(ts, valueKey, timeseries.getValue(ts, valueKey));
                 }
+
                 return simpleTS;
             }
+
             return null;
         }
 
@@ -811,6 +900,11 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 //                            tsVis.resizeScrollbar();
 //                        }
 //                    });
+            } catch (final CancellationException ex) {
+                final String message = "action was cancelled";                          // NOI18N
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(message, ex);
+                }
             } catch (final InterruptedException ex) {
                 final String message = "in done nothing should be interrupted anymore"; // NOI18N
                 LOG.error(message, ex);

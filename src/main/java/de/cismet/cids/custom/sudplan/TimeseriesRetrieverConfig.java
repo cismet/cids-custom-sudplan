@@ -41,7 +41,8 @@ public final class TimeseriesRetrieverConfig {
 
     private final String protocol;
     private final String handlerLookup;
-    private final URL location;
+//    private final URL location;
+    private final URL sosLocation;
 
     private final String procedure;
     private final String foi;
@@ -58,7 +59,7 @@ public final class TimeseriesRetrieverConfig {
      *
      * @param   protocol       DOCUMENT ME!
      * @param   handlerLookup  DOCUMENT ME!
-     * @param   location       DOCUMENT ME!
+     * @param   soslocation    DOCUMENT ME!
      * @param   procedure      DOCUMENT ME!
      * @param   foi            DOCUMENT ME!
      * @param   obsProp        DOCUMENT ME!
@@ -70,20 +71,20 @@ public final class TimeseriesRetrieverConfig {
      */
     public TimeseriesRetrieverConfig(final String protocol,
             final String handlerLookup,
-            final URL location,
+            final URL soslocation,
             final String procedure,
             final String foi,
             final String obsProp,
             final String offering,
             final Geometry geometry,
             final TimeInterval interval) {
-        if ((protocol == null) || (location == null)) {
+        if ((protocol == null) || (soslocation == null)) {
             throw new IllegalArgumentException("handlerLookup or sosLocation must not be null"); // NOI18N
         }
 
         this.protocol = protocol;
         this.handlerLookup = handlerLookup;
-        this.location = location;
+        this.sosLocation = soslocation;
         this.procedure = procedure;
         this.foi = foi;
         this.obsProp = obsProp;
@@ -108,9 +109,9 @@ public final class TimeseriesRetrieverConfig {
      *
      * @return  DOCUMENT ME!
      */
-    public URL getLocation() {
-        return location;
-    }
+// public URL getLocation() {
+// return location;
+// }
 
     /**
      * DOCUMENT ME!
@@ -223,6 +224,14 @@ public final class TimeseriesRetrieverConfig {
         return properties;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public URL getSosLocation() {
+        return sosLocation;
+    }
     /**
      * DOCUMENT ME!
      *
@@ -412,7 +421,7 @@ public final class TimeseriesRetrieverConfig {
     public String toTSTBUrl() {
         final StringBuilder sb = new StringBuilder(PROTOCOL_TSTB);
         sb.append(':').append(handlerLookup);
-        sb.append('@').append(location);
+        sb.append('@').append(sosLocation);
         if (!((procedure == null) && (foi == null) && (obsProp == null) && (offering == null) && (geometry == null))) {
             sb.append('?');
             if (procedure != null) {
