@@ -9,46 +9,40 @@ package de.cismet.cids.custom.sudplan;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
+import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
 import org.apache.log4j.Logger;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.SamplingXYLineRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.data.time.Minute;
-import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.IntervalXYDataset;
-import org.jfree.ui.RectangleInsets;
+import org.jfree.util.Log;
 
 import org.openide.util.NbBundle;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 
 import java.net.MalformedURLException;
 
+import java.util.HashMap;
 import java.util.concurrent.Future;
-
-import javax.imageio.ImageIO;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingWorker;
+
+import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.Controllable;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.TimeSeriesVisualisationFactory;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.VisualisationType;
+
+import de.cismet.cids.dynamics.Disposable;
 
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -58,7 +52,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  *
  * @version  $Revision$, $Date$
  */
-public class TimeseriesChartPanel extends javax.swing.JPanel {
+public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposable {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -66,29 +60,28 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient TimeseriesRetrieverConfig config;
-
+    private final transient HashMap<TimeseriesRetrieverConfig, TimeseriesConverter> configs;
     private transient JFreeChart chart;
     private transient BufferedImage image;
-
     private transient volatile Boolean cached;
     private final transient Refreshable refreshable;
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // End of variables declaration
+    private final transient TimeseriesDisplayer displayer;
+    private TimeSeriesVisualisation tsVis;
+    // Variables declaration - do not modify
     private javax.swing.JLabel pnlLoading;
-    // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates new form TimeseriesFeatureRenderer.
      *
-     * @param   tstburi  DOCUMENT ME!
+     * @param   uri  DOCUMENT ME!
      *
      * @throws  MalformedURLException  DOCUMENT ME!
      */
-    public TimeseriesChartPanel(final String tstburi) throws MalformedURLException {
-        this(TimeseriesRetrieverConfig.fromTSTBUrl(tstburi), false, null);
+    public TimeseriesChartPanel(final String uri) throws MalformedURLException {
+        this(TimeseriesRetrieverConfig.fromUrl(uri), false, null, null);
     }
 
     /**
@@ -97,19 +90,41 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
      * @param  config  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final TimeseriesRetrieverConfig config) {
-        this(config, false);
+        this(config, false, null, null);
+    }
+
+    /**
+     * Creates a new TimeseriesChartPanel object.
+     *
+     * @param   uri        DOCUMENT ME!
+     * @param   converter  DOCUMENT ME!
+     *
+     * @throws  MalformedURLException  DOCUMENT ME!
+     */
+    public TimeseriesChartPanel(final String uri, final TimeseriesConverter converter) throws MalformedURLException {
+        this(TimeseriesRetrieverConfig.fromUrl(uri), false, null, converter);
+    }
+
+    /**
+     * Creates a new TimeseriesChartPanel object.
+     *
+     * @param  config     DOCUMENT ME!
+     * @param  converter  DOCUMENT ME!
+     */
+    public TimeseriesChartPanel(final TimeseriesRetrieverConfig config, final TimeseriesConverter converter) {
+        this(config, false, null, converter);
     }
 
     /**
      * Creates new form TimeseriesFeatureRenderer.
      *
-     * @param   tstburi      DOCUMENT ME!
+     * @param   uri          DOCUMENT ME!
      * @param   refreshable  DOCUMENT ME!
      *
      * @throws  MalformedURLException  DOCUMENT ME!
      */
-    public TimeseriesChartPanel(final String tstburi, final Refreshable refreshable) throws MalformedURLException {
-        this(TimeseriesRetrieverConfig.fromTSTBUrl(tstburi), false, refreshable);
+    public TimeseriesChartPanel(final String uri, final Refreshable refreshable) throws MalformedURLException {
+        this(TimeseriesRetrieverConfig.fromUrl(uri), false, refreshable, null);
     }
 
     /**
@@ -119,7 +134,31 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
      * @param  cacheImmedialtely  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final TimeseriesRetrieverConfig config, final boolean cacheImmedialtely) {
-        this(config, cacheImmedialtely, null);
+        this(config, cacheImmedialtely, null, null);
+    }
+
+    /**
+     * Creates a new TimeseriesChartPanel object.
+     *
+     * @param   configs            DOCUMENT ME!
+     * @param   cacheImmedialtely  DOCUMENT ME!
+     * @param   refreshable        DOCUMENT ME!
+     *
+     * @throws  IllegalArgumentException  DOCUMENT ME!
+     */
+    public TimeseriesChartPanel(final HashMap<TimeseriesRetrieverConfig, TimeseriesConverter> configs,
+            final boolean cacheImmedialtely,
+            final Refreshable refreshable) {
+        this.configs = configs;
+        if (configs == null) {
+            throw new IllegalArgumentException("config must not be null"); // NOI18N
+        }
+        this.cached = cacheImmedialtely;
+        this.refreshable = refreshable;
+        this.displayer = new TimeseriesDisplayer();
+
+        initComponents();
+        initTimeSeriesChart();
     }
 
     /**
@@ -128,39 +167,38 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
      * @param   config             DOCUMENT ME!
      * @param   cacheImmedialtely  DOCUMENT ME!
      * @param   refreshable        DOCUMENT ME!
+     * @param   converter          DOCUMENT ME!
      *
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final TimeseriesRetrieverConfig config,
             final boolean cacheImmedialtely,
-            final Refreshable refreshable) {
+            final Refreshable refreshable,
+            final TimeseriesConverter converter) {
         if (config == null) {
             throw new IllegalArgumentException("config must not be null"); // NOI18N
         }
 
         this.refreshable = refreshable;
-        this.config = config;
-
-        validateConfig();
+        cached = cacheImmedialtely;
+        this.configs = new HashMap<TimeseriesRetrieverConfig, TimeseriesConverter>();
+        this.configs.put(config, converter);
+        displayer = new TimeseriesDisplayer();
 
         initComponents();
-
-        cached = cacheImmedialtely;
-
-        new TimeseriesDisplayer().execute();
+        initTimeSeriesChart();
     }
 
     //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
-     *
-     * @throws  IllegalStateException  DOCUMENT ME!
      */
-    private void validateConfig() {
-        if (config.getObservedProperty() == null) {
-            throw new IllegalStateException("config must contain an observed property"); // NOI18N
-        }
+    private void initTimeSeriesChart() {
+        tsVis = TimeSeriesVisualisationFactory.getInstance().createVisualisation(VisualisationType.SIMPLE);
+        final Controllable tsVisController = tsVis.getLookup(Controllable.class);
+        tsVisController.enableSelection(false);
+        displayer.execute();
     }
 
     /**
@@ -224,28 +262,11 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
      * @throws  IOException  DOCUMENT ME!
      */
     private void performCaching() throws IOException {
-        PipedOutputStream pos = null;
-        BufferedInputStream bis = null;
-        try {
-            pos = new PipedOutputStream();
-            bis = new BufferedInputStream(new PipedInputStream(pos));
+        // TODO: proper image size
+        image = tsVis.getImage();
 
-            // TODO: proper image size
-            ChartUtilities.writeChartAsPNG(pos, chart, 640, 480, true, 1);
-
-            image = ImageIO.read(bis);
-
-            // image was created, dismiss the chart
-            chart = null;
-        } finally {
-            if (pos != null) {
-                pos.close();
-            }
-
-            if (bis != null) {
-                bis.close();
-            }
-        }
+        // image was created, dismiss the chart
+        chart = null;
     }
 
     /**
@@ -263,6 +284,11 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
         pnlLoading.setText(NbBundle.getMessage(TimeseriesChartPanel.class, "TimeseriesChartPanel.pnlLoading.text")); // NOI18N
         add(pnlLoading, java.awt.BorderLayout.CENTER);
     }                                                                                                                // </editor-fold>//GEN-END:initComponents
+
+    @Override
+    public void dispose() {
+        displayer.cancel(true);
+    }
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -288,17 +314,39 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
                 LOG.debug("creating timeseries chart"); // NOI18N
             }
 
+            Future<TimeSeries> tsFuture = null;
+            int count = 0;
             try {
-                final Future<TimeSeries> timeseriesFuture = TimeseriesRetriever.getInstance().retrieve(config);
-                final TimeSeries timeseries = timeseriesFuture.get();
+                for (final TimeseriesRetrieverConfig config : configs.keySet()) {
+                    final TimeseriesConverter converter = configs.get(config);
+                    tsFuture = TimeseriesRetriever.getInstance().retrieve(config, converter);
+                    final TimeSeries timeseries = tsFuture.get();
+                    final String name = config.getObsProp();
+                    String humanReadableObsProp = "";
+                    if (name != null) {
+                        final String[] splittedName = name.split(":");
+                        humanReadableObsProp = splittedName[splittedName.length - 1];
+                    }
+                    timeseries.setTSProperty(TimeSeries.OBSERVEDPROPERTY, humanReadableObsProp);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("retrieved timeseries"); // NOI18N
+                    }
 
+                    tsVis.addTimeSeries(timeseries);
+                    count++;
+                }
+            } catch (final InterruptedException ex) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("retrieved timeseries"); // NOI18N
+                    LOG.debug("chartpanel was interrupted, cancelling retriever future", ex); // NOI18N
                 }
 
-                final IntervalXYDataset dataset = createDataset(timeseries, config.getObsProp());
+                final boolean flag = tsFuture.cancel(true);
 
-                chart = createChart(dataset, SMSUtils.unitFromTimeseries(timeseries));
+                if (!flag) {
+                    Log.error("Can not abort TimeSeries Retriever");
+                }
+
+                throw ex;
             } catch (final Exception ex) {
                 LOG.error("cannot create chart", ex); // NOI18N
                 throw ex;
@@ -322,7 +370,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
         protected void done() {
             try {
                 if (!cached) {
-                    final JComponent comp = new ChartPanel(chart, true);
+                    final JComponent comp = tsVis.getVisualisationUI();
                     remove(pnlLoading);
                     add(comp, BorderLayout.CENTER);
 
@@ -346,108 +394,31 @@ public class TimeseriesChartPanel extends javax.swing.JPanel {
         /**
          * DOCUMENT ME!
          *
-         * @param   timeseries  DOCUMENT ME!
-         * @param   name        DOCUMENT ME!
+         * @param   ts  DOCUMENT ME!
          *
          * @return  DOCUMENT ME!
-         *
-         * @throws  IllegalStateException  DOCUMENT ME!
          */
-        private IntervalXYDataset createDataset(final TimeSeries timeseries, final String name) {
-            final Object valueKeyObject = timeseries.getTSProperty(TimeSeries.VALUE_KEYS);
-
-            final String valueKey;
-            if (valueKeyObject instanceof String) {
-                valueKey = (String)valueKeyObject;
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("found valuekey: " + valueKey);                   // NOI18N
+        private TimeSeries copyTimeSeries(final TimeSeries ts) {
+            final TimeSeries result = new TimeSeriesImpl();
+            String valueKey = null;
+            // copy properties
+            for (final String key : ts.getTSKeys()) {
+                result.setTSProperty(key, ts.getTSProperty(key));
+                if (key.equals(TimeSeries.VALUE_KEYS)) {
+                    if (ts.getTSProperty(key) instanceof String) {
+                        valueKey = (String)ts.getTSProperty(key);
+                    } else {
+                        valueKey = ((String[])ts.getTSProperty(key))[0];
+                    }
                 }
-            } else if (valueKeyObject instanceof String[]) {
-                final String[] valueKeys = (String[])valueKeyObject;
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("found multiple valuekeys: " + valueKeys.length); // NOI18N
-                }
-
-                if (valueKeys.length == 1) {
-                    valueKey = valueKeys[0];
-                } else {
-                    throw new IllegalStateException("found too many valuekeys");              // NOI18N
-                }
-            } else {
-                throw new IllegalStateException("unknown value key type: " + valueKeyObject); // NOI18N
             }
+            final TimeStamp[] clonedStamps = ts.getTimeStampsArray().clone();
 
-            final TimeStamp[] timeStamps = timeseries.getTimeStampsArray(); // getTimeStamps();
-            final org.jfree.data.time.TimeSeries data = new org.jfree.data.time.TimeSeries(name);
-
-            for (final TimeStamp ts : timeStamps) {
-                final Object value = timeseries.getValue(ts, valueKey);
-
-                if (!(value instanceof Number)) {
-                    throw new IllegalStateException("illegal value, can only display numbers: " + value); // NOI18N
-                }
-
-                data.add(new Minute(ts.asDate()), (Number)value);
+            // copy values
+            for (final TimeStamp t : clonedStamps) {
+                result.setValue(t, valueKey, ts.getValue(t, valueKey));
             }
-
-            final TimeSeriesCollection collection = new TimeSeriesCollection(data);
-
-            return collection;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param   dataset  DOCUMENT ME!
-         * @param   unit     DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         *
-         * @throws  IllegalStateException  DOCUMENT ME!
-         */
-        private JFreeChart createChart(final IntervalXYDataset dataset, final Unit unit) {
-            final JFreeChart chart;
-            final XYItemRenderer renderer;
-            final Variable observed = config.getObservedProperty();
-            if (Variable.PRECIPITATION.equals(observed)) {
-                chart = ChartFactory.createXYBarChart(
-                        "Rainfall data",
-                        "Time",
-                        true,
-                        unit.getLocalisedName(),
-                        dataset,
-                        PlotOrientation.VERTICAL,
-                        true,
-                        true,
-                        false);
-                // TODO: create sampling bar renderer
-                renderer = new SamplingXYLineRenderer();
-            } else if (Variable.TEMPERATURE.equals(observed)) {
-                chart = ChartFactory.createTimeSeriesChart(
-                        "Timeseries data",
-                        "Time",
-                        unit.getLocalisedName(),
-                        dataset,
-                        true,
-                        true,
-                        false);
-                renderer = new SamplingXYLineRenderer();
-            } else {
-                throw new IllegalStateException("unsupported variable: " + observed);
-            }
-
-            chart.setBackgroundPaint(getBackground());
-
-            final XYPlot plot = (XYPlot)chart.getPlot();
-            plot.setBackgroundPaint(Color.WHITE);
-            plot.setDomainGridlinePaint(Color.BLUE);
-            plot.setRangeGridlinePaint(Color.BLUE);
-            plot.setAxisOffset(new RectangleInsets(15d, 15d, 15d, 15d));
-            plot.setDomainCrosshairVisible(true);
-            plot.setRangeCrosshairVisible(true);
-            plot.setRenderer(renderer);
-
-            return chart;
+            return result;
         }
     }
 }

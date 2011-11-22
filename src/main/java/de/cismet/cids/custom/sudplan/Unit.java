@@ -87,6 +87,17 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
     /**
      * DOCUMENT ME!
      *
+     * @param   unit  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Unit createCustomUnit(final String unit) {
+        return new Unit(unit, unit);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @return  DOCUMENT ME!
      */
     public static Unit[] values() {

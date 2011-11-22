@@ -14,7 +14,9 @@ import java.awt.BorderLayout;
 import java.net.MalformedURLException;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
+import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 
 /**
  * DOCUMENT ME!
@@ -27,6 +29,10 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(TimeseriesRenderer.class);
+
+    //~ Instance fields --------------------------------------------------------
+
+    private transient TimeseriesChartPanel panel;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -42,12 +48,21 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
     @Override
     protected void init() {
         try {
-            final TimeseriesChartPanel panel = new TimeseriesChartPanel((String)cidsBean.getProperty("uri")); // NOI18N
+            final String uri = (String)cidsBean.getProperty("uri"); // NOI18N
+            final TimeseriesConverter converter = SMSUtils.loadConverter(cidsBean);
+            panel = new TimeseriesChartPanel(uri, converter);
             add(panel, BorderLayout.CENTER);
         } catch (final MalformedURLException ex) {
-            final String message = "cidsbean contains invalid uri";                                           // NOI18N
+            final String message = "cidsbean contains invalid uri"; // NOI18N
             LOG.error(message, ex);
             throw new IllegalStateException(message, ex);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        if (panel != null) {
+            panel.dispose();
         }
     }
 
