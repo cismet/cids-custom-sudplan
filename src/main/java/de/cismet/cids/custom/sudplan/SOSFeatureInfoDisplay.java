@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
-import Sirius.navigator.plugin.PluginRegistry;
-
 import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
@@ -19,8 +17,6 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-
-import edu.umd.cs.piccolo.PLayer;
 
 import org.apache.log4j.Logger;
 
@@ -48,7 +44,6 @@ import java.text.ParseException;
 
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -93,8 +88,6 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
-
-import de.cismet.cismap.navigatorplugin.CismapPlugin;
 
 /**
  * DOCUMENT ME!
@@ -345,25 +338,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             throws InitialisationException {
         parseKeywords(layer.getLayerInformation().getKeywords());
 
-//        final DataHandler dh = DataHandlerFactory.Lookup.lookup(SOS_FACTORY);
-//        sosHandler = new SOSClientHandler();
-//
-//        if (sosHandler == null) {
-//            final String message = "cannot lookup datahander factory: " + SOS_FACTORY; // NOI18N
-//            LOG.error(message);
-//            throw new InitialisationException(message);
-//        }
-//
-//        sosHandler.setId(sosUrl.toString());
-//        try {
-//            sosHandler.setEndpoint(sosUrl);
-//            sosHandler.open();
-//        } catch (final Exception e) {
-//            final String message = "cannot initialise sos client handler"; // NOI18N
-//            LOG.error(message, e);
-//            throw new InitialisationException(message, e);
-//        }
-
         initialised = true;
     }
 
@@ -469,17 +443,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             LOG.error(message, e);
             throw new InitialisationException(message, e);
         }
-
-//        config = new TimeseriesRetrieverConfig(
-//                TimeseriesRetrieverConfig.PROTOCOL_TSTB,
-//                SOS_FACTORY,
-//                sosUrl,
-//                procedure,
-//                foi,
-//                obsProp,
-//                offering,
-//                null,
-//                null);
     }
 
     /**

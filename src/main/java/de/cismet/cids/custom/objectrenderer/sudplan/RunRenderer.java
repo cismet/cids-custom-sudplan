@@ -64,8 +64,8 @@ public class RunRenderer extends AbstractManagerRenderer {
      * Creates new form RunRenderer.
      */
     public RunRenderer() {
-        openInputL = new OpenIOtActionListener("modelinput", SMSUtils.TABLENAME_MODELINPUT);    // NOI18N
-        openOutputL = new OpenIOtActionListener("modeloutput", SMSUtils.TABLENAME_MODELOUTPUT); // NOI18N
+        openInputL = new OpenIOActionListener("modelinput", SMSUtils.TABLENAME_MODELINPUT);    // NOI18N
+        openOutputL = new OpenIOActionListener("modeloutput", SMSUtils.TABLENAME_MODELOUTPUT); // NOI18N
 
         initComponents();
 
@@ -287,6 +287,8 @@ public class RunRenderer extends AbstractManagerRenderer {
 
     @Override
     protected void init() {
+        super.init();
+
         bindingGroup.unbind();
         bindingGroup.bind();
     }
@@ -306,6 +308,7 @@ public class RunRenderer extends AbstractManagerRenderer {
     @Override
     public void dispose() {
         super.dispose();
+
         bindingGroup.unbind();
     }
 
@@ -326,7 +329,7 @@ public class RunRenderer extends AbstractManagerRenderer {
      *
      * @version  $Revision$, $Date$
      */
-    private final class OpenIOtActionListener implements ActionListener {
+    private final class OpenIOActionListener implements ActionListener {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -341,7 +344,7 @@ public class RunRenderer extends AbstractManagerRenderer {
          * @param  propertyName  DOCUMENT ME!
          * @param  tableName     DOCUMENT ME!
          */
-        public OpenIOtActionListener(final String propertyName, final String tableName) {
+        public OpenIOActionListener(final String propertyName, final String tableName) {
             this.propertyName = propertyName;
             this.tableName = tableName;
         }

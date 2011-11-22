@@ -51,8 +51,8 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
     private final transient ListSelectionListener listL;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JList jlsAvailableInput;
+    private final transient javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
+    private final transient javax.swing.JList jlsAvailableInput = new javax.swing.JList();
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -67,6 +67,11 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
     public RunGeoCPMVisualPanelInput(final RunGeoCPMWizardPanelInput model) throws WizardInitialisationException {
         this.model = model;
         listL = new SelectionListener();
+
+        // name of the wizard step
+        this.setName(NbBundle.getMessage(
+                RunGeoCPMVisualPanelInput.class,
+                "RunGeoCPMVisualPanelInput.this.name")); // NOI18N
 
         initComponents();
 
@@ -125,10 +130,12 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     void init() {
-        final DefaultListModel dlm = (DefaultListModel)jlsAvailableInput.getModel();
-        if (dlm.contains(model.getInput())) {
-            jlsAvailableInput.setSelectedValue(model.getInput(), true);
+        if (model.getInput() == null) {
+            jlsAvailableInput.getSelectionModel().clearSelection();
         }
+
+        // why is this not sufficient to clear the selection if rainevent is null
+        jlsAvailableInput.setSelectedValue(model.getInput(), true);
     }
 
     /**
@@ -139,9 +146,6 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         final java.awt.GridBagConstraints gridBagConstraints;
-
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jlsAvailableInput = new javax.swing.JList();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
@@ -177,9 +181,7 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
         @Override
         public void valueChanged(final ListSelectionEvent e) {
             if (!e.getValueIsAdjusting()) {
-                if (e.getFirstIndex() == e.getLastIndex()) {
-                    model.setInput((CidsBean)jlsAvailableInput.getSelectedValue());
-                }
+                model.setInput((CidsBean)jlsAvailableInput.getSelectedValue());
             }
         }
     }

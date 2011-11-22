@@ -7,8 +7,12 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import org.apache.log4j.Logger;
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+
+import java.io.IOException;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.Manager;
@@ -16,7 +20,6 @@ import de.cismet.cids.custom.sudplan.ManagerType;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
-import de.cismet.cids.dynamics.Disposable;
 
 /**
  * DOCUMENT ME!
@@ -25,6 +28,10 @@ import de.cismet.cids.dynamics.Disposable;
  * @version  $Revision$, $Date$
  */
 public abstract class AbstractManagerRenderer extends AbstractCidsBeanRenderer {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(AbstractManagerRenderer.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -76,13 +83,19 @@ public abstract class AbstractManagerRenderer extends AbstractCidsBeanRenderer {
 
     /**
      * DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
      */
     @Override
     public void dispose() {
         super.dispose();
 
-        if (manager instanceof Disposable) {
-            ((Disposable)manager).dispose();
+        try {
+            manager.finalise();
+        } catch (final IOException ex) {
+            final String message = "cannot finalise manager: " + this; // NOI18N
+            LOG.error(message, ex);
+            throw new IllegalStateException(message, ex);
         }
     }
 }

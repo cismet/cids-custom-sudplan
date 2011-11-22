@@ -26,28 +26,9 @@ public final class RunoffIO {
     //~ Instance fields --------------------------------------------------------
 
     private transient int geocpmInputId;
-    private transient int timeseriesId;
-    private transient String runId;
+    private transient int raineventId;
 
     //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public String getRunId() {
-        return runId;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  runId  DOCUMENT ME!
-     */
-    public void setRunId(final String runId) {
-        this.runId = runId;
-    }
 
     /**
      * DOCUMENT ME!
@@ -72,17 +53,17 @@ public final class RunoffIO {
      *
      * @return  DOCUMENT ME!
      */
-    public int getTimeseries() {
-        return timeseriesId;
+    public int getRainevent() {
+        return raineventId;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  timeseriesId  DOCUMENT ME!
+     * @param  raineventId  DOCUMENT ME!
      */
-    public void setTimeseries(final int timeseriesId) {
-        this.timeseriesId = timeseriesId;
+    public void setRainevent(final int raineventId) {
+        this.raineventId = raineventId;
     }
 
     /**
@@ -90,8 +71,8 @@ public final class RunoffIO {
      *
      * @return  DOCUMENT ME!
      */
-    public CidsBean fetchTimeseries() {
-        return SMSUtils.fetchCidsBean(timeseriesId, SMSUtils.TABLENAME_TIMESERIES);
+    public CidsBean fetchRainevent() {
+        return SMSUtils.fetchCidsBean(raineventId, SMSUtils.TABLENAME_RAINEVENT);
     }
 
     /**

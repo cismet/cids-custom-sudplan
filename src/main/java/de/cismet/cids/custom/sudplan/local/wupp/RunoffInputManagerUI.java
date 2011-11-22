@@ -7,9 +7,15 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.wupp;
 
+import Sirius.navigator.ui.ComponentRegistry;
+
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import java.io.IOException;
 
@@ -31,9 +37,14 @@ public class RunoffInputManagerUI extends javax.swing.JPanel {
 
     private final transient RunoffInputManager model;
 
+    private final transient OpenIOListener geoCfgL;
+    private final transient OpenIOListener rainL;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JEditorPane jedGeoCPM;
+    private org.jdesktop.swingx.JXHyperlink hypCalculationModel;
+    private org.jdesktop.swingx.JXHyperlink hypRainevent;
+    private javax.swing.JLabel lblCalculationModel;
+    private javax.swing.JLabel lblRainevent;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -45,10 +56,15 @@ public class RunoffInputManagerUI extends javax.swing.JPanel {
      */
     public RunoffInputManagerUI(final RunoffInputManager model) {
         this.model = model;
+        geoCfgL = new OpenIOListener(true);
+        rainL = new OpenIOListener(false);
 
         initComponents();
 
         init();
+
+        WeakListeners.create(ActionListener.class, geoCfgL, hypCalculationModel);
+        WeakListeners.create(ActionListener.class, rainL, hypRainevent);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -60,11 +76,14 @@ public class RunoffInputManagerUI extends javax.swing.JPanel {
         try {
             final RunoffIO io = model.getUR();
             final CidsBean geocpmBean = io.fetchGeocpmInput();
+            final CidsBean raineventBean = io.fetchRainevent();
 
-            jedGeoCPM.setText((String)geocpmBean.getProperty("input")); // NOI18N
+            hypCalculationModel.setText((String)geocpmBean.getProperty("name")); // NOI18N
+            hypRainevent.setText((String)raineventBean.getProperty("name"));     // NOI18N
         } catch (final IOException ex) {
-            jedGeoCPM.setText("ERROR: " + ex);                          // NOI18N
-            LOG.error("cannot initialise runoff input manager ui", ex); // NOI18N
+            hypCalculationModel.setText("ERROR: " + ex);                         // NOI18N
+            hypRainevent.setText("ERROR: " + ex);                                // NOI18N
+            LOG.error("cannot initialise runoff input manager ui", ex);          // NOI18N
         }
     }
 
@@ -75,24 +94,94 @@ public class RunoffInputManagerUI extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        final java.awt.GridBagConstraints gridBagConstraints;
+        java.awt.GridBagConstraints gridBagConstraints;
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jedGeoCPM = new javax.swing.JEditorPane();
+        lblCalculationModel = new javax.swing.JLabel();
+        lblRainevent = new javax.swing.JLabel();
+        hypCalculationModel = new org.jdesktop.swingx.JXHyperlink();
+        hypRainevent = new org.jdesktop.swingx.JXHyperlink();
 
+        setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        jedGeoCPM.setBorder(javax.swing.BorderFactory.createTitledBorder(
-                NbBundle.getMessage(RunoffInputManagerUI.class, "RunoffInputManagerUI.jedGeoCPM.border.title"))); // NOI18N
-        jScrollPane1.setViewportView(jedGeoCPM);
-
+        lblCalculationModel.setText(NbBundle.getMessage(
+                RunoffInputManagerUI.class,
+                "RunoffInputManagerUI.lblCalculationModel.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblCalculationModel, gridBagConstraints);
+
+        lblRainevent.setText(NbBundle.getMessage(RunoffInputManagerUI.class, "RunoffInputManagerUI.lblRainevent.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblRainevent, gridBagConstraints);
+
+        hypCalculationModel.setText(NbBundle.getMessage(
+                RunoffInputManagerUI.class,
+                "RunoffInputManagerUI.hypCalculationModel.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        add(jScrollPane1, gridBagConstraints);
-    } // </editor-fold>//GEN-END:initComponents
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(hypCalculationModel, gridBagConstraints);
+
+        hypRainevent.setText(NbBundle.getMessage(RunoffInputManagerUI.class, "RunoffInputManagerUI.hypRainevent.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(hypRainevent, gridBagConstraints);
+    }                                                                                                                    // </editor-fold>//GEN-END:initComponents
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class OpenIOListener implements ActionListener {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final boolean geocpm;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new OpenIOListener object.
+         *
+         * @param  geocpm  DOCUMENT ME!
+         */
+        public OpenIOListener(final boolean geocpm) {
+            this.geocpm = geocpm;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            try {
+                final RunoffIO io = model.getUR();
+                final CidsBean bean = geocpm ? io.fetchGeocpmInput() : io.fetchRainevent();
+
+                ComponentRegistry.getRegistry().getDescriptionPane().gotoMetaObject(bean.getMetaObject(), null);
+            } catch (final IOException ex) {
+                LOG.warn("cannot open hyperlink", ex); // NOI18N
+            }
+        }
+    }
 }

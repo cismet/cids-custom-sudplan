@@ -24,7 +24,7 @@ public final class ActionProviderFactory {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final transient Set instances = new HashSet();
+    private static final transient Set<CidsBeanAction> instances = new HashSet<CidsBeanAction>();
 
     private static final transient Logger LOG = Logger.getLogger(ActionProviderFactory.class);
 
