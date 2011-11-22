@@ -1,10 +1,10 @@
 /***************************************************
- *
- * cismet GmbH, Saarbruecken, Germany
- *
- *              ... and it just works.
- *
- ****************************************************/
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cids.custom.sudplan;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
@@ -55,8 +55,11 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposable {
 
     //~ Static fields/initializers ---------------------------------------------
+
     private static final transient Logger LOG = Logger.getLogger(TimeseriesChartPanel.class);
+
     //~ Instance fields --------------------------------------------------------
+
     private final transient HashMap<TimeseriesRetrieverConfig, TimeseriesConverter> configs;
     private transient JFreeChart chart;
     private transient BufferedImage image;
@@ -69,6 +72,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     private javax.swing.JLabel pnlLoading;
 
     //~ Constructors -----------------------------------------------------------
+
     /**
      * Creates new form TimeseriesFeatureRenderer.
      *
@@ -186,6 +190,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     }
 
     //~ Methods ----------------------------------------------------------------
+
     /**
      * DOCUMENT ME!
      */
@@ -214,11 +219,11 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
 
                     EventQueue.invokeLater(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            repaint();
-                        }
-                    });
+                            @Override
+                            public void run() {
+                                repaint();
+                            }
+                        });
                 }
             }
         }
@@ -232,7 +237,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     @Override
     public void paint(final Graphics g) {
         if (cached) {
-            final Graphics2D g2 = (Graphics2D) g;
+            final Graphics2D g2 = (Graphics2D)g;
 
             assert image != null : "image is null"; // NOI18N
 
@@ -286,6 +291,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     }
 
     //~ Inner Classes ----------------------------------------------------------
+
     /**
      * DOCUMENT ME!
      *
@@ -294,6 +300,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     private final class TimeseriesDisplayer extends SwingWorker<Void, Void> {
 
         //~ Methods ------------------------------------------------------------
+
         /**
          * DOCUMENT ME!
          *
@@ -324,7 +331,6 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("retrieved timeseries"); // NOI18N
                     }
-
 
                     tsVis.addTimeSeries(timeseries);
                     count++;
@@ -400,9 +406,9 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                 result.setTSProperty(key, ts.getTSProperty(key));
                 if (key.equals(TimeSeries.VALUE_KEYS)) {
                     if (ts.getTSProperty(key) instanceof String) {
-                        valueKey = (String) ts.getTSProperty(key);
+                        valueKey = (String)ts.getTSProperty(key);
                     } else {
-                        valueKey = ((String[]) ts.getTSProperty(key))[0];
+                        valueKey = ((String[])ts.getTSProperty(key))[0];
                     }
                 }
             }
