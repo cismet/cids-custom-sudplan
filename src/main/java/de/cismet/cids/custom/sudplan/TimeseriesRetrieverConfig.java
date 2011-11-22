@@ -226,6 +226,14 @@ public final class TimeseriesRetrieverConfig {
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     */
+    public URL getSosLocation() {
+        return sosLocation;
+    }
+    /**
+     * DOCUMENT ME!
+     *
      * @param   tstbUrl  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!

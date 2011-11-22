@@ -532,7 +532,8 @@ public final class SMSUtils {
     }
 
     /**
-     * Determines the {@link Unit} of a {@link Timeseries}.
+     * Determines the {@link Unit} of a {@link Timeseries}. If the unit is unknown an new custom <code>Unit</code> will
+     * be created.
      *
      * @param   timeseries  the <code>Timeseries</code> that contains the unit
      *
@@ -545,7 +546,6 @@ public final class SMSUtils {
      *                                      <li>has no unit property</li>
      *                                      <li>has a unit property in an unknown format</li>
      *                                      <li>has more than one unit</li>
-     *                                      <li>has an unknown unit</li>
      *                                    </ul>
      */
     public static Unit unitFromTimeseries(final TimeSeries timeseries) {
@@ -564,7 +564,10 @@ public final class SMSUtils {
                     }
                 }
 
-                throw new IllegalStateException("unknown unit: " + unit);                                         // NOI18N
+                // there has not been a known unit
+                LOG.warn("cannot determine known unit, creating custom unit: " + unit); // NOI18N
+
+                return Unit.createCustomUnit(unit);
             } else {
                 throw new IllegalStateException("more than one unit per datapoint not supported");                // NOI18N
             }
