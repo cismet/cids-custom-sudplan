@@ -540,7 +540,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             featureList.add(f);
         }
         for (final HoldListener hl : holdListeners) {
-            hl.holdFeautresChanged(new HoldFeatureChangeEvent(featureList, this));
+            hl.holdFeaturesChanged(new HoldFeatureChangeEvent(featureList, this));
         }
     }
 

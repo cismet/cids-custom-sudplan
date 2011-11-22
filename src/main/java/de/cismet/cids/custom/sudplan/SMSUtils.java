@@ -43,8 +43,6 @@ import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
-
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
