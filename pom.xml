@@ -14,7 +14,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>cids Custom Sudplan </name>
+    <name>cids Custom Sudplan</name>
     <description>cids Navigator customisation for the SUDPLAN FP7 project</description>
 
     <developers>
@@ -120,7 +120,7 @@
             <groupId>at.ac.ait.enviro.sudplan</groupId>
             <artifactId>SPSDummyHandler</artifactId>
             <version>1.0-SNAPSHOT</version>-->
-            <!-- exclude slf to prevent version conflicts -->
+<!--             exclude slf to prevent version conflicts -->
 <!--            <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -130,7 +130,7 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>-->
-                <!-- exclude jts to prevent version conflicts -->
+<!--                 exclude jts to prevent version conflicts -->
 <!--                <exclusion>
                     <groupId>com.vividsolutions</groupId>
                     <artifactId>jts</artifactId>

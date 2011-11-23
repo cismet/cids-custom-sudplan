@@ -65,11 +65,12 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     private transient BufferedImage image;
     private transient volatile Boolean cached;
     private final transient Refreshable refreshable;
-    // End of variables declaration
     private final transient TimeseriesDisplayer displayer;
     private TimeSeriesVisualisation tsVis;
-    // Variables declaration - do not modify
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel pnlLoading;
+    // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
 
@@ -263,7 +264,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
      */
     private void performCaching() throws IOException {
         // TODO: proper image size
-        image = tsVis.getImage();
+// image = tsVis.getImage();
 
         // image was created, dismiss the chart
         chart = null;

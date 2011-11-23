@@ -124,4 +124,21 @@ public final class RunoffModelManager extends AbstractAsyncModelManager {
             throw new IOException(message, ex);
         }
     }
+
+    @Override
+    protected String getReloadId() {
+        try {
+            final RunoffIO io = (RunoffIO)getUR();
+            final CidsBean geocpmBean = io.fetchGeocpmInput();
+
+            final CidsBean iaBean = (CidsBean)geocpmBean.getProperty("investigation_area"); // NOI18N
+            final int iaId = iaBean.getMetaObject().getID();
+
+            return "ia_id" + iaId + "_scenarios";  // NOI18N
+        } catch (final Exception e) {
+            LOG.warn("cannot fetch reload id", e); // NOI18N
+
+            return null;
+        }
+    }
 }

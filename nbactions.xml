@@ -54,4 +54,17 @@
             <activatedProfile>deploy-public</activatedProfile>
         </activatedProfiles>
     </action>
+    <action>
+            <actionName>debug.test.single</actionName>
+            <goals>
+                <goal>test-compile</goal>
+                <goal>surefire:test</goal>
+            </goals>
+            <properties>
+                <jpda.listen>true</jpda.listen>
+                <maven.surefire.debug>-Xmx1024m -Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address}</maven.surefire.debug>
+                <forkMode>once</forkMode>
+                <test>${packageClassName}</test>
+            </properties>
+        </action>
 </actions>
