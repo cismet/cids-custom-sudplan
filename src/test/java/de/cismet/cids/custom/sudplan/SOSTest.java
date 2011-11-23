@@ -51,7 +51,7 @@ import org.junit.Ignore;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-//@Ignore
+@Ignore
 public class SOSTest {
 
     //~ Static fields/initializers ---------------------------------------------
