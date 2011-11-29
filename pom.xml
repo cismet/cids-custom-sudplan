@@ -59,6 +59,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>de.cismet.cids.custom.sudplan</groupId>
+            <artifactId>cids-custom-sudplan-server</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>de.cismet.cismap</groupId>
             <artifactId>cismap-plugin</artifactId>
             <version>1.0-SNAPSHOT</version>
@@ -79,15 +84,6 @@
             <version>4.4</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>de.cismet.cids.custom.sudplan</groupId>
-            <artifactId>cids-custom-sudplan-server</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <!--
-            cannot be used yet since maven will request for a key authorisation
-            making the build interactive which is at least for hudson inacceptable
-         -->
         <dependency>
             <groupId>at.ac.ait.enviro.sudplan</groupId>
             <artifactId>SOSClient</artifactId>
@@ -116,27 +112,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-<!--        <dependency>
-            <groupId>at.ac.ait.enviro.sudplan</groupId>
-            <artifactId>SPSDummyHandler</artifactId>
-            <version>1.0-SNAPSHOT</version>-->
-<!--             exclude slf to prevent version conflicts -->
-<!--            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>-->
-<!--                 exclude jts to prevent version conflicts -->
-<!--                <exclusion>
-                    <groupId>com.vividsolutions</groupId>
-                    <artifactId>jts</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>-->
         <dependency>
             <groupId>at.ac.ait.enviro.sudplan</groupId>
             <artifactId>SPSClient</artifactId>
@@ -177,31 +152,6 @@
             <version>RELEASE691</version>
         </dependency>
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.7.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.dfki.av.sudplan</groupId>
-            <artifactId>vis-comp</artifactId>
-            <version>ATR_URL_CUSTOMISED</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>java3d</groupId>
-            <artifactId>vecmath</artifactId>
-            <version>1.5.1</version>
-        </dependency>
-        <dependency>
             <groupId>de.cismet.cids.navigator.plugin</groupId>
             <artifactId>rm-plugin</artifactId>
             <version>1.0-SNAPSHOT</version>
@@ -215,21 +165,6 @@
             <groupId>de.cismet.cids.custom.sudplan</groupId>
             <artifactId>geocpm-rest</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>java3d</groupId>
-            <artifactId>j3d-core</artifactId>
-            <version>1.5.1</version>
-        </dependency>
-        <dependency>
-            <groupId>java3d</groupId>
-            <artifactId>j3d-core-utils</artifactId>
-            <version>1.5.1</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>cids-custom-sudplan-commons</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.toedter</groupId>
