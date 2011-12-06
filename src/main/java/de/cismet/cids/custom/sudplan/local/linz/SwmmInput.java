@@ -7,11 +7,12 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * DOCUMENT ME!
@@ -29,9 +30,9 @@ public final class SwmmInput {
 
     private transient String startDate;
     private transient String endDate;
-    
+
     private transient int swmmProjectId;
-    //private transient int timeseriesId;
+    // private transient int timeseriesId;
     private transient List<Integer> timeseriesIds = new ArrayList<Integer>();
 
     //~ Methods ----------------------------------------------------------------
@@ -66,32 +67,47 @@ public final class SwmmInput {
     /**
      * DOCUMENT ME!
      *
-     * @param  timeseriesId  raineventId DOCUMENT ME!
+     * @param  timeseriesIds  raineventId DOCUMENT ME!
      */
     public void setTimeseries(final List<Integer> timeseriesIds) {
         this.timeseriesIds = timeseriesIds;
     }
 
-    public String getEndDate()
-    {
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(String endDate)
-    {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  endDate  DOCUMENT ME!
+     */
+    public void setEndDate(final String endDate) {
         this.endDate = endDate;
     }
 
-    public String getStartDate()
-    {
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(String startDate)
-    {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  startDate  DOCUMENT ME!
+     */
+    public void setStartDate(final String startDate) {
         this.startDate = startDate;
     }
-
 
     /**
      * DOCUMENT ME!
@@ -99,14 +115,12 @@ public final class SwmmInput {
      * @return  DOCUMENT ME!
      */
     public List<CidsBean> fetchTimeseries() {
-        
         assert this.timeseriesIds != null : "timeseries list is null";
-        List<CidsBean> timeseriesBeans = new ArrayList<CidsBean>(this.timeseriesIds.size());
-        for(int timeseriesId : this.timeseriesIds)
-        {
+        final List<CidsBean> timeseriesBeans = new ArrayList<CidsBean>(this.timeseriesIds.size());
+        for (final int timeseriesId : this.timeseriesIds) {
             timeseriesBeans.add(SMSUtils.fetchCidsBean(timeseriesId, SMSUtils.TABLENAME_TIMESERIES));
         }
-        
+
         return timeseriesBeans;
     }
 

@@ -1,29 +1,31 @@
 /***************************************************
- *
- * cismet GmbH, Saarbruecken, Germany
- *
- *              ... and it just works.
- *
- ****************************************************/
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
 import Sirius.navigator.ui.ComponentRegistry;
 
 import org.apache.log4j.Logger;
 
+import org.jdesktop.swingx.JXHyperlink;
+
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
+import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import java.io.IOException;
 
-import de.cismet.cids.dynamics.CidsBean;
-import java.awt.GridBagConstraints;
 import java.util.HashMap;
 import java.util.List;
-import org.jdesktop.swingx.JXHyperlink;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 /**
  * DOCUMENT ME!
@@ -31,12 +33,14 @@ import org.jdesktop.swingx.JXHyperlink;
  * @author   pascal dihe
  * @version  $Revision$, $Date$
  */
-public class SwmmInputManagerUI extends javax.swing.JPanel
-{
+public class SwmmInputManagerUI extends javax.swing.JPanel {
 
     //~ Static fields/initializers ---------------------------------------------
+
     private static final transient Logger LOG = Logger.getLogger(SwmmInputManagerUI.class);
+
     //~ Instance fields --------------------------------------------------------
+
     private final transient SwmmInputManager inputManager;
     private transient SwmmInputListener swmmInputListener;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -50,13 +54,13 @@ public class SwmmInputManagerUI extends javax.swing.JPanel
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
+
     /**
      * Creates new form RunoffInputManagerUI.
      *
      * @param  inputManager  DOCUMENT ME!
      */
-    public SwmmInputManagerUI(final SwmmInputManager inputManager)
-    {
+    public SwmmInputManagerUI(final SwmmInputManager inputManager) {
         this.inputManager = inputManager;
 
         initComponents();
@@ -64,13 +68,12 @@ public class SwmmInputManagerUI extends javax.swing.JPanel
     }
 
     //~ Methods ----------------------------------------------------------------
+
     /**
      * DOCUMENT ME!
      */
-    private void init()
-    {
-        try
-        {
+    private void init() {
+        try {
             final SwmmInput swmmInput = inputManager.getUR();
             final CidsBean swmmProjectBean = swmmInput.fetchSwmmProject();
             final List<CidsBean> timeseriesBeans = swmmInput.fetchTimeseries();
@@ -78,21 +81,22 @@ public class SwmmInputManagerUI extends javax.swing.JPanel
 
             this.startDateLabel.setText(swmmInput.getStartDate());
             this.endDateLabel.setText(swmmInput.getEndDate());
-            
+
             beansMap.put("-1", swmmProjectBean);
-            for (CidsBean timeseriesBean : timeseriesBeans)
-            {
+            for (final CidsBean timeseriesBean : timeseriesBeans) {
                 beansMap.put(timeseriesBean.getProperty("id").toString(), timeseriesBean);
             }
 
             this.swmmInputListener = new SwmmInputListener(beansMap);
 
-            swmmProjectLink.setText((String) swmmProjectBean.getProperty("title")); // NOI18N
+            swmmProjectLink.setText((String)swmmProjectBean.getProperty("title")); // NOI18N
             swmmProjectLink.addActionListener(WeakListeners.create(
-                    ActionListener.class, swmmInputListener, swmmProjectLink));
+                    ActionListener.class,
+                    swmmInputListener,
+                    swmmProjectLink));
             swmmProjectLink.setActionCommand("-1");
 
-            GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
+            final GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
             gridBagConstraints.gridx = 1;
             gridBagConstraints.gridy = 3;
             gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
@@ -100,21 +104,22 @@ public class SwmmInputManagerUI extends javax.swing.JPanel
             gridBagConstraints.weightx = 1.0;
             gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
 
-            for (CidsBean timeseriesBean : timeseriesBeans)
-            {
-                JXHyperlink timeseriesLink = new JXHyperlink();
-                timeseriesLink.setText((String) timeseriesBean.getProperty("name"));    // NOI18N
+            for (final CidsBean timeseriesBean : timeseriesBeans) {
+                final JXHyperlink timeseriesLink = new JXHyperlink();
+                timeseriesLink.setText((String)timeseriesBean.getProperty("name")); // NOI18N
                 timeseriesLink.setActionCommand(timeseriesBean.getProperty("id").toString());
-                timeseriesLink.addActionListener(WeakListeners.create(ActionListener.class, swmmInputListener, timeseriesLink));
+                timeseriesLink.addActionListener(WeakListeners.create(
+                        ActionListener.class,
+                        swmmInputListener,
+                        timeseriesLink));
                 add(timeseriesLink, gridBagConstraints);
 
                 gridBagConstraints.gridy++;
             }
-
-        } catch (final IOException ex)
-        {
-            //swmmProjectLink.setText("ERROR: " + ex);                               // NOI18N                              // NOI18N
-            LOG.error("cannot initialise swmm input manager ui", ex);            // NOI18N
+        } catch (final IOException ex) {
+            // swmmProjectLink.setText("ERROR: " + ex);                               // NOI18N
+            // // NOI18N
+            LOG.error("cannot initialise swmm input manager ui", ex); // NOI18N
         }
     }
 
@@ -155,7 +160,9 @@ public class SwmmInputManagerUI extends javax.swing.JPanel
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lbTimeseries, gridBagConstraints);
 
-        swmmProjectLink.setText(NbBundle.getMessage(SwmmInputManagerUI.class, "SwmmInputManagerUI.swmmProjectLink.text")); // NOI18N
+        swmmProjectLink.setText(NbBundle.getMessage(
+                SwmmInputManagerUI.class,
+                "SwmmInputManagerUI.swmmProjectLink.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -183,7 +190,9 @@ public class SwmmInputManagerUI extends javax.swing.JPanel
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lbEndDate, gridBagConstraints);
 
-        startDateLabel.setText(org.openide.util.NbBundle.getMessage(SwmmInputManagerUI.class, "SwmmInputManagerUI.startDateLabel.text")); // NOI18N
+        startDateLabel.setText(org.openide.util.NbBundle.getMessage(
+                SwmmInputManagerUI.class,
+                "SwmmInputManagerUI.startDateLabel.text"));                                     // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -191,9 +200,14 @@ public class SwmmInputManagerUI extends javax.swing.JPanel
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(startDateLabel, gridBagConstraints);
-        startDateLabel.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getMessage(SwmmInputManagerUI.class, "SwmmInputManagerUI.startDateLabel.AccessibleContext.accessibleName")); // NOI18N
+        startDateLabel.getAccessibleContext()
+                .setAccessibleName(org.openide.util.NbBundle.getMessage(
+                        SwmmInputManagerUI.class,
+                        "SwmmInputManagerUI.startDateLabel.AccessibleContext.accessibleName")); // NOI18N
 
-        endDateLabel.setText(org.openide.util.NbBundle.getMessage(SwmmInputManagerUI.class, "SwmmInputManagerUI.endDateLabel.text")); // NOI18N
+        endDateLabel.setText(org.openide.util.NbBundle.getMessage(
+                SwmmInputManagerUI.class,
+                "SwmmInputManagerUI.endDateLabel.text"));                                // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -201,27 +215,45 @@ public class SwmmInputManagerUI extends javax.swing.JPanel
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(endDateLabel, gridBagConstraints);
-        endDateLabel.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getMessage(SwmmInputManagerUI.class, "SwmmInputManagerUI.jLabel1.AccessibleContext.accessibleName")); // NOI18N
-    }// </editor-fold>//GEN-END:initComponents
+        endDateLabel.getAccessibleContext()
+                .setAccessibleName(org.openide.util.NbBundle.getMessage(
+                        SwmmInputManagerUI.class,
+                        "SwmmInputManagerUI.jLabel1.AccessibleContext.accessibleName")); // NOI18N
+    }                                                                                    // </editor-fold>//GEN-END:initComponents
 
-    class SwmmInputListener implements ActionListener
-    {
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class SwmmInputListener implements ActionListener {
+
+        //~ Instance fields ----------------------------------------------------
 
         final HashMap<String, CidsBean> beansMap;
 
-        public SwmmInputListener(HashMap<String, CidsBean> beansMap)
-        {
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new SwmmInputListener object.
+         *
+         * @param  beansMap  DOCUMENT ME!
+         */
+        public SwmmInputListener(final HashMap<String, CidsBean> beansMap) {
             this.beansMap = beansMap;
         }
 
+        //~ Methods ------------------------------------------------------------
+
         @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            if (beansMap.containsKey(e.getActionCommand()))
-            {
-                ComponentRegistry.getRegistry().getDescriptionPane().gotoMetaObject(beansMap.get(e.getActionCommand()).getMetaObject(), null);
-            } else
-            {
+        public void actionPerformed(final ActionEvent e) {
+            if (beansMap.containsKey(e.getActionCommand())) {
+                ComponentRegistry.getRegistry()
+                        .getDescriptionPane()
+                        .gotoMetaObject(beansMap.get(e.getActionCommand()).getMetaObject(), null);
+            } else {
                 LOG.warn("beans map does not contain cids bean '" + e.getActionCommand() + "'");
             }
         }

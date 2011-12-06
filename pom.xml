@@ -231,6 +231,11 @@
                     </descriptors>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>de.cismet.cids</groupId>
+                <artifactId>cids-maven-plugin</artifactId>
+                <version>1.5-SNAPSHOT</version>
+            </plugin>
         </plugins>
     </build>
     

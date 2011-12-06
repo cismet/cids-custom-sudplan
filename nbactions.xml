@@ -4,13 +4,13 @@
         <actionName>run</actionName>
         <goals>
             <goal>process-classes</goal>
-            <goal>org.codehaus.mojo:exec-maven-plugin:1.1.1:exec</goal>
+            <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
         </goals>
         <properties>
             <jalopy.skip>true</jalopy.skip>
             <exec.classpathScope>runtime</exec.classpathScope>
             <exec.workingdir>${de.cismet.cids.navigator.workingDir}</exec.workingdir>
-            <exec.args>-Xms512m -Xmx2048m -XX:MaxPermSize=128m -ea -classpath ${de.cismet.cids.classpath} Sirius.navigator.Navigator ${de.cismet.cids.navigator.workingDir}/config/log4j.debug.properties ${de.cismet.cids.navigator.workingDir}/config/navigator.cfg ${de.cismet.cids.navigator.workingDir} ${de.cismet.cids.navigator.workingDir}/plugins ${de.cismet.cids.navigator.workingDir}/search ${de.cismet.cids.navigator.workingDir}/profiles</exec.args>
+            <exec.args>-Xms512m -Xmx1024m -XX:MaxPermSize=128m -ea -classpath ${de.cismet.cids.classpath} Sirius.navigator.Navigator ${de.cismet.cids.navigator.workingDir}/config/log4j.debug.properties ${de.cismet.cids.navigator.workingDir}/config/navigator.cfg ${de.cismet.cids.navigator.workingDir} ${de.cismet.cids.navigator.workingDir}/plugins ${de.cismet.cids.navigator.workingDir}/search ${de.cismet.cids.navigator.workingDir}/profiles</exec.args>
             <exec.executable>java</exec.executable>
         </properties>
     </action>
@@ -18,7 +18,7 @@
         <actionName>debug</actionName>
         <goals>
             <goal>process-classes</goal>
-            <goal>org.codehaus.mojo:exec-maven-plugin:1.1.1:exec</goal>
+            <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
         </goals>
         <properties>
             <jalopy.skip>true</jalopy.skip>
@@ -33,10 +33,10 @@
         <actionName>profile</actionName>
         <goals>
             <goal>process-classes</goal>
-            <goal>org.codehaus.mojo:exec-maven-plugin:1.1.1:exec</goal>
+            <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
         </goals>
         <properties>
-            <exec.args>${profiler.args} -Xms512m -Xmx2048m -XX:MaxPermSize=128m -ea -classpath ${de.cismet.cids.classpath} Sirius.navigator.Navigator ${de.cismet.cids.navigator.workingDir}/config/log4j.debug.properties ${de.cismet.cids.navigator.workingDir}/config/navigator.cfg ${de.cismet.cids.navigator.workingDir} ${de.cismet.cids.navigator.workingDir}/plugins ${de.cismet.cids.navigator.workingDir}/search ${de.cismet.cids.navigator.workingDir}/profiles</exec.args>
+            <exec.args>${profiler.args} -Xms512m -Xmx1024m -XX:MaxPermSize=128m -ea -classpath ${de.cismet.cids.classpath} Sirius.navigator.Navigator ${de.cismet.cids.navigator.workingDir}/config/log4j.debug.properties ${de.cismet.cids.navigator.workingDir}/config/navigator.cfg ${de.cismet.cids.navigator.workingDir} ${de.cismet.cids.navigator.workingDir}/plugins ${de.cismet.cids.navigator.workingDir}/search ${de.cismet.cids.navigator.workingDir}/profiles</exec.args>
             <exec.workingdir>${de.cismet.cids.navigator.workingDir}</exec.workingdir>
             <profiler.action>profile</profiler.action>
             <exec.executable>${profiler.java}</exec.executable>
@@ -66,5 +66,13 @@
                 <forkMode>once</forkMode>
                 <test>${packageClassName}</test>
             </properties>
+        </action>
+    <action>
+            <actionName>CUSTOM-fresh build</actionName>
+            <displayName>fresh build</displayName>
+            <goals>
+                <goal>clean</goal>
+                <goal>install</goal>
+            </goals>
         </action>
 </actions>
