@@ -330,11 +330,10 @@ public class DefaultParamOrderUI extends javax.swing.JDialog {
         for (int i = 0; i < paramCount; i++) {
             final JComboBox cb = paramList.get(i);
             paramArray[i] = (TimeSeries)cb.getSelectedItem();
-            final Unit unit = SMSUtils.unitFromTimeseries(paramArray[i]);
+            final String unit = SMSUtils.unitFromTimeseries(paramArray[i]).getPropertyKey();
             if (i > 0) {
-                final Unit lastUnit = SMSUtils.unitFromTimeseries(paramArray[i - 1]);
+                final String lastUnit = SMSUtils.unitFromTimeseries(paramArray[i - 1]).getPropertyKey();
                 if (!unit.equals(lastUnit)) {
-                    // TODO ERROR Dialog
                     JOptionPane.showMessageDialog(this, "Parameters must have the same Unit");
                     return;
                 }
