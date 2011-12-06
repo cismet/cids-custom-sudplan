@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
 import at.ac.ait.enviro.sudplan.sosclient.SOSClientHandler;
@@ -37,10 +37,15 @@ import java.io.IOException;
 
 import java.net.MalformedURLException;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import org.junit.Ignore;
@@ -55,13 +60,15 @@ import org.junit.Ignore;
 public class SOSTest {
 
     //~ Static fields/initializers ---------------------------------------------
-
-    private static final transient Logger LOG = Logger.getLogger(SOSTest.class);
     private static Set<Datapoint> dps;
     private static BufferedWriter w;
+    private static final DatapointComparator comparator = new DatapointComparator();
+    private static ArrayList<Datapoint> sortedDpsList;
+    private static String succsBuffer = "";
+    private static String errReportBuffer = "";
+    private static final String newLine = System.getProperty("line.separator");
 
     //~ Constructors -----------------------------------------------------------
-
     /**
      * Creates a new SOSTest object.
      */
@@ -69,7 +76,6 @@ public class SOSTest {
     }
 
     //~ Methods ----------------------------------------------------------------
-
     /**
      * DOCUMENT ME!
      *
@@ -78,9 +84,10 @@ public class SOSTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         final File resultsFile = new File(System.getProperty("user.home") + System.getProperty("file.separator")
-                        + "SOSTestResults.txt");
+                + "SOSTestResults.txt");
         w = new BufferedWriter(new FileWriter(resultsFile));
         final SOSClientHandler handler = new SOSClientHandler();
+//        handler.setId("foo");
 
         try {
             handler.getConnector().connect("http://enviro3.ait.ac.at:8080");
@@ -92,15 +99,41 @@ public class SOSTest {
         }
 
         dps = handler.getDatapoints(null, Access.DONT_CARE);
+        sortedDpsList = new ArrayList<Datapoint>(dps);
+
+        errReportBuffer += newLine + newLine;
+        errReportBuffer += "################################################################################################################################"
+                + newLine;
+        errReportBuffer += "#############################################################" + newLine;
+
+        errReportBuffer += "Summary of occured errors" + newLine;
+        errReportBuffer +=
+                "---------------------------------------------------------------------------------------------------------------------------------------"
+                + newLine
+                + newLine;
+
+        Collections.sort(sortedDpsList, comparator);
+        w.write("SOS Testrun - Report" + newLine);
+        final Date d = new Date(System.currentTimeMillis());
+        w.write("Date: " + d + newLine + newLine);
+
+        w.write("Available Layers" + newLine);
+        w.write(
+                "---------------------------------------------------------------------------------------------------------------------------------------"
+                + newLine);
+        final String dpsList = sortedDpsList.toString().replaceAll("},", newLine + newLine).replaceAll(",", newLine + "\t");
+        w.write(dpsList);
+        w.flush();
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @throws  Exception  DOCUMENT ME!
+     * @throws  IOException  DOCUMENT ME!
      */
     @AfterClass
-    public static void tearDownClass() throws Exception {
+    public static void tearDownClass() throws IOException {
+        w.flush();
         w.close();
     }
 
@@ -125,30 +158,62 @@ public class SOSTest {
      */
     @Test
     public void retriveTSForSpecificPoint() throws IOException {
-        final Iterator<Datapoint> it = dps.iterator();
-
+        final Iterator<Datapoint> it = sortedDpsList.iterator();
+        w.write(newLine + newLine + "starting time series retrieval..." + newLine + newLine);
         while (it.hasNext()) {
-            // bitte nach auflösung sortieren, von grob nach fein
-            // alle verfügbaren dps ausgeben und mit den verfügbaren layern vergleichen: gibt es zu jedem layer alle auflösungen
+            succsBuffer = "";
+            String layerInfo = "";
             final Datapoint dp = it.next();
-            LOG.info("starting timeseries retrieval for Offering: " + dp.toString());
-            w.write("starting timeseries retrieval for Offering: " + dp.toString() + "\n");
-            LOG.info("Filter: " + dp.getFilter().toString());
-            w.write("Filter: " + dp.getFilter().toString() + "\n");
+
+            //keep out 1h and 30m time series
+            final String[] offering = dp.getFilter().getProperty("ts:offering").split("_");
+            final String prec = offering[offering.length - 1];
+            
+            //TODO: dont filter high precision timeseries
+            if (prec.equals("1h") || prec.equals("30min")) {
+                continue;
+            }
+
+            layerInfo += newLine
+                    + newLine
+                    + dp.getFilter().getProperty("ts:offering")
+                    + newLine;
+            layerInfo +=
+                    "---------------------------------------------------------------------------------------------------------------------------------------"
+                    + newLine;
+            layerInfo += "Layer:"
+                    + dp.toString().replaceAll(", ", newLine + "\t")
+                    + newLine;
+
+            layerInfo += newLine
+                    + "Properties: "
+                    + dp.getProperties().toString().replaceFirst(",", " /").replaceAll(", ", newLine + "\t")
+                    + newLine;
+
+            errReportBuffer += layerInfo;
             final Map<String, Object> props = dp.getProperties();
-            final Envelope env = (Envelope)props.get("ts:geometry");
+            final Envelope env = (Envelope) props.get("ts:geometry");
 
             final double maxX = env.getMaxX();
             final double maxY = env.getMaxY();
             final double minX = env.getMinX();
             final double minY = env.getMinY();
-            for (int i = 1; i < 21; i++) {
+
+            w.write(layerInfo + newLine);
+            w.write("\t Retrievals with errors:" + newLine + newLine);
+
+//            succsBuffer += layerInfo;
+//            errBuffer += layerInfo;
+
+            for (int i = 0; i < 21; i++) {
                 /*
                  * calculate a random point
                  */
                 final Random r = new Random();
-                final double x = (r.nextDouble() * (maxX - minX)) + minX;
-                final double y = (r.nextDouble() * (maxY - minY)) + minY;
+                final double x = (r.nextDouble() * (maxX - minX))
+                        + minX;
+                final double y = (r.nextDouble() * (maxY - minY))
+                        + minY;
 
                 Assert.assertTrue(minX <= x);
                 Assert.assertTrue(x <= maxX);
@@ -157,10 +222,10 @@ public class SOSTest {
                 /*
                  * calculate a random time interval
                  */
-                final Date minDate = (Date)props.get("ts:available_data_min");
-                final Date maxDate = (Date)props.get("ts:available_data_max");
-                final long a = (long)((r.nextDouble() * (maxDate.getTime() - minDate.getTime())) + minDate.getTime());
-                final long b = (long)((r.nextDouble() * (maxDate.getTime() - minDate.getTime())) + minDate.getTime());
+                final Date minDate = (Date) props.get("ts:available_data_min");
+                final Date maxDate = (Date) props.get("ts:available_data_max");
+                final long a = (long) ((r.nextDouble() * (maxDate.getTime() - minDate.getTime())) + minDate.getTime());
+                final long b = (long) ((r.nextDouble() * (maxDate.getTime() - minDate.getTime())) + minDate.getTime());
                 final long start = (a > b) ? b : a;
                 final long end = (a > b) ? a : b;
 
@@ -184,64 +249,162 @@ public class SOSTest {
                 long startTime;
                 long endTime;
                 TimeSeries ts = null;
+
+                String pointInterval = "";
+
                 try {
                     /*
                      * TimeSeriesRetrieval for specific point
                      */
-                    LOG.info("TimeSeriesRetrieval " + i + ", for Point: " + x + " / " + y);
-                    w.write("\t TimeSeriesRetrieval " + i + ", for Point: " + x + " / " + y);
+                    pointInterval = newLine
+                            + "\t\t TimeSeriesRetrieval "
+                            + i
+                            + ", for Point: "
+                            + x
+                            + " / "
+                            + y;
                     startTime = System.currentTimeMillis();
                     ts = dp.getTimeSeries(TimeInterval.ALL_INTERVAL, point);
                     endTime = System.currentTimeMillis();
 
 //                    Assert.assertNotNull(ts);
                     if (ts != null) {
-                        LOG.info(" - retrieval succesfull ");
-                        w.write(" - retrieval succesfull \n");
-                        LOG.info("Time: " + ((endTime - startTime) / 1000) + " secs");
-                        w.write("\t Time: " + ((endTime - startTime) / 1000) + " secs \n");
+                        String result = " - retrieval succesfull"
+                                + newLine;
+                        result += "\t\t Time: "
+                                + ((endTime - startTime) / 1000)
+                                + " secs"
+                                + newLine;
+
+                        succsBuffer += pointInterval
+                                + result;
                     } else {
-                        LOG.error(" - retrieval failed");
-                        w.write(" - retrieval failed \n");
+                        errReportBuffer += newLine
+                                + pointInterval
+                                + " - retrieval failed"
+                                + newLine;
+                        w.write(pointInterval + " - retrieval failed" + newLine);
                     }
                     ts = null;
+
                     /*
                      * TimeSeriesRetrieval for specific interval and specific point
                      */
+                    pointInterval = newLine
+                            + "\t\t TimeSeriesRetrieval"
+                            + i
+                            + ", for Interval: "
+                            + startDate.getTime()
+                            + " / "
+                            + endDate.getTime();
 
-                    LOG.info("TimeSeriesRetrieval" + i + ", for Interval: " + startDate.getTime() + " / "
-                                + endDate.getTime());
-                    w.write(" \t TimeSeriesRetrieval" + i + ", for Interval: " + startDate.getTime() + " / "
-                                + endDate.getTime());
                     startTime = System.currentTimeMillis();
                     ts = dp.getTimeSeries(interval, point);
                     endTime = System.currentTimeMillis();
 
 //                    Assert.assertNotNull(ts);
                     if (ts != null) {
-                        LOG.info(" - retrieval succesfull ");
-                        w.write(" - retrieval succesfull \n");
-                        LOG.info("Time: " + ((endTime - startTime) / 1000) + " secs");
-                        w.write("\t Time: " + ((endTime - startTime) / 1000) + " secs \n");
+                        String result = " - retrieval succesfull"
+                                + newLine;
+                        result += "\t\t Time: "
+                                + ((endTime - startTime) / 1000)
+                                + " secs"
+                                + newLine;
+                        succsBuffer += newLine
+                                + pointInterval
+                                + result;
                     } else {
-                        LOG.error(" - retrieval failed");
-                        w.write(" - retrieval failed \n");
+                        w.write(pointInterval + " - retrieval failed" + newLine);
+                        errReportBuffer += pointInterval
+                                + " - retrieval failed"
+                                + newLine;
                     }
                 } catch (Exception e) {
-                    LOG.error(" - retrieval failed", e);
-                    w.write(" - retrieval failed \n");
-                    w.write("Error: " + e.getMessage() + "\n");
+                    w.write(pointInterval + " - retrieval failed" + newLine);
+                    w.write("\t\t Error: " + e.getMessage() + newLine);
+                    errReportBuffer += pointInterval
+                            + " - retrieval failed"
+                            + newLine;
+                    errReportBuffer += "\t\t Error: "
+                            + e.getMessage()
+                            + newLine;
                     continue;
                 } catch (Throwable t) {
-                    LOG.error(" - retrieval failed", t);
-                    w.write(" - retrieval failed \n");
-                    w.write("Error: " + t.getMessage() + "\n");
-                    
+                    w.write("\t\t Error: " + t.getMessage() + "\n");
+                    errReportBuffer += "\t\t Error: "
+                            + t.getMessage()
+                            + "\n";
+                    w.write(errReportBuffer);
                     return;
                 } finally {
                     w.flush();
                 }
             }
+            w.write(newLine + "\t Succesfull retrievals" + newLine + newLine);
+            w.write(succsBuffer);
+            w.write(newLine + newLine);
+            w.flush();
+        }
+        return;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    protected static final class DatapointComparator implements Comparator<Datapoint> {
+
+        //~ Instance fields ----------------------------------------------------
+        final HashMap<String, Integer> lookupTable;
+
+        //~ Constructors -------------------------------------------------------
+        /**
+         * Creates a new DatapointComparator object.
+         */
+        public DatapointComparator() {
+            lookupTable = new HashMap<String, Integer>();
+            lookupTable.put("10Y", 100);
+            lookupTable.put("1Y", 200);
+            lookupTable.put("1M", 300);
+            lookupTable.put("1d", 400);
+            lookupTable.put("1h", 500);
+            lookupTable.put("30m", 600);
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /*
+         * take the temp value of the sos:Offering String  wich encodes the precision it is one of the following values
+         * (increasing precision) 10Y, 1Y, 1M, 1d = 86400s, 3600s, 1800s
+         */
+        @Override
+        public int compare(final Datapoint o1, final Datapoint o2) {
+            final Properties f1 = o1.getFilter();
+            final String[] offering1 = f1.getProperty("ts:offering").split("_");
+            final String prec1 = offering1[offering1.length
+                    - 1];
+            final Integer valueOfPrec1 = lookupTable.get(prec1);
+
+            final Properties f2 = o2.getFilter();
+            final String[] offering2 = f2.getProperty("ts:offering").split("_");
+            final String prec2 = offering2[offering2.length
+                    - 1];
+            final Integer valueOfPrec2 = lookupTable.get(prec2);
+
+            if ((valueOfPrec1 == null) || (valueOfPrec2 == null)) {
+                throw new IllegalStateException("Could not compare the two datapoints " + o1 + o2
+                        + " because the precision is unkown. ");
+            }
+
+            if (valueOfPrec1.intValue() < valueOfPrec2.intValue()) {
+                return -1;
+            } else if (valueOfPrec1.intValue() == valueOfPrec2.intValue()) {
+                return 0;
+            }
+
+            return 1;
         }
     }
 }
