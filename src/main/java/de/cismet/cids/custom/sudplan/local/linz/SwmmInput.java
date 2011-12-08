@@ -28,6 +28,8 @@ public final class SwmmInput {
 
     //~ Instance fields --------------------------------------------------------
 
+    protected String inpFile;
+
     private transient String startDate;
     private transient String endDate;
 
@@ -107,6 +109,24 @@ public final class SwmmInput {
      */
     public void setStartDate(final String startDate) {
         this.startDate = startDate;
+    }
+
+    /**
+     * Get the value of inpFileName.
+     *
+     * @return  the value of inpFile
+     */
+    public String getInpFile() {
+        return inpFile;
+    }
+
+    /**
+     * Set the value of inpFileName.
+     *
+     * @param  inpFile  new value of inpFile
+     */
+    public void setInpFile(final String inpFile) {
+        this.inpFile = inpFile;
     }
 
     /**

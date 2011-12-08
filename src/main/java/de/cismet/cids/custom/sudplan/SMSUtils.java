@@ -83,10 +83,13 @@ public final class SMSUtils {
 
         //~ Enum constants -----------------------------------------------------
 
-        AQ_DS("Airquality Downscaling"), // NOI18N
-        RF_DS("Rainfall Downscaling"),   // NOI18N
-        HY_CAL("Hydrology Calibration"), // NOI18N
-        GEOCPM("Wuppertal Abfluss Berechnung"); // NOI18N
+        AQ_DS("Airquality Downscaling"),        // NOI18N
+        RF_DS("Rainfall Downscaling"),          // NOI18N
+        HY_CAL("Hydrology Calibration"),        // NOI18N
+        GEOCPM("Wuppertal Abfluss Berechnung"), // NOI18N
+        SWMM("Linz EPA SWMM 5.0 Berechnung"),   // NOI18N
+        ETA("Linz Wirkungsgrad Berechnung"),    // NOI18N
+        SWMM_ETA("Linz EPA SWMM 5.0 und Wirkungsgrad Berechnung"); // NOI18N
 
         //~ Instance fields ----------------------------------------------------
 

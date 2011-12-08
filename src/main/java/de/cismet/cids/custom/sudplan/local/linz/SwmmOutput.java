@@ -1,18 +1,20 @@
 /***************************************************
- *
- * cismet GmbH, Saarbruecken, Germany
- *
- *              ... and it just works.
- *
- ****************************************************/
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
-import de.cismet.cids.custom.sudplan.SMSUtils;
-import de.cismet.cids.dynamics.CidsBean;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import de.cismet.cids.custom.sudplan.SMSUtils;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 /**
  * DOCUMENT ME!
@@ -23,20 +25,27 @@ import java.util.Map;
 public class SwmmOutput {
 
     //~ Static fields/initializers ---------------------------------------------
+
     public static final String TABLENAME_LINZ_CSO = "LINZ_CSO"; // NOI18N
+
     //~ Instance fields --------------------------------------------------------
+
     protected transient Map<String, CsoOverflow> csoOverflows = new HashMap<String, CsoOverflow>();
 
     //~ Constructors -----------------------------------------------------------
+
     /**
      * Creates a new SwmmOutput object.
      */
     public SwmmOutput() {
     }
 
-    // private transient csoParameters
     //~ Methods ----------------------------------------------------------------
+
+    // private transient csoParameters
     /**
+     * DOCUMENT ME!
+     *
      * @return  DOCUMENT ME!
      */
     public Map<String, CsoOverflow> getCsoOverflows() {
@@ -68,6 +77,7 @@ public class SwmmOutput {
     }
 
     //~ Inner Classes ----------------------------------------------------------
+
     /**
      * DOCUMENT ME!
      *
@@ -76,6 +86,7 @@ public class SwmmOutput {
     public class CsoOverflow {
 
         //~ Instance fields ----------------------------------------------------
+
         protected transient float overflowVolume;
         protected transient float overflowFrequency;
         protected transient float overflowDuration;
@@ -83,6 +94,7 @@ public class SwmmOutput {
         protected transient String name;
 
         //~ Methods ------------------------------------------------------------
+
         /**
          * Get the value of overflowVolume.
          *
@@ -95,7 +107,7 @@ public class SwmmOutput {
         /**
          * Set the value of overflowVolume.
          *
-         * @param  overflowVolume  new value of overflowVolume
+         * @param  volume  overflowVolume new value of overflowVolume
          */
         public void setOverflowVolume(final float volume) {
             this.overflowVolume = volume;
@@ -113,7 +125,7 @@ public class SwmmOutput {
         /**
          * Set the value of overflowFrequency.
          *
-         * @param  overflowFrequency  new value of overflowFrequency
+         * @param  frequency  new value of overflowFrequency
          */
         public void setOverflowFrequency(final float frequency) {
             this.overflowFrequency = frequency;
@@ -149,28 +161,27 @@ public class SwmmOutput {
         /**
          * Set the value of name.
          *
-         * @param  name  new value of name
+         * @param  node  name new value of name
          */
         public void setName(final String node) {
             this.name = node;
         }
-        
 
         /**
-         * Get the value of overflowDuration
+         * Get the value of overflowDuration.
          *
-         * @return the value of overflowDuration
+         * @return  the value of overflowDuration
          */
         public float getOverflowDuration() {
             return overflowDuration;
         }
 
         /**
-         * Set the value of overflowDuration
+         * Set the value of overflowDuration.
          *
-         * @param overflowDuration new value of overflowDuration
+         * @param  overflowDuration  new value of overflowDuration
          */
-        public void setOverflowDuration(float overflowDuration) {
+        public void setOverflowDuration(final float overflowDuration) {
             this.overflowDuration = overflowDuration;
         }
 

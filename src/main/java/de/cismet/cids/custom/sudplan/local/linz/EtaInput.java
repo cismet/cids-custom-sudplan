@@ -1,19 +1,10 @@
-/*
- * Copyright (C) 2011 cismet GmbH
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
 import java.util.HashMap;
@@ -21,80 +12,125 @@ import java.util.Map;
 
 /**
  * Input for the ETA Calculation is the output of the SWMM Model Run!
- * 
- * @author Pascal Dihé
+ *
+ * @author   Pascal Dihé
+ * @version  $Revision$, $Date$
  */
 public class EtaInput extends SwmmOutput {
 
+    //~ Instance fields --------------------------------------------------------
+
     protected transient Map<String, EtaConfiguration> etaConfigurations = new HashMap<String, EtaConfiguration>();
 
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Map<String, EtaConfiguration> getEtaConfigurations() {
         return this.etaConfigurations;
     }
 
-    public void setEtaConfigurations(Map<String, EtaConfiguration> etaConfigurations) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  etaConfigurations  DOCUMENT ME!
+     */
+    public void setEtaConfigurations(final Map<String, EtaConfiguration> etaConfigurations) {
         this.etaConfigurations = etaConfigurations;
     }
 
-    //TODO: don't store output 2x, provide to model output id, implement fetch operations
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * TODO: don't store output 2x, provide to model output id, implement fetch operations
+     *
+     * @version  $Revision$, $Date$
+     */
     public class EtaConfiguration {
+
+        //~ Instance fields ----------------------------------------------------
 
         protected transient boolean enabled;
         protected transient float sedimentationEfficency;
         protected transient String name;
 
+        protected String etaFile;
+
+        //~ Methods ------------------------------------------------------------
+
         /**
-         * Get the value of name
+         * Get the value of name.
          *
-         * @return the value of name
+         * @return  the value of name
          */
         public String getName() {
             return name;
         }
 
         /**
-         * Set the value of name
+         * Set the value of name.
          *
-         * @param name new value of name
+         * @param  name  new value of name
          */
-        public void setName(String name) {
+        public void setName(final String name) {
             this.name = name;
         }
 
         /**
-         * Get the value of sedimentationEfficency
+         * Get the value of sedimentationEfficency.
          *
-         * @return the value of sedimentationEfficency
+         * @return  the value of sedimentationEfficency
          */
         public float getSedimentationEfficency() {
             return sedimentationEfficency;
         }
 
         /**
-         * Set the value of sedimentationEfficency
+         * Set the value of sedimentationEfficency.
          *
-         * @param sedimentationEfficency new value of sedimentationEfficency
+         * @param  sedimentationEfficency  new value of sedimentationEfficency
          */
-        public void setSedimentationEfficency(float sedimentationEfficency) {
+        public void setSedimentationEfficency(final float sedimentationEfficency) {
             this.sedimentationEfficency = sedimentationEfficency;
         }
 
         /**
-         * Get the value of enabled
+         * Get the value of enabled.
          *
-         * @return the value of enabled
+         * @return  the value of enabled
          */
         public boolean isEnabled() {
             return enabled;
         }
 
         /**
-         * Set the value of enabled
+         * Set the value of enabled.
          *
-         * @param enabled new value of enabled
+         * @param  enabled  new value of enabled
          */
-        public void setEnabled(boolean enabled) {
+        public void setEnabled(final boolean enabled) {
             this.enabled = enabled;
+        }
+
+        /**
+         * Get the value of etaFile.
+         *
+         * @return  the value of etaFile
+         */
+        public String getEtaFile() {
+            return etaFile;
+        }
+
+        /**
+         * Set the value of etaFile.
+         *
+         * @param  etaFile  new value of etaFile
+         */
+        public void setEtaFile(final String etaFile) {
+            this.etaFile = etaFile;
         }
     }
 }

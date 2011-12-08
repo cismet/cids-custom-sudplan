@@ -7,15 +7,17 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
-import de.cismet.cids.custom.sudplan.Manager;
-import de.cismet.cids.dynamics.CidsBean;
-import de.cismet.cismap.commons.features.Feature;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 
 import javax.swing.JComponent;
 
+import de.cismet.cids.custom.sudplan.Manager;
+
+import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.cismap.commons.features.Feature;
 
 /**
  * DOCUMENT ME!
@@ -23,12 +25,13 @@ import javax.swing.JComponent;
  * @author   pascal.dihe@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class EtaInputManager implements Manager{
+public final class EtaInputManager implements Manager {
+
+    //~ Instance fields --------------------------------------------------------
 
     protected transient CidsBean modelInputBean;
     protected transient volatile EtaInputManagerUI ui;
-    
-    
+
     //~ Methods ----------------------------------------------------------------
 
     @Override
@@ -38,8 +41,8 @@ public final class EtaInputManager implements Manager{
 
         return mapper.readValue(json, EtaInput.class);
     }
-    
-        @Override
+
+    @Override
     public void finalise() throws IOException {
         // not needed
     }
