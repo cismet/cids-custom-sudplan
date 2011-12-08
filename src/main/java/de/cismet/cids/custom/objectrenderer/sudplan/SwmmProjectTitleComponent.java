@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import org.apache.log4j.Logger;
+
 import org.openide.util.NbBundle;
 
 import java.awt.EventQueue;
@@ -17,8 +19,6 @@ import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.utils.interfaces.CidsBeanAction;
-import org.apache.log4j.Logger;
-
 
 /**
  * DOCUMENT ME!
@@ -27,7 +27,9 @@ import org.apache.log4j.Logger;
  * @version  $Revision$, $Date$
  */
 public class SwmmProjectTitleComponent extends javax.swing.JPanel {
-    
+
+    //~ Static fields/initializers ---------------------------------------------
+
     private static final transient Logger LOG = Logger.getLogger(SwmmProjectTitleComponent.class);
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -52,7 +54,7 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
      * @param  title  DOCUMENT ME!
      */
     public void setTitle(final String title) {
-        LOG.fatal("set Title = " +title);
+        LOG.fatal("set Title = " + title);
         if (EventQueue.isDispatchThread()) {
             lblTitle.setText(title);
         } else {
@@ -73,11 +75,11 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
      */
     public void setCidsBean(final CidsBean cidsBean) {
         LOG.fatal(cidsBean);
-        
+
         if (btnRunSwmmPlusEta.getAction() instanceof CidsBeanAction) {
             final CidsBeanAction cba = (CidsBeanAction)btnRunSwmmPlusEta.getAction();
             cba.setCidsBean(cidsBean);
-             LOG.fatal(cba);
+            LOG.fatal(cba);
 
             // trigger the action enable
             cba.isEnabled();
