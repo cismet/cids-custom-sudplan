@@ -82,29 +82,65 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
 
     @Override
     public void readSettings(final Object settings) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("read settings");
+        }
         wizard = (WizardDescriptor)settings;
         assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN) != null : "swmm project bean is null";
-        final CidsBean swmmProjectBean = (CidsBean)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN);
+        this.swmmProject = (CidsBean)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN);
 
         assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN) != null : "swmm input bean is null";
-        final SwmmInput swmmInputObject = (SwmmInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT);
-
-        this.setSwmmProject(swmmProjectBean);
-        this.setSwmmInput(swmmInputObject);
+        this.swmmInput = (SwmmInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT);
 
         component.init();
     }
 
     @Override
     public void storeSettings(final Object settings) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("store settings");
+        }
         wizard = (WizardDescriptor)settings;
         wizard.putProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN, this.getSwmmProject());
-        wizard.putProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT, this.getSwmmInput());
+        wizard.putProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT, this.swmmInput);
     }
 
     @Override
     public boolean isValid() {
-        return (this.getSwmmProject() != null) && (this.getSwmmInput() != null);
+        boolean valid = true;
+        if (this.swmmInput.getSwmmProject() == -1) {
+            // FIXME: i18n
+            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                "Bitte wählen Sie ein SWMM Project aus");
+            valid = false;
+        } else if ((this.swmmInput.getInpFile() == null) || this.swmmInput.getInpFile().isEmpty()) {
+            final String inpFile = this.getSwmmProject().getProperty("title") + ".inp";
+            LOG.warn("SWMM INP file not set, setting to " + inpFile);
+
+            // dieser beansbinding und property change mist funktioniert einfach nicht
+            // warum sonst wird jetzt das textfield im UI nicht aktualisiert???!!!!
+            this.swmmInput.setInpFile(inpFile);
+
+            wizard.putProperty(
+                WizardDescriptor.PROP_INFO_MESSAGE,
+                "<html>Da keine INP Datei angegeben wurde, "
+                        + "wurde der Name automatich auf '"
+                        + inpFile
+                        + "' festgelegt.</html>");
+        } else if ((this.swmmInput.getStartDate() == null) || this.swmmInput.getStartDate().isEmpty()) {
+            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                "Bitte geben Sie ein Startdatum an");
+            valid = false;
+        } else if ((this.swmmInput.getEndDate() == null) || this.swmmInput.getEndDate().isEmpty()) {
+            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                "Bitte geben Sie ein Enddatum an");
+            valid = false;
+        } else {
+            wizard.putProperty(
+                WizardDescriptor.PROP_INFO_MESSAGE,
+                null);
+        }
+        return valid;
     }
 
     @Override
@@ -123,17 +159,9 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
      * @return  DOCUMENT ME!
      */
     public SwmmInput getSwmmInput() {
+        // nicht schön aber notwendig, damit die Validierung funktioniert
+        this.changeSupport.fireChange();
         return swmmInput;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  swmmInput  DOCUMENT ME!
-     */
-    public void setSwmmInput(final SwmmInput swmmInput) {
-        this.swmmInput = swmmInput;
-        changeSupport.fireChange();
     }
 
     /**
@@ -152,6 +180,14 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
      */
     public void setSwmmProject(final CidsBean swmmProject) {
         this.swmmProject = swmmProject;
-        changeSupport.fireChange();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public WizardDescriptor getWizard() {
+        return wizard;
     }
 }

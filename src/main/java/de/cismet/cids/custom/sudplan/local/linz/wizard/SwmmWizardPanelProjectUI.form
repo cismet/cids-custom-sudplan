@@ -16,11 +16,11 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
+          <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="projectPanel" alignment="1" max="32767" attributes="0"/>
-                  <Component id="configurationPanel" alignment="0" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="projectPanel" alignment="0" max="32767" attributes="1"/>
+                  <Component id="configurationPanel" alignment="0" max="32767" attributes="1"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -33,7 +33,7 @@
               <Component id="projectPanel" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="configurationPanel" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="59" max="32767" attributes="0"/>
+              <EmptySpace pref="21" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -53,18 +53,18 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
+              <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="lblDescription" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="lblProject" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace min="-2" pref="73" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="lblDescriptionText" min="-2" pref="191" max="-2" attributes="0"/>
-                      <Component id="cobProjects" min="-2" max="-2" attributes="0"/>
+                      <Component id="lblDescriptionText" pref="320" max="32767" attributes="0"/>
+                      <Component id="cobProjects" min="-2" pref="185" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="100" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -79,7 +79,7 @@
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="lblDescription" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="lblDescriptionText" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="lblDescriptionText" alignment="3" min="-2" pref="14" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -116,6 +116,9 @@
               <ResourceString bundle="de/cismet/cids/custom/sudplan/local/linz/wizard/Bundle.properties" key="SwmmWizardPanelProjectUI.lblDescriptionText.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
+          <BindingProperties>
+            <BindingProperty name="text" source="Form" sourcePath="${model.swmmProject.description}" target="lblDescriptionText" targetPath="text" updateStrategy="0" immediately="false"/>
+          </BindingProperties>
         </Component>
       </SubComponents>
     </Container>
@@ -138,24 +141,26 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="lblStartDate" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="lblEndDate" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="lblEta" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="lblInpFile" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="lblEta" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="33" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
-                          <Group type="103" groupAlignment="1" attributes="0">
-                              <Component id="fldInpFile" alignment="0" pref="262" max="32767" attributes="0"/>
-                              <Component id="fldStartDate" alignment="0" pref="262" max="32767" attributes="0"/>
-                              <Component id="fldEndDate" alignment="1" pref="262" max="32767" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="fldEndDate" max="32767" attributes="1"/>
+                              <Component id="fldStartDate" alignment="0" pref="154" max="32767" attributes="1"/>
                           </Group>
-                          <EmptySpace min="-2" pref="67" max="-2" attributes="0"/>
-                      </Group>
-                      <Group type="102" attributes="0">
-                          <Component id="chbEta" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="btnStartDate" min="-2" max="-2" attributes="0"/>
+                              <Component id="btnEndDate" min="-2" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
+                      <Component id="fldInpFile" alignment="0" min="-2" pref="181" max="-2" attributes="0"/>
+                      <Component id="chbEta" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <EmptySpace pref="124" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -170,16 +175,20 @@
                   <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
                       <Component id="lblStartDate" min="-2" max="-2" attributes="0"/>
-                      <Component id="fldStartDate" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="lblEndDate" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="fldEndDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" alignment="1" groupAlignment="3" attributes="0">
+                          <Component id="fldStartDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnStartDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="lblEta" alignment="3" pref="21" max="32767" attributes="1"/>
+                      <Component id="lblEndDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="fldEndDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnEndDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="lblEta" alignment="3" pref="31" max="32767" attributes="1"/>
                       <Component id="chbEta" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -210,16 +219,24 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="fldStartDate">
+          <Properties>
+            <Property name="editable" type="boolean" value="false"/>
+          </Properties>
           <BindingProperties>
             <BindingProperty name="text" source="Form" sourcePath="${model.swmmInput.startDate}" target="fldStartDate" targetPath="text" updateStrategy="0" immediately="false">
               <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_FOCUS_LOST"/>
+              <Property name="name" type="java.lang.String" value="startDate"/>
             </BindingProperty>
           </BindingProperties>
         </Component>
         <Component class="javax.swing.JTextField" name="fldEndDate">
+          <Properties>
+            <Property name="editable" type="boolean" value="false"/>
+          </Properties>
           <BindingProperties>
             <BindingProperty name="text" source="Form" sourcePath="${model.swmmInput.endDate}" target="fldEndDate" targetPath="text" updateStrategy="0" immediately="false">
               <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_FOCUS_LOST"/>
+              <Property name="name" type="java.lang.String" value="endDate"/>
             </BindingProperty>
           </BindingProperties>
         </Component>
@@ -233,7 +250,8 @@
         <Component class="javax.swing.JTextField" name="fldInpFile">
           <BindingProperties>
             <BindingProperty name="text" source="Form" sourcePath="${model.swmmInput.inpFile}" target="fldInpFile" targetPath="text" updateStrategy="0" immediately="false">
-              <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_FOCUS_LOST"/>
+              <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_ACTION_OR_FOCUS_LOST"/>
+              <Property name="name" type="java.lang.String" value="inpFile"/>
             </BindingProperty>
           </BindingProperties>
         </Component>
@@ -244,6 +262,16 @@
               <ResourceString bundle="de/cismet/cids/custom/sudplan/local/linz/wizard/Bundle.properties" key="SwmmWizardPanelProjectUI.chbEta.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
             <Property name="enabled" type="boolean" value="false"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnStartDate">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="..." noResource="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnEndDate">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="..." noResource="true"/>
           </Properties>
         </Component>
       </SubComponents>

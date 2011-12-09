@@ -30,12 +30,14 @@ import java.text.MessageFormat;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.local.linz.EtaInput;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.rainfall.*;
 
@@ -54,21 +56,18 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String TABLENAME_SWMM_PROJECT = SwmmInput.TABLENAME_SWMM_PROJECT;
-
-    // public static final String PROP_SCENARIO = "__prop_scenario__";       // NOI18N
-    // public static final String PROP_TARGET_YEAR = "__prop_target_year__"; // NOI18N
-
+    public static final String TABLENAME_MONITOR_STATION = "monitorstation";
+    // public static final String PROP_SCENARIO = "__prop_scenario__";       // NOI18N public static final String
+    // PROP_TARGET_YEAR = "__prop_target_year__"; // NOI18N
     /** Name of the model run. */
     public static final String PROP_SWMM_PROJECT_BEAN = "__prop_swmm_project_bean__"; // NOI18N
     public static final String PROP_SWMM_INPUT = "__prop_swmm_input__";               // NOI18N
     public static final String PROP_ETA_INPUT = "__prop_eta_input__";                 // NOI18N
-
+    public static final String PROP_STATION_IDS = "__prop_station_ids__";             // NOI18N
     /** Name of the model run. */
     public static final String PROP_NAME = "__prop_name__"; // NOI18N
-
     /** Description of the model run. */
     public static final String PROP_DESCRIPTION = "__prop_description__"; // NOI18N
-
     private static final transient Logger LOG = Logger.getLogger(SwmmPlusEtaWizardAction.class);
 
     //~ Instance fields --------------------------------------------------------
@@ -98,7 +97,8 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
             panels = new WizardDescriptor.Panel[] {
                     // new RainfallDownscalingWizardPanelScenarios(),
                     // new RainfallDownscalingWizardPanelTargetDate(),
-                    new SwmmWizardPanelProject()
+                    new SwmmWizardPanelProject(),
+                    new SwmmWizardPanelStations()
                 };
             final String[] steps = new String[panels.length];
             for (int i = 0; i < panels.length; i++) {
@@ -145,12 +145,22 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
         assert mc != null : "metaobject without metaclass"; // NOI18N
 
         if (TABLENAME_SWMM_PROJECT.equals(mc.getTableName())) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("opening wizard with swmm project:" + mo);
+            }
             final WizardDescriptor wizard = new WizardDescriptor(getPanels());
             wizard.setTitleFormat(new MessageFormat("{0}"));                               // NOI18N
             wizard.setTitle(NbBundle.getMessage(
                     SwmmPlusEtaWizardAction.class,
                     "SwmmPlusEtaWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
+
+            wizard.putProperty(PROP_SWMM_PROJECT_BEAN, cidsBean);
+            wizard.putProperty(PROP_SWMM_INPUT, new SwmmInput());
+            wizard.putProperty(PROP_STATION_IDS, new LinkedList<Integer>());
+            wizard.putProperty(PROP_ETA_INPUT, new EtaInput());
+
             final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
+
             dialog.pack();
             dialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
             dialog.setVisible(true);
@@ -158,6 +168,9 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
 
             final boolean cancelled = wizard.getValue() != WizardDescriptor.FINISH_OPTION;
             if (!cancelled) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("wizard closed (not cancelled), creating new SWMM+ETA Runs");
+                }
                 try {
                     CidsBean modelInput = createModelInput(wizard, mo);
                     CidsBean modelRun = createModelRun(wizard, modelInput);
@@ -167,16 +180,18 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
 
                     SMSUtils.executeAndShowRun(modelRun);
                 } catch (final Exception ex) {
-                    final String message = "Cannot perform downscaling";
+                    final String message = "Cannot perform SWMM+ETA calculation";
                     LOG.error(message, ex);
                     JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
                         message,
-                        "Error",
+                        NbBundle.getMessage(
+                            SwmmPlusEtaWizardAction.class,
+                            "SwmmPlusEtaWizardAction.actionPerformed(ActionEvent).wizard.error"),
                         JOptionPane.ERROR_MESSAGE);
                 }
             }
         } else {
-            LOG.warn("can only perform this action on objects of metaclass timeseries"); // NOI18N
+            LOG.warn("can only perform this action on objects of metaclass SWMM_PROJECT"); // NOI18N
         }
     }
 

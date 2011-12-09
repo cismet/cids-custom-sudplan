@@ -54,7 +54,6 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
      * @param  title  DOCUMENT ME!
      */
     public void setTitle(final String title) {
-        LOG.fatal("set Title = " + title);
         if (EventQueue.isDispatchThread()) {
             lblTitle.setText(title);
         } else {
@@ -74,12 +73,9 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
      * @param  cidsBean  DOCUMENT ME!
      */
     public void setCidsBean(final CidsBean cidsBean) {
-        LOG.fatal(cidsBean);
-
         if (btnRunSwmmPlusEta.getAction() instanceof CidsBeanAction) {
             final CidsBeanAction cba = (CidsBeanAction)btnRunSwmmPlusEta.getAction();
             cba.setCidsBean(cidsBean);
-            LOG.fatal(cba);
 
             // trigger the action enable
             cba.isEnabled();
