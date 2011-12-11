@@ -28,11 +28,11 @@ import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
+public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final transient Logger LOG = Logger.getLogger(SwmmWizardPanelStations.class);
+    private static final transient Logger LOG = Logger.getLogger(SwmmWizardPanelTimeseries.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -45,14 +45,14 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
 
     private transient List<Integer> stationIds;
 
-    private transient volatile SwmmWizardPanelStationsUI component;
+    private transient volatile SwmmWizardPanelTimeseriesUI component;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RunGeoCPMWizardPanelInput object.
      */
-    public SwmmWizardPanelStations() {
+    public SwmmWizardPanelTimeseries() {
         changeSupport = new ChangeSupport(this);
     }
 
@@ -64,9 +64,9 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
             synchronized (this) {
                 if (component == null) {
                     try {
-                        component = new SwmmWizardPanelStationsUI(this);
+                        component = new SwmmWizardPanelTimeseriesUI(this);
                     } catch (final WizardInitialisationException ex) {
-                        LOG.error("cannot create monitoring station wizard panel component", ex); // NOI18N
+                        LOG.error("cannot create Timeseries wizard panel component", ex); // NOI18N
                     }
                 }
             }
@@ -91,7 +91,7 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
         this.stationIds = (List<Integer>)wizard.getProperty(
                 SwmmPlusEtaWizardAction.PROP_STATION_IDS);
 
-        assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT) != null : "swmm input bean is null";
+        assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT) != null : "swmm input is null";
         this.swmmInput = (SwmmInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT);
 
         component.init();
@@ -103,18 +103,21 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
             LOG.debug("store settings");
         }
         wizard = (WizardDescriptor)settings;
-        wizard.putProperty(SwmmPlusEtaWizardAction.PROP_STATION_IDS, this.stationIds);
+        // wizard.putProperty(SwmmPlusEtaWizardAction.PROP_STATION_IDS, this.stationIds);
         wizard.putProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT, this.swmmInput);
     }
 
     @Override
     public boolean isValid() {
         boolean valid = true;
-        if (this.stationIds.isEmpty()) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("isValid");
+        }
+        if (this.swmmInput.getTimeseries().isEmpty()) {
             // FIXME: i18n
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Bitte wählen Sie mindestens eine Regenmessstation aus");
+                "Bitte wählen Sie mindestens eine Regenzeitreihe aus");
             valid = false;
         } else {
             wizard.putProperty(
@@ -149,8 +152,8 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
      *
      * @return  DOCUMENT ME!
      */
-    public SwmmInput getSwmmInput() {
-        return swmmInput;
+    public List<Integer> getStationIds() {
+        return stationIds;
     }
 
     /**
@@ -158,8 +161,17 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
      *
      * @return  DOCUMENT ME!
      */
-    public List<Integer> getStationsIds() {
-        return stationIds;
+    public List<Integer> getTimeseriesIds() {
+        return this.swmmInput.getTimeseries();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isForecast() {
+        return this.swmmInput.isForecast();
     }
 
     /**
@@ -167,8 +179,8 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
      *
      * @param  stationIds  DOCUMENT ME!
      */
-    public void setStationsIds(final List<Integer> stationIds) {
-        this.stationIds = stationIds;
+    public void setTimeseriesIds(final List<Integer> stationIds) {
+        this.swmmInput.setTimeseries(stationIds);
         this.changeSupport.fireChange();
     }
 }

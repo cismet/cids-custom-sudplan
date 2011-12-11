@@ -19,6 +19,8 @@ import java.util.List;
 
 import javax.swing.event.ChangeListener;
 
+import de.cismet.cids.custom.sudplan.local.linz.EtaConfiguration;
+import de.cismet.cids.custom.sudplan.local.linz.EtaInput;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
 
@@ -28,31 +30,30 @@ import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
+public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Panel {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final transient Logger LOG = Logger.getLogger(SwmmWizardPanelStations.class);
+    private static final transient Logger LOG = Logger.getLogger(EtaWizardPanelEtaConfiguration.class);
 
     //~ Instance fields --------------------------------------------------------
 
-    protected SwmmInput swmmInput;
+    protected transient SwmmInput swmmInput;
+    protected transient EtaInput etaInput;
 
     private final transient ChangeSupport changeSupport;
 
     private transient WizardDescriptor wizard;
     /** local swmm project variable. */
 
-    private transient List<Integer> stationIds;
-
-    private transient volatile SwmmWizardPanelStationsUI component;
+    private transient volatile EtaWizardPanelEtaConfigurationUI component;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RunGeoCPMWizardPanelInput object.
      */
-    public SwmmWizardPanelStations() {
+    public EtaWizardPanelEtaConfiguration() {
         changeSupport = new ChangeSupport(this);
     }
 
@@ -64,9 +65,9 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
             synchronized (this) {
                 if (component == null) {
                     try {
-                        component = new SwmmWizardPanelStationsUI(this);
+                        component = new EtaWizardPanelEtaConfigurationUI(this);
                     } catch (final WizardInitialisationException ex) {
-                        LOG.error("cannot create monitoring station wizard panel component", ex); // NOI18N
+                        LOG.error("cannot create Timeseries wizard panel component", ex); // NOI18N
                     }
                 }
             }
@@ -87,11 +88,11 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
         }
 
         wizard = (WizardDescriptor)settings;
-        assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_STATION_IDS) != null : "station ids list is null";
-        this.stationIds = (List<Integer>)wizard.getProperty(
-                SwmmPlusEtaWizardAction.PROP_STATION_IDS);
+        assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT) != null : "eta input is null";
+        this.etaInput = (EtaInput)wizard.getProperty(
+                SwmmPlusEtaWizardAction.PROP_ETA_INPUT);
 
-        assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT) != null : "swmm input bean is null";
+        assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT) != null : "swmm input is null";
         this.swmmInput = (SwmmInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT);
 
         component.init();
@@ -103,26 +104,13 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
             LOG.debug("store settings");
         }
         wizard = (WizardDescriptor)settings;
-        wizard.putProperty(SwmmPlusEtaWizardAction.PROP_STATION_IDS, this.stationIds);
+        wizard.putProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT, this.etaInput);
         wizard.putProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT, this.swmmInput);
     }
 
     @Override
     public boolean isValid() {
-        boolean valid = true;
-        if (this.stationIds.isEmpty()) {
-            // FIXME: i18n
-            wizard.putProperty(
-                WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Bitte wählen Sie mindestens eine Regenmessstation aus");
-            valid = false;
-        } else {
-            wizard.putProperty(
-                WizardDescriptor.PROP_INFO_MESSAGE,
-                null);
-        }
-
-        return valid;
+        return true;
     }
 
     @Override
@@ -149,8 +137,18 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
      *
      * @return  DOCUMENT ME!
      */
-    public SwmmInput getSwmmInput() {
-        return swmmInput;
+    public List<EtaConfiguration> getEtaConfigurations() {
+        return this.etaInput.getEtaConfigurations();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  etaConfigurations  DOCUMENT ME!
+     */
+    public void setEtaConfigurations(final List<EtaConfiguration> etaConfigurations) {
+        this.etaInput.setEtaConfigurations(etaConfigurations);
+        // this.changeSupport.fireChange();
     }
 
     /**
@@ -158,17 +156,7 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
      *
      * @return  DOCUMENT ME!
      */
-    public List<Integer> getStationsIds() {
-        return stationIds;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  stationIds  DOCUMENT ME!
-     */
-    public void setStationsIds(final List<Integer> stationIds) {
-        this.stationIds = stationIds;
-        this.changeSupport.fireChange();
+    public int getSwmmProjectId() {
+        return this.swmmInput.getSwmmProject();
     }
 }

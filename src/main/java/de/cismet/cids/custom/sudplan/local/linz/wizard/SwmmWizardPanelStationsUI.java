@@ -42,8 +42,6 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(SwmmWizardPanelStationsUI.class);
-    private static final transient String START_DATE_ACTION = "startDate";
-    private static final transient String END_DATE_ACTION = "endDate";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -75,8 +73,8 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
 
         // name of the wizard step
         this.setName(NbBundle.getMessage(
-                SwmmWizardPanelProject.class,
-                "SwmmWizardPanelStations.this.name")); // NOI18N
+                SwmmWizardPanelStations.class,
+                "SwmmWizardPanelStations.this.name"));
 
         this.initStations();
         this.tblStations.setModel(this.stationsTableModel);
@@ -88,7 +86,7 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
      * DOCUMENT ME!
      */
     void init() {
-        this.stationsTableModel.setSelectedStations(model.getStationIds());
+        this.stationsTableModel.setSelectedStations(model.getStationsIds());
 
         this.bindingGroup.unbind();
         this.bindingGroup.bind();
@@ -160,19 +158,16 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
                 stationsPanelLayout.createSequentialGroup().addContainerGap().addComponent(
                     jScrollPaneStations,
                     javax.swing.GroupLayout.PREFERRED_SIZE,
-                    452,
+                    425,
                     javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(
                     javax.swing.GroupLayout.DEFAULT_SIZE,
                     Short.MAX_VALUE)));
         stationsPanelLayout.setVerticalGroup(
-            stationsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                stationsPanelLayout.createSequentialGroup().addComponent(
-                    jScrollPaneStations,
-                    javax.swing.GroupLayout.PREFERRED_SIZE,
-                    224,
-                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE)));
+            stationsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(
+                jScrollPaneStations,
+                javax.swing.GroupLayout.PREFERRED_SIZE,
+                184,
+                javax.swing.GroupLayout.PREFERRED_SIZE));
 
         forecastPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
@@ -190,7 +185,10 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${model.swmmInput.forecast}"),
                 chbForecast,
-                org.jdesktop.beansbinding.BeanProperty.create("selected"));
+                org.jdesktop.beansbinding.BeanProperty.create("selected"),
+                "forecast");
+        binding.setSourceNullValue(false);
+        binding.setSourceUnreadableValue(false);
         bindingGroup.addBinding(binding);
 
         final javax.swing.GroupLayout forecastPanelLayout = new javax.swing.GroupLayout(forecastPanel);
@@ -198,7 +196,7 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
         forecastPanelLayout.setHorizontalGroup(
             forecastPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
                 forecastPanelLayout.createSequentialGroup().addComponent(chbForecast).addContainerGap(
-                    239,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
                     Short.MAX_VALUE)));
         forecastPanelLayout.setVerticalGroup(
             forecastPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
@@ -212,16 +210,15 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
                 layout.createSequentialGroup().addContainerGap().addGroup(
-                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(
+                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false).addComponent(
                         stationsPanel,
                         javax.swing.GroupLayout.DEFAULT_SIZE,
                         javax.swing.GroupLayout.DEFAULT_SIZE,
                         Short.MAX_VALUE).addComponent(
                         forecastPanel,
-                        javax.swing.GroupLayout.Alignment.TRAILING,
                         javax.swing.GroupLayout.DEFAULT_SIZE,
                         javax.swing.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE)).addContainerGap()));
+                        Short.MAX_VALUE)).addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
                 layout.createSequentialGroup().addContainerGap().addComponent(
@@ -320,7 +317,7 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
             fireTableCellUpdated(row, col);
 
             // update selected stations
-            model.setStationIds(this.getSelectedStations());
+            model.setStationsIds(this.getSelectedStations());
         }
 
         @Override
