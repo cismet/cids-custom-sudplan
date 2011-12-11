@@ -42,7 +42,7 @@ public final class SwmmInput {
 
     //~ Instance fields --------------------------------------------------------
 
-    protected transient int[] timeseries;
+    protected transient List<Integer> timeseries = new ArrayList<Integer>();
 
     protected transient String inpFile;
 
@@ -63,7 +63,7 @@ public final class SwmmInput {
      *
      * @return  the value of timeseries
      */
-    public int[] getTimeseries() {
+    public List<Integer> getTimeseries() {
         return timeseries;
     }
 
@@ -72,8 +72,8 @@ public final class SwmmInput {
      *
      * @param  timeseries  new value of timeseries
      */
-    public void setTimeseries(final int[] timeseries) {
-        final int[] oldTimeseries = this.timeseries;
+    public void setTimeseries(final List<Integer> timeseries) {
+        final List<Integer> oldTimeseries = this.timeseries;
         this.timeseries = timeseries;
         propertyChangeSupport.firePropertyChange(PROP_TIMESERIES, oldTimeseries, timeseries);
     }
@@ -86,7 +86,7 @@ public final class SwmmInput {
      * @return  the value of timeseries at specified index
      */
     public int getTimeseries(final int index) {
-        return this.timeseries[index];
+        return this.timeseries.get(index);
     }
 
     /**
@@ -96,8 +96,8 @@ public final class SwmmInput {
      * @param  newTimeseries  new value of timeseries at specified index
      */
     public void setTimeseries(final int index, final int newTimeseries) {
-        final int oldTimeseries = this.timeseries[index];
-        this.timeseries[index] = newTimeseries;
+        final int oldTimeseries = this.timeseries.get(index);
+        this.timeseries.set(index, newTimeseries);
         propertyChangeSupport.fireIndexedPropertyChange(PROP_TIMESERIES, index, oldTimeseries, newTimeseries);
     }
 
@@ -210,7 +210,7 @@ public final class SwmmInput {
      */
     public List<CidsBean> fetchTimeseries() {
         assert this.timeseries != null : "timeseries list is null";
-        final List<CidsBean> timeseriesBeans = new ArrayList<CidsBean>(this.timeseries.length);
+        final List<CidsBean> timeseriesBeans = new ArrayList<CidsBean>(this.timeseries.size());
         for (final int timeseriesId : this.timeseries) {
             timeseriesBeans.add(SMSUtils.fetchCidsBean(timeseriesId, SMSUtils.TABLENAME_TIMESERIES));
         }

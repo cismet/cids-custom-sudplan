@@ -62,7 +62,7 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
         try {
             final SwmmOutput swmmOutput = outputManager.getUR();
             final DefaultTableModel ctoTableModel = (DefaultTableModel)this.csoTable.getModel();
-            for (final SwmmOutput.CsoOverflow csoOverflow : swmmOutput.getCsoOverflows().values()) {
+            for (final CsoOverflow csoOverflow : swmmOutput.getCsoOverflows().values()) {
                 ctoTableModel.addRow(
                     new Object[] {
                         csoOverflow.getName(),

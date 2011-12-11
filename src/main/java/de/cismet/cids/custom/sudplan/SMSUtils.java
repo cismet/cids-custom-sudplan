@@ -87,9 +87,8 @@ public final class SMSUtils {
         RF_DS("Rainfall Downscaling"),          // NOI18N
         HY_CAL("Hydrology Calibration"),        // NOI18N
         GEOCPM("Wuppertal Abfluss Berechnung"), // NOI18N
-        SWMM("Linz EPA SWMM 5.0 Berechnung"),   // NOI18N
-        ETA("Linz Wirkungsgrad Berechnung"),    // NOI18N
-        SWMM_ETA("Linz EPA SWMM 5.0 und Wirkungsgrad Berechnung"); // NOI18N
+        SWMM("EPA SWMM 5.0"),                   // NOI18N
+        LINZ_ETA("Linz Wirkungsgradberechnung"); // NOI18N
 
         //~ Instance fields ----------------------------------------------------
 
@@ -235,8 +234,10 @@ public final class SMSUtils {
         try {
             final MetaObject[] results = SessionManager.getProxy().getMetaObject(query);
 
-            if (results.length != 1) {
-                throw new IllegalStateException("multiple results found"); // NOI18N
+            if (results.length > 1) {
+                throw new IllegalStateException("multiple results for model '" + type + "' found"); // NOI18N
+            } else if (results.length < 1) {
+                throw new IllegalStateException("no results for model '" + type + "' found");       // NOI18N
             }
 
             return results[0].getBean();

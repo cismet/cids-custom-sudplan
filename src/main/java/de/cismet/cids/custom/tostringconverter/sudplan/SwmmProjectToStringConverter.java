@@ -12,7 +12,7 @@ import de.cismet.cids.tools.CustomToStringConverter;
 /**
  * DOCUMENT ME!
  *
- * @author   martin.scholl@cismet.de
+ * @author   pascal.dihe@cismet.de
  * @version  $Revision$, $Date$
  */
 public final class SwmmProjectToStringConverter extends CustomToStringConverter {
@@ -21,6 +21,6 @@ public final class SwmmProjectToStringConverter extends CustomToStringConverter 
 
     @Override
     public String createString() {
-        return "Manager [" + cidsBean.getProperty("title") + "]";
+        return cidsBean.getProperty("title").toString();
     }
 }
