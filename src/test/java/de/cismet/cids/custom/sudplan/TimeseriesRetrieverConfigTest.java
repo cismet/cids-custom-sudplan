@@ -71,7 +71,7 @@ public class TimeseriesRetrieverConfigTest
     public void testFromTSTBUrlWithTimeInterval() throws Exception
     {
         String url = "tstb:SOS-SUDPLAN-Dummy@http://dummy.org?"
-                   + "ts:ts_interval=[20110101T111250;20110202T121155]";
+                   + "ts:interval=[20110101T111250;20110202T121155]";
 
         TimeseriesRetrieverConfig result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
         assertNotNull(result.getInterval());
@@ -81,7 +81,7 @@ public class TimeseriesRetrieverConfigTest
         //---
         
         url =  "tstb:SOS-SUDPLAN-Dummy@http://dummy.org?"
-             + "ts:ts_interval=]20110101T111250;20110202T121155]";
+             + "ts:interval=]20110101T111250;20110202T121155]";
         
         result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
         assertNotNull(result.getInterval());
@@ -91,7 +91,7 @@ public class TimeseriesRetrieverConfigTest
         //---
         
         url =  "tstb:SOS-SUDPLAN-Dummy@http://dummy.org?"
-             + "ts:ts_interval=[20110101T111250;20110202T121155[";
+             + "ts:interval=[20110101T111250;20110202T121155[";
         
         result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
         assertNotNull(result.getInterval());
@@ -102,7 +102,7 @@ public class TimeseriesRetrieverConfigTest
         //---
         
         url =  "tstb:SOS-SUDPLAN-Dummy@http://dummy.org?"
-             + "ts:ts_interval=]20110101T111250;20110202T121155[";
+             + "ts:interval=]20110101T111250;20110202T121155[";
         
         result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
         assertNotNull(result.getInterval());

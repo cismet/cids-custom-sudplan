@@ -43,7 +43,7 @@ public final class TimeseriesRetrieverConfig {
     public static final String PROTOCOL_TSTB = "tstb"; // NOI18N
     public static final String PROTOCOL_DAV = "dav";   // NOI18N
 
-    private static final String TOKEN_TIMEINTERVAL = "ts:ts_interval";
+    private static final String TOKEN_TIMEINTERVAL = "ts:interval";
     private static final Pattern PATTERN = Pattern.compile("[\\],\\[](\\w+);(\\w+)[\\],\\[]");
     private static final String DATE_FORMAT = "yyyyMMdd'T'HHmmss";
 
