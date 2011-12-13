@@ -1,7 +1,5 @@
 package de.cismet.cids.custom.sudplan;
 
-
-
 import java.net.URL;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -69,6 +67,54 @@ public class TimeseriesRetrieverConfigTest
         assertNull(result.getInterval());
     }
 
+    @Test
+    public void testFromTSTBUrlWithTimeInterval() throws Exception
+    {
+        String url = "tstb:SOS-SUDPLAN-Dummy@http://dummy.org?"
+                   + "ts:ts_interval=[20110101T111250;20110202T121155]";
+
+        TimeseriesRetrieverConfig result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
+        assertNotNull(result.getInterval());
+        assertTrue(result.getInterval().isFinte());
+        assertEquals(url, result.toTSTBUrl());
+        
+        //---
+        
+        url =  "tstb:SOS-SUDPLAN-Dummy@http://dummy.org?"
+             + "ts:ts_interval=]20110101T111250;20110202T121155]";
+        
+        result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
+        assertNotNull(result.getInterval());
+        assertTrue(result.getInterval().isLeftOpen());
+        assertEquals(url, result.toTSTBUrl());
+        
+        //---
+        
+        url =  "tstb:SOS-SUDPLAN-Dummy@http://dummy.org?"
+             + "ts:ts_interval=[20110101T111250;20110202T121155[";
+        
+        result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
+        assertNotNull(result.getInterval());
+        assertTrue(result.getInterval().isRightOpen());
+        assertEquals(url, result.toTSTBUrl());
+        
+
+        //---
+        
+        url =  "tstb:SOS-SUDPLAN-Dummy@http://dummy.org?"
+             + "ts:ts_interval=]20110101T111250;20110202T121155[";
+        
+        result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
+        assertNotNull(result.getInterval());
+        assertTrue(result.getInterval().isLeftOpen() && result.getInterval().isRightOpen());
+        assertEquals(url, result.toTSTBUrl());
+    }
+    
+    
+
+    
+    
+    
     @Test
     public void testToTSTBUrl() throws Exception
     {

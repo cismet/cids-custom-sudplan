@@ -9,6 +9,7 @@ package de.cismet.cids.custom.sudplan;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
+import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -20,7 +21,12 @@ import org.apache.log4j.Logger;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * DOCUMENT ME!
@@ -36,6 +42,10 @@ public final class TimeseriesRetrieverConfig {
 
     public static final String PROTOCOL_TSTB = "tstb"; // NOI18N
     public static final String PROTOCOL_DAV = "dav";   // NOI18N
+
+    private static final String TOKEN_TIMEINTERVAL = "ts:ts_interval";
+    private static final Pattern PATTERN = Pattern.compile("[\\],\\[](\\w+);(\\w+)[\\],\\[]");
+    private static final String DATE_FORMAT = "yyyyMMdd'T'HHmmss";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -347,7 +357,7 @@ public final class TimeseriesRetrieverConfig {
             String obsProp = null;
             String offering = null;
             Geometry geometry = null;
-            final TimeInterval interval = null;
+            TimeInterval interval = null;
             for (final String param : params) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("found param: " + param);          // NOI18N
@@ -380,8 +390,45 @@ public final class TimeseriesRetrieverConfig {
                         LOG.error(message, ex);
                         throw new MalformedURLException(message);
                     }
-                } else if (false) {
-                    // TODO: add TimeInterval support
+                } else if (TOKEN_TIMEINTERVAL.equals(key)) {
+                    final Matcher matcher = PATTERN.matcher(value);
+
+                    final TimeStamp start;
+                    final TimeStamp end;
+
+                    if (!matcher.matches()) {
+                        throw new MalformedURLException("Time interval is not specified properly");
+                    }
+
+                    try {
+                        final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+                        start = new TimeStamp(dateFormat.parse(matcher.group(1)));
+                        end = new TimeStamp(dateFormat.parse(matcher.group(2)));
+                    } catch (final java.text.ParseException pe) {
+                        throw new MalformedURLException("TimeStamps in TimeInterval do not have a "
+                                    + "correct format: \"yyyyMMdd'T'HHmmss\"");
+                    }
+
+                    final boolean isLeftOpen = value.startsWith("]");
+                    final boolean isRightOpen = value.endsWith("[");
+
+                    if (isLeftOpen) {
+                        if (isRightOpen)                                                                     // open interval
+                        {
+                            interval = TimeInterval.createOpenInterval(start, end);
+                        } else                                                                               // left open interval
+                        {
+                            interval = TimeInterval.createLeftOpenInterval(start, end);
+                        }
+                    } else {
+                        if (isRightOpen)                                                                     // right open interval
+                        {
+                            interval = TimeInterval.createRightOpenInterval(start, end);
+                        } else                                                                               // closed interval
+                        {
+                            interval = TimeInterval.createClosedInterval(start, end);
+                        }
+                    }
                 } else {
                     throw new MalformedURLException("invalid tstburl, invalid token '" + key + "': " + url); // NOI18N
                 }
@@ -413,7 +460,13 @@ public final class TimeseriesRetrieverConfig {
         final StringBuilder sb = new StringBuilder(PROTOCOL_TSTB);
         sb.append(':').append(handlerLookup);
         sb.append('@').append(location);
-        if (!((procedure == null) && (foi == null) && (obsProp == null) && (offering == null) && (geometry == null))) {
+
+        if (!((procedure == null)
+                        && (foi == null)
+                        && (obsProp == null)
+                        && (offering == null)
+                        && (geometry == null)
+                        && (interval == null))) {
             sb.append('?');
             if (procedure != null) {
                 sb.append(TimeSeries.PROCEDURE).append('=').append(procedure).append('&');
@@ -430,7 +483,27 @@ public final class TimeseriesRetrieverConfig {
             if (geometry != null) {
                 sb.append(TimeSeries.GEOMETRY).append('=').append(geometry);
             }
-            // TODO: add Timeinterval support
+
+            if (interval != null) {
+                sb.append(TOKEN_TIMEINTERVAL).append('=');
+
+                if (interval.isLeftOpen()) {
+                    sb.append("]");
+                } else {
+                    sb.append("[");
+                }
+
+                final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+                sb.append(dateFormat.format(interval.getStart().asDate()));
+                sb.append(";");
+                sb.append(dateFormat.format(interval.getEnd().asDate()));
+
+                if (interval.isRightOpen()) {
+                    sb.append("[");
+                } else {
+                    sb.append("]");
+                }
+            }
 
             if (sb.charAt(sb.length() - 1) == '&') {
                 sb.deleteCharAt(sb.length() - 1);
