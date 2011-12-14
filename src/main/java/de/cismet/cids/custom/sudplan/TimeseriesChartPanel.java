@@ -36,6 +36,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 
+import de.cismet.cids.custom.sudplan.converter.TimeSeriesSerializer;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.Controllable;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
@@ -319,7 +320,15 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
             int count = 0;
             try {
                 for (final TimeseriesRetrieverConfig config : configs.keySet()) {
-                    final TimeseriesConverter converter = configs.get(config);
+                    // if TimeSeries data is located on DAV, we can assume that it is encoded in the
+                    // internal format (TimeSeriesSerializer)
+                    final TimeseriesConverter converter;
+                    if (TimeseriesRetrieverConfig.PROTOCOL_DAV.equals(config.getProtocol())) {
+                        converter = TimeSeriesSerializer.getInstance();
+                    } else {
+                        converter = configs.get(config);
+                    }
+
                     tsFuture = TimeseriesRetriever.getInstance().retrieve(config, converter);
                     final TimeSeries timeseries = tsFuture.get();
                     final String name = config.getObsProp();

@@ -143,4 +143,9 @@ public final class WuppertalTimeseriesConverter extends TimeseriesConverter {
     public InputStream convertBackward(final TimeSeries to) throws ConversionException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public String toString() {
+        return "Wuppertal Converter";
+    }
 }

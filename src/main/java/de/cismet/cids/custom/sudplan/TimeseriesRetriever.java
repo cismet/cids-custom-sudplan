@@ -276,6 +276,9 @@ public final class TimeseriesRetriever {
             BufferedInputStream bis = null;
             try {
                 client.executeMethod(get);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("GET operation has been finished with status code: " + get.getStatusCode());
+                }
 
                 bis = new BufferedInputStream(get.getResponseBodyAsStream());
 

@@ -165,8 +165,6 @@ public class RaineventEditor extends AbstractCidsBeanRenderer implements EditorS
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.forecast}"),
                 chkForecast,
                 org.jdesktop.beansbinding.BeanProperty.create("selected"));
-        binding.setSourceNullValue(false);
-        binding.setSourceUnreadableValue(false);
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
