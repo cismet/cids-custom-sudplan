@@ -51,6 +51,7 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
     private final transient ListSelectionListener listL;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private final transient javax.swing.JCheckBox chkDyna = new javax.swing.JCheckBox();
     private final transient javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
     private final transient javax.swing.JList jlsAvailableInput = new javax.swing.JList();
     // End of variables declaration//GEN-END:variables
@@ -145,7 +146,7 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        final java.awt.GridBagConstraints gridBagConstraints;
+        java.awt.GridBagConstraints gridBagConstraints;
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
@@ -165,7 +166,16 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jScrollPane1, gridBagConstraints);
-    } // </editor-fold>//GEN-END:initComponents
+
+        chkDyna.setText(NbBundle.getMessage(RunGeoCPMVisualPanelInput.class, "RunGeoCPMVisualPanelInput.chkDyna.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(chkDyna, gridBagConstraints);
+    }                                                                                                                    // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
 
