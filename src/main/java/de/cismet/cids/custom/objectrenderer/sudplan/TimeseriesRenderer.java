@@ -9,6 +9,8 @@ package de.cismet.cids.custom.objectrenderer.sudplan;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
+
 import java.awt.BorderLayout;
 
 import java.net.MalformedURLException;
@@ -34,6 +36,13 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
 
     private transient TimeseriesChartPanel panel;
 
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox chkforecast;
+    private javax.swing.JPanel pnlFiller;
+    private javax.swing.JPanel pnlNorth;
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
+    // End of variables declaration//GEN-END:variables
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -47,6 +56,9 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
 
     @Override
     protected void init() {
+        bindingGroup.unbind();
+        bindingGroup.bind();
+
         try {
             final String uri = (String)cidsBean.getProperty("uri"); // NOI18N
             final TimeseriesConverter converter = SMSUtils.loadConverter(cidsBean);
@@ -73,11 +85,48 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
+
+        pnlNorth = new javax.swing.JPanel();
+        chkforecast = new javax.swing.JCheckBox();
+        pnlFiller = new javax.swing.JPanel();
+
         setOpaque(false);
         setLayout(new java.awt.BorderLayout());
+
+        pnlNorth.setOpaque(false);
+        pnlNorth.setLayout(new java.awt.GridBagLayout());
+
+        chkforecast.setText(NbBundle.getMessage(TimeseriesRenderer.class, "TimeseriesRenderer.chkforecast.text")); // NOI18N
+        chkforecast.setContentAreaFilled(false);
+
+        final org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.forecast}"),
+                chkforecast,
+                org.jdesktop.beansbinding.BeanProperty.create("selected"));
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(8, 8, 8, 8);
+        pnlNorth.add(chkforecast, gridBagConstraints);
+
+        pnlFiller.setOpaque(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        pnlNorth.add(pnlFiller, gridBagConstraints);
+
+        add(pnlNorth, java.awt.BorderLayout.PAGE_START);
+
+        bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    // End of variables declaration//GEN-END:variables
-
 }
