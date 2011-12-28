@@ -8,7 +8,6 @@
 package de.cismet.cids.custom.sudplan;
 
 import Sirius.navigator.ui.ComponentRegistry;
-import Sirius.navigator.ui.DescriptionPane;
 
 import Sirius.server.middleware.types.MetaObject;
 
@@ -36,8 +35,6 @@ import de.cismet.cids.editors.converters.SqlTimestampToUtilDateConverter;
 import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
 
 import de.cismet.cismap.commons.features.Feature;
-
-import de.cismet.tools.CismetThreadPool;
 
 /**
  * DOCUMENT ME!
