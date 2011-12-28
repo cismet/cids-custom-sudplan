@@ -12,7 +12,7 @@
 [images/webstartsmall2.gif]
 
 ~~ we have to insert this by hand afterwards since apt does not support link images, see: http://jira.codehaus.org/browse/DOXIA-71
-~~ <a href="http://sudplan.cismet.de/sudplanDist/client/sudplan/navigator.jnlp"><img src="images/webstartsmall2.gif"/></a>
+~~ <a href="http://sudplan.cismet.de/sudplanDist/client/sudplan/cids-custom-sudplan-1.0-SNAPSHOT-starter.jnlp"><img src="images/webstartsmall2.gif"/></a>
 
   Documentation:
 
@@ -30,11 +30,11 @@
 
   * This software is ALPHA
 
-  * Username and credential are available for Sudplan partners only.
+  * Username and credential are available for Sudplan partners only
 
   * Artefacts created in a session will be deleted hourly
 
-  * Rainfall downscaling can only be performed once per Application startup (because the SOS dummy works in-memory)
+  * This software is connected to real services, so please be careful when trying to perform downscaling
 
   * Please report issues and feature requests on {{{http://sudplanwp3.cismet.de/?cat=47} Sudplan WP3 Blog}} using the {{{https://service.projectplace.com/pp/pp.cgi/d604965796/Sudplan_SMS_Issue_Reporting_template.ppt?save_as=1} PPT template}}
 
