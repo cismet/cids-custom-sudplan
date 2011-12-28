@@ -20,6 +20,8 @@ import java.util.Observer;
 
 import javax.swing.JOptionPane;
 
+import de.cismet.cids.custom.sudplan.concurrent.ProgressWatch;
+
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.tools.gui.downloadmanager.Download;
@@ -70,6 +72,20 @@ public abstract class AbstractAsyncModelManager extends AbstractModelManager imp
             fireBroken();
         }
     }
+
+    @Override
+    protected void internalExecute() throws IOException {
+        prepareExecution();
+
+        ProgressWatch.getWatch().submit(createWatchable());
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
+    protected abstract void prepareExecution() throws IOException;
 
     /**
      * DOCUMENT ME!

@@ -17,7 +17,6 @@ import java.io.StringWriter;
 import de.cismet.cids.custom.sudplan.AbstractAsyncModelManager;
 import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
 import de.cismet.cids.custom.sudplan.SMSUtils;
-import de.cismet.cids.custom.sudplan.concurrent.ProgressWatch;
 import de.cismet.cids.custom.sudplan.geocpmrest.GeoCPMRestClient;
 import de.cismet.cids.custom.sudplan.geocpmrest.io.GeoCPMInput;
 
@@ -40,7 +39,7 @@ public final class RunoffModelManager extends AbstractAsyncModelManager {
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    protected void internalExecute() throws IOException {
+    protected void prepareExecution() throws IOException {
         if (isFinished()) {
             return;
         }
@@ -62,10 +61,8 @@ public final class RunoffModelManager extends AbstractAsyncModelManager {
 
             mapper.writeValue(writer, runinfo);
 
-            cidsBean.setProperty("runinfo", writer.toString()); // NOI18N
+            cidsBean.setProperty("runinfo", writer.toString());      // NOI18N
             cidsBean = cidsBean.persist();
-
-            ProgressWatch.getWatch().submit(createWatchable());
         } catch (final Exception ex) {
             final String message = "cannot store runinfo: " + runId; // NOI18N
             LOG.error(message, ex);
