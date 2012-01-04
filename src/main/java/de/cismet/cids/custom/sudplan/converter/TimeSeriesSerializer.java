@@ -24,7 +24,6 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.OutputStreamWriter;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.Arrays;
@@ -33,10 +32,10 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 /**
- * DOCUMENT ME!
+ * Internal converter for imported TimeSeries.
  *
- * @author   bfriedrich
- * @version  $Revision$, $Date$
+ * @author   Benjamin Friedrich benjamin.friedrich@cismet.de
+ * @version  1.0, 04.01.2012
  */
 public final class TimeSeriesSerializer extends TimeseriesConverter {
 

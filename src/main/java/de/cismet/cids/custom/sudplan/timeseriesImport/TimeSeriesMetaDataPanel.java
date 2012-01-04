@@ -12,8 +12,6 @@
  */
 package de.cismet.cids.custom.sudplan.timeseriesImport;
 
-import net.opengis.sensorml.v_1_0_1.DocumentList;
-
 import org.apache.log4j.Logger;
 
 import java.awt.event.ActionEvent;

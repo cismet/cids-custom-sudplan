@@ -11,8 +11,6 @@ import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
 import org.openide.util.HelpCtx;
 
-import java.awt.Component;
-
 import javax.swing.event.ChangeListener;
 
 /**
@@ -68,21 +66,6 @@ public abstract class AbstractWizardPanelCtrl implements WizardDescriptor.Panel 
      * @param  wizard  DOCUMENT ME!
      */
     protected abstract void store(WizardDescriptor wizard);
-
-//    @Override
-//    public void readSettings(Object data) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
-//
-//    @Override
-//    public void storeSettings(Object data) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
-//
-//    @Override
-//    public boolean isValid() {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
 
     @Override
     public void addChangeListener(final ChangeListener l) {

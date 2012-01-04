@@ -115,7 +115,9 @@ public final class WuppertalTimeseriesConverter extends TimeseriesConverter {
                 }
 
                 if (Thread.currentThread().isInterrupted()) {
-                    throw new ConversionException("execution was interrupted"); // NOI18N
+//                    throw new ConversionException("execution was interrupted"); // NOI18N
+                    LOG.warn("execution was interrupted"); // NOI18N
+                    return null;
                 }
 
                 line = br.readLine();

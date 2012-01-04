@@ -8,16 +8,24 @@
 package de.cismet.cids.custom.sudplan.timeseriesImport;
 
 import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.exception.ConnectionException;
 
 import Sirius.server.middleware.types.MetaClass;
+import Sirius.server.search.CidsServerSearch;
 
 import org.apache.log4j.Logger;
 
 import org.openide.WizardDescriptor;
+import org.openide.util.Exceptions;
 
 import java.awt.Component;
 
+import java.text.MessageFormat;
+
+import java.util.Collection;
+
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.server.search.TimeSeriesSearch;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -68,9 +76,9 @@ public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
         if (mc == null) {
             LOG.error(
                 "Was not able to retrieve MetaClass for domain '"
-                        + domain                        // NOI18N
+                        + domain                        // NOI18N //NOI18N
                         + "' and table '"
-                        + SMSUtils.TABLENAME_TIMESERIES // NOI18N
+                        + SMSUtils.TABLENAME_TIMESERIES // NOI18N //NOI18N
                         + "'");                         // NOI18N
         } else {
             this.cidsBean = mc.getEmptyInstance().getBean();
@@ -120,9 +128,9 @@ public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/timeseriesImport/Bundle").getString(
-                    "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).nameAndStation"));
+                    "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).nameAndStation")); // NOI18N
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Leaving isValid() with retun value false"); // NOI18N
+                LOG.debug("Leaving isValid() with retun value false");                                          // NOI18N
             }
             return false;
         }
@@ -132,10 +140,49 @@ public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/timeseriesImport/Bundle").getString(
-                    "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).name"));
+                    "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).name")); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Leaving isValid() with retun value false");                                // NOI18N
+            }
+            return false;
+        }
+
+        try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Looking for existing TimeSeries with name " + name);                   // NOI18N
+            }
+            final CidsServerSearch search = new TimeSeriesSearch(name);
+            final Collection coll = SessionManager.getProxy().customServerSearch(search);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Result of search for TimeSeries with name : " + name + " is " + coll); // NOI18N
+            }
+
+            if (!coll.isEmpty()) {
+                wizard.putProperty(
+                    WizardDescriptor.PROP_WARNING_MESSAGE,
+                    MessageFormat.format(
+                        java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/timeseriesImport/Bundle")
+                                    .getString(
+                                        "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).duplicateName"),
+                        name));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Leaving isValid() with retun value false"); // NOI18N
+                }
+
+                return false;
+            }
+        } catch (final ConnectionException ex) {
+            LOG.error("An error occured while TimeSeries name", ex); // NOI18N
+
+            wizard.putProperty(
+                WizardDescriptor.PROP_ERROR_MESSAGE,
+                java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/timeseriesImport/Bundle").getString(
+                    "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).ConnectionException"));
+
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Leaving isValid() with retun value false"); // NOI18N
             }
+
             return false;
         }
 
@@ -143,9 +190,9 @@ public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
         wizard.putProperty(
             WizardDescriptor.PROP_INFO_MESSAGE,
             java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/timeseriesImport/Bundle").getString(
-                "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).persisting"));
+                "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).persisting")); // NOI18N
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Leaving isValid() with retun value true"); // NOI18N
+            LOG.debug("Leaving isValid() with retun value true");                                       // NOI18N
         }
         return true;
     }
