@@ -936,9 +936,9 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 JOptionPane.showMessageDialog(
                     SOSFeatureInfoDisplay.this,
                     java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/Bundle").getString(
-                        "SosFeatureInfoDisplay.TimeSeriesDisplayer.done().JOptionPane.showMessageDialog(Component, String, String,int).errorMsg.title"),
-                    java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/Bundle").getString(
                         "SosFeatureInfoDisplay.TimeSeriesDisplayer.done().JOptionPane.showMessageDialog(Component, String, String,int).errorMsg.message"),
+                    java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/Bundle").getString(
+                        "SosFeatureInfoDisplay.TimeSeriesDisplayer.done().JOptionPane.showMessageDialog(Component, String, String,int).errorMsg.title"),
                     JOptionPane.ERROR_MESSAGE);
 
                 throw new IllegalStateException(message, ex.getCause());
