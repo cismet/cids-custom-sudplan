@@ -38,9 +38,18 @@ public class TimeSeriesRetrieverTest
     
     private static final String TARGET_FILE = "timeseries_retriever_test_file";
      
-    private static final String URL = "dav:http://sudplan.cismet.de/tsDav/" + 
-                                       TARGET_FILE +
-                                       "?ts:observed_property=urn:ogc:def:property:OGC:prec";
+    private static final String URL = "dav:" +
+                                      TimeSeriesRemoteHelper.DAV_HOST
+                                      + '?'
+                                      + TimeSeries.OBSERVEDPROPERTY
+                                      + "=urn:ogc:def:property:OGC:prec&" // NOI18N
+                                      + TimeSeries.PROCEDURE
+                                      + "=urn:ogc:object:"
+                                      + TARGET_FILE
+                                      + ":prec:unknown&"                  // NOI18N
+                                      + TimeSeries.OFFERING
+                                      + '='
+                                      + TARGET_FILE;          // NOI18N
     
     
     private static TimeSeries testTs;
