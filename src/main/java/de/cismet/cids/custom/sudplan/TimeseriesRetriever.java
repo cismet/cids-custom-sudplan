@@ -249,19 +249,15 @@ public final class TimeseriesRetriever {
                 throw new TimeseriesRetrieverException("cannot fetch timeseries from dav without converter"); // NOI18N
             }
 
-//            if(converter.getClass().equals(TimeSeriesSerializer.class))
-//            {
-//                converter = TimeSeriesSerializer.getInstance();
-//                LOG.info("Specified Converter " + converter.getClass().getName() +
-//                         " is ignored and replaced by TimeSeriesSerializer instance");
-//            }
-
             // we don't use the cismet dav client as its "care-less" implementation leads to unpleasant behaviour in
             // case of exception/about etc.
             final HttpClient client = TimeSeriesRemoteHelper.createHttpClient(this.config.getLocation().getHost(),
                     TimeSeriesRemoteHelper.CREDS);
 
-            final GetMethod get = new GetMethod(config.getLocation().toExternalForm());
+            String location = config.getLocation().toExternalForm();
+            location += '/' + config.getOffering();
+
+            final GetMethod get = new GetMethod(location);
             BufferedInputStream bis = null;
             try {
                 client.executeMethod(get);

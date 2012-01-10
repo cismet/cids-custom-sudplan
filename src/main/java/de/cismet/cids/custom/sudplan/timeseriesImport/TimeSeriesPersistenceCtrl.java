@@ -54,8 +54,8 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
 
     private static final transient Logger LOG = Logger.getLogger(TimeSeriesPersistenceCtrl.class);
 
-    private static final String URL_PREFIX = "dav:";                                               // NOI18N
-    private static final String URL_SUFFX = "?ts:observed_property=urn:ogc:def:property:OGC:prec"; // NOI18N
+    private static final String URL_PREFIX = "dav:"; // NOI18N private static final String URL_SUFFX =
+                                                     // "?ts:observed_property=urn:ogc:def:property:OGC:prec"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -125,7 +125,7 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
                             final TimeseriesTransmitter transmitter = TimeseriesTransmitter.getInstance();
 
                             // send aggregated TimeSeries to DAV
-                            URL url = new URL(TimeSeriesRemoteHelper.DAV_HOST + aggTsFileName);
+                            URL url = new URL(TimeSeriesRemoteHelper.DAV_HOST + '/' + aggTsFileName);
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("start transmitting file " + aggTsFileName + " to " + url); // NOI18N
                             }
@@ -142,7 +142,7 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
                             }
 
                             // send original TimeSeries to DAV
-                            url = new URL(TimeSeriesRemoteHelper.DAV_HOST + unknownResFileName);
+                            url = new URL(TimeSeriesRemoteHelper.DAV_HOST + '/' + unknownResFileName);
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("start transmitting file " + unknownResFileName + " to " + url); // NOI18N
                             }
@@ -166,7 +166,20 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
 
                                 // the file with the unknown resolution is associated with the bean as
                                 // it represents the original data
-                                tsBean.setProperty("uri", URL_PREFIX + url.toURI().toString() + URL_SUFFX); // NOI18N
+                                tsBean.setProperty(
+                                    "uri",                                      // NOI18N
+                                    URL_PREFIX
+                                            + TimeSeriesRemoteHelper.DAV_HOST
+                                            + '?'
+                                            + TimeSeries.OBSERVEDPROPERTY
+                                            + "=urn:ogc:def:property:OGC:prec&" // NOI18N
+                                            + TimeSeries.PROCEDURE
+                                            + "=urn:ogc:object:"
+                                            + tsName
+                                            + ":prec:unknown&"                  // NOI18N
+                                            + TimeSeries.OFFERING
+                                            + '='
+                                            + unknownResFileName);              // NOI18N
 
                                 final Object converter = wizard.getProperty(
                                         TimeSeriesImportWizardAction.PROP_CONVERTER);

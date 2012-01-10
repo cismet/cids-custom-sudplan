@@ -31,7 +31,7 @@ public final class TimeSeriesRemoteHelper {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String DAV_HOST = "http://sudplan.cismet.de/tsDav/";
+    public static final String DAV_HOST = "http://sudplan.cismet.de/tsDav";
     public static final Credentials CREDS = new UsernamePasswordCredentials("tsDav", "RHfio2l4wrsklfghj");
 
     private static final Logger LOG = Logger.getLogger(TimeSeriesRemoteHelper.class);

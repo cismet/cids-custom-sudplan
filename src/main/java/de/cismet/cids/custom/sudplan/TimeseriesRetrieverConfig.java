@@ -107,6 +107,44 @@ public final class TimeseriesRetrieverConfig {
     /**
      * DOCUMENT ME!
      *
+     * @param   resolution  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  NullPointerException  DOCUMENT ME!
+     */
+    public TimeseriesRetrieverConfig changeResolution(final Resolution resolution) {
+        if (resolution == null) {
+            throw new NullPointerException("Resolution must not be null");
+        }
+
+        String offering;
+        String procedure;
+        if (PROTOCOL_DAV.equals(this.getProtocol())) {
+            offering = this.offering.replaceFirst("_unknown$", '_' + resolution.getPrecision());               // NOI18N
+            procedure = this.procedure.replaceFirst("prec:unknown", "prec:" + resolution.getPrecision());      // NOI18N
+        } else {
+            offering = this.offering.replaceFirst("prec_\\d+[YMd]", "prec_" + resolution.getOfferingSuffix()); // NOI18N
+            procedure = this.procedure.replaceFirst("prec:\\d+[YMs]", "prec:" + resolution.getPrecision());    // NOI18N
+        }
+
+        final TimeseriesRetrieverConfig config = new TimeseriesRetrieverConfig(
+                this.protocol,
+                this.handlerLookup,
+                this.location,
+                procedure,
+                this.foi,
+                this.obsProp,
+                offering,
+                this.geometry,
+                this.interval);
+
+        return config;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @return  DOCUMENT ME!
      */
     public String getProtocol() {
