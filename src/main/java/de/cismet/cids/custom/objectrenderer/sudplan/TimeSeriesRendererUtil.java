@@ -25,7 +25,7 @@ public final class TimeSeriesRendererUtil {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final Pattern REGEX_PREC = Pattern.compile("prec:(\\d+[YMs])"); // NOI18N
+    private static final Pattern REGEX_PREC = Pattern.compile(".*prec:(\\d+[YMs])"); // NOI18N
     private static final Logger LOG = Logger.getLogger(TimeSeriesRendererUtil.class);
 
     //~ Constructors -----------------------------------------------------------
@@ -41,7 +41,7 @@ public final class TimeSeriesRendererUtil {
     /**
      * Returns the best suitable {@link Resolution} for TimeSeries preview visualization.
      *
-     * @param   config 
+     * @param   config  DOCUMENT ME!
      *
      * @return  best suitable preview {@link Resolution}
      */

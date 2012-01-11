@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.Properties;
@@ -121,11 +122,16 @@ public final class TimeseriesRetrieverConfig {
         String offering;
         String procedure;
         if (PROTOCOL_DAV.equals(this.getProtocol())) {
-            offering = this.offering.replaceFirst("_unknown$", '_' + resolution.getPrecision());               // NOI18N
-            procedure = this.procedure.replaceFirst("prec:unknown", "prec:" + resolution.getPrecision());      // NOI18N
+            offering = this.offering.replaceFirst("_unknown$", '_' + resolution.getPrecision());                  // NOI18N
+            procedure = this.procedure.replaceFirst("prec:unknown", "prec:" + resolution.getPrecision());         // NOI18N
         } else {
-            offering = this.offering.replaceFirst("prec_\\d+[YMd]", "prec_" + resolution.getOfferingSuffix()); // NOI18N
-            procedure = this.procedure.replaceFirst("prec:\\d+[YMs]", "prec:" + resolution.getPrecision());    // NOI18N
+            offering = this.offering.replaceFirst("prec_\\d+[YMdhms]", "prec_" + resolution.getOfferingSuffix()); // NOI18N
+            procedure = this.procedure.replaceFirst("prec:\\d+[YMs]", "prec:" + resolution.getPrecision());       // NOI18N
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(MessageFormat.format(
+                    "Changed offering {0} to {1} and procedure {2} to {3}",
+                    new Object[] { this.offering, offering, this.procedure, procedure }));
         }
 
         final TimeseriesRetrieverConfig config = new TimeseriesRetrieverConfig(

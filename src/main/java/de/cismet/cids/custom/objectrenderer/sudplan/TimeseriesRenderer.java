@@ -19,9 +19,6 @@ import java.net.MalformedURLException;
 
 import java.text.MessageFormat;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -135,7 +132,7 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         bindingGroup.bind();
 
         try {
-            final String uri = (String)cidsBean.getProperty("uri"); // NOI18N 
+            final String uri = (String)cidsBean.getProperty("uri"); // NOI18N
             final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
             this.setTimeSeriesPanel(TimeSeriesRendererUtil.getPreviewResolution(config));
         } catch (final MalformedURLException ex) {
