@@ -9,15 +9,11 @@ package de.cismet.cids.custom.objectrenderer.sudplan;
 
 import Sirius.navigator.ui.ComponentRegistry;
 
-import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
-
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import java.net.MalformedURLException;
 
@@ -26,15 +22,14 @@ import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
-import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 
 /**
@@ -54,6 +49,7 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
     private transient TimeseriesChartPanel panel;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnOriginalTS;
     private javax.swing.JCheckBox chkforecast;
     private javax.swing.JPanel pnlFiller;
     private javax.swing.JPanel pnlNorth;
@@ -88,32 +84,41 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
                 config = config.changeResolution(resolution);
             }
 
-            if (this.panel != null) {
-                super.remove(this.panel);
-            }
+            final TimeseriesRetrieverConfig tsrConfig = config;
 
-            this.panel = new TimeseriesChartPanel(config, converter);
-            add(this.panel, BorderLayout.CENTER);
+            SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        if (panel != null) {
+                            TimeseriesRenderer.this.remove(panel);
+                        }
+
+                        TimeseriesRenderer.this.panel = new TimeseriesChartPanel(tsrConfig, converter);
+                        TimeseriesRenderer.this.add(TimeseriesRenderer.this.panel, BorderLayout.CENTER);
+
+                        TimeseriesRenderer.this.invalidate();
+                        TimeseriesRenderer.this.validate();
+                    }
+                });
         } catch (final IllegalStateException e) {
             if (resolution == null) {
                 LOG.error("An error occured while retrieving original TimeSeries", e); // NOI18N
                 throw e;
             } else {
                 // most likely, there is no TimeSeries with the specified resolution
-                LOG.warn("An error occured while retrieving TimeSeries with resolution " + resolution, e); // NOI18N
+                LOG.warn("An error occured while retrieving TimeSeries with resolution " + resolution, e);            // NOI18N
                 final int answer = JOptionPane.showConfirmDialog(
                         ComponentRegistry.getRegistry().getMainWindow(),
                         MessageFormat.format(
                             java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle")
                                         .getString(
-                                            "TimeseriesRenderer.setTimeSeriesPanel(Resolution).JOptionPane.message"),
+                                            "TimeseriesRenderer.setTimeSeriesPanel(Resolution).JOptionPane.message"), // NOI18N
                             resolution.getLocalisedName()),
                         java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle")
                                     .getString("TimeseriesRenderer.setTimeSeriesPanel(Resolution).JOptionPane.title"),
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.WARNING_MESSAGE);
-                // WARNING
-                // may crash system
 
                 if (answer == JOptionPane.YES_OPTION) {
                     this.setTimeSeriesPanel(null);
@@ -130,46 +135,9 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         bindingGroup.bind();
 
         try {
-            final String uri = (String)cidsBean.getProperty("uri"); // NOI18N final TimeseriesConverter converter =
-                                                                    // SMSUtils.loadConverter(cidsBean);
-
-            // ----
+            final String uri = (String)cidsBean.getProperty("uri"); // NOI18N 
             final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
-
-            if (config.getProtocol().equals(TimeseriesRetrieverConfig.PROTOCOL_DAV)) {
-                // config = config.changeResolution(Resolution.DAY);
-                this.setTimeSeriesPanel(Resolution.DAY);
-            } else {
-                final String procedure = config.getProcedure();
-
-                final Pattern p = Pattern.compile("prec:(\\d+[YMs])"); // NOI18N
-                final Matcher m = p.matcher(procedure);
-
-                Resolution resolution = Resolution.DAY;
-                if (m.matches()) {
-                    final String precision = m.group(1);
-                    if (!precision.equals(Resolution.DAY.getPrecision())) {
-                        if (precision.equals(Resolution.MONTH.getPrecision())) {
-                            resolution = Resolution.MONTH;
-                        } else if (precision.equals(Resolution.YEAR.getPrecision())) {
-                            resolution = Resolution.YEAR;
-                        } else if (precision.equals(Resolution.DECADE.getPrecision())) {
-                            resolution = Resolution.DECADE;
-                        } else {
-                            LOG.warn("Unknown resolution " + precision + ". Using default resolution " + resolution); // NOI18N
-                        }
-                    }
-                } else {
-                    LOG.warn("Can not determine TimeSeries resolution. Using default resolution " + resolution);      // NOI18N
-                }
-
-                // config = config.changeResolution(resolution);
-                this.setTimeSeriesPanel(resolution);
-            }
-
-            // panel = new TimeseriesChartPanel(config, converter);
-
-            // add(panel, BorderLayout.CENTER);
+            this.setTimeSeriesPanel(TimeSeriesRendererUtil.getPreviewResolution(config));
         } catch (final MalformedURLException ex) {
             final String message = "cidsbean contains invalid uri"; // NOI18N
             LOG.error(message, ex);
@@ -196,6 +164,7 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
 
         pnlNorth = new javax.swing.JPanel();
         chkforecast = new javax.swing.JCheckBox();
+        btnOriginalTS = new javax.swing.JButton();
         pnlFiller = new javax.swing.JPanel();
 
         setOpaque(false);
@@ -223,6 +192,18 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints.insets = new java.awt.Insets(8, 8, 8, 8);
         pnlNorth.add(chkforecast, gridBagConstraints);
 
+        btnOriginalTS.setText(org.openide.util.NbBundle.getMessage(
+                TimeseriesRenderer.class,
+                "TimeseriesRenderer.btnOriginalTS.text")); // NOI18N
+        btnOriginalTS.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnOriginalTSActionPerformed(evt);
+                }
+            });
+        pnlNorth.add(btnOriginalTS, new java.awt.GridBagConstraints());
+
         pnlFiller.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -235,4 +216,25 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void btnOriginalTSActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOriginalTSActionPerformed
+
+        final int answer = JOptionPane.showConfirmDialog(
+                ComponentRegistry.getRegistry().getMainWindow(),
+                java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle").getString(
+                    "TimeSeriesRenderer.btnOriginalTSActionPerformed(ActionEvent).message"),
+                java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle").getString(
+                    "TimeSeriesRenderer.btnOriginalTSActionPerformed(ActionEvent).title"),
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+
+        if (answer == JOptionPane.YES_OPTION) {
+            this.setTimeSeriesPanel(null);
+        }
+    }//GEN-LAST:event_btnOriginalTSActionPerformed
 }

@@ -79,7 +79,12 @@ public final class WuppertalTimeseriesConverter extends TimeseriesConverter {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("token without value: " + split[0]); // NOI18N
                     }
-                } else if (split.length == 2) {
+                } else {
+                    if (split.length > 2) {
+                        // usually, there should be only 2 splits, but there  might be more (e.g. for comments)
+                        LOG.warn("illegal line format: " + line + " -> only first 2 splits are considered"); // NOI18N
+                    }
+
                     final String key = split[0];
                     final String value = split[1];
 
@@ -110,8 +115,6 @@ public final class WuppertalTimeseriesConverter extends TimeseriesConverter {
                         final float val = NUMBERFORMAT.parse(value.trim()).floatValue();
                         ts.setValue(new TimeStamp(date), PropertyNames.VALUE, val);
                     }
-                } else {
-                    throw new ConversionException("illegal line format: " + line); // NOI18N
                 }
 
                 if (Thread.currentThread().isInterrupted()) {
