@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.rainfall;
 
-import org.apache.log4j.Logger;
-
 import java.util.Date;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
@@ -22,10 +20,6 @@ import de.cismet.cids.dynamics.CidsBean;
  * @version  $Revision$, $Date$
  */
 public final class RainfallDownscalingInput {
-
-    //~ Static fields/initializers ---------------------------------------------
-
-    private static final transient Logger LOG = Logger.getLogger(RainfallDownscalingInput.class);
 
     //~ Instance fields --------------------------------------------------------
 

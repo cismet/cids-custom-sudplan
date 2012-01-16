@@ -33,6 +33,8 @@ public final class RainfallDownscalingOutput {
     private transient String tsInput1dName;
     private transient int tsResult1dId;
     private transient String tsResult1dName;
+    private transient int tsInputId;
+    private transient String tsInputName;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -57,6 +59,8 @@ public final class RainfallDownscalingOutput {
      * @param  tsInput1dName   DOCUMENT ME!
      * @param  tsResult1dId    DOCUMENT ME!
      * @param  tsResult1dName  DOCUMENT ME!
+     * @param  tsInputId       DOCUMENT ME!
+     * @param  tsInputName     DOCUMENT ME!
      */
     public RainfallDownscalingOutput(final int modelInputId,
             final int modelRunId,
@@ -69,7 +73,9 @@ public final class RainfallDownscalingOutput {
             final int tsInput1dId,
             final String tsInput1dName,
             final int tsResult1dId,
-            final String tsResult1dName) {
+            final String tsResult1dName,
+            final int tsInputId,
+            final String tsInputName) {
         this.modelInputId = modelInputId;
         this.modelRunId = modelRunId;
         this.tsResultId = tsResultId;
@@ -82,6 +88,8 @@ public final class RainfallDownscalingOutput {
         this.tsInput1dName = tsInput1dName;
         this.tsResult1dId = tsResult1dId;
         this.tsResult1dName = tsResult1dName;
+        this.tsInputId = tsInputId;
+        this.tsInputName = tsInputName;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -345,5 +353,50 @@ public final class RainfallDownscalingOutput {
      */
     public void setTsResult1dName(final String tsResult1dName) {
         this.tsResult1dName = tsResult1dName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getTsInputId() {
+        return tsInputId;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  tsInputId  DOCUMENT ME!
+     */
+    public void setTsInputId(final int tsInputId) {
+        this.tsInputId = tsInputId;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public CidsBean fetchTsInput() {
+        return SMSUtils.fetchCidsBean(tsInputId, SMSUtils.TABLENAME_TIMESERIES);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getTsInputName() {
+        return tsInputName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  tsInputName  DOCUMENT ME!
+     */
+    public void setTsInputName(final String tsInputName) {
+        this.tsInputName = tsInputName;
     }
 }

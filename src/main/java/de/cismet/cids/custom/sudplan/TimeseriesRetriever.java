@@ -191,7 +191,7 @@ public final class TimeseriesRetriever {
             final DataHandler handler;
             try {
                 handler = DataHandlerCache.getInstance()
-                            .getSOSDataHandler(config.getHandlerLookup(), config.getLocation());
+                            .getSOSDataHandler(config.getHandlerLookup(), config.getLocation().toExternalForm());
             } catch (DataHandlerCacheException ex) {
                 final String message = "cannot create data handler"; // NOI18N
                 LOG.error(message, ex);

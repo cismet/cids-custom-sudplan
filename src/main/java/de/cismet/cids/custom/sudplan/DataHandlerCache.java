@@ -13,8 +13,6 @@ import at.ac.ait.enviro.tsapi.handler.DataHandler;
 
 import org.apache.log4j.Logger;
 
-import java.net.URL;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,7 +56,7 @@ public final class DataHandlerCache {
      *
      * @throws  DataHandlerCacheException  DOCUMENT ME!
      */
-    public DataHandler getSOSDataHandler(final String lookup, final URL url) throws DataHandlerCacheException {
+    public DataHandler getSOSDataHandler(final String lookup, final String url) throws DataHandlerCacheException {
         final String key = lookup + "-" + url.toString(); // NOI18N
 
         if (!sosCache.containsKey(key)) {
@@ -67,7 +65,7 @@ public final class DataHandlerCache {
             handler.setId(lookup);
 
             try {
-                handler.getConnector().connect(url.toExternalForm());
+                handler.getConnector().connect(url);
                 handler.open();
             } catch (final Exception e) {
                 final String message = "cannot initialise handler"; // NOI18N
@@ -91,7 +89,7 @@ public final class DataHandlerCache {
      *
      * @throws  DataHandlerCacheException  DOCUMENT ME!
      */
-    public DataHandler getSPSDataHandler(final String lookup, final URL url) throws DataHandlerCacheException {
+    public DataHandler getSPSDataHandler(final String lookup, final String url) throws DataHandlerCacheException {
         final String key = lookup + "-" + url.toString(); // NOI18N
 
         if (!spsCache.containsKey(key)) {
@@ -100,7 +98,7 @@ public final class DataHandlerCache {
             handler.setId(lookup);
 
             try {
-                handler.getConnector().connect(url.toExternalForm());
+                handler.getConnector().connect(url);
                 handler.open();
             } catch (final Exception e) {
                 final String message = "cannot initialise handler"; // NOI18N

@@ -76,7 +76,7 @@ public class TimeseriesRetrieverConfigTest
         TimeseriesRetrieverConfig result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
         assertNotNull(result.getInterval());
         assertTrue(result.getInterval().isFinte());
-        assertEquals(url, result.toTSTBUrl());
+        assertEquals(url, result.toUrl());
         
         //---
         
@@ -86,7 +86,7 @@ public class TimeseriesRetrieverConfigTest
         result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
         assertNotNull(result.getInterval());
         assertTrue(result.getInterval().isLeftOpen());
-        assertEquals(url, result.toTSTBUrl());
+        assertEquals(url, result.toUrl());
         
         //---
         
@@ -96,7 +96,7 @@ public class TimeseriesRetrieverConfigTest
         result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
         assertNotNull(result.getInterval());
         assertTrue(result.getInterval().isRightOpen());
-        assertEquals(url, result.toTSTBUrl());
+        assertEquals(url, result.toUrl());
         
 
         //---
@@ -107,7 +107,7 @@ public class TimeseriesRetrieverConfigTest
         result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
         assertNotNull(result.getInterval());
         assertTrue(result.getInterval().isLeftOpen() && result.getInterval().isRightOpen());
-        assertEquals(url, result.toTSTBUrl());
+        assertEquals(url, result.toUrl());
     }
     
     
@@ -126,6 +126,6 @@ public class TimeseriesRetrieverConfigTest
 
         TimeseriesRetrieverConfig result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
 
-        assertEquals(url, result.toTSTBUrl());
+        assertEquals(url, result.toUrl());
     }
 }

@@ -21,11 +21,11 @@ import java.sql.Timestamp;
 
 import java.util.GregorianCalendar;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
+import de.cismet.cids.custom.sudplan.commons.CismetExecutors;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -48,6 +48,14 @@ public abstract class AbstractModelManager implements ModelManager {
 
     private static final transient Logger LOG = Logger.getLogger(AbstractModelManager.class);
 
+    // NOTE: maybe we need a per-cidsbean dispatch thread, but this should do
+    private static final ExecutorService progressDispatcher;
+
+    static {
+        progressDispatcher = CismetExecutors.newSingleThreadExecutor(
+                SudplanConcurrency.createThreadFactory("model-progress-dispatcher")); // NOI18N
+    }
+
     //~ Instance fields --------------------------------------------------------
 
     protected transient CidsBean cidsBean;
@@ -56,8 +64,6 @@ public abstract class AbstractModelManager implements ModelManager {
 
     private transient volatile JComponent ui;
 
-    private final ExecutorService progressDispatcher;
-
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -65,8 +71,6 @@ public abstract class AbstractModelManager implements ModelManager {
      */
     public AbstractModelManager() {
         progressSupport = new ProgressSupport();
-        progressDispatcher = Executors.newSingleThreadExecutor(
-                SudplanConcurrency.createThreadFactory("model-progress-dispatcher")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -210,14 +214,14 @@ public abstract class AbstractModelManager implements ModelManager {
      * @throws  IllegalStateException  DOCUMENT ME!
      */
     protected void fireProgressed(final int step, final int maxSteps) {
-        if (!isStarted()) {
-            throw new IllegalStateException("cannot progress when not started yet"); // NOI18N
-        }
-
         final Runnable fireProgressed = new Runnable() {
 
                 @Override
                 public void run() {
+                    if (!isStarted()) {
+                        throw new IllegalStateException("cannot progress when not started yet"); // NOI18N
+                    }
+
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("fireProgressed: " + AbstractModelManager.this); // NOI18N
                     }
@@ -243,14 +247,14 @@ public abstract class AbstractModelManager implements ModelManager {
      * @throws  IllegalStateException  DOCUMENT ME!
      */
     protected void fireBroken() {
-        if (!isStarted()) {
-            throw new IllegalStateException("cannot be broken when not started yet"); // NOI18N
-        }
-
         final Runnable fireBroken = new Runnable() {
 
                 @Override
                 public void run() {
+                    if (!isStarted()) {
+                        throw new IllegalStateException("cannot be broken when not started yet"); // NOI18N
+                    }
+
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("fireBroken: " + AbstractModelManager.this); // NOI18N
                     }
@@ -283,6 +287,10 @@ public abstract class AbstractModelManager implements ModelManager {
 
                 @Override
                 public void run() {
+                    if (!isStarted()) {
+                        throw new IllegalStateException("cannot be finished when not started yet"); // NOI18N
+                    }
+
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("fireFinished: " + AbstractModelManager.this); // NOI18N
                     }

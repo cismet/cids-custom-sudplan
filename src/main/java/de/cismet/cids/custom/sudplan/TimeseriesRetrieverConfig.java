@@ -500,8 +500,8 @@ public final class TimeseriesRetrieverConfig {
      *
      * @return  DOCUMENT ME!
      */
-    public String toTSTBUrl() {
-        final StringBuilder sb = new StringBuilder(PROTOCOL_TSTB);
+    public String toUrl() {
+        final StringBuilder sb = new StringBuilder(protocol);
         sb.append(':').append(handlerLookup);
         sb.append('@').append(location);
 
@@ -559,6 +559,6 @@ public final class TimeseriesRetrieverConfig {
 
     @Override
     public String toString() {
-        return toTSTBUrl() + "[" + super.toString() + "]"; // NOI18N
+        return toUrl() + "[" + super.toString() + "]"; // NOI18N
     }
 }

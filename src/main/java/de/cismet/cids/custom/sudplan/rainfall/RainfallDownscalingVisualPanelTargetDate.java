@@ -61,8 +61,7 @@ public final class RainfallDownscalingVisualPanelTargetDate extends javax.swing.
      */
     void init() {
         if (model.getTargetYear() == null) {
-            // FIXME: atr preselect hack: use 2086 instead of 2050
-            txtYear.setText("2086"); // NOI18N
+            txtYear.setText("2050"); // NOI18N
         } else {
             txtYear.setText(model.getTargetYear().toString());
         }
@@ -95,7 +94,7 @@ public final class RainfallDownscalingVisualPanelTargetDate extends javax.swing.
         setLayout(new java.awt.GridBagLayout());
 
         sldYears.setMajorTickSpacing(10);
-        sldYears.setMaximum(2095);
+        sldYears.setMaximum(2085);
         sldYears.setMinimum(2025);
         sldYears.setMinorTickSpacing(5);
         sldYears.setPaintLabels(true);

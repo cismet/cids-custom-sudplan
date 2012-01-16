@@ -103,34 +103,22 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         jtbAdditionalResults.setDefaultRenderer(String.class, new AdditionalResultsCellRenderer());
         jtbAdditionalResults.setPreferredScrollableViewportSize(jtbAdditionalResults.getPreferredSize());
 
-//        final CidsBean resultTs = model.fetchTsResult();
-//        final CidsBean result30Ts = model.fetchTsResult30();
-//        final CidsBean input30Ts = model.fetchTsInput30();
-        final CidsBean input1dTs = model.fetchTsInput1d();
-        final CidsBean result1dTs = model.fetchTsResult1d();
+        final CidsBean inputTs = model.fetchTsInput();
+        final CidsBean resultTs = model.fetchTsResult();
 
         final TimeseriesChartPanel resultTsPanel;
-        final TimeseriesChartPanel result30TsPanel;
-        final TimeseriesChartPanel input30TsPanel;
-        final TimeseriesChartPanel input1dTsPanel;
-        final TimeseriesChartPanel result1dTsPanel;
+        final TimeseriesChartPanel inputTsPanel;
         try {
             // FIXME: for the mockup
-            resultTsPanel = new TimeseriesChartPanel((String)result1dTs.getProperty("uri"));   // NOI18N
-            result30TsPanel = new TimeseriesChartPanel((String)result1dTs.getProperty("uri")); // NOI18N
-            input30TsPanel = new TimeseriesChartPanel((String)input1dTs.getProperty("uri"));   // NOI18N
-            input1dTsPanel = new TimeseriesChartPanel((String)input1dTs.getProperty("uri"));   // NOI18N
-            result1dTsPanel = new TimeseriesChartPanel((String)result1dTs.getProperty("uri")); // NOI18N
+            resultTsPanel = new TimeseriesChartPanel((String)resultTs.getProperty("uri")); // NOI18N
+            inputTsPanel = new TimeseriesChartPanel((String)inputTs.getProperty("uri"));   // NOI18N
         } catch (final MalformedURLException ex) {
-            final String message = "illegal ts uri";                                           // NOI18N
+            final String message = "illegal ts uri";                                       // NOI18N
             LOG.error(message, ex);
             throw new IllegalStateException(message, ex);
         }
 
-        jtpResults.insertTab(model.getTsInput1dName(), icon, input1dTsPanel, null, 0);
-        jtpResults.insertTab(model.getTsInput30Name(), icon, input30TsPanel, null, 0);
-        jtpResults.insertTab(model.getTsResult30Name(), icon, result30TsPanel, null, 0);
-        jtpResults.insertTab(model.getTsResult1dName(), icon, result1dTsPanel, null, 0);
+        jtpResults.insertTab(model.getTsInputName(), icon, inputTsPanel, null, 0);
         jtpResults.insertTab(model.getTsResultName(), icon, resultTsPanel, null, 0);
         jtpResults.setSelectedIndex(0);
 

@@ -34,7 +34,7 @@ public final class RunoffModelManager extends AbstractAsyncModelManager {
 
     private static final transient Logger LOG = Logger.getLogger(RunoffModelManager.class);
 
-    private static final String CLIENT_URL = "http://192.168.100.12:9986/GeoCPM"; // NOI18N
+    public static final String CLIENT_URL = "http://192.168.100.12:9986/GeoCPM"; // NOI18N
 
     //~ Methods ----------------------------------------------------------------
 
@@ -53,7 +53,7 @@ public final class RunoffModelManager extends AbstractAsyncModelManager {
         input.rainevent = (String)rainevent.getProperty("data");       // NOI18N
 
         final GeoCPMRestClient client = new GeoCPMRestClient(CLIENT_URL);
-        final String runId = client.runGeoCPM(input);
+        final String runId = null; // client.runGeoCPM(input);
         final GeoCPMRunInfo runinfo = new GeoCPMRunInfo(runId, CLIENT_URL);
         try {
             final ObjectMapper mapper = new ObjectMapper();

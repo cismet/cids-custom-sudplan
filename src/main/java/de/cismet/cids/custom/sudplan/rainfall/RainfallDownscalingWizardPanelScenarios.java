@@ -7,6 +7,14 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.rainfall;
 
+import at.ac.ait.enviro.tsapi.handler.DataHandler;
+import at.ac.ait.enviro.tsapi.handler.Datapoint;
+import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
+
+import net.opengis.sps.v_1_0_0.InputDescriptor;
+
+import org.apache.log4j.Logger;
+
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
 import org.openide.util.HelpCtx;
@@ -14,7 +22,12 @@ import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
+import java.util.List;
+import java.util.Properties;
+
 import javax.swing.event.ChangeListener;
+
+import de.cismet.cids.custom.sudplan.DataHandlerCache;
 
 /**
  * DOCUMENT ME!
@@ -24,6 +37,10 @@ import javax.swing.event.ChangeListener;
  */
 public final class RainfallDownscalingWizardPanelScenarios implements WizardDescriptor.Panel {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(RainfallDownscalingWizardPanelScenarios.class);
+
     //~ Instance fields --------------------------------------------------------
 
     private final transient ChangeSupport changeSupport;
@@ -31,6 +48,8 @@ public final class RainfallDownscalingWizardPanelScenarios implements WizardDesc
     private transient WizardDescriptor wizard;
     private transient RainfallDownscalingVisualPanelScenarios component;
     private transient String scenario;
+    private transient String[] scenarios;
+    private transient Exception spsError;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -60,7 +79,31 @@ public final class RainfallDownscalingWizardPanelScenarios implements WizardDesc
     @Override
     public void readSettings(final Object settings) {
         wizard = (WizardDescriptor)settings;
+        spsError = null;
         scenario = (String)wizard.getProperty(RainfallDownscalingWizardAction.PROP_SCENARIO);
+        scenarios = new String[] {};
+        try {
+            final DataHandler dh = DataHandlerCache.getInstance()
+                        .getSPSDataHandler(
+                            RainfallDownscalingModelManager.RF_SPS_LOOKUP,
+                            RainfallDownscalingModelManager.RF_SPS_URL);
+            final Properties filter = new Properties();
+            filter.put(TimeSeries.PROCEDURE, RainfallDownscalingModelManager.RF_DS_PROCEDURE);
+            final Datapoint dp = dh.createDatapoint(filter, null, DataHandler.Access.READ);
+            final InputDescriptor id = (InputDescriptor)dp.getProperties().get("jaxb_desc:climate_scenario"); // NOI18N
+            final List<String> scenarioList = id.getDefinition()
+                        .getCommonData()
+                        .getCategory()
+                        .getConstraint()
+                        .getAllowedTokens()
+                        .getValueList()
+                        .get(0)
+                        .getValue();
+            scenarios = scenarioList.toArray(new String[scenarioList.size()]);
+        } catch (final Exception ex) {
+            spsError = ex;
+        }
+
         component.init();
     }
 
@@ -79,7 +122,7 @@ public final class RainfallDownscalingWizardPanelScenarios implements WizardDesc
      * @return  DOCUMENT ME!
      */
     String[] getScenarios() {
-        return new String[] { "ECHAM5 A1B 3 RCP 4.5", "HADLEY A1B RCP 4.5" };
+        return scenarios;
     }
 
     @Override
@@ -90,6 +133,14 @@ public final class RainfallDownscalingWizardPanelScenarios implements WizardDesc
 
     @Override
     public boolean isValid() {
+        if (spsError != null) {
+            wizard.putProperty(
+                WizardDescriptor.PROP_ERROR_MESSAGE,
+                "An error occurred during SPS communication");
+
+            return false;
+        }
+
         final String choosenScenario = component.getSelectedScenario();
         boolean valid = false;
 

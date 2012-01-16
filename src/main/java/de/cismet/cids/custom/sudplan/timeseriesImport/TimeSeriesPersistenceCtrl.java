@@ -18,6 +18,8 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import org.apache.log4j.Logger;
 
 import org.openide.WizardDescriptor;
+import org.openide.util.Cancellable;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
@@ -33,6 +35,7 @@ import java.util.concurrent.Future;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import de.cismet.cids.custom.sudplan.StatusPanel;
 import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
 import de.cismet.cids.custom.sudplan.TimeSeriesTrashBin;
 import de.cismet.cids.custom.sudplan.TimeseriesTransmitter;
@@ -48,7 +51,7 @@ import de.cismet.tools.CismetThreadPool;
  * @author   bfriedrich
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implements Cancelable {
+public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implements Cancellable {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -59,7 +62,7 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient TimeSeriesStatusPanel comp;
+    private final transient StatusPanel comp;
     private transient volatile boolean hasFinished;
     private transient Future<?> runningTask;
     private transient List<URL> transmittedFiles;
@@ -70,9 +73,9 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
      * Creates a new TimeSeriesImportFileChoosePanelCtrl object.
      */
     public TimeSeriesPersistenceCtrl() {
-        this.comp = new TimeSeriesStatusPanel();
-        this.comp.setName(java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/timeseriesImport/Bundle")
-                    .getString("TimeSeriesPersistenceCtrl.comp.name"));
+        this.comp = new StatusPanel(NbBundle.getMessage(
+                    TimeSeriesPersistenceCtrl.class,
+                    "TimeSeriesPersistenceCtrl.comp.name")); // NOI18N
         this.hasFinished = false;
         this.transmittedFiles = new ArrayList<URL>(2);
     }
@@ -86,9 +89,9 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
 
     @Override
     protected void read(final WizardDescriptor wizard) {
-        comp.setStatusMessage(java.util.ResourceBundle.getBundle(
-                "de/cismet/cids/custom/sudplan/timeseriesImport/Bundle").getString(
-                "TimeSeriesPersistenceCtrl.read(WizardDescriptor).comp.statusMessage.begin"));
+        comp.setStatusMessage(NbBundle.getMessage(
+                TimeSeriesPersistenceCtrl.class,
+                "TimeSeriesPersistenceCtrl.read(WizardDescriptor).comp.statusMessage.begin")); // NOI18N
         comp.setBusy(true);
 
         this.runningTask = CismetThreadPool.submit(new Runnable() {
@@ -295,11 +298,13 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
     }
 
     @Override
-    public synchronized void cancel() {
+    public synchronized boolean cancel() {
         if (this.runningTask != null) {
             this.runningTask.cancel(true);
             this.runningTask = null;
             this.deleteTransmittedFiles();
         }
+
+        return true;
     }
 }

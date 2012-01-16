@@ -74,6 +74,8 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
         this.cidsBean = cidsBean;
         this.metaclassId = mc.getID();
         this.metaobjectId = cidsBean.getMetaObject().getID();
+
+        currentState = State.WAITING;
     }
 
     /**
@@ -106,6 +108,8 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
         this.cidsBean = null;
         this.metaclassId = metaclassId;
         this.metaobjectId = metaobjectId;
+
+        currentState = State.WAITING;
     }
 
     //~ Methods ----------------------------------------------------------------

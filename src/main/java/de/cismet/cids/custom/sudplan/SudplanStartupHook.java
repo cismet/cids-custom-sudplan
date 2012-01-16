@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import java.util.Collection;
 
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.concurrent.ProgressWatch;
 import de.cismet.cids.custom.sudplan.concurrent.Watchable;
 import de.cismet.cids.custom.sudplan.server.search.UnfinishedRunSearchStatement;
@@ -43,42 +44,48 @@ public final class SudplanStartupHook implements StartupHook {
 
     @Override
     public void applicationStarted() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Initialising run status watcher"); // NOI18N
-        }
+        SudplanConcurrency.getSudplanGeneralPurposePool().execute(new Runnable() {
 
-        final UnfinishedRunSearchStatement urss = new UnfinishedRunSearchStatement();
-
-        final Collection<MetaObject> unfinishedBeans;
-        try {
-            unfinishedBeans = SessionManager.getProxy().customServerSearch(urss);
-        } catch (final ConnectionException ex) {
-            LOG.error("cannot initialise unfinished run watch", ex); // NOI18N
-
-            return;
-        }
-
-        for (final MetaObject mo : unfinishedBeans) {
-            final Manager m = SMSUtils.loadManagerFromRun(mo.getBean(), ManagerType.MODEL);
-
-            if (m instanceof AbstractAsyncModelManager) {
-                try {
-                    m.setCidsBean(mo.getBean());
-                    final Watchable watchable = ((AbstractAsyncModelManager)m).createWatchable();
-
+                @Override
+                public void run() {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("submitting watchable: " + watchable); // NOI18N
+                        LOG.debug("Initialising run status watcher"); // NOI18N
                     }
 
-                    ProgressWatch.getWatch().submit(watchable);
-                } catch (final IOException ex) {
-                    LOG.error("cannot create watchable for manager: " + m, ex); // NOI18N
+                    final UnfinishedRunSearchStatement urss = new UnfinishedRunSearchStatement();
+
+                    final Collection<MetaObject> unfinishedBeans;
+                    try {
+                        unfinishedBeans = SessionManager.getProxy().customServerSearch(urss);
+                    } catch (final ConnectionException ex) {
+                        LOG.error("cannot initialise unfinished run watch", ex); // NOI18N
+
+                        return;
+                    }
+
+                    for (final MetaObject mo : unfinishedBeans) {
+                        final Manager m = SMSUtils.loadManagerFromRun(mo.getBean(), ManagerType.MODEL);
+
+                        if (m instanceof AbstractAsyncModelManager) {
+                            try {
+                                m.setCidsBean(mo.getBean());
+                                final Watchable watchable = ((AbstractAsyncModelManager)m).createWatchable();
+
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("submitting watchable: " + watchable); // NOI18N
+                                }
+
+                                ProgressWatch.getWatch().submit(watchable);
+                            } catch (final IOException ex) {
+                                LOG.error("cannot create watchable for manager: " + m, ex); // NOI18N
+                            }
+                        } else {
+                            if (LOG.isInfoEnabled()) {
+                                LOG.info("ignoring manager, because it is not asynchronous: " + m); // NOI18N
+                            }
+                        }
+                    }
                 }
-            } else {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("ignoring manager, because it is not asynchronous: " + m); // NOI18N
-                }
-            }
-        }
+            });
     }
 }

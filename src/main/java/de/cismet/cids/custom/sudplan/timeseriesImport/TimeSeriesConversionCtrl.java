@@ -10,6 +10,8 @@ package de.cismet.cids.custom.sudplan.timeseriesImport;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
 import org.openide.WizardDescriptor;
+import org.openide.util.Cancellable;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
@@ -19,6 +21,7 @@ import java.io.FileInputStream;
 
 import java.util.concurrent.Future;
 
+import de.cismet.cids.custom.sudplan.StatusPanel;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 
 import de.cismet.tools.CismetThreadPool;
@@ -29,11 +32,11 @@ import de.cismet.tools.CismetThreadPool;
  * @author   bfriedrich
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesConversionCtrl extends AbstractWizardPanelCtrl implements Cancelable {
+public class TimeSeriesConversionCtrl extends AbstractWizardPanelCtrl implements Cancellable {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient TimeSeriesStatusPanel comp;
+    private final transient StatusPanel comp;
     private transient volatile TimeSeries ts;
     private transient Future<?> runningTask;
 
@@ -43,9 +46,9 @@ public class TimeSeriesConversionCtrl extends AbstractWizardPanelCtrl implements
      * Creates a new TimeSeriesImportFileChoosePanelCtrl object.
      */
     public TimeSeriesConversionCtrl() {
-        this.comp = new TimeSeriesStatusPanel();
-        this.comp.setName(java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/timeseriesImport/Bundle")
-                    .getString("TimeSeriesConversionPanelCtrl.comp.name"));
+        this.comp = new StatusPanel(NbBundle.getMessage(
+                    TimeSeriesConversionCtrl.class,
+                    "TimeSeriesConversionPanelCtrl.comp.name")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -112,10 +115,12 @@ public class TimeSeriesConversionCtrl extends AbstractWizardPanelCtrl implements
     }
 
     @Override
-    public synchronized void cancel() {
+    public synchronized boolean cancel() {
         if (this.runningTask != null) {
             this.runningTask.cancel(true);
             this.runningTask = null;
         }
+
+        return true;
     }
 }

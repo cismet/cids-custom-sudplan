@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
+import org.openide.util.Cancellable;
 
 import java.awt.Component;
 import java.awt.Dialog;
@@ -126,8 +127,8 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
         // if TS import has been canceled, cancel all running threads
         if (wizard.getValue() != WizardDescriptor.FINISH_OPTION) {
             for (final WizardDescriptor.Panel panel : this.panels) {
-                if (panel instanceof Cancelable) {
-                    ((Cancelable)panel).cancel();
+                if (panel instanceof Cancellable) {
+                    ((Cancellable)panel).cancel();
                 }
             }
         }

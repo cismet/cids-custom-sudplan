@@ -91,8 +91,7 @@ public final class RainfallDownscalingWizardPanelTargetDate implements WizardDes
             final Integer year = Integer.parseInt(choosenYear);
             wizard.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, null);
 
-            // FIXME: ATR hack to increase range from 2085 to 2095 so that the sample data fits in
-            if ((year < 2025) || (year > 2095)) {
+            if ((year < 2025) || (year > 2085)) {
                 wizard.putProperty(
                     WizardDescriptor.PROP_WARNING_MESSAGE,
                     NbBundle.getMessage(

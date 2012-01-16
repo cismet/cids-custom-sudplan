@@ -74,7 +74,7 @@ public final class AirqualityDownscalingModelManager extends AbstractModelManage
             throw new IOException(message, ex);
         }
 
-        out.setTstburl(config.toTSTBUrl());
+        out.setTstburl(config.toUrl());
 
         final CidsBean outputBean = SMSUtils.createModelOutput(
                 "Downscaling results of ("
