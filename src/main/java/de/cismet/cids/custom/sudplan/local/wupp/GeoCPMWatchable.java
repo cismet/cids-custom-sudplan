@@ -16,8 +16,8 @@ import de.cismet.cids.custom.sudplan.ProgressEvent;
 import de.cismet.cids.custom.sudplan.ProgressListener;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.geocpmrest.GeoCPMRestClient;
+import de.cismet.cids.custom.sudplan.geocpmrest.io.ExecutionStatus;
 import de.cismet.cids.custom.sudplan.geocpmrest.io.GeoCPMOutput;
-import de.cismet.cids.custom.sudplan.geocpmrest.io.Status;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -117,20 +117,22 @@ public final class GeoCPMWatchable extends AbstractModelRunWatchable {
 
     @Override
     public ProgressEvent requestStatus() throws IOException {
-        final Status status = client.getStatus(runId);
-        switch (status.status) {
-            case Status.STATUS_RUNNING: {
+        try {
+            final ExecutionStatus status = client.getStatus(runId);
+            if (ExecutionStatus.RUNNING.equals(status.getStatus())) {
                 return new ProgressEvent(this, ProgressEvent.State.PROGRESSING);
-            }
-            case Status.STATUS_BROKEN: {
+            } else if (ExecutionStatus.BROKEN.equals(status.getStatus())) {
                 return new ProgressEvent(this, ProgressEvent.State.BROKEN);
-            }
-            case Status.STATUS_FINISHED: {
+            } else if (ExecutionStatus.FINISHED.equals(status.getStatus())) {
                 return new ProgressEvent(this, ProgressEvent.State.FINISHED);
+            } else {
+                throw new IOException("illegal run status for run '" + runId + "': " + status.getStatus()); // NOI18N
             }
-            default: {
-                throw new IOException("illegal run status for run '" + runId + "': " + status.status); // NOI18N
-            }
+        } catch (final Exception ex) {
+            final String message = "cannot request status from geocpm service: " + runId;                   // NOI18N
+            LOG.error(message, ex);
+
+            throw new IOException(message, ex);
         }
     }
 
@@ -170,7 +172,8 @@ public final class GeoCPMWatchable extends AbstractModelRunWatchable {
                     setStatus(State.RUNNING);
 
                     try {
-                        output = client.getResults(runId);
+                        throw new UnsupportedOperationException("implement"); // NOI18N
+//                        output = client.getResults(runId);
                     } catch (final Exception e) {
                         LOG.error("could not download run results", e); // NOI18N
 
