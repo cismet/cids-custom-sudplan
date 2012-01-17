@@ -153,23 +153,30 @@ public final class TimeSeriesSerializer extends TimeseriesConverter {
             Object prop;
             final Set<String> tsKeys = ts.getTSKeys();
             for (final String k : tsKeys) {
-                writer.write(k);
-
                 prop = ts.getTSProperty(k);
+                if (prop == null) {
+                    LOG.warn("There is no value for key "
+                                + k
+                                + " ---> Ignored for serialization");
+                    continue;
+                }
 
                 if (prop instanceof String) {
+                    writer.write(k);
                     writer.write(FIELD_SEP_AS_CHAR);
                     writer.write(TYPE_STRING);
                     writer.write(FIELD_SEP_AS_CHAR);
                     writer.write(String.valueOf(prop));
                     writer.newLine();
                 } else if (prop instanceof Integer) {
+                    writer.write(k);
                     writer.write(FIELD_SEP_AS_CHAR);
                     writer.write(TYPE_INTEGER);
                     writer.write(FIELD_SEP_AS_CHAR);
                     writer.write(String.valueOf(prop));
                     writer.newLine();
                 } else if (prop instanceof String[]) {
+                    writer.write(k);
                     writer.write(FIELD_SEP_AS_CHAR);
                     writer.write(TYPE_STRING_ARRAY);
 
