@@ -157,11 +157,6 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>de.cismet.commons</groupId>
-            <artifactId>cismet-commons</artifactId>
-            <version>1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>de.cismet.cids.custom.sudplan</groupId>
             <artifactId>geocpm-rest</artifactId>
             <version>1.0-SNAPSHOT</version>
@@ -175,6 +170,35 @@
             <groupId>org.swinglabs</groupId>
             <artifactId>swingx</artifactId>
             <version>0.9.7</version>
+        </dependency>
+        <dependency> 
+            <groupId>at.ac.ait.enviro.sudplan</groupId> 
+            <artifactId>client-tools</artifactId> 
+            <version>1.0-SNAPSHOT</version>
+             <!-- exclude slf to prevent version conflicts -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                 <!-- exclude jts to prevent version conflicts -->
+                <exclusion>
+                    <groupId>com.vividsolutions</groupId>
+                    <artifactId>jts</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
