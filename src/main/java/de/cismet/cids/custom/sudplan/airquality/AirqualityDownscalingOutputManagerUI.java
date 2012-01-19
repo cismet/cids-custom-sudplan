@@ -420,7 +420,11 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                         Variable.O3.getPropertyKey(),
                         "STHLM-O3-A1B3-coverage-10y",                               // NOI18N
                         null,
-                        TimeInterval.ALL_INTERVAL);
+                        new TimeInterval(
+                            TimeInterval.Openness.OPEN,
+                            TimeStamp.NEGATIVE_INFINITY,
+                            TimeStamp.POSITIVE_INFINITY,
+                            TimeInterval.Openness.OPEN));
             } catch (MalformedURLException ex) {
                 final String message = "cannot create retriever config";            // NOI18N
                 LOG.error(message, ex);
@@ -515,7 +519,11 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                         Variable.NO2.getPropertyKey(),
                         "STHLM-NO2-coverage-2031-1m",                                // NOI18N
                         null,
-                        TimeInterval.ALL_INTERVAL);
+                        new TimeInterval(
+                            TimeInterval.Openness.OPEN,
+                            TimeStamp.NEGATIVE_INFINITY,
+                            TimeStamp.POSITIVE_INFINITY,
+                            TimeInterval.Openness.OPEN));
             } catch (MalformedURLException ex) {
                 final String message = "cannot create retriever config";             // NOI18N
                 LOG.error(message, ex);

@@ -8,6 +8,7 @@
 package de.cismet.cids.custom.sudplan.airquality;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
+import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 
 import org.apache.log4j.Logger;
 
@@ -67,7 +68,11 @@ public final class AirqualityDownscalingModelManager extends AbstractModelManage
                     Variable.O3.getPropertyKey(),
                     "AIRVIRO-O3-coverage",                               // NOI18N
                     null,
-                    TimeInterval.ALL_INTERVAL);
+                    new TimeInterval(
+                        TimeInterval.Openness.OPEN,
+                        TimeStamp.NEGATIVE_INFINITY,
+                        TimeStamp.POSITIVE_INFINITY,
+                        TimeInterval.Openness.OPEN));
         } catch (MalformedURLException ex) {
             final String message = "cannot create retriever config";     // NOI18N
             LOG.error(message, ex);

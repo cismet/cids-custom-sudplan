@@ -20,7 +20,6 @@ public class EtaConfiguration {
     protected transient boolean enabled;
     protected transient float sedimentationEfficency;
     protected transient String name;
-    protected String etaFile;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -84,23 +83,5 @@ public class EtaConfiguration {
      */
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
-    }
-
-    /**
-     * Get the value of etaFile.
-     *
-     * @return  the value of etaFile
-     */
-    public String getEtaFile() {
-        return etaFile;
-    }
-
-    /**
-     * Set the value of etaFile.
-     *
-     * @param  etaFile  new value of etaFile
-     */
-    public void setEtaFile(final String etaFile) {
-        this.etaFile = etaFile;
     }
 }

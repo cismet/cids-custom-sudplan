@@ -1,4 +1,4 @@
-<?xml version="1.1" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.4" maxVersion="1.7" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <AuxValues>
@@ -41,11 +41,10 @@
         <Component class="javax.swing.JTable" name="csoTable">
           <Properties>
             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-              <Table columnCount="4" rowCount="0">
-                <Column editable="false" title="CSO" type="java.lang.String"/>
+              <Table columnCount="3" rowCount="0">
+                <Column editable="false" title="Outfall" type="java.lang.String"/>
                 <Column editable="false" title="Volumen" type="java.lang.Float"/>
                 <Column editable="false" title="Frequenz" type="java.lang.Float"/>
-                <Column editable="false" title="Dauer" type="java.lang.Float"/>
               </Table>
             </Property>
           </Properties>

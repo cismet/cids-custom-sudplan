@@ -7,6 +7,11 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
+import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -16,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
 
@@ -31,7 +37,12 @@ public final class SwmmInput {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String TABLENAME_SWMM_PROJECT = "SWMM_PROJECT"; // NOI18N
+    public static final String TABLENAME_SWMM_PROJECT = "SWMM_PROJECT";        // NOI18N
+    public static final String TABLENAME_MONITOR_STATION = "monitorstation";
+    public static final String TABLENAME_MONITOR_STATION_TYPE = "monitorstationtype";
+    public static final String MONITOR_STATION_TYPE = "Linz Regenmessstation"; // NOI18N
+    public static final String FLD_MONITOR_STATION_TYPE = "name";              // NOI18N
+    public static final String FK_MONITOR_STATION_TYPE = "type";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
     public static final String PROP_TIMESERIES = "timeseries";
     public static final String PROP_INPFILE = "inpFile";
@@ -39,24 +50,80 @@ public final class SwmmInput {
     public static final String PROP_SWMMPROJECT = "swmmProject";
     public static final String PROP_ENDDATE = "endDate";
     public static final String PROP_FORECAST = "forecast";
+    public static final String PROP_TIMESERIESURLS = "timeseriesURLs";
+    public static final String PROP_CREATED = "created";
+    public static final String PROP_USER = "user";
+
+    static {
+        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     //~ Instance fields --------------------------------------------------------
 
-    protected transient List<Integer> timeseries = new ArrayList<Integer>();
+    private transient List<Integer> timeseries = new ArrayList<Integer>();
 
-    protected transient String inpFile;
+    private transient String inpFile;
 
-    protected transient String startDate;
+    private transient String startDate;
 
-    protected transient int swmmProject = -1;
+    private transient int swmmProject = -1;
 
-    protected transient String endDate;
+    private transient String endDate;
 
-    protected boolean forecast = false;
+    private boolean forecast = false;
 
-    private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    private transient List<String> timeseriesURLs = new ArrayList<String>();
+
+    private transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
+    private transient Date created;
+
+    private transient String user;
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * Get the value of timeseriesURLs.
+     *
+     * @return  the value of timeseriesURLs
+     */
+    public List<String> getTimeseriesURLs() {
+        return timeseriesURLs;
+    }
+
+    /**
+     * Set the value of timeseriesURLs.
+     *
+     * @param  timeseriesURLs  new value of timeseriesURLs
+     */
+    public void setTimeseriesURLs(final List<String> timeseriesURLs) {
+        final List<String> oldTimeseriesURLs = this.timeseriesURLs;
+        this.timeseriesURLs = timeseriesURLs;
+        propertyChangeSupport.firePropertyChange(PROP_TIMESERIESURLS, oldTimeseriesURLs, timeseriesURLs);
+    }
+
+    /**
+     * Get the value of timeseriesURLs at specified index.
+     *
+     * @param   index  DOCUMENT ME!
+     *
+     * @return  the value of timeseriesURLs at specified index
+     */
+    public String getTimeseriesURLs(final int index) {
+        return this.timeseriesURLs.get(index);
+    }
+
+    /**
+     * Set the value of timeseriesURLs at specified index.
+     *
+     * @param  index             DOCUMENT ME!
+     * @param  newTimeseriesURL  new value of timeseriesURLs at specified index
+     */
+    public void setTimeseriesURLs(final int index, final String newTimeseriesURL) {
+        final String oldTimeseriesURL = this.timeseriesURLs.get(index);
+        this.timeseriesURLs.set(index, newTimeseriesURL);
+        propertyChangeSupport.fireIndexedPropertyChange(PROP_TIMESERIESURLS, index, oldTimeseriesURL, newTimeseriesURL);
+    }
 
     /**
      * Get the value of timeseries.
@@ -188,6 +255,7 @@ public final class SwmmInput {
      *
      * @throws  ParseException  DOCUMENT ME!
      */
+    @JsonIgnore
     public Date getEndDateDate() throws ParseException {
         return DATE_FORMAT.parse(this.getEndDate());
     }
@@ -199,6 +267,7 @@ public final class SwmmInput {
      *
      * @throws  ParseException  DOCUMENT ME!
      */
+    @JsonIgnore
     public Date getStartDateDate() throws ParseException {
         return DATE_FORMAT.parse(this.getStartDate());
     }
@@ -263,5 +332,71 @@ public final class SwmmInput {
         final boolean oldForecast = this.forecast;
         this.forecast = forecast;
         propertyChangeSupport.firePropertyChange(PROP_FORECAST, oldForecast, forecast);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  ParseException  DOCUMENT ME!
+     */
+    @JsonIgnore
+    public TimeStamp getStartDateTimestamp() throws ParseException {
+        final Date startDateDate = this.getStartDateDate();
+        return new TimeStamp(startDateDate.getTime());
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  ParseException  DOCUMENT ME!
+     */
+    @JsonIgnore
+    public TimeStamp getEndDateTimestamp() throws ParseException {
+        final Date endDateDate = this.getEndDateDate();
+        return new TimeStamp(endDateDate.getTime());
+    }
+
+    /**
+     * Get the value of created.
+     *
+     * @return  the value of created
+     */
+    public Date getCreated() {
+        return created;
+    }
+
+    /**
+     * Set the value of created.
+     *
+     * @param  created  new value of created
+     */
+    public void setCreated(final Date created) {
+        final Date oldCreated = this.created;
+        this.created = created;
+        propertyChangeSupport.firePropertyChange(PROP_CREATED, oldCreated, created);
+    }
+
+    /**
+     * Get the value of user.
+     *
+     * @return  the value of user
+     */
+    public String getUser() {
+        return user;
+    }
+
+    /**
+     * Set the value of user.
+     *
+     * @param  user  new value of user
+     */
+    public void setUser(final String user) {
+        final String oldUser = this.user;
+        this.user = user;
+        propertyChangeSupport.firePropertyChange(PROP_USER, oldUser, user);
     }
 }

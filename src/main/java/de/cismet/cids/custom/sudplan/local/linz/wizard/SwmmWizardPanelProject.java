@@ -11,9 +11,12 @@ import org.apache.log4j.Logger;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
+import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 
 import java.awt.Component;
+
+import java.text.ParseException;
 
 import javax.swing.event.ChangeListener;
 
@@ -37,14 +40,11 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
     //~ Instance fields --------------------------------------------------------
 
     private final transient ChangeSupport changeSupport;
-
     private transient WizardDescriptor wizard;
     /** local swmm project variable. */
-
     private transient CidsBean swmmProject;
     /** local swmm input variable. */
     private transient SwmmInput swmmInput;
-
     private transient volatile SwmmWizardPanelProjectUI component;
 
     //~ Constructors -----------------------------------------------------------
@@ -108,38 +108,58 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
     @Override
     public boolean isValid() {
         boolean valid = true;
-        if (this.swmmInput.getSwmmProject() == -1) {
-            // FIXME: i18n
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Bitte wählen Sie ein SWMM Project aus");
-            valid = false;
-        } else if ((this.swmmInput.getInpFile() == null) || this.swmmInput.getInpFile().isEmpty()) {
-            final String inpFile = this.getSwmmProject().getProperty("title") + ".inp";
-            LOG.warn("SWMM INP file not set, setting to " + inpFile);
+        try {
+            if (this.swmmInput.getSwmmProject() == -1) {
+                // FIXME: i18n
+                wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                    "Bitte wählen Sie ein SWMM Project aus");
+                valid = false;
+            } else if ((this.swmmInput.getInpFile() == null) || this.swmmInput.getInpFile().isEmpty()) {
+                final String inpFile = this.getSwmmProject().getProperty("title") + ".inp";
+                LOG.warn("SWMM INP file not set, setting to " + inpFile);
 
-            // dieser beansbinding und property change mist funktioniert einfach nicht
-            // warum sonst wird jetzt das textfield im UI nicht aktualisiert???!!!!
-            this.swmmInput.setInpFile(inpFile);
+                // dieser beansbinding und property change mist funktioniert einfach nicht
+                // warum sonst wird jetzt das textfield im UI nicht aktualisiert???!!!!
+                this.swmmInput.setInpFile(inpFile);
 
+                wizard.putProperty(
+                    WizardDescriptor.PROP_INFO_MESSAGE,
+                    "<html>Da keine INP Datei angegeben wurde, "
+                            + "wurde der Name automatich auf '"
+                            + inpFile
+                            + "' festgelegt.</html>");
+            } else if ((this.swmmInput.getStartDate() == null) || this.swmmInput.getStartDate().isEmpty()) {
+                wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                    "Bitte geben Sie ein Startdatum an");
+                valid = false;
+            } else if ((this.swmmInput.getEndDate() == null) || this.swmmInput.getEndDate().isEmpty()) {
+                wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                    "Bitte geben Sie ein Enddatum an");
+                valid = false;
+            } else if (this.swmmInput.getStartDateDate().getTime() >= this.swmmInput.getEndDateDate().getTime()) {
+                wizard.putProperty(
+                    WizardDescriptor.PROP_WARNING_MESSAGE,
+                    "Das Startdatum muss vor dem Enddatum liegen");
+                valid = false;
+            } else if ((this.swmmInput.getEndDateDate().getTime()
+                            - this.swmmInput.getStartDateDate().getTime()) < 200) {
+                wizard.putProperty(
+                    WizardDescriptor.PROP_INFO_MESSAGE,
+                    "Bitte wählen sie einen Zitrum von mindestens 6.5 Monaten aus");
+                valid = false;
+            } else {
+                wizard.putProperty(
+                    WizardDescriptor.PROP_INFO_MESSAGE,
+                    null);
+            }
+        } catch (ParseException ex) {
+            LOG.warn("invalid date format", ex);
             wizard.putProperty(
-                WizardDescriptor.PROP_INFO_MESSAGE,
-                "<html>Da keine INP Datei angegeben wurde, "
-                        + "wurde der Name automatich auf '"
-                        + inpFile
-                        + "' festgelegt.</html>");
-        } else if ((this.swmmInput.getStartDate() == null) || this.swmmInput.getStartDate().isEmpty()) {
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Bitte geben Sie ein Startdatum an");
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                "Das eingegebenen Datumsformat wird nicht unterstützt");
             valid = false;
-        } else if ((this.swmmInput.getEndDate() == null) || this.swmmInput.getEndDate().isEmpty()) {
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Bitte geben Sie ein Enddatum an");
-            valid = false;
-        } else {
-            wizard.putProperty(
-                WizardDescriptor.PROP_INFO_MESSAGE,
-                null);
         }
+
         return valid;
     }
 

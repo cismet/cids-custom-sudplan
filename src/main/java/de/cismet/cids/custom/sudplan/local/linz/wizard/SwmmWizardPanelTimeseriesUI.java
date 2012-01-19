@@ -33,6 +33,8 @@ import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
+import de.cismet.tools.CismetThreadPool;
+
 /**
  * DOCUMENT ME!
  *
@@ -305,10 +307,16 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
                 this.selectedTimeseries[row] = (Boolean)value;
             }
 
-            fireTableCellUpdated(row, col);
+            // update selected timeseries in the model
+            CismetThreadPool.execute(new Runnable() {
 
-            // update selected timeseries
-            model.setTimeseriesIds(this.getSelectedTimeseries());
+                    @Override
+                    public void run() {
+                        saveSelectedTimeseries();
+                    }
+                });
+
+            fireTableCellUpdated(row, col);
         }
 
         @Override
@@ -328,19 +336,19 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
 
         /**
          * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
          */
-        private List<Integer> getSelectedTimeseries() {
-            final ArrayList<Integer> selectedStationsList = new ArrayList<Integer>();
+        private void saveSelectedTimeseries() {
+            final ArrayList<Integer> selectedTimeseriesIds = new ArrayList<Integer>();
+            final ArrayList<String> selectedTimeseriesURLs = new ArrayList<String>();
 
             for (int i = 0; i < this.selectedTimeseries.length; i++) {
                 if (this.selectedTimeseries[i]) {
-                    selectedStationsList.add(this.timeseries[i].getId());
+                    selectedTimeseriesIds.add(this.timeseries[i].getId());
+                    selectedTimeseriesURLs.add(this.timeseries[i].getBean().getProperty("uri").toString());
                 }
             }
 
-            return selectedStationsList;
+            model.setTimeseries(selectedTimeseriesIds, selectedTimeseriesURLs);
         }
 
         /**

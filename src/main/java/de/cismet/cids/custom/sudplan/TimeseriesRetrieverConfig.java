@@ -60,7 +60,11 @@ public final class TimeseriesRetrieverConfig {
     private final String offering;
 
     private final Geometry geometry;
-    private final TimeInterval interval;
+    private TimeInterval interval = new TimeInterval(
+            TimeInterval.Openness.OPEN,
+            TimeStamp.NEGATIVE_INFINITY,
+            TimeStamp.POSITIVE_INFINITY,
+            TimeInterval.Openness.OPEN);
 
     //~ Constructors -----------------------------------------------------------
 
@@ -248,6 +252,15 @@ public final class TimeseriesRetrieverConfig {
      */
     public TimeInterval getInterval() {
         return interval;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  interval  DOCUMENT ME!
+     */
+    public void setInterval(final TimeInterval interval) {
+        this.interval = interval;
     }
 
     /**

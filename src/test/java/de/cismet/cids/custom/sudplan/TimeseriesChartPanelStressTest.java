@@ -203,7 +203,7 @@ public class TimeseriesChartPanelStressTest {
 //                                                                     TimeInterval.Openness.OPEN);
                     
                     long memUsage = Runtime.getRuntime().freeMemory();
-                    ts = dp.getTimeSeries(TimeInterval.ALL_INTERVAL, point);
+                    ts = dp.getTimeSeries(new TimeInterval(TimeInterval.Openness.OPEN, TimeStamp.NEGATIVE_INFINITY, TimeStamp.POSITIVE_INFINITY, TimeInterval.Openness.OPEN), point);
                     memUsage = memUsage - Runtime.getRuntime().freeMemory();
                     LOG.info("Main Memory Usage (in bytes): " + memUsage);
                     
@@ -269,7 +269,7 @@ public class TimeseriesChartPanelStressTest {
 //                                TimeseriesRetrieverConfig.fromUrl(url)
 //                        TimeseriesRetrieverConfig result = TimeseriesRetrieverConfig.fromTSTBUrl(url);
 //                       
-//                       final TimeseriesRetrieverConfig config = new TimeseriesRetrieverConfig(null, null, null, null, null, null, null, null, TimeInterval.ALL_INTERVAL)
+//                       final TimeseriesRetrieverConfig config = new TimeseriesRetrieverConfig(null, null, null, null, null, null, null, null, new TimeInterval(TimeInterval.Openness.OPEN, TimeStamp.NEGATIVE_INFINITY, TimeStamp.POSITIVE_INFINITY, TimeInterval.Openness.OPEN))
 //                       
 //                       
 //                       TimeseriesChartPanel panel = new TimeseriesChartPanel

@@ -790,7 +790,11 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                     obsProp,
                     offering,
                     point,
-                    TimeInterval.ALL_INTERVAL);
+                    new TimeInterval(
+                        TimeInterval.Openness.OPEN,
+                        TimeStamp.NEGATIVE_INFINITY,
+                        TimeStamp.POSITIVE_INFINITY,
+                        TimeInterval.Openness.OPEN));
 
             final TimeSeries timeseries = TimeseriesRetriever.getInstance().retrieve(config).get();
             final Object valueKeyObject = timeseries.getTSProperty(TimeSeries.VALUE_KEYS);
@@ -840,7 +844,11 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 final double yCoord = this.coordinate.y;
                 final double xRelation = ((xCoord - envelope.getMinX()) / width);
                 final double yRelation = ((yCoord - envelope.getMinY()) / height);
-                final TimeSeries simpleTS = timeseries.slice(TimeInterval.ALL_INTERVAL);
+                final TimeSeries simpleTS = timeseries.slice(new TimeInterval(
+                            TimeInterval.Openness.OPEN,
+                            TimeStamp.NEGATIVE_INFINITY,
+                            TimeStamp.POSITIVE_INFINITY,
+                            TimeInterval.Openness.OPEN));
                 simpleTS.setTSProperty(TimeSeries.OBSERVEDPROPERTY, humanReadableObsProp);
                 for (final TimeStamp ts : timeStamps) {
 //                    final Float[][] values = ((Float[][])timeseries.getValue(ts, valueKey));

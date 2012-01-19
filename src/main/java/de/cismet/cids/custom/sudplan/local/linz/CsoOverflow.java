@@ -28,13 +28,60 @@ public class CsoOverflow {
 
     //~ Instance fields --------------------------------------------------------
 
-    protected transient float overflowVolume;
-    protected transient float overflowFrequency;
-    protected transient float overflowDuration;
-    protected transient int cso;
+    protected transient float overflowVolume = 0.0f;
+    protected transient float overflowFrequency = 0.0f;
+    protected transient float overflowDuration = 0.0f;
+    protected transient int cso = -1;
     protected transient String name;
-    private int swmmProject;
+    private int swmmProject = -1;
     private final transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new CsoOverflow object.
+     */
+    public CsoOverflow() {
+    }
+
+    /**
+     * Creates a new CsoOverflow object.
+     *
+     * @param  name               DOCUMENT ME!
+     * @param  overflowVolume     DOCUMENT ME!
+     * @param  overflowFrequency  DOCUMENT ME!
+     * @param  overflowDuration   DOCUMENT ME!
+     */
+    public CsoOverflow(final String name,
+            final float overflowVolume,
+            final float overflowFrequency,
+            final float overflowDuration) {
+        this(name, overflowVolume, overflowFrequency, overflowDuration, -1, -1);
+    }
+
+    /**
+     * Creates a new CsoOverflow object.
+     *
+     * @param  name               DOCUMENT ME!
+     * @param  overflowVolume     DOCUMENT ME!
+     * @param  overflowFrequency  DOCUMENT ME!
+     * @param  overflowDuration   DOCUMENT ME!
+     * @param  cso                DOCUMENT ME!
+     * @param  swmmProject        DOCUMENT ME!
+     */
+    public CsoOverflow(final String name,
+            final float overflowVolume,
+            final float overflowFrequency,
+            final float overflowDuration,
+            final int cso,
+            final int swmmProject) {
+        this.name = name;
+        this.overflowVolume = overflowVolume;
+        this.overflowFrequency = overflowFrequency;
+        this.overflowDuration = overflowDuration;
+        this.cso = cso;
+        this.swmmProject = swmmProject;
+    }
 
     //~ Methods ----------------------------------------------------------------
 

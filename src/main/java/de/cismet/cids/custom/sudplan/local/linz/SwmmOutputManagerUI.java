@@ -68,7 +68,7 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
                         csoOverflow.getName(),
                         csoOverflow.getOverflowVolume(),
                         csoOverflow.getOverflowFrequency(),
-                        csoOverflow.getOverflowFrequency()
+                        // csoOverflow.getOverflowFrequency()
                     });
             }
         } catch (IOException ex) {
@@ -88,15 +88,10 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
 
         csoTable.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
-                new String[] { "CSO", "Volumen", "Frequenz", "Dauer" }) {
+                new String[] { "Outfall", "Volumen", "Frequenz" }) {
 
-                Class[] types = new Class[] {
-                        java.lang.String.class,
-                        java.lang.Float.class,
-                        java.lang.Float.class,
-                        java.lang.Float.class
-                    };
-                boolean[] canEdit = new boolean[] { false, false, false, false };
+                Class[] types = new Class[] { java.lang.String.class, java.lang.Float.class, java.lang.Float.class };
+                boolean[] canEdit = new boolean[] { false, false, false };
 
                 @Override
                 public Class getColumnClass(final int columnIndex) {

@@ -57,7 +57,7 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String TABLENAME_SWMM_PROJECT = SwmmInput.TABLENAME_SWMM_PROJECT;
-    public static final String TABLENAME_MONITOR_STATION = "monitorstation";
+    public static final String TABLENAME_MONITOR_STATION = SwmmInput.TABLENAME_MONITOR_STATION;
     public static final String TABLENAME_TIMESERIES = "timeseries";
     public static final String TABLENAME_CSOS = "linz_cso";
     // public static final String PROP_SCENARIO = "__prop_scenario__";       // NOI18N public static final String
@@ -179,19 +179,24 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
                 }
                 try {
                     final CidsBean swmmModelInput = this.createSwmmModelInput(wizard);
-                    final CidsBean etaModelInput = this.createEtaModelInput(wizard);
+                    CidsBean swmmModelRun = this.createSwmmModelRun(wizard, swmmModelInput);
+                    swmmModelRun = swmmModelRun.persist();
 
-                    final CidsBean swmmModelRun = this.createSwmmModelRun(wizard, swmmModelInput);
-                    final CidsBean etaModelRun = this.createEtaModelRun(wizard, etaModelInput);
+                    final CidsBean etaModelInput = this.createEtaModelInput(
+                            wizard,
+                            Integer.valueOf(swmmModelRun.getProperty("id").toString()));
+                    CidsBean etaModelRun = this.createEtaModelRun(wizard, etaModelInput);
+                    etaModelRun = etaModelRun.persist();
 
-                    this.attachSwmmModelRun(etaModelRun, wizard);
-                    this.attachEtaModelRun(etaModelRun, wizard);
+                    final List<CidsBean> swmmScenarios = (List)cidsBean.getProperty("swmm_scenarios"); // NOI18N
+                    swmmScenarios.add(swmmModelRun);
+                    final List<CidsBean> etaScenarios = (List)cidsBean.getProperty("eta_scenarios");   // NOI18N
+                    etaScenarios.add(etaModelRun);
 
-                    swmmModelRun.persist();
-                    etaModelRun.persist();
+                    // cidsBean = swmmProject
+                    cidsBean.persist();
 
-                    // SMSUtils.executeAndShowRun(modelRun);
-
+                    SMSUtils.executeAndShowRun(etaModelRun);
                 } catch (final Exception ex) {
                     final String message = "Cannot perform SWMM+ETA calculation";
                     LOG.error(message, ex);
@@ -222,6 +227,9 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
         final Date created = GregorianCalendar.getInstance().getTime();
         final String user = SessionManager.getSession().getUser().getName();
 
+        swmmInput.setCreated(created);
+        swmmInput.setUser(user);
+
         final String wizName = (String)wizard.getProperty(PROP_NAME);
         final String name = "SWMM Modellkonfiguration (" + wizName + ")";
 
@@ -231,16 +239,21 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
     /**
      * DOCUMENT ME!
      *
-     * @param   wizard  DOCUMENT ME!
+     * @param   wizard     DOCUMENT ME!
+     * @param   swmmRunId  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      *
      * @throws  IOException  DOCUMENT ME!
      */
-    private CidsBean createEtaModelInput(final WizardDescriptor wizard) throws IOException {
+    private CidsBean createEtaModelInput(final WizardDescriptor wizard, final int swmmRunId) throws IOException {
         final EtaInput etaInput = (EtaInput)wizard.getProperty(PROP_ETA_INPUT);
         final Date created = GregorianCalendar.getInstance().getTime();
         final String user = SessionManager.getSession().getUser().getName();
+
+        etaInput.setCreated(created);
+        etaInput.setUser(user);
+        etaInput.setSwmmRun(swmmRunId);
 
         final String wizName = (String)wizard.getProperty(PROP_NAME);
         final String name = "ETA Modellkonfiguration (" + wizName + ")";
@@ -296,49 +309,5 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
         }
 
         return SMSUtils.createModelRun(name, description, inputBean);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   modelRun  DOCUMENT ME!
-     * @param   wizard    DOCUMENT ME!
-     *
-     * @throws  IOException  DOCUMENT ME!
-     */
-    private void attachSwmmModelRun(final CidsBean modelRun, final WizardDescriptor wizard) throws IOException {
-        final CidsBean swmmProject = (CidsBean)wizard.getProperty(PROP_SWMM_PROJECT_BEAN);
-        final List<CidsBean> scenarios = (List)swmmProject.getProperty("swmm_scenarios"); // NOI18N
-
-        scenarios.add(modelRun);
-
-        try {
-            swmmProject.persist();
-        } catch (final Exception ex) {
-            final String message = "cannot attach ETA modelrun to swmm project"; // NOI18N
-            throw new IOException(message, ex);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   modelRun  DOCUMENT ME!
-     * @param   wizard    DOCUMENT ME!
-     *
-     * @throws  IOException  DOCUMENT ME!
-     */
-    private void attachEtaModelRun(final CidsBean modelRun, final WizardDescriptor wizard) throws IOException {
-        final CidsBean swmmProject = (CidsBean)wizard.getProperty(PROP_SWMM_PROJECT_BEAN);
-        final List<CidsBean> scenarios = (List)swmmProject.getProperty("eta_scenarios"); // NOI18N
-
-        scenarios.add(modelRun);
-
-        try {
-            swmmProject.persist();
-        } catch (final Exception ex) {
-            final String message = "cannot attach SWMM modelrun to swmm project"; // NOI18N
-            throw new IOException(message, ex);
-        }
     }
 }

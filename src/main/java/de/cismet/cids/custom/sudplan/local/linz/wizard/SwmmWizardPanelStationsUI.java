@@ -28,6 +28,7 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.table.AbstractTableModel;
 
+import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
@@ -107,14 +108,35 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
 
         final StringBuilder sb = new StringBuilder();
 
-        sb.append("SELECT ").append(mc.getID()).append(',').append(mc.getPrimaryKey()); // NOI18N
-        sb.append(" FROM ").append(mc.getTableName());                                  // NOI18N
+        sb.append("SELECT ")
+                .append(mc.getID())
+                .append(',')
+                .append(mc.getTableName())
+                .append('.')
+                .append(mc.getPrimaryKey()); // NOI18N
+        sb.append(" FROM ").append(mc.getTableName()).append(',').append(SwmmInput.TABLENAME_MONITOR_STATION_TYPE);
+        sb.append(" WHERE ")
+                .append(mc.getTableName())
+                .append('.')
+                .append(SwmmInput.FK_MONITOR_STATION_TYPE)
+                .append(" = ")
+                .append(SwmmInput.TABLENAME_MONITOR_STATION_TYPE)
+                .append(".id")
+                .append(" AND ")
+                .append(SwmmInput.TABLENAME_MONITOR_STATION_TYPE)
+                .append('.')
+                .append(SwmmInput.FLD_MONITOR_STATION_TYPE)
+                .append(" LIKE '")
+                .append(SwmmInput.MONITOR_STATION_TYPE)
+                .append('\'');
 
-        final ClassAttribute ca = mc.getClassAttribute("sortingColumn"); // NOI18N
+        final ClassAttribute ca = mc.getClassAttribute("sortingColumn");                        // NOI18N
         if (ca != null) {
-            sb.append(" ORDER BY ").append(ca.getValue());               // NOI18N
+            sb.append(" ORDER BY ").append(ca.getValue());                                      // NOI18N
         }
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("executing SQL statement: \n" + sb);
+        }
         final MetaObject[] metaObjects;
         try {
             metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);

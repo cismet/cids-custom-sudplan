@@ -112,7 +112,11 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
             LOG.debug("requesting status for rf ds run: " + runId); // NOI18N
         }
 
-        final TimeSeries statusTs = dp.getTimeSeries(TimeInterval.ALL_INTERVAL);
+        final TimeSeries statusTs = dp.getTimeSeries(new TimeInterval(
+                    TimeInterval.Openness.OPEN,
+                    TimeStamp.NEGATIVE_INFINITY,
+                    TimeStamp.POSITIVE_INFINITY,
+                    TimeInterval.Openness.OPEN));
 
         // search for errors first and bail out if present
         for (final TimeStamp stamp : statusTs.getTimeStamps().descendingSet()) {
@@ -162,7 +166,11 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
 
         setStatus(State.RUNNING);
 
-        final TimeSeries statusTs = dp.getTimeSeries(TimeInterval.ALL_INTERVAL);
+        final TimeSeries statusTs = dp.getTimeSeries(new TimeInterval(
+                    TimeInterval.Openness.OPEN,
+                    TimeStamp.NEGATIVE_INFINITY,
+                    TimeStamp.POSITIVE_INFINITY,
+                    TimeInterval.Openness.OPEN));
 
         // FIXME: bull**** impl
 
@@ -199,7 +207,11 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                     }
 
                     Datapoint datapoint = dps.iterator().next();
-                    TimeSeries ts = datapoint.getTimeSeries(TimeInterval.ALL_INTERVAL);
+                    TimeSeries ts = datapoint.getTimeSeries(new TimeInterval(
+                                TimeInterval.Openness.OPEN,
+                                TimeStamp.NEGATIVE_INFINITY,
+                                TimeStamp.POSITIVE_INFINITY,
+                                TimeInterval.Openness.OPEN));
 
                     final CidsBean bean = getCidsBean();
                     assert bean != null : "null cidsbean in rainfall watchable"; // NOI18N
@@ -228,7 +240,11 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                     }
 
                     datapoint = dps.iterator().next();
-                    ts = datapoint.getTimeSeries(TimeInterval.ALL_INTERVAL);
+                    ts = datapoint.getTimeSeries(new TimeInterval(
+                                TimeInterval.Openness.OPEN,
+                                TimeStamp.NEGATIVE_INFINITY,
+                                TimeStamp.POSITIVE_INFINITY,
+                                TimeInterval.Openness.OPEN));
 
                     url = new URL(TimeSeriesRemoteHelper.DAV_HOST + "/" + tsName + "_" + runId + "_86400s"); // NOI18N
 

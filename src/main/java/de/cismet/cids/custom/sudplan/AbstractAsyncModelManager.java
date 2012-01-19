@@ -182,7 +182,12 @@ public abstract class AbstractAsyncModelManager extends AbstractModelManager imp
                             final AbstractAsyncModelManager aamm = (AbstractAsyncModelManager)m;
                             aamm.setCidsBean(runBean);
                             aamm.watchable = amrw;
-                            aamm.fireFinised();
+
+                            if (Download.State.COMPLETED_WITH_ERROR.equals(arg)) {
+                                aamm.fireBroken();
+                            } else {
+                                aamm.fireFinised();
+                            }
                         } else {
                             final String message = "ModelManager not of type AbstractAsyncModelManager"; // NOI18N
                             LOG.error(message);

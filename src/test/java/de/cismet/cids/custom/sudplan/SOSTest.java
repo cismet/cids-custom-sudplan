@@ -264,7 +264,7 @@ public class SOSTest {
                             + " / "
                             + y;
                     startTime = System.currentTimeMillis();
-                    ts = dp.getTimeSeries(TimeInterval.ALL_INTERVAL, point);
+                    ts = dp.getTimeSeries(new TimeInterval(TimeInterval.Openness.OPEN, TimeStamp.NEGATIVE_INFINITY, TimeStamp.POSITIVE_INFINITY, TimeInterval.Openness.OPEN), point);
                     endTime = System.currentTimeMillis();
 
 //                    Assert.assertNotNull(ts);

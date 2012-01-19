@@ -7,18 +7,25 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz.wizard;
 
+import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
+import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
+
 import org.apache.log4j.Logger;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
+import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 
 import java.awt.Component;
+
+import java.net.MalformedURLException;
 
 import java.util.List;
 
 import javax.swing.event.ChangeListener;
 
+import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
 
@@ -37,15 +44,14 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
     //~ Instance fields --------------------------------------------------------
 
     protected SwmmInput swmmInput;
-
     private final transient ChangeSupport changeSupport;
-
     private transient WizardDescriptor wizard;
     /** local swmm project variable. */
-
     private transient List<Integer> stationIds;
-
     private transient volatile SwmmWizardPanelTimeseriesUI component;
+    private transient boolean validTimeIntervall = false;
+    private transient TimeStamp startDate;
+    private transient TimeStamp endDate;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -82,10 +88,6 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
 
     @Override
     public void readSettings(final Object settings) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("read settings");
-        }
-
         wizard = (WizardDescriptor)settings;
         assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_STATION_IDS) != null : "station ids list is null";
         this.stationIds = (List<Integer>)wizard.getProperty(
@@ -93,6 +95,46 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
 
         assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT) != null : "swmm input is null";
         this.swmmInput = (SwmmInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT);
+
+        try {
+            this.startDate = this.swmmInput.getStartDateTimestamp();
+            this.endDate = this.swmmInput.getEndDateTimestamp();
+        } catch (Throwable t) {
+            LOG.error("could not set start and end date timestamps", t);
+            this.startDate = null;
+            this.endDate = null;
+        }
+
+        try {
+            if ((this.swmmInput.getTimeseriesURLs() != null)
+                        && !this.swmmInput.getTimeseriesURLs().isEmpty()) {
+                this.validTimeIntervall = true;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("checking selected time series dates for validity");
+                }
+                for (final String timeseries : this.swmmInput.getTimeseriesURLs()) {
+                    final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(timeseries);
+                    final TimeInterval timeInterval = config.getInterval();
+
+                    if (!timeInterval.containsTimeStamp(startDate)
+                                || !timeInterval.containsTimeStamp(endDate)) {
+                        LOG.warn("time intervall " + timeInterval + " of timeseries " + timeseries
+                                    + " does not cover selected model timespan " + startDate + "<->" + endDate);
+                        this.validTimeIntervall = false;
+                        break;
+                    }
+                }
+            } else {
+                this.validTimeIntervall = false;
+            }
+        } catch (MalformedURLException ex) {
+            LOG.error("could not check time intervall of timseries", ex);
+            this.validTimeIntervall = false;
+        }
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("read settings: startDate=" + this.startDate + ", endDate=" + this.endDate);
+        }
 
         component.init();
     }
@@ -119,7 +161,14 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 "Bitte wählen Sie mindestens eine Regenzeitreihe aus");
             valid = false;
+        } else if (!validTimeIntervall) {
+            wizard.putProperty(
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                "Der Modellzeitrum wird nicht von den ausgewählten Zeitreihen abgedeckt");
+            valid = false;
         } else {
+            // TODO: check time intervall!
+
             wizard.putProperty(
                 WizardDescriptor.PROP_INFO_MESSAGE,
                 null);
@@ -177,10 +226,51 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
     /**
      * DOCUMENT ME!
      *
-     * @param  stationIds  DOCUMENT ME!
+     * @param  timeseriesIds   DOCUMENT ME!
+     * @param  timeseriesURLs  DOCUMENT ME!
      */
-    public void setTimeseriesIds(final List<Integer> stationIds) {
-        this.swmmInput.setTimeseries(stationIds);
+    public void setTimeseries(final List<Integer> timeseriesIds, final List<String> timeseriesURLs) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("setting " + timeseriesIds.size() + " new timiseries ids and URIs");
+        }
+        this.swmmInput.setTimeseries(timeseriesIds);
+
+        try {
+            // reset flag
+            this.validTimeIntervall = true;
+            int i = 0;
+            final TimeInterval modelIntervall = new TimeInterval(
+                    TimeInterval.Openness.OPEN,
+                    this.startDate,
+                    this.endDate,
+                    TimeInterval.Openness.OPEN);
+            for (final String timeseries : timeseriesURLs) {
+                final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(timeseries);
+                final TimeInterval timeInterval = config.getInterval();
+
+                if (!timeInterval.containsTimeStamp(startDate)
+                            || !timeInterval.containsTimeStamp(endDate)) {
+                    LOG.warn("time intervall " + timeInterval + " of timeseries " + timeseriesIds.get(i)
+                                + " does not cover selected model timespan " + startDate + "<->" + endDate);
+                    this.validTimeIntervall = false;
+                    break;
+                } else {
+                    config.setInterval(modelIntervall);
+                    final String newURI = config.toUrl();
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("updated timeseries URI: " + newURI);
+                    }
+                    timeseriesURLs.set(i, newURI);
+                }
+
+                i++;
+            }
+        } catch (Throwable t) {
+            LOG.error("could not check time intervall of timseries", t);
+            this.validTimeIntervall = false;
+        }
+
+        this.swmmInput.setTimeseriesURLs(timeseriesURLs);
         this.changeSupport.fireChange();
     }
 }

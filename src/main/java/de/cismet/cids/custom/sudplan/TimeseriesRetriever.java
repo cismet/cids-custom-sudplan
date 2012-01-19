@@ -231,10 +231,13 @@ public final class TimeseriesRetriever {
                 interval = config.getInterval();
             }
 
-            final EnvelopeQueryParameter point = new EnvelopeQueryParameter();
-            point.setEnvelope(config.getGeometry().getEnvelopeInternal());
-
-            return datapoint.getTimeSeries(interval, point);
+            if (config.getGeometry() != null) {
+                final EnvelopeQueryParameter point = new EnvelopeQueryParameter();
+                point.setEnvelope(config.getGeometry().getEnvelopeInternal());
+                return datapoint.getTimeSeries(interval, point);
+            } else {
+                return datapoint.getTimeSeries(interval);
+            }
         }
 
         /**

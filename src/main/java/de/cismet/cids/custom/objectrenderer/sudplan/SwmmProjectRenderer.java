@@ -7,11 +7,28 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import Sirius.navigator.ui.ComponentRegistry;
+
+import org.apache.log4j.Logger;
+
+import org.jdesktop.swingx.JXHyperlink;
+
 import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
+
+import java.awt.GridBagConstraints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.JComponent;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
+import de.cismet.cids.custom.sudplan.local.linz.SwmmInputManagerUI;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.tools.gui.TitleComponentProvider;
 
@@ -23,20 +40,25 @@ import de.cismet.tools.gui.TitleComponentProvider;
  */
 public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(SwmmProjectRenderer.class);
+
     //~ Instance fields --------------------------------------------------------
 
     private final transient SwmmProjectTitleComponent titleComponent = new SwmmProjectTitleComponent();
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel configPanel;
     private javax.swing.JTextArea configurationArea;
+    private javax.swing.JPanel etaRunPanel;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblDescription;
     private javax.swing.JLabel lblDescriptionText;
-    private javax.swing.JLabel lblName;
     private javax.swing.JLabel lblTitle;
+    private javax.swing.JLabel lblTitleText;
     private javax.swing.JLabel previewLabel;
     private javax.swing.JPanel previewPanel;
-    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
+    private javax.swing.JPanel swmmRunPanel;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -50,6 +72,57 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
 
     //~ Methods ----------------------------------------------------------------
 
+    @Override
+    protected void init() {
+        final GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 0.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.fill = GridBagConstraints.NONE;
+
+        final List<CidsBean> swmmScenarios = (List)cidsBean.getProperty("swmm_scenarios"); // NOI18N
+        final List<CidsBean> etaScenarios = (List)cidsBean.getProperty("eta_scenarios");   // NOI18N
+        final HashMap beansMap = new HashMap(swmmScenarios.size() + etaScenarios.size());
+        final ScenarioListener scenarioListener = new ScenarioListener(beansMap);
+
+        for (final CidsBean swmmBean : swmmScenarios) {
+            final String key = "SWMM::" + swmmBean.getProperty("id");
+            beansMap.put(key, swmmBean);
+            final JXHyperlink hyperLink = new JXHyperlink();
+            hyperLink.setText((String)swmmBean.getProperty("name")); // NOI18N
+            hyperLink.setActionCommand(key);
+            hyperLink.addActionListener(WeakListeners.create(
+                    ActionListener.class,
+                    scenarioListener,
+                    hyperLink));
+            this.swmmRunPanel.add(hyperLink, gridBagConstraints);
+            gridBagConstraints.gridy++;
+        }
+
+        gridBagConstraints.gridx = 0;
+        for (final CidsBean etaBean : etaScenarios) {
+            final String key = "ETA::" + etaBean.getProperty("id");
+            beansMap.put(key, etaBean);
+            final JXHyperlink hyperLink = new JXHyperlink();
+            hyperLink.setText((String)etaBean.getProperty("name")); // NOI18N
+            hyperLink.setActionCommand(key);
+            hyperLink.addActionListener(WeakListeners.create(
+                    ActionListener.class,
+                    scenarioListener,
+                    hyperLink));
+            this.etaRunPanel.add(hyperLink, gridBagConstraints);
+            gridBagConstraints.gridy++;
+        }
+
+        this.lblTitleText.setText(cidsBean.getProperty("title").toString());
+        this.lblDescriptionText.setText(cidsBean.getProperty("description").toString());
+        this.configurationArea.setText(cidsBean.getProperty("options").toString());
+        titleComponent.setCidsBean(cidsBean);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
      * content of this method is always regenerated by the Form Editor.
@@ -57,10 +130,8 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
-
         lblTitle = new javax.swing.JLabel();
-        lblName = new javax.swing.JLabel();
+        lblTitleText = new javax.swing.JLabel();
         lblDescription = new javax.swing.JLabel();
         lblDescriptionText = new javax.swing.JLabel();
         configPanel = new javax.swing.JPanel();
@@ -68,34 +139,16 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         configurationArea = new javax.swing.JTextArea();
         previewPanel = new javax.swing.JPanel();
         previewLabel = new javax.swing.JLabel();
+        swmmRunPanel = new javax.swing.JPanel();
+        etaRunPanel = new javax.swing.JPanel();
 
         setOpaque(false);
 
         lblTitle.setText(NbBundle.getMessage(SwmmProjectRenderer.class, "SwmmProjectRenderer.lblTitle.text")); // NOI18N
 
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.title}"),
-                lblName,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("");
-        binding.setSourceUnreadableValue("<error>");
-        bindingGroup.addBinding(binding);
-
         lblDescription.setText(NbBundle.getMessage(
                 SwmmProjectRenderer.class,
                 "SwmmProjectRenderer.lblDescription.text")); // NOI18N
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
-                lblDescriptionText,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("");
-        binding.setSourceUnreadableValue("<error>");
-        bindingGroup.addBinding(binding);
 
         configPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
@@ -107,15 +160,6 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         configurationArea.setColumns(20);
         configurationArea.setLineWrap(true);
         configurationArea.setRows(6);
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.options}"),
-                configurationArea,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        bindingGroup.addBinding(binding);
-
         jScrollPane2.setViewportView(configurationArea);
 
         configPanel.add(jScrollPane2);
@@ -147,70 +191,103 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         previewLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         previewPanel.add(previewLabel);
 
+        swmmRunPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                org.openide.util.NbBundle.getMessage(
+                    SwmmProjectRenderer.class,
+                    "SwmmProjectRenderer.swmmRunPanel.border.title"))); // NOI18N
+        swmmRunPanel.setOpaque(false);
+        swmmRunPanel.setLayout(new java.awt.GridBagLayout());
+
+        etaRunPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                org.openide.util.NbBundle.getMessage(
+                    SwmmProjectRenderer.class,
+                    "SwmmProjectRenderer.etaRunPanel.border.title"))); // NOI18N
+        etaRunPanel.setOpaque(false);
+        etaRunPanel.setLayout(new java.awt.GridBagLayout());
+
         final org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
                 layout.createSequentialGroup().add(19, 19, 19).add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                        previewPanel,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        378,
-                        Short.MAX_VALUE).add(
-                        layout.createSequentialGroup().add(lblDescription).add(18, 18, 18).add(
-                            lblDescriptionText,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                            247,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).add(
-                        layout.createSequentialGroup().add(
-                            lblTitle,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                            68,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).add(18, 18, 18).add(
-                            lblName,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                            243,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).add(
+                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false).add(
                         configPanel,
                         org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        378,
-                        Short.MAX_VALUE)).add(18, 18, 18)));
+                        360,
+                        Short.MAX_VALUE).add(
+                        layout.createSequentialGroup().add(
+                            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
+                                lblDescription).add(
+                                lblTitle,
+                                org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                                68,
+                                org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).add(50, 50, 50).add(
+                            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
+                                lblDescriptionText,
+                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                Short.MAX_VALUE).add(
+                                lblTitleText,
+                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                Short.MAX_VALUE))).add(
+                        swmmRunPanel,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        Short.MAX_VALUE)).addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED).add(
+                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false).add(
+                        previewPanel,
+                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                        360,
+                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).add(
+                        etaRunPanel,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        Short.MAX_VALUE)).addContainerGap(
+                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                    Short.MAX_VALUE)));
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
                 layout.createSequentialGroup().addContainerGap().add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE).add(
+                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
+                        org.jdesktop.layout.GroupLayout.TRAILING,
+                        lblTitleText,
+                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                        14,
+                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).add(
                         lblTitle,
                         org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
                         14,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).add(lblName)).addPreferredGap(
+                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).addPreferredGap(
                     org.jdesktop.layout.LayoutStyle.UNRELATED).add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE).add(lblDescription).add(
-                        lblDescriptionText)).addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED).add(
-                    configPanel,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    previewPanel,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                    285,
-                    Short.MAX_VALUE).addContainerGap(433, Short.MAX_VALUE)));
-
-        bindingGroup.bind();
+                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false).add(
+                        lblDescription,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        Short.MAX_VALUE).add(
+                        lblDescriptionText,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        Short.MAX_VALUE)).addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED).add(
+                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false).add(
+                        previewPanel,
+                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                        300,
+                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).add(
+                        configPanel,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        Short.MAX_VALUE)).addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED).add(
+                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
+                        swmmRunPanel,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        Short.MAX_VALUE).add(
+                        etaRunPanel,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        Short.MAX_VALUE)).addContainerGap()));
     } // </editor-fold>//GEN-END:initComponents
-
-    @Override
-    protected void init() {
-        titleComponent.setCidsBean(cidsBean);
-        bindingGroup.unbind();
-        bindingGroup.bind();
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
-        bindingGroup.unbind();
-    }
 
     @Override
     public JComponent getTitleComponent() {
@@ -222,5 +299,43 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         super.setTitle(title);
 
         titleComponent.setTitle(title);
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class ScenarioListener implements ActionListener {
+
+        //~ Instance fields ----------------------------------------------------
+
+        final HashMap<String, CidsBean> beansMap;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new ScenarioListener object.
+         *
+         * @param  beansMap  DOCUMENT ME!
+         */
+        public ScenarioListener(final HashMap<String, CidsBean> beansMap) {
+            this.beansMap = beansMap;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            if ((beansMap != null) && beansMap.containsKey(e.getActionCommand())) {
+                ComponentRegistry.getRegistry()
+                        .getDescriptionPane()
+                        .gotoMetaObject(beansMap.get(e.getActionCommand()).getMetaObject(), null);
+            } else {
+                LOG.warn("beans map does not contain cids bean '" + e.getActionCommand() + "'");
+            }
+        }
     }
 }

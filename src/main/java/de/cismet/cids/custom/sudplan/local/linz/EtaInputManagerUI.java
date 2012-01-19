@@ -62,6 +62,9 @@ public class EtaInputManagerUI extends javax.swing.JPanel {
         try {
             final EtaInput etaInput = inputManager.getUR();
             final DefaultTableModel ctoTableModel = (DefaultTableModel)this.etaTable.getModel();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("loading configuration of #" + etaInput.getEtaConfigurations().size() + "CSO");
+            }
             for (final EtaConfiguration etaConfiguration : etaInput.getEtaConfigurations()) {
                 ctoTableModel.addRow(
                     new Object[] {
@@ -70,6 +73,7 @@ public class EtaInputManagerUI extends javax.swing.JPanel {
                         etaConfiguration.getSedimentationEfficency()
                     });
             }
+            ctoTableModel.fireTableDataChanged();
         } catch (IOException ex) {
             LOG.error("cannot initialise eta input manager ui", ex); // NOI18N
         }
