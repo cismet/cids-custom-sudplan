@@ -31,8 +31,11 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
+import de.cismet.cids.custom.objectrenderer.sudplan.TimeSeriesRendererUtil;
+import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
+import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -108,12 +111,19 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
 
         final TimeseriesChartPanel resultTsPanel;
         final TimeseriesChartPanel inputTsPanel;
+        final TimeseriesRetrieverConfig resultCfg;
+        final TimeseriesRetrieverConfig inputCfg;
         try {
+            resultCfg = TimeseriesRetrieverConfig.fromUrl((String)resultTs.getProperty("uri")); // NOI18N
+            inputCfg = TimeseriesRetrieverConfig.fromUrl((String)inputTs.getProperty("uri"));   // NOI18N
+            final Resolution inputRes = TimeSeriesRendererUtil.getPreviewResolution(inputCfg);
+            final Resolution resultRes = TimeSeriesRendererUtil.getPreviewResolution(resultCfg);
+
             // FIXME: for the mockup
-            resultTsPanel = new TimeseriesChartPanel((String)resultTs.getProperty("uri")); // NOI18N
-            inputTsPanel = new TimeseriesChartPanel((String)inputTs.getProperty("uri"));   // NOI18N
+            resultTsPanel = new TimeseriesChartPanel(resultCfg.changeResolution(resultRes));
+            inputTsPanel = new TimeseriesChartPanel(inputCfg.changeResolution(inputRes));
         } catch (final MalformedURLException ex) {
-            final String message = "illegal ts uri";                                       // NOI18N
+            final String message = "illegal ts uri"; // NOI18N
             LOG.error(message, ex);
             throw new IllegalStateException(message, ex);
         }

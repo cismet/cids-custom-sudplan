@@ -18,6 +18,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import de.cismet.cids.custom.sudplan.ProgressEvent;
+import de.cismet.cids.custom.sudplan.ProgressEvent.State;
+import de.cismet.cids.custom.sudplan.commons.CismetExecutors;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 /**
@@ -44,7 +46,7 @@ public final class ProgressWatch {
      */
     private ProgressWatch() {
         poller = Executors.newScheduledThreadPool(5, SudplanConcurrency.createThreadFactory("progress-watch")); // NOI18N
-        deregisterDispatcher = Executors.newSingleThreadExecutor(
+        deregisterDispatcher = CismetExecutors.newSingleThreadExecutor(
                 SudplanConcurrency.createThreadFactory("deregister-dispatcher"));                               // NOI18N
     }
 
@@ -59,7 +61,7 @@ public final class ProgressWatch {
         final Deregister deregister = new Deregister();
         final Runnable poll = new Poll(deregister, watchable);
 
-        final ScheduledFuture future = poller.scheduleWithFixedDelay(poll, 5, 5, TimeUnit.SECONDS);
+        final ScheduledFuture future = poller.scheduleWithFixedDelay(poll, 30, 30, TimeUnit.SECONDS);
         deregister.self = future;
     }
 
@@ -122,10 +124,16 @@ public final class ProgressWatch {
      */
     private final class Poll implements Runnable {
 
+        //~ Static fields/initializers -----------------------------------------
+
+        private static final int MAX_RETRIES = 5;
+
         //~ Instance fields ----------------------------------------------------
 
         private final transient Deregister deregister;
         private final transient Watchable watchable;
+
+        private transient int retryCount;
 
         //~ Constructors -------------------------------------------------------
 
@@ -147,6 +155,7 @@ public final class ProgressWatch {
 
             this.deregister = deregister;
             this.watchable = watchable;
+            this.retryCount = 0;
         }
 
         //~ Methods ------------------------------------------------------------
@@ -181,7 +190,22 @@ public final class ProgressWatch {
                     }
                 }
             } catch (final IOException e) {
-                LOG.warn("error in status poll: " + watchable, e); // NOI18N
+                retryCount++;
+                if (retryCount > MAX_RETRIES) {
+                    LOG.warn("error in status poll: " + watchable, e); // NOI18N
+
+                    final ProgressEvent progress = new ProgressEvent(watchable, State.BROKEN);
+
+                    watchable.getStatusCallback().progress(progress);
+
+                    if (deregister != null) {
+                        deregisterDispatcher.submit(deregister);
+                    }
+                } else {
+                    LOG.warn("error in status poll, retrying (no. " + retryCount + "/" + MAX_RETRIES + "): " // NOI18N
+                                + watchable,
+                        e);
+                }
             }
         }
     }

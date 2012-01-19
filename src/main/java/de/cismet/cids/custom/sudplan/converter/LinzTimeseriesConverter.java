@@ -37,20 +37,14 @@ import de.cismet.cids.custom.sudplan.Variable;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = Converter.class)
-public final class WuppertalTimeseriesConverter extends TimeseriesConverter {
+public final class LinzTimeseriesConverter extends TimeseriesConverter {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final transient Logger LOG = Logger.getLogger(WuppertalTimeseriesConverter.class);
+    private static final transient Logger LOG = Logger.getLogger(LinzTimeseriesConverter.class);
 
-    private static final String TOKEN_STATION = "Station";                                    // NOI18N
-    private static final String TOKEN_STATION_NO = "Stationsnummer";                          // NOI18N
-    private static final String TOKEN_SUB_DESCR = "Unterbezeichnung";                         // NOI18N
-    private static final String TOKEN_PARAM = "Parameter";                                    // NOI18N
-    private static final String TOKEN_UNIT = "Einheit";                                       // NOI18N
-    private static final String TOKEN_SENSOR = "Geber";                                       // NOI18N
-    private static final DateFormat DATEFORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss"); // NOI18N
-    private static final NumberFormat NUMBERFORMAT = NumberFormat.getInstance(Locale.GERMAN);
+    private static final DateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // NOI18N
+    private static final NumberFormat NUMBERFORMAT = NumberFormat.getInstance(Locale.US);
 
     //~ Methods ----------------------------------------------------------------
 
@@ -75,9 +69,16 @@ public final class WuppertalTimeseriesConverter extends TimeseriesConverter {
             ts.setTSProperty(TimeSeries.VALUE_KEYS, new String[] { PropertyNames.VALUE });
             ts.setTSProperty(TimeSeries.VALUE_JAVA_CLASS_NAMES, new String[] { Float.class.getName() });
             ts.setTSProperty(TimeSeries.VALUE_TYPES, new String[] { TimeSeries.VALUE_TYPE_NUMBER });
+            // FIXME: hardcoded unit and observed property
+            ts.setTSProperty(TimeSeries.VALUE_UNITS, new String[] { Unit.MM.getPropertyKey() });
+            ts.setTSProperty(
+                TimeSeries.VALUE_OBSERVED_PROPERTY_URNS,
+                new String[] { Variable.PRECIPITATION.getPropertyKey() });
+            // must be present
+            ts.setTSProperty(PropertyNames.DESCRIPTION, "imported_linz_timeseries_" + System.currentTimeMillis());
 
             while (line != null) {
-                final String[] split = line.split(";");                // NOI18N
+                final String[] split = line.split("   ");              // NOI18N
                 if (split.length == 1) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("token without value: " + split[0]); // NOI18N
@@ -91,37 +92,12 @@ public final class WuppertalTimeseriesConverter extends TimeseriesConverter {
                     final String key = split[0];
                     final String value = split[1];
 
-                    if (TOKEN_STATION.equals(key)) {
-                    } else if (TOKEN_STATION_NO.equals(key)) {
-                        // TODO: where to put this
-                        ts.setTSProperty(PropertyNames.DESCRIPTION, value);
-                    } else if (TOKEN_SUB_DESCR.equals(key)) {
-                        // TODO: where to put this
-                    } else if (TOKEN_PARAM.equals(key)) {
-                        if (value.equals("Niederschlag")) { // NOI18N
-                            ts.setTSProperty(
-                                TimeSeries.VALUE_OBSERVED_PROPERTY_URNS,
-                                new String[] { Variable.PRECIPITATION.getPropertyKey() });
-                        } else {
-                            ts.setTSProperty(TimeSeries.VALUE_OBSERVED_PROPERTY_URNS, new String[] { value });
-                        }
-                    } else if (TOKEN_UNIT.equals(key)) {
-                        if (value.equals("mm/h")) {         // NOI18N
-                            ts.setTSProperty(TimeSeries.VALUE_UNITS, new String[] { Unit.MM.getPropertyKey() });
-                        } else {
-                            ts.setTSProperty(TimeSeries.VALUE_UNITS, new String[] { value });
-                        }
-                    } else if (TOKEN_SENSOR.equals(key)) {
-                        // TODO: where to put this
-                    } else {
-                        final Date date = DATEFORMAT.parse(key);
-                        final float val = NUMBERFORMAT.parse(value.trim()).floatValue();
-                        ts.setValue(new TimeStamp(date), PropertyNames.VALUE, val);
-                    }
+                    final Date date = DATEFORMAT.parse(key);
+                    final float val = NUMBERFORMAT.parse(value.trim()).floatValue();
+                    ts.setValue(new TimeStamp(date), PropertyNames.VALUE, val);
                 }
 
                 if (Thread.currentThread().isInterrupted()) {
-//                    throw new ConversionException("execution was interrupted"); // NOI18N
                     LOG.warn("execution was interrupted"); // NOI18N
                     return null;
                 }
@@ -154,6 +130,6 @@ public final class WuppertalTimeseriesConverter extends TimeseriesConverter {
 
     @Override
     public String toString() {
-        return "Wuppertal Converter";
+        return "Linz Converter";
     }
 }

@@ -210,7 +210,7 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                     final CidsBean tsBean = input.fetchTimeseries();
                     final String tsName = URLEncoder.encode((String)tsBean.getProperty("name"), "UTF-8"); // NOI18N
 
-                    URL url = new URL(TimeSeriesRemoteHelper.DAV_HOST + tsName + "_" + runId + "_unknown"); // NOI18N
+                    URL url = new URL(TimeSeriesRemoteHelper.DAV_HOST + "/" + tsName + "_" + runId + "_unknown"); // NOI18N
 
                     TimeseriesTransmitter.getInstance().put(url, ts, TimeSeriesRemoteHelper.CREDS);
 
@@ -230,7 +230,7 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                     datapoint = dps.iterator().next();
                     ts = datapoint.getTimeSeries(TimeInterval.ALL_INTERVAL);
 
-                    url = new URL(TimeSeriesRemoteHelper.DAV_HOST + tsName + "_" + runId + "_86400s"); // NOI18N
+                    url = new URL(TimeSeriesRemoteHelper.DAV_HOST + "/" + tsName + "_" + runId + "_86400s"); // NOI18N
 
                     TimeseriesTransmitter.getInstance().put(url, ts, TimeSeriesRemoteHelper.CREDS);
 

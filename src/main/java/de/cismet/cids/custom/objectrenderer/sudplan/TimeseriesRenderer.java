@@ -219,7 +219,7 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnOriginalTSActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOriginalTSActionPerformed
+    private void btnOriginalTSActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOriginalTSActionPerformed
 
         final int answer = JOptionPane.showConfirmDialog(
                 ComponentRegistry.getRegistry().getMainWindow(),
@@ -233,5 +233,5 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         if (answer == JOptionPane.YES_OPTION) {
             this.setTimeSeriesPanel(null);
         }
-    }//GEN-LAST:event_btnOriginalTSActionPerformed
+    } //GEN-LAST:event_btnOriginalTSActionPerformed
 }

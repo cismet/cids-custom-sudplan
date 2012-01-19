@@ -12,6 +12,7 @@
  */
 package de.cismet.cids.custom.sudplan.timeseriesImport;
 
+import de.cismet.cids.custom.sudplan.converter.LinzTimeseriesConverter;
 import de.cismet.cids.custom.sudplan.converter.TimeSeriesSerializer;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 import de.cismet.cids.custom.sudplan.converter.WuppertalTimeseriesConverter;
@@ -61,8 +62,10 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     public void init() {
+        // TODO: use lookup
         this.cboConverterChooser.removeAllItems();
         this.cboConverterChooser.addItem(new WuppertalTimeseriesConverter());
+        this.cboConverterChooser.addItem(new LinzTimeseriesConverter());
         this.cboConverterChooser.addItem(TimeSeriesSerializer.getInstance());
     }
 

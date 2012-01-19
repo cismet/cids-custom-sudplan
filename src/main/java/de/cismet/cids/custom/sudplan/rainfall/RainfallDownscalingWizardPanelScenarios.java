@@ -88,7 +88,7 @@ public final class RainfallDownscalingWizardPanelScenarios implements WizardDesc
                             RainfallDownscalingModelManager.RF_SPS_LOOKUP,
                             RainfallDownscalingModelManager.RF_SPS_URL);
             final Properties filter = new Properties();
-            filter.put(TimeSeries.PROCEDURE, RainfallDownscalingModelManager.RF_DS_PROCEDURE);
+            filter.put(TimeSeries.PROCEDURE, RainfallDownscalingModelManager.RF_TS_DS_PROCEDURE);
             final Datapoint dp = dh.createDatapoint(filter, null, DataHandler.Access.READ);
             final InputDescriptor id = (InputDescriptor)dp.getProperties().get("jaxb_desc:climate_scenario"); // NOI18N
             final List<String> scenarioList = id.getDefinition()

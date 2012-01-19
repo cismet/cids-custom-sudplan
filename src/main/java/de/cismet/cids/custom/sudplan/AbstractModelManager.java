@@ -138,7 +138,7 @@ public abstract class AbstractModelManager implements ModelManager {
      */
     @Override
     public void finalise() throws IOException {
-        progressDispatcher.shutdown();
+        // noop
     }
 
     @Override

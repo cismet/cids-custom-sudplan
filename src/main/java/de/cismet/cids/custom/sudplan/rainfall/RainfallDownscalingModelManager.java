@@ -57,47 +57,24 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
     //~ Static fields/initializers ---------------------------------------------
 
-    // TODO: these commented lines are not used anymore, maybe their won't even serve as examples anymore and can thus
-    // be deleted
-// public static final String PROP_MODEL_ID = "ts:sps:sensor_id"; // NOI18N
-
-// public static final String PROP_TASK_ID = "ts:sps:task_id";    // NOI18N
-
-    // TODO: probably align this id with the one in the model database
-
-// public static final String RAIN_TIMESERIES_DOWNSCALING_ID = "Rain_Timeseries_Downscaling"; // NOI18N
-
-// private static final String ENDPOINT = "endpoint";
-
     private static final transient Logger LOG = Logger.getLogger(RainfallDownscalingModelManager.class);
-//    private static final String PARAM_REF_RAIN = "param:reference_rain";                    // NOI18N
-//    private static final String PARAM_RESULT_RAIN = "param:result_rain";                    // NOI18N
-//    private static final String PARAM_REF_RAIN_30 = "param:result_rain_30";                 // NOI18N
-//    private static final String PARAM_RESULT_RAIN_30 = "param:result_rain_30_downscaled";   // NOI18N
-//    private static final String PARAM_REF_RAIN_1D = "param:result_rain_1day";               // NOI18N
-//    private static final String PARAM_RESULT_RAIN_1D = "param:result_rain_1day_downscaled"; // NOI18N
 
     public static final String PARAM_CLIMATE_SCENARIO = "climate_scenario";
     public static final String PARAM_SOURCE_RAIN = "source_rain";
     public static final String PARAM_CENTER_TIME = "center_time";
 
-    public static final String RF_SOS_LOOKUP = "rainfall_sos_lookup";           // NOI18N
-    public static final String RF_SPS_LOOKUP = "rainfall_sps_lookup";           // NOI18N
-    public static final String RF_SOS_URL = "http://sudplan.ait.ac.at:8084/";   // NOI18N
-    public static final String RF_SPS_URL = "http://sudplan.ait.ac.at:8085/";   // NOI18N
-    public static final String RF_DS_PROCEDURE = "Rain_Timeseries_Downscaling"; // NOI18N
+    public static final String RF_SOS_LOOKUP = "rainfall_sos_lookup";                   // NOI18N
+    public static final String RF_SPS_LOOKUP = "rainfall_sps_lookup";                   // NOI18N
+    public static final String RF_SOS_URL = "http://sudplan.ait.ac.at:8084/";           // NOI18N
+    public static final String RF_SPS_URL = "http://sudplan.ait.ac.at:8085/";           // NOI18N
+    public static final String RF_TS_DS_PROCEDURE = "Rain_Timeseries_Downscaling";      // NOI18N
+    public static final String RF_IDF_DS_PROCEDURE = "IDF_Rain_Timeseries_Downscaling"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
     private transient Datapoint runningTask;
 
     //~ Methods ----------------------------------------------------------------
-
-// private transient ResultProcessor.CreateOutputRunner outputRunner;
-
-    // NOI18N
-
-// private transient ResultProcessor.CreateOutputRunner outputRunner;
 
     @Override
     protected CidsBean createOutputBean() throws IOException {
@@ -177,7 +154,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
         }
 
         final Properties filter = new Properties();
-        filter.put(TimeSeries.PROCEDURE, RF_DS_PROCEDURE);
+        filter.put(TimeSeries.PROCEDURE, RF_TS_DS_PROCEDURE);
 
         final Datapoint dp = spsHandler.createDatapoint(filter, null, DataHandler.Access.READ_WRITE);
 
@@ -213,31 +190,6 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
     }
 
 //    /**
-//     * DOCUMENT ME!
-//     *
-//     * @param   bean   DOCUMENT ME!
-//     * @param   where  DOCUMENT ME!
-//     *
-//     * @return  DOCUMENT ME!
-//     *
-//     * @throws  IOException  DOCUMENT ME!
-//     */
-//    private static Object getInfo(final Object bean, final String where) throws IOException {
-//        try {
-//            final BeanInfo info = Introspector.getBeanInfo(bean.getClass(), Introspector.USE_ALL_BEANINFO);
-//            for (final PropertyDescriptor pd : info.getPropertyDescriptors()) {
-//                if (pd.getName().equals(where)) {
-//                    return pd.getReadMethod().invoke(bean);
-//                }
-//            }
-//
-//            throw new IOException("unknown property: " + where); // NOI18N
-//        } catch (final Exception exception) {
-//            final String message = "cannot get info";            // NOI18N
-//            LOG.error(message, exception);
-//            throw new IOException(message, exception);
-//        }
-//    }
 
     /**
      * DOCUMENT ME!
@@ -290,8 +242,6 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
         final TimeSeries ts;
         try {
-            // FIXME: we must use the sms ts converter instead of the native one
-// final TimeseriesConverter converter = SMSUtils.loadConverter(tsBean);
             final Future<TimeSeries> tsFuture = TimeseriesRetriever.getInstance()
                         .retrieve(config, TimeSeriesSerializer.getInstance());
 
@@ -473,284 +423,4 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
     protected boolean needsDownload() {
         return true;
     }
-
-//    /**
-//     * DOCUMENT ME!
-//     *
-//     * @version  $Revision$, $Date$
-//     */
-//    private final class ResultProcessor implements DatapointListener {
-//
-//        //~ Static fields/initializers -----------------------------------------
-//
-//        private static final String COMPLETED = "completed"; // NOI18N
-//
-//        //~ Instance fields ----------------------------------------------------
-//
-//        private final transient Map<String, Properties> resultFilters;
-//        private final transient Datapoint task;
-//        private final transient DataHandler resultHander;
-//
-//        //~ Constructors -------------------------------------------------------
-//
-//        /**
-//         * Creates a new ResultProcessor object.
-//         *
-//         * @param  resultFilters  DOCUMENT ME!
-//         * @param  task           DOCUMENT ME!
-//         * @param  resultHandler  DOCUMENT ME!
-//         * @param  runBean        DOCUMENT ME!
-//         */
-//        public ResultProcessor(final Map<String, Properties> resultFilters,
-//                final Datapoint task,
-//                final DataHandler resultHandler,
-//                final CidsBean runBean) {
-//            this.resultFilters = resultFilters;
-//            this.task = task;
-//            this.resultHander = resultHandler;
-//        }
-//
-//        //~ Methods ------------------------------------------------------------
-//
-//        @Override
-//        public void dataChanged(final Datapoint datapoint, final TimeInterval timeinterval) {
-//            assert datapoint != null : "datapoint must not be null";       // NOI18N
-//            assert timeinterval != null : "timeinterval must not be null"; // NOI18N
-//
-//            final TimeSeries eventTS = datapoint.getTimeSeries(timeinterval);
-//            final TimeStamp lastStamp = eventTS.getTimeStamps().last();
-//
-//            assert lastStamp != null : "last stamp must not be null"; // NOI18N
-//
-//            final String state = (String)eventTS.getValue(lastStamp, "state"); // NOI18N
-//            if (LOG.isDebugEnabled()) {
-//                LOG.debug("current task state: " + state);                     // NOI18N
-//            }
-//
-//            if (COMPLETED.equals(state)) {
-//                task.removeListener(ResultProcessor.this);
-//                outputRunner = new CreateOutputRunner();
-//
-//                try {
-//                    Thread.sleep(2000);
-//                } catch (InterruptedException ex) {
-//                    LOG.warn("interrupted", ex); // NOI18N
-//                }
-//
-//                outputRunner.start();
-//                fireFinised();
-//            }
-//        }
-//
-//        //~ Inner Classes ------------------------------------------------------
-//
-//        /**
-//         * DOCUMENT ME!
-//         *
-//         * @version  $Revision$, $Date$
-//         */
-//        private final class CreateOutputRunner extends Thread {
-//
-//            //~ Instance fields ------------------------------------------------
-//
-//            private transient CidsBean modelOutput;
-//
-//            //~ Methods --------------------------------------------------------
-//
-//            @Override
-//            public void run() {
-//                final String lookup = resultHander.getId();
-//                final URL location;
-//                try {
-//                    location = (URL)getInfo(resultHander, ENDPOINT);
-//                } catch (final Exception ex) {
-//                    LOG.error("cannot fetch result sos location from datahandler", ex); // NOI18N
-//                    // TODO: joptionpane
-//                    return;
-//                }
-//
-//                final TimeseriesRetrieverConfig resultConfig = getConfig(
-//                        lookup,
-//                        location,
-//                        resultFilters.get(PARAM_RESULT_RAIN));
-//                final TimeseriesRetrieverConfig ref30Config = getConfig(
-//                        lookup,
-//                        location,
-//                        resultFilters.get(PARAM_REF_RAIN_30));
-//                final TimeseriesRetrieverConfig result30Config = getConfig(
-//                        lookup,
-//                        location,
-//                        resultFilters.get(PARAM_RESULT_RAIN_30));
-//                final TimeseriesRetrieverConfig ref1dConfig = getConfig(
-//                        lookup,
-//                        location,
-//                        resultFilters.get(PARAM_REF_RAIN_1D));
-//                final TimeseriesRetrieverConfig result1dConfig = getConfig(
-//                        lookup,
-//                        location,
-//                        resultFilters.get(PARAM_RESULT_RAIN_1D));
-//
-//                try {
-//                    final RainfallDownscalingInput input = inputFromRun(cidsBean);
-//                    final CidsBean refBean = input.fetchTimeseries();
-//                    CidsBean resultBean = createResultBean(
-//                            "Downscaled result("
-//                                    + refBean.getProperty("name")
-//                                    + ")",
-//                            resultConfig.toUrl(),
-//                            refBean);
-//                    CidsBean result30Bean = createResultBean(
-//                            "Downscaled 30 min result("
-//                                    + refBean.getProperty("name")
-//                                    + ")",
-//                            result30Config.toUrl(),
-//                            refBean);
-//                    CidsBean ref30Bean = createResultBean(
-//                            "Reference 30 min("
-//                                    + refBean.getProperty("name")
-//                                    + ")",
-//                            ref30Config.toUrl(),
-//                            refBean);
-//                    CidsBean result1dBean = createResultBean(
-//                            "Downscaled 1 day result("
-//                                    + refBean.getProperty("name")
-//                                    + ")",
-//                            result1dConfig.toUrl(),
-//                            refBean);
-//                    CidsBean ref1dBean = createResultBean(
-//                            "Reference 1 day("
-//                                    + refBean.getProperty("name")
-//                                    + ")",
-//                            ref1dConfig.toUrl(),
-//                            refBean);
-//
-//                    resultBean = resultBean.persist();
-//                    result30Bean = result30Bean.persist();
-//                    ref30Bean = ref30Bean.persist();
-//                    result1dBean = result1dBean.persist();
-//                    ref1dBean = ref1dBean.persist();
-//
-//                    if (LOG.isDebugEnabled()) {
-//                        LOG.debug("created resulting timeseries"); // NOI18N
-//                    }
-//
-//                    final RainfallDownscalingOutput output = createOutput(
-//                            ref30Bean,
-//                            result30Bean,
-//                            resultBean,
-//                            result1dBean,
-//                            ref1dBean);
-//
-//                    modelOutput = SMSUtils.createModelOutput(
-//                            "Downscaling results of ("
-//                                    + cidsBean.getProperty("name")
-//                                    + ")",
-//                            output,
-//                            SMSUtils.Model.RF_DS);
-//                    modelOutput = modelOutput.persist();
-//
-//                    if (LOG.isDebugEnabled()) {
-//                        LOG.debug("created resulting model output"); // NOI18N
-//                    }
-//                } catch (final Exception ex) {
-//                    LOG.error("cannot create rainfall output", ex);  // NOI18N
-//                    // TODO: joptionpane
-//                }
-//            }
-//
-//            /**
-//             * DOCUMENT ME!
-//             *
-//             * @param   ref30Bean     DOCUMENT ME!
-//             * @param   result30Bean  DOCUMENT ME!
-//             * @param   resultBean    DOCUMENT ME!
-//             * @param   result1dBean  DOCUMENT ME!
-//             * @param   ref1dBean     DOCUMENT ME!
-//             *
-//             * @return  DOCUMENT ME!
-//             */
-//            private RainfallDownscalingOutput createOutput(final CidsBean ref30Bean,
-//                    final CidsBean result30Bean,
-//                    final CidsBean resultBean,
-//                    final CidsBean result1dBean,
-//                    final CidsBean ref1dBean) {
-//                return new RainfallDownscalingOutput(
-//                        ((CidsBean)cidsBean.getProperty("modelinput")).getMetaObject().getID(),     // NOI18N
-//                        cidsBean.getMetaObject().getID(),
-//                        resultBean.getMetaObject().getID(),
-//                        (String)resultBean.getProperty("name"),                                     // NOI18N
-//                        result30Bean.getMetaObject().getID(),
-//                        (String)result30Bean.getProperty("name"),                                   // NOI18N
-//                        ref30Bean.getMetaObject().getID(),
-//                        (String)ref30Bean.getProperty("name"),                                      // NOI18N
-//                        ref1dBean.getMetaObject().getID(),
-//                        (String)ref1dBean.getProperty("name"),                                      // NOI18N
-//                        result1dBean.getMetaObject().getID(),
-//                        (String)result1dBean.getProperty("name"));                                  // NOI18N
-//            }
-//
-//            /**
-//             * DOCUMENT ME!
-//             *
-//             * @param   name     DOCUMENT ME!
-//             * @param   uri      DOCUMENT ME!
-//             * @param   station  DOCUMENT ME!
-//             *
-//             * @return  DOCUMENT ME!
-//             *
-//             * @throws  IOException  DOCUMENT ME!
-//             */
-//            private CidsBean createResultBean(final String name, final String uri, final CidsBean station)
-//                    throws IOException {
-//                try {
-//                    final MetaClass mcTimeseries = ClassCacheMultiple.getMetaClass(
-//                            SessionManager.getSession().getUser().getDomain(),
-//                            SMSUtils.TABLENAME_TIMESERIES);
-//                    final CidsBean result = mcTimeseries.getEmptyInstance().getBean();
-//
-//                    result.setProperty("name", name);
-//                    result.setProperty("uri", uri);
-//                    result.setProperty("station", station);
-//
-//                    return result;
-//                } catch (Exception e) {
-//                    final String message = "cannot create result bean: " // NOI18N
-//                                + "name=" + name                         // NOI18N
-//                                + "uri=" + uri                           // NOI18N
-//                                + "station=" + station;                  // NOI18N
-//                    LOG.error(message, e);
-//                    throw new IOException(message, e);
-//                }
-//            }
-//
-//            /**
-//             * DOCUMENT ME!
-//             *
-//             * @param   lookup    DOCUMENT ME!
-//             * @param   location  DOCUMENT ME!
-//             * @param   props     DOCUMENT ME!
-//             *
-//             * @return  DOCUMENT ME!
-//             */
-//            private TimeseriesRetrieverConfig getConfig(final String lookup,
-//                    final URL location,
-//                    final Properties props) {
-//                final String foi = props.getProperty(TimeSeries.FEATURE_OF_INTEREST);
-//                final String obs = props.getProperty(TimeSeries.OBSERVEDPROPERTY);
-//                final String off = props.getProperty(TimeSeries.OFFERING);
-//                final String proc = props.getProperty(TimeSeries.PROCEDURE);
-//
-//                return new TimeseriesRetrieverConfig(
-//                        TimeseriesRetrieverConfig.PROTOCOL_TSTB,
-//                        lookup,
-//                        location,
-//                        proc,
-//                        foi,
-//                        obs,
-//                        off,
-//                        null,
-//                        TimeInterval.ALL_INTERVAL);
-//            }
-//        }
-//    }
 }
