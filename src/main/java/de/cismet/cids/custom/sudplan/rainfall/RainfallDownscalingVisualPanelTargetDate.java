@@ -60,6 +60,9 @@ public final class RainfallDownscalingVisualPanelTargetDate extends javax.swing.
      * DOCUMENT ME!
      */
     void init() {
+        sldYears.setMinimum(model.getBeginYear());
+        sldYears.setMaximum(model.getEndYear());
+
         if (model.getTargetYear() == null) {
             txtYear.setText("2050"); // NOI18N
         } else {
