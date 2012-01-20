@@ -36,6 +36,8 @@ import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.color.ColorSpace;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
 
@@ -118,9 +120,11 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
     //~ Instance fields --------------------------------------------------------
 
-// private transient SOSClientHandler sosHandler;
     // NOI18N
-// private transient SOSClientHandler sosHandler;
+
+    // NOI18N
+
+    // NOI18N
     private transient String scenario;
     private transient String obsProp;
     private transient String procedure;
@@ -131,11 +135,10 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private transient int toYear;
     private transient boolean initialised;
     // has to be initialised here because of the variable declaration of the GUI
-    private final transient Available<Resolution> available = new Available.PositiveAvailable<Resolution>();
+    private final transient Available<Resolution> available = new ResolutionAvailable();
     // will only be accessed from EDT
     private transient TimeSeriesDisplayer currentDisplayer;
     private int timeseriesCount = 0;
-    // End of variables declaration
     private final transient Map<Integer, SignaturedFeature> holdFeatures;
     private final transient Set<HoldListener> holdListeners;
     private final transient TimeSeriesVisualisation tsVis;
@@ -149,11 +152,16 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private transient Coordinate currentCoordinate;
     private transient Resolution fallBackResolution;
 
+    private final transient ActionListener resL;
+    private final transient ActionListener holdL;
+
     /**
      * Used by {@link TimeSeriesDisplayer} for busy indication. Note that Serialization should not be necessary as only
      * one {@link TimeSeriesDisplayer} instance can access this attribute simultaneously.
      */
     private final LockableUI lockableUI;
+
+    private transient Resolution currentItem;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JComboBox cboResolution =
@@ -187,6 +195,9 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         holdFeatures = new HashMap<Integer, SignaturedFeature>();
         holdListeners = new HashSet<HoldListener>();
         tsListChangedL = new TimeServiesListChangedListenerImpl();
+        resL = new ResolutionChangedListener();
+        holdL = new HoldChangedListener();
+        currentItem = Resolution.DECADE;
 
         initComponents();
 
@@ -249,6 +260,9 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         this.lockableUI.setLockedEffects(effect);
         final JXLayer layer = new JXLayer(this.contentPanel, lockableUI);
         super.add(layer);
+
+        cboResolution.addActionListener(WeakListeners.create(ActionListener.class, resL, cboResolution));
+        holdCheckBox.addActionListener(WeakListeners.create(ActionListener.class, holdL, holdCheckBox));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -329,13 +343,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         pnlResolution.add(lblResolution, gridBagConstraints);
 
-        cboResolution.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cboResolutionActionPerformed(evt);
-                }
-            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -362,19 +369,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         add(contentPanel, java.awt.BorderLayout.CENTER);
     } // </editor-fold>//GEN-END:initComponents
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void cboResolutionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboResolutionActionPerformed
-        if (this.currentCoordinate != null) {
-            final Resolution resolution = (Resolution)this.cboResolution.getSelectedItem();
-            final SwingWorker worker = new TimeSeriesDisplayer(this.currentCoordinate, resolution);
-            worker.execute();
-        }
-    }                                                                                 //GEN-LAST:event_cboResolutionActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -535,9 +529,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 throw new IllegalStateException("cannot process events before this instance is initialised"); // NOI18N
             }
 
-            // default resolution of a newly selected offering
-            this.cboResolution.setSelectedItem(Resolution.DECADE);
-
             currentCoordinate = new Coordinate(mce.getxCoord(), mce.getyCoord());
 
             if ((currentDisplayer == null) || currentDisplayer.isDone() || currentDisplayer.cancel(true)) {
@@ -571,7 +562,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
     @Override
     public boolean isOnHold() {
-        return this.holdCheckBox.isSelected();
+        return (holdCheckBox != null) && holdCheckBox.isSelected();
     }
 
     /**
@@ -621,10 +612,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
                         @Override
                         public void run() {
-                            listener.holdFeaturesChanged(
-                                new HoldFeatureChangeEvent(
-                                    SOSFeatureInfoDisplay.this.holdFeatures.values(),
-                                    SOSFeatureInfoDisplay.this));
+                            listener.holdFeaturesChanged(event);
                         }
                     });
             }
@@ -659,6 +647,92 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     }
 
     //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class HoldChangedListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            if (isOnHold()) {
+                final Resolution currentRes = (Resolution)cboResolution.getSelectedItem();
+                if (!Resolution.DECADE.equals(currentRes)) {
+                    cboResolution.setSelectedItem(Resolution.DECADE);
+
+                    if (SOSFeatureInfoDisplay.this.currentCoordinate != null) {
+                        if ((currentDisplayer == null) || currentDisplayer.isDone() || currentDisplayer.cancel(true)) {
+                            final Resolution resolution = (Resolution)SOSFeatureInfoDisplay.this.cboResolution
+                                        .getSelectedItem();
+                            tsVis.clearTimeSeries();
+                            currentDisplayer = new TimeSeriesDisplayer(currentCoordinate, resolution);
+                        } else {
+                            final String message = "cannot cancel current displayer task"; // NOI18N
+                            LOG.error(message);
+                            throw new IllegalStateException(message);
+                        }
+                        currentDisplayer.execute();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class ResolutionChangedListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final Resolution selected = (Resolution)cboResolution.getSelectedItem();
+            if (available.isAvailable(selected)) {
+                currentItem = selected;
+
+                if (SOSFeatureInfoDisplay.this.currentCoordinate != null) {
+                    if ((currentDisplayer == null) || currentDisplayer.isDone() || currentDisplayer.cancel(true)) {
+                        final Resolution resolution = (Resolution)SOSFeatureInfoDisplay.this.cboResolution
+                                    .getSelectedItem();
+                        currentDisplayer = new TimeSeriesDisplayer(currentCoordinate, resolution);
+                    } else {
+                        final String message = "cannot cancel current displayer task"; // NOI18N
+                        LOG.error(message);
+                        throw new IllegalStateException(message);
+                    }
+                    currentDisplayer.execute();
+                }
+            } else {
+                cboResolution.setSelectedItem(currentItem);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class ResolutionAvailable implements Available<Resolution> {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public boolean isAvailable(final Resolution type) {
+            if (isOnHold()) {
+                return Resolution.DECADE.equals(type);
+            } else {
+                return true;
+            }
+        }
+    }
 
     /**
      * DOCUMENT ME!
@@ -773,8 +847,8 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             // ------------------------------------------------------
 
             if (this.resolution != null) {
-                offering = offering.replaceFirst("prec_\\d+[YMd]", "prec_" + this.resolution.getOfferingSuffix()); // NOI18N
-                procedure = procedure.replaceFirst("prec:\\d+[YMs]", "prec:" + this.resolution.getPrecision());    // NOI18N
+                offering = offering.replaceFirst("_\\d+[YMd]$", "_" + this.resolution.getOfferingSuffix()); // NOI18N
+                procedure = procedure.replaceFirst(":\\d+[YMs]$", ":" + this.resolution.getPrecision());    // NOI18N
             }
 
             // TODO: crs transform to WGS84
@@ -838,12 +912,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             if (envelope == null) {
                 return null;
             } else if (envelope.contains(this.coordinate.x, this.coordinate.y)) {
-                final double width = envelope.getWidth();
-                final double height = envelope.getHeight();
-                final double xCoord = this.coordinate.x;
-                final double yCoord = this.coordinate.y;
-                final double xRelation = ((xCoord - envelope.getMinX()) / width);
-                final double yRelation = ((yCoord - envelope.getMinY()) / height);
                 final TimeSeries simpleTS = timeseries.slice(new TimeInterval(
                             TimeInterval.Openness.OPEN,
                             TimeStamp.NEGATIVE_INFINITY,
@@ -851,11 +919,6 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                             TimeInterval.Openness.OPEN));
                 simpleTS.setTSProperty(TimeSeries.OBSERVEDPROPERTY, humanReadableObsProp);
                 for (final TimeStamp ts : timeStamps) {
-//                    final Float[][] values = ((Float[][])timeseries.getValue(ts, valueKey));
-//                    // assume this is a rectangular grid
-//                    final int i = (int)(values.length * xRelation);
-//                    final int j = (int)(values[i].length * yRelation);
-//                    final float value = values[i][j];
                     simpleTS.setValue(ts, valueKey, timeseries.getValue(ts, valueKey));
                 }
 
