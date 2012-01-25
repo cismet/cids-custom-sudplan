@@ -40,6 +40,9 @@ public class TimeSeriesRetrieverTest
     public static void setUpClass() throws Exception
     {
        TimeSeriesTestUtil.initLogger(); 
+       
+       // if test crashes or is canceled, the test file put to the DAV might not be deleted by tearDownClass()
+       TimeSeriesTestUtil.removeRemoteFile(TARGET_FILE);
         
        testTs = TimeSeriesTestUtil.createTestTimeSeries(); 
         
