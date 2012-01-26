@@ -14,6 +14,8 @@ import Sirius.server.middleware.types.MetaClass;
 
 import org.apache.log4j.Logger;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
@@ -26,12 +28,15 @@ import java.net.MalformedURLException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 import de.cismet.cids.custom.objectrenderer.sudplan.TimeSeriesRendererUtil;
+import de.cismet.cids.custom.sudplan.IDFCurve;
+import de.cismet.cids.custom.sudplan.IDFTablePanel;
 import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
@@ -103,33 +108,56 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
      * @throws  IllegalStateException  DOCUMENT ME!
      */
     private void init() {
-        jtbAdditionalResults.setDefaultRenderer(String.class, new AdditionalResultsCellRenderer());
-        jtbAdditionalResults.setPreferredScrollableViewportSize(jtbAdditionalResults.getPreferredSize());
+        final CidsBean inputTs = model.fetchInputRFObj();
+        final CidsBean resultTs = model.fetchResultRFObj();
 
-        final CidsBean inputTs = model.fetchTsInput();
-        final CidsBean resultTs = model.fetchTsResult();
+        final JPanel resultPanel;
+        final JPanel inputPanel;
 
-        final TimeseriesChartPanel resultTsPanel;
-        final TimeseriesChartPanel inputTsPanel;
-        final TimeseriesRetrieverConfig resultCfg;
-        final TimeseriesRetrieverConfig inputCfg;
-        try {
-            resultCfg = TimeseriesRetrieverConfig.fromUrl((String)resultTs.getProperty("uri")); // NOI18N
-            inputCfg = TimeseriesRetrieverConfig.fromUrl((String)inputTs.getProperty("uri"));   // NOI18N
-            final Resolution inputRes = TimeSeriesRendererUtil.getPreviewResolution(inputCfg);
-            final Resolution resultRes = TimeSeriesRendererUtil.getPreviewResolution(resultCfg);
+        if (SMSUtils.TABLENAME_TIMESERIES.equals(model.getRfObjTableName())) {
+            final TimeseriesRetrieverConfig resultCfg;
+            final TimeseriesRetrieverConfig inputCfg;
 
-            // FIXME: for the mockup
-            resultTsPanel = new TimeseriesChartPanel(resultCfg.changeResolution(resultRes));
-            inputTsPanel = new TimeseriesChartPanel(inputCfg.changeResolution(inputRes));
-        } catch (final MalformedURLException ex) {
-            final String message = "illegal ts uri"; // NOI18N
-            LOG.error(message, ex);
-            throw new IllegalStateException(message, ex);
+            try {
+                resultCfg = TimeseriesRetrieverConfig.fromUrl((String)resultTs.getProperty("uri")); // NOI18N
+                inputCfg = TimeseriesRetrieverConfig.fromUrl((String)inputTs.getProperty("uri"));   // NOI18N
+                final Resolution inputRes = TimeSeriesRendererUtil.getPreviewResolution(inputCfg);
+                final Resolution resultRes = TimeSeriesRendererUtil.getPreviewResolution(resultCfg);
+
+                resultPanel = new TimeseriesChartPanel(resultCfg.changeResolution(resultRes));
+                inputPanel = new TimeseriesChartPanel(inputCfg.changeResolution(inputRes));
+            } catch (final MalformedURLException ex) {
+                final String message = "illegal ts uri"; // NOI18N
+                LOG.error(message, ex);
+                throw new IllegalStateException(message, ex);
+            }
+
+            jtbAdditionalResults.setDefaultRenderer(String.class, new AdditionalResultsCellRenderer());
+            jtbAdditionalResults.setPreferredScrollableViewportSize(jtbAdditionalResults.getPreferredSize());
+        } else {
+            final ObjectMapper mapper = new ObjectMapper();
+            final String uriInput = (String)inputTs.getProperty("uri");   // NOI18N
+            final String uriResult = (String)resultTs.getProperty("uri"); // NOI18N
+
+            final IDFCurve idfInput;
+            final IDFCurve idfResult;
+            try {
+                idfInput = mapper.readValue(uriInput, IDFCurve.class);
+                idfResult = mapper.readValue(uriResult, IDFCurve.class);
+            } catch (Exception ex) {
+                final String message = "cannot read idf data from uri"; // NOI18N
+                LOG.error(message, ex);
+                throw new IllegalStateException(message, ex);
+            }
+
+            inputPanel = new IDFTablePanel(idfInput);
+            resultPanel = new IDFTablePanel(idfResult);
+
+            this.remove(pnlStatisticalResults);
         }
 
-        jtpResults.insertTab(model.getTsInputName(), icon, inputTsPanel, null, 0);
-        jtpResults.insertTab(model.getTsResultName(), icon, resultTsPanel, null, 0);
+        jtpResults.insertTab(model.getRfObjInputName(), icon, inputPanel, null, 0);
+        jtpResults.insertTab(model.getRfObjResultName(), icon, resultPanel, null, 0);
         jtpResults.setSelectedIndex(0);
 
         final CidsBean runBean = SMSUtils.fetchCidsBean(model.getModelRunId(), SMSUtils.TABLENAME_MODELRUN);

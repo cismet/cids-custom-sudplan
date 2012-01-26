@@ -23,18 +23,11 @@ public final class RainfallDownscalingOutput {
 
     private transient int modelInputId;
     private transient int modelRunId;
-    private transient int tsResultId;
-    private transient String tsResultName;
-    private transient int tsResult30Id;
-    private transient String tsResult30Name;
-    private transient int tsInput30Id;
-    private transient String tsInput30Name;
-    private transient int tsInput1dId;
-    private transient String tsInput1dName;
-    private transient int tsResult1dId;
-    private transient String tsResult1dName;
-    private transient int tsInputId;
-    private transient String tsInputName;
+    private transient int rfObjResultId;
+    private transient String rfObjResultName;
+    private transient int rfObjInputId;
+    private transient String rfObjInputName;
+    private transient String rfObjTableName;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -47,49 +40,28 @@ public final class RainfallDownscalingOutput {
     /**
      * Creates a new RainfallDownscalingOutput object.
      *
-     * @param  modelInputId    DOCUMENT ME!
-     * @param  modelRunId      DOCUMENT ME!
-     * @param  tsResultId      DOCUMENT ME!
-     * @param  tsResultName    DOCUMENT ME!
-     * @param  tsResult30Id    DOCUMENT ME!
-     * @param  tsResult30Name  DOCUMENT ME!
-     * @param  tsInput30Id     DOCUMENT ME!
-     * @param  tsInput30Name   DOCUMENT ME!
-     * @param  tsInput1dId     DOCUMENT ME!
-     * @param  tsInput1dName   DOCUMENT ME!
-     * @param  tsResult1dId    DOCUMENT ME!
-     * @param  tsResult1dName  DOCUMENT ME!
-     * @param  tsInputId       DOCUMENT ME!
-     * @param  tsInputName     DOCUMENT ME!
+     * @param  modelInputId     DOCUMENT ME!
+     * @param  modelRunId       DOCUMENT ME!
+     * @param  rfObjResultId    DOCUMENT ME!
+     * @param  rfObjResultName  DOCUMENT ME!
+     * @param  rfObjInputId     DOCUMENT ME!
+     * @param  rfObjInputName   DOCUMENT ME!
+     * @param  rfObjTableName   DOCUMENT ME!
      */
     public RainfallDownscalingOutput(final int modelInputId,
             final int modelRunId,
-            final int tsResultId,
-            final String tsResultName,
-            final int tsResult30Id,
-            final String tsResult30Name,
-            final int tsInput30Id,
-            final String tsInput30Name,
-            final int tsInput1dId,
-            final String tsInput1dName,
-            final int tsResult1dId,
-            final String tsResult1dName,
-            final int tsInputId,
-            final String tsInputName) {
+            final int rfObjResultId,
+            final String rfObjResultName,
+            final int rfObjInputId,
+            final String rfObjInputName,
+            final String rfObjTableName) {
         this.modelInputId = modelInputId;
         this.modelRunId = modelRunId;
-        this.tsResultId = tsResultId;
-        this.tsResultName = tsResultName;
-        this.tsResult30Id = tsResult30Id;
-        this.tsResult30Name = tsResult30Name;
-        this.tsInput30Id = tsInput30Id;
-        this.tsInput30Name = tsInput30Name;
-        this.tsInput1dId = tsInput1dId;
-        this.tsInput1dName = tsInput1dName;
-        this.tsResult1dId = tsResult1dId;
-        this.tsResult1dName = tsResult1dName;
-        this.tsInputId = tsInputId;
-        this.tsInputName = tsInputName;
+        this.rfObjResultId = rfObjResultId;
+        this.rfObjResultName = rfObjResultName;
+        this.rfObjInputId = rfObjInputId;
+        this.rfObjInputName = rfObjInputName;
+        this.rfObjTableName = rfObjTableName;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -135,17 +107,8 @@ public final class RainfallDownscalingOutput {
      *
      * @return  DOCUMENT ME!
      */
-    public int getTsInput30Id() {
-        return tsInput30Id;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  tsInput30Id  DOCUMENT ME!
-     */
-    public void setTsInput30Id(final int tsInput30Id) {
-        this.tsInput30Id = tsInput30Id;
+    public CidsBean fetchResultRFObj() {
+        return SMSUtils.fetchCidsBean(rfObjResultId, rfObjTableName);
     }
 
     /**
@@ -153,8 +116,8 @@ public final class RainfallDownscalingOutput {
      *
      * @return  DOCUMENT ME!
      */
-    public String getTsInput30Name() {
-        return tsInput30Name;
+    public CidsBean fetchInputRFObj() {
+        return SMSUtils.fetchCidsBean(rfObjInputId, rfObjTableName);
     }
 
     /**
@@ -162,26 +125,17 @@ public final class RainfallDownscalingOutput {
      *
      * @return  DOCUMENT ME!
      */
-    public CidsBean fetchTsInput30() {
-        return SMSUtils.fetchCidsBean(tsInput30Id, SMSUtils.TABLENAME_TIMESERIES);
+    public int getRfObjInputId() {
+        return rfObjInputId;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  tsInput30Name  DOCUMENT ME!
+     * @param  rfObjInputId  DOCUMENT ME!
      */
-    public void setTsInput30Name(final String tsInput30Name) {
-        this.tsInput30Name = tsInput30Name;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public int getTsResult30Id() {
-        return tsResult30Id;
+    public void setRfObjInputId(final int rfObjInputId) {
+        this.rfObjInputId = rfObjInputId;
     }
 
     /**
@@ -189,35 +143,17 @@ public final class RainfallDownscalingOutput {
      *
      * @return  DOCUMENT ME!
      */
-    public CidsBean fetchTsResult30() {
-        return SMSUtils.fetchCidsBean(tsResult30Id, SMSUtils.TABLENAME_TIMESERIES);
+    public String getRfObjInputName() {
+        return rfObjInputName;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  tsResult30Id  DOCUMENT ME!
+     * @param  rfObjInputName  DOCUMENT ME!
      */
-    public void setTsResult30Id(final int tsResult30Id) {
-        this.tsResult30Id = tsResult30Id;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public String getTsResult30Name() {
-        return tsResult30Name;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  tsResult30Name  DOCUMENT ME!
-     */
-    public void setTsResult30Name(final String tsResult30Name) {
-        this.tsResult30Name = tsResult30Name;
+    public void setRfObjInputName(final String rfObjInputName) {
+        this.rfObjInputName = rfObjInputName;
     }
 
     /**
@@ -225,35 +161,17 @@ public final class RainfallDownscalingOutput {
      *
      * @return  DOCUMENT ME!
      */
-    public int getTsResultId() {
-        return tsResultId;
+    public int getRfObjResultId() {
+        return rfObjResultId;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  tsResultId  DOCUMENT ME!
+     * @param  rfObjResultId  DOCUMENT ME!
      */
-    public void setTsResultId(final int tsResultId) {
-        this.tsResultId = tsResultId;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public String getTsResultName() {
-        return tsResultName;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  tsResultName  DOCUMENT ME!
-     */
-    public void setTsResultName(final String tsResultName) {
-        this.tsResultName = tsResultName;
+    public void setRfObjResultId(final int rfObjResultId) {
+        this.rfObjResultId = rfObjResultId;
     }
 
     /**
@@ -261,8 +179,17 @@ public final class RainfallDownscalingOutput {
      *
      * @return  DOCUMENT ME!
      */
-    public CidsBean fetchTsResult() {
-        return SMSUtils.fetchCidsBean(tsResultId, SMSUtils.TABLENAME_TIMESERIES);
+    public String getRfObjResultName() {
+        return rfObjResultName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  rfObjResultName  DOCUMENT ME!
+     */
+    public void setRfObjResultName(final String rfObjResultName) {
+        this.rfObjResultName = rfObjResultName;
     }
 
     /**
@@ -270,133 +197,16 @@ public final class RainfallDownscalingOutput {
      *
      * @return  DOCUMENT ME!
      */
-    public int getTsInput1dId() {
-        return tsInput1dId;
+    public String getRfObjTableName() {
+        return rfObjTableName;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @param  rfObjTableName  DOCUMENT ME!
      */
-    public String getTsInput1dName() {
-        return tsInput1dName;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public CidsBean fetchTsInput1d() {
-        return SMSUtils.fetchCidsBean(tsInput1dId, SMSUtils.TABLENAME_TIMESERIES);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  tsInput1dId  DOCUMENT ME!
-     */
-    public void setTsInput1dId(final int tsInput1dId) {
-        this.tsInput1dId = tsInput1dId;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  tsInput1dName  DOCUMENT ME!
-     */
-    public void setTsInput1dName(final String tsInput1dName) {
-        this.tsInput1dName = tsInput1dName;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public int getTsResult1dId() {
-        return tsResult1dId;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public String getTsResult1dName() {
-        return tsResult1dName;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public CidsBean fetchTsResult1d() {
-        return SMSUtils.fetchCidsBean(tsResult1dId, SMSUtils.TABLENAME_TIMESERIES);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  tsResult1dId  DOCUMENT ME!
-     */
-    public void setTsResult1dId(final int tsResult1dId) {
-        this.tsResult1dId = tsResult1dId;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  tsResult1dName  DOCUMENT ME!
-     */
-    public void setTsResult1dName(final String tsResult1dName) {
-        this.tsResult1dName = tsResult1dName;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public int getTsInputId() {
-        return tsInputId;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  tsInputId  DOCUMENT ME!
-     */
-    public void setTsInputId(final int tsInputId) {
-        this.tsInputId = tsInputId;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public CidsBean fetchTsInput() {
-        return SMSUtils.fetchCidsBean(tsInputId, SMSUtils.TABLENAME_TIMESERIES);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public String getTsInputName() {
-        return tsInputName;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  tsInputName  DOCUMENT ME!
-     */
-    public void setTsInputName(final String tsInputName) {
-        this.tsInputName = tsInputName;
+    public void setRfObjTableName(final String rfObjTableName) {
+        this.rfObjTableName = rfObjTableName;
     }
 }

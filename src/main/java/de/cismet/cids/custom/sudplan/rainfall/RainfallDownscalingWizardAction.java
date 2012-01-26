@@ -50,10 +50,11 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String PROP_SCENARIO = "__prop_scenario__";       // NOI18N
-    public static final String PROP_TARGET_YEAR = "__prop_target_year__"; // NOI18N
-    public static final String PROP_NAME = "__prop_name__";               // NOI18N
-    public static final String PROP_DESCRIPTION = "__prop_description__"; // NOI18N
+    public static final String PROP_SCENARIO = "__prop_scenario__";           // NOI18N
+    public static final String PROP_TARGET_YEAR = "__prop_target_year__";     // NOI18N
+    public static final String PROP_NAME = "__prop_name__";                   // NOI18N
+    public static final String PROP_DESCRIPTION = "__prop_description__";     // NOI18N
+    public static final String PROP_SPS_PROCEDURE = "__prop_sps_procedure__"; // NOI18N
 
     private static final transient Logger LOG = Logger.getLogger(RainfallDownscalingWizardAction.class);
 
@@ -130,39 +131,81 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
 
         assert mc != null : "metaobject without metaclass"; // NOI18N
 
-        if (SMSUtils.TABLENAME_TIMESERIES.equals(mc.getTableName())) {
-            final WizardDescriptor wizard = new WizardDescriptor(getPanels());
-            wizard.setTitleFormat(new MessageFormat("{0}"));                                       // NOI18N
-            wizard.setTitle(NbBundle.getMessage(
-                    RainfallDownscalingWizardAction.class,
-                    "RainfallDownscalingWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
-            final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
-            dialog.pack();
-            dialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
-            dialog.setVisible(true);
-            dialog.toFront();
-
-            final boolean cancelled = wizard.getValue() != WizardDescriptor.FINISH_OPTION;
-            if (!cancelled) {
-                try {
-                    CidsBean modelInput = createModelInput(wizard, mo);
-                    CidsBean modelRun = createModelRun(wizard, modelInput);
-
-                    modelRun = modelRun.persist();
-                    modelInput = (CidsBean)modelRun.getProperty("modelinput"); // NOI18N
-
-                    SMSUtils.executeAndShowRun(modelRun);
-                } catch (final Exception ex) {
-                    final String message = "Cannot perform downscaling";
-                    LOG.error(message, ex);
-                    JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
-                        message,
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
-                }
+        String tableName = null;
+        for (final String supportedClass : getSupportedClasses()) {
+            if (supportedClass.equals(mc.getTableName())) {
+                tableName = supportedClass;
+                break;
             }
+        }
+
+        if (tableName == null) {
+            LOG.warn("can only perform this action on objects of metaclass timeseries or idf curve"); // NOI18N
+
+            return;
+        }
+
+        final WizardDescriptor wizard = new WizardDescriptor(getPanels());
+        wizard.setTitleFormat(new MessageFormat("{0}"));                                       // NOI18N
+        wizard.setTitle(NbBundle.getMessage(
+                RainfallDownscalingWizardAction.class,
+                "RainfallDownscalingWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
+
+        prepareWizard(wizard, tableName);
+
+        final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
+        dialog.pack();
+        dialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
+        dialog.setVisible(true);
+        dialog.toFront();
+
+        final boolean cancelled = wizard.getValue() != WizardDescriptor.FINISH_OPTION;
+        if (!cancelled) {
+            try {
+                final CidsBean modelInput = createModelInput(wizard, mo);
+                CidsBean modelRun = createModelRun(wizard, modelInput);
+
+                modelRun = modelRun.persist();
+
+                SMSUtils.executeAndShowRun(modelRun);
+            } catch (final Exception ex) {
+                final String message = "Cannot perform downscaling";
+                LOG.error(message, ex);
+                JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
+                    message,
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String[] getSupportedClasses() {
+        return new String[] {
+                SMSUtils.TABLENAME_IDFCURVE,
+                SMSUtils.TABLENAME_TIMESERIES
+            };
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   wizard     DOCUMENT ME!
+     * @param   tableName  DOCUMENT ME!
+     *
+     * @throws  IllegalArgumentException  DOCUMENT ME!
+     */
+    private void prepareWizard(final WizardDescriptor wizard, final String tableName) {
+        if (SMSUtils.TABLENAME_TIMESERIES.equals(tableName)) {
+            wizard.putProperty(PROP_SPS_PROCEDURE, RainfallDownscalingModelManager.RF_TS_DS_PROCEDURE);
+        } else if (SMSUtils.TABLENAME_IDFCURVE.equals(tableName)) {
+            wizard.putProperty(PROP_SPS_PROCEDURE, RainfallDownscalingModelManager.RF_IDF_DS_PROCEDURE);
         } else {
-            LOG.warn("can only perform this action on objects of metaclass timeseries"); // NOI18N
+            throw new IllegalArgumentException("unsupported tablename: " + tableName); // NOI18N
         }
     }
 
@@ -196,8 +239,8 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
         final String wizName = (String)wizard.getProperty(PROP_NAME);
         final String name = "Rainfall downscaling input (" + wizName + ")";
 
-        final String timeseriesName = (String)mo.getBean().getProperty("name"); // NOI18N
-        final Integer timeseriesId = mo.getId();
+        final String rainfallObjectName = (String)mo.getBean().getProperty("name"); // NOI18N
+        final Integer rainfallObjectId = mo.getId();
 
         final RainfallDownscalingInput input = new RainfallDownscalingInput(
                 created,
@@ -205,8 +248,9 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
                 name,
                 scenario,
                 targetYear,
-                timeseriesId,
-                timeseriesName);
+                rainfallObjectId,
+                rainfallObjectName,
+                mo.getMetaClass().getTableName());
 
         return SMSUtils.createModelInput(name, input, SMSUtils.Model.RF_DS);
     }

@@ -28,6 +28,7 @@ import java.util.Set;
 
 import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
 import de.cismet.cids.custom.sudplan.DataHandlerCache;
+import de.cismet.cids.custom.sudplan.IDFCurve;
 import de.cismet.cids.custom.sudplan.Manager;
 import de.cismet.cids.custom.sudplan.ManagerType;
 import de.cismet.cids.custom.sudplan.ProgressEvent;
@@ -60,6 +61,7 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
 
     private transient URL dsDailyRes;
     private transient URL dsOrigRes;
+    private transient IDFCurve curve;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -185,78 +187,129 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                 }
 
                 // bull**** result, has to be parsed etc pp, crap code for crap api
-                final String histDailyResult = results[1].substring(results[1].indexOf("tsf"), results[1].length() - 1); // NOI18N
-                final String dsOrigResult = results[2].substring(results[2].indexOf("tsf"), results[2].length() - 1);    // NOI18N
-                final String dsDailyResult = results[3].substring(results[3].indexOf("tsf"), results[3].length() - 1);   // NOI18N
-                // table results don't work! it's annoying
-                try {
-                    // ds results with original resolution
+
+                // assume idf crap
+                if (results.length == 2) {
+                    final String dsOrig = results[1].substring(results[1].indexOf("idf"), results[1].length() - 1); // NOI18N
+
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("processing ds result with original resolution"); // NOI18N
+                        LOG.debug("processing idf ds results"); // NOI18N
                     }
 
-                    final DataHandler dh = DataHandlerCache.getInstance()
-                                .getSOSDataHandler(String.valueOf(System.currentTimeMillis()),
-                                    RainfallDownscalingModelManager.RF_SOS_URL);
-                    final Properties filter = new Properties();
-                    filter.setProperty(TimeSeries.OFFERING, dsOrigResult);
+                    try {
+                        final DataHandler dh = DataHandlerCache.getInstance()
+                                    .getSOSDataHandler(String.valueOf(System.currentTimeMillis()),
+                                        RainfallDownscalingModelManager.RF_SOS_URL);
+                        final Properties filter = new Properties();
+                        filter.setProperty(TimeSeries.OFFERING, dsOrig);
 
-                    Set<Datapoint> dps = dh.getDatapoints(filter, Access.READ);
-                    if (dps.size() != 1) {
-                        throw new IllegalStateException("there should be exactly one datapoint: " + dsOrigResult); // NOI18N
+                        final Set<Datapoint> dps = dh.getDatapoints(filter, Access.READ);
+                        if (dps.size() != 1) {
+                            throw new IllegalStateException("there should be exactly one datapoint: " + dsOrig); // NOI18N
+                        }
+
+                        final Datapoint datapoint = dps.iterator().next();
+
+                        final TimeSeries ts = datapoint.getTimeSeries(TimeInterval.ALL_INTERVAL);
+                        final TimeStamp[] stamps = ts.getTimeStampsArray();
+                        final Float[] durations = (Float[])ts.getValue(stamps[0], "Duration");       // NOI18N
+                        final Float[] frequencies = (Float[])ts.getValue(stamps[0], "ReturnPeriod"); // NOI18N
+                        final Float[] intensities = (Float[])ts.getValue(stamps[0], "Intensity");    // NOI18N
+
+                        assert (durations.length == frequencies.length) && (frequencies.length == intensities.length);
+
+                        curve = new IDFCurve();
+                        for (int i = 0; i < durations.length; ++i) {
+                            curve.add(
+                                durations[i].intValue(),
+                                frequencies[i].intValue(),
+                                Math.round(intensities[i].doubleValue() * 100)
+                                        / 100);
+                        }
+
+                        setStatus(State.COMPLETED);
+                    } catch (final Exception ex) {
+                        LOG.error("error while downloading the results", ex); // NOI18N
+                        setDownloadException(ex);
+                        setStatus(State.COMPLETED_WITH_ERROR);
                     }
+                } else {
+                    final String dsOrigResult = results[2].substring(results[2].indexOf("tsf"), // NOI18N
+                            results[2].length()
+                                    - 1);
+                    final String dsDailyResult = results[3].substring(results[3].indexOf("tsf"), // NOI18N
+                            results[3].length()
+                                    - 1);
+                    // table results don't work! it's annoying
+                    try {
+                        // ds results with original resolution
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("processing ds result with original resolution"); // NOI18N
+                        }
 
-                    Datapoint datapoint = dps.iterator().next();
-                    TimeSeries ts = datapoint.getTimeSeries(new TimeInterval(
-                                TimeInterval.Openness.OPEN,
-                                TimeStamp.NEGATIVE_INFINITY,
-                                TimeStamp.POSITIVE_INFINITY,
-                                TimeInterval.Openness.OPEN));
+                        final DataHandler dh = DataHandlerCache.getInstance()
+                                    .getSOSDataHandler(String.valueOf(System.currentTimeMillis()),
+                                        RainfallDownscalingModelManager.RF_SOS_URL);
+                        final Properties filter = new Properties();
+                        filter.setProperty(TimeSeries.OFFERING, dsOrigResult);
 
-                    final CidsBean bean = getCidsBean();
-                    assert bean != null : "null cidsbean in rainfall watchable"; // NOI18N
+                        Set<Datapoint> dps = dh.getDatapoints(filter, Access.READ);
+                        if (dps.size() != 1) {
+                            throw new IllegalStateException("there should be exactly one datapoint: " + dsOrigResult); // NOI18N
+                        }
 
-                    final Manager m = SMSUtils.loadManagerFromRun(bean, ManagerType.INPUT);
-                    m.setCidsBean((CidsBean)bean.getProperty("modelinput"));                              // NOI18N
-                    final RainfallDownscalingInput input = (RainfallDownscalingInput)m.getUR();
-                    final CidsBean tsBean = input.fetchTimeseries();
-                    final String tsName = URLEncoder.encode((String)tsBean.getProperty("name"), "UTF-8"); // NOI18N
+                        Datapoint datapoint = dps.iterator().next();
+                        TimeSeries ts = datapoint.getTimeSeries(new TimeInterval(
+                                    TimeInterval.Openness.OPEN,
+                                    TimeStamp.NEGATIVE_INFINITY,
+                                    TimeStamp.POSITIVE_INFINITY,
+                                    TimeInterval.Openness.OPEN));
 
-                    URL url = new URL(TimeSeriesRemoteHelper.DAV_HOST + "/" + tsName + "_" + runId + "_unknown"); // NOI18N
+                        final CidsBean bean = getCidsBean();
+                        assert bean != null : "null cidsbean in rainfall watchable"; // NOI18N
 
-                    TimeseriesTransmitter.getInstance().put(url, ts, TimeSeriesRemoteHelper.CREDS);
+                        final Manager m = SMSUtils.loadManagerFromRun(bean, ManagerType.INPUT);
+                        m.setCidsBean((CidsBean)bean.getProperty("modelinput"));                              // NOI18N
+                        final RainfallDownscalingInput input = (RainfallDownscalingInput)m.getUR();
+                        final CidsBean tsBean = input.fetchRainfallObject();
+                        final String tsName = URLEncoder.encode((String)tsBean.getProperty("name"), "UTF-8"); // NOI18N
 
-                    dsOrigRes = url;
+                        URL url = new URL(TimeSeriesRemoteHelper.DAV_HOST + "/" + tsName + "_" + runId + "_unknown"); // NOI18N
 
-                    // ds results with daily resolution
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("processing ds result with daily resolution"); // NOI18N
+                        TimeseriesTransmitter.getInstance().put(url, ts, TimeSeriesRemoteHelper.CREDS);
+
+                        dsOrigRes = url;
+
+                        // ds results with daily resolution
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("processing ds result with daily resolution"); // NOI18N
+                        }
+
+                        filter.setProperty(TimeSeries.OFFERING, dsDailyResult);
+                        dps = dh.getDatapoints(filter, Access.READ);
+                        if (dps.size() != 1) {
+                            throw new IllegalStateException("there should be exactly one datapoint: " + dsOrigResult); // NOI18N
+                        }
+
+                        datapoint = dps.iterator().next();
+                        ts = datapoint.getTimeSeries(new TimeInterval(
+                                    TimeInterval.Openness.OPEN,
+                                    TimeStamp.NEGATIVE_INFINITY,
+                                    TimeStamp.POSITIVE_INFINITY,
+                                    TimeInterval.Openness.OPEN));
+
+                        url = new URL(TimeSeriesRemoteHelper.DAV_HOST + "/" + tsName + "_" + runId + "_86400s"); // NOI18N
+
+                        TimeseriesTransmitter.getInstance().put(url, ts, TimeSeriesRemoteHelper.CREDS);
+
+                        dsDailyRes = url;
+
+                        setStatus(State.COMPLETED);
+                    } catch (final Exception ex) {
+                        LOG.error("error while downloading the results", ex); // NOI18N
+                        setDownloadException(ex);
+                        setStatus(State.COMPLETED_WITH_ERROR);
                     }
-
-                    filter.setProperty(TimeSeries.OFFERING, dsDailyResult);
-                    dps = dh.getDatapoints(filter, Access.READ);
-                    if (dps.size() != 1) {
-                        throw new IllegalStateException("there should be exactly one datapoint: " + dsOrigResult); // NOI18N
-                    }
-
-                    datapoint = dps.iterator().next();
-                    ts = datapoint.getTimeSeries(new TimeInterval(
-                                TimeInterval.Openness.OPEN,
-                                TimeStamp.NEGATIVE_INFINITY,
-                                TimeStamp.POSITIVE_INFINITY,
-                                TimeInterval.Openness.OPEN));
-
-                    url = new URL(TimeSeriesRemoteHelper.DAV_HOST + "/" + tsName + "_" + runId + "_86400s"); // NOI18N
-
-                    TimeseriesTransmitter.getInstance().put(url, ts, TimeSeriesRemoteHelper.CREDS);
-
-                    dsDailyRes = url;
-
-                    setStatus(State.COMPLETED);
-                } catch (final Exception ex) {
-                    LOG.error("error while downloading the results", ex); // NOI18N
-                    setDownloadException(ex);
-                    setStatus(State.COMPLETED_WITH_ERROR);
                 }
             }
         }
@@ -294,5 +347,14 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
      */
     public String getRunId() {
         return runId;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public IDFCurve getResultCurve() {
+        return curve;
     }
 }

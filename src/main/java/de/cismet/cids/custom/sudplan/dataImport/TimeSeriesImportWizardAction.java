@@ -5,14 +5,11 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.local.wupp;
+package de.cismet.cids.custom.sudplan.dataImport;
 
 import Sirius.navigator.ui.ComponentRegistry;
 
 import org.apache.log4j.Logger;
-
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
@@ -25,11 +22,7 @@ import java.awt.event.ActionEvent;
 
 import java.text.MessageFormat;
 
-import java.util.logging.Level;
-
 import javax.swing.JComponent;
-
-import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.CidsClientToolbarItem;
 
@@ -38,15 +31,19 @@ import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 /**
  * DOCUMENT ME!
  *
- * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
 @org.openide.util.lookup.ServiceProvider(service = CidsClientToolbarItem.class)
-public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction implements CidsClientToolbarItem {
+public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction implements CidsClientToolbarItem {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final transient Logger LOG = Logger.getLogger(ImportGeoCPMWizardAction.class);
+    public static final String PROP_INPUT_FILE = "__prop_input_file__"; // NOI18N
+    public static final String PROP_CONVERTER = "__prop_converter__";   // NOI18N
+    public static final String PROP_TIMESERIES = "__prop_timeseries__"; // NOI18N
+    public static final String PROP_BEAN = "__prop_bean__";             // NOI18N
+
+    private static final transient Logger LOG = Logger.getLogger(TimeSeriesImportWizardAction.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -55,16 +52,17 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates a new ImportGeoCPMWizardAction object.
+     * Creates a new RainfallDownscalingWizardAction object.
      */
-    public ImportGeoCPMWizardAction() {
-        super("GeoCPM Konfiguration importieren"); // NOI18N
+    public TimeSeriesImportWizardAction() {
+        super(java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
+                "TimeSeriesImportWizardAction.this.name"));
     }
 
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * EDT only !
      *
      * @return  DOCUMENT ME!
      */
@@ -73,9 +71,11 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
 
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
-                    new ImportGeoCPMWizardPanelCFGSelect(),
-                    new ImportGeoCPMWizardPanelUpload(),
-                    new ImportGeoCPMWizardPanelMetadata()
+                    new TimeSeriesImportFileChoosePanelCtrl(),
+                    new TimeSeriesConverterChoosePanelCtrl(),
+                    new TimeSeriesConversionCtrl(),
+                    new TimeSeriesMetaDataPanelCtrl(),
+                    new TimeSeriesPersistenceCtrl()
                 };
 
             final String[] steps = new String[panels.length];
@@ -115,7 +115,8 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
     public void actionPerformed(final ActionEvent e) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
         wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
-        wizard.setTitle("Import GeoCPM configuration");
+        wizard.setTitle(java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
+                "TimeSeriesImportWizardAction.actionPerformed(ActionEvent).wizard.title"));
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -123,46 +124,23 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
         dialog.setVisible(true);
         dialog.toFront();
 
-        final boolean cancelled = wizard.getValue() != WizardDescriptor.FINISH_OPTION;
-
-        if (cancelled) {
-            for (final Object o : getPanels()) {
-                if (o instanceof Cancellable) {
-                    ((Cancellable)o).cancel();
+        // if TS import has been canceled, cancel all running threads
+        if (wizard.getValue() != WizardDescriptor.FINISH_OPTION) {
+            for (final WizardDescriptor.Panel panel : this.panels) {
+                if (panel instanceof Cancellable) {
+                    ((Cancellable)panel).cancel();
                 }
-            }
-        } else {
-            final CidsBean cidsBean = (CidsBean)wizard.getProperty(ImportGeoCPMWizardPanelMetadata.PROP_GEOCPM_BEAN);
-            assert cidsBean != null : "cidsBean must not be null"; // NOI18N
-            try {
-                cidsBean.persist();
-            } catch (final Exception ex) {
-                LOG.error("error during import", ex);              // NOI18N
-                final ErrorInfo info = new ErrorInfo(
-                        "Import error",
-                        "Error during import",
-                        "The GeoCPM import encountered an error. Please report the error details to your administrator.",
-                        "GeoCPM",
-                        ex,
-                        Level.WARNING,
-                        null);
-                JXErrorPane.showDialog(ComponentRegistry.getRegistry().getMainWindow(), info);
             }
         }
     }
 
     @Override
     public String getSorterString() {
-        return "Z";
+        return "ZZZZZZZZ"; // NOI18N
     }
 
     @Override
     public boolean isVisible() {
         return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return false;
     }
 }

@@ -316,7 +316,9 @@ public abstract class AbstractModelManager implements ModelManager {
 
                         final CidsBeanRenderer currentRenderer = reg.getDescriptionPane().currentRenderer();
                         if (currentRenderer == null) {
-                            LOG.warn("cannot fetch current renderer, won't reflect bean changes to ui"); // NOI18N
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("current renderer is null, won't reflect bean changes to ui"); // NOI18N
+                            }
                         } else {
                             final CidsBean currentBean = currentRenderer.getCidsBean();
                             if ((cidsBean.getMetaObject().getClassID() == currentBean.getMetaObject().getClassID())

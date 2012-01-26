@@ -35,6 +35,7 @@ import java.util.concurrent.Future;
 import de.cismet.cids.custom.sudplan.AbstractAsyncModelManager;
 import de.cismet.cids.custom.sudplan.DataHandlerCache;
 import de.cismet.cids.custom.sudplan.DataHandlerCacheException;
+import de.cismet.cids.custom.sudplan.IDFCurve;
 import de.cismet.cids.custom.sudplan.Manager;
 import de.cismet.cids.custom.sudplan.ManagerType;
 import de.cismet.cids.custom.sudplan.SMSUtils;
@@ -53,6 +54,7 @@ import de.cismet.cismap.commons.CrsTransformer;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
+// NOTE: this could be implemented much smoother but wth... ftt
 public final class RainfallDownscalingModelManager extends AbstractAsyncModelManager {
 
     //~ Static fields/initializers ---------------------------------------------
@@ -88,23 +90,36 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
         final RainfallDSWatchable watchable = (RainfallDSWatchable)getWatchable();
         final Manager m = SMSUtils.loadManagerFromRun(cidsBean, ManagerType.INPUT);
-        m.setCidsBean((CidsBean)cidsBean.getProperty("modelinput"));                                                // NOI18N
+        m.setCidsBean((CidsBean)cidsBean.getProperty("modelinput")); // NOI18N
         final RainfallDownscalingInput input = (RainfallDownscalingInput)m.getUR();
-        final CidsBean tsBean = input.fetchTimeseries();
-        final TimeseriesRetrieverConfig cfg = TimeseriesRetrieverConfig.fromUrl((String)tsBean.getProperty("uri")); // NOI18N
+        final CidsBean rfBean = input.fetchRainfallObject();
+        final MetaClass tsClass = rfBean.getMetaObject().getMetaClass();
 
-        final MetaClass tsClass = tsBean.getMetaObject().getMetaClass();
         CidsBean dsBean = tsClass.getEmptyInstance().getBean();
         try {
-            final String tsName = (String)tsBean.getProperty("name");                               // NOI18N
-            final String cfgUrl = cfg.toUrl().replace(tsName, tsName + "_" + watchable.getRunId()); // NOI18N
+            final String rfObjName = (String)rfBean.getProperty("name"); // NOI18N
 
-            dsBean.setProperty("name", tsName + " downscaled (taskid=" + watchable.getRunId() + ")"); // NOI18N
-            dsBean.setProperty("converter", tsBean.getProperty("converter"));                         // NOI18N
-            dsBean.setProperty("description", "Downscaled timeseries");                               // NOI18N
-            dsBean.setProperty("forecast", Boolean.TRUE);                                             // NOI18N
-            dsBean.setProperty("station", tsBean.getProperty("station"));                             // NOI18N
-            dsBean.setProperty("uri", cfgUrl);
+            if (SMSUtils.TABLENAME_TIMESERIES.equals(input.getRainfallObjectTableName())) {
+                final TimeseriesRetrieverConfig cfg = TimeseriesRetrieverConfig.fromUrl((String)rfBean.getProperty(
+                            "uri"));                                                                          // NOI18N
+                final String cfgUrl = cfg.toUrl().replace(rfObjName, rfObjName + "_" + watchable.getRunId()); // NOI18N
+                dsBean.setProperty("uri", cfgUrl);
+                dsBean.setProperty("station", rfBean.getProperty("station"));                                 // NOI18N
+            } else {
+                final ObjectMapper mapper = new ObjectMapper();
+                final StringWriter sw = new StringWriter();
+
+                mapper.writeValue(sw, watchable.getResultCurve());
+
+                dsBean.setProperty("uri", sw.toString());
+                dsBean.setProperty("geom", rfBean.getProperty("geom")); // NOI18N
+                dsBean.setProperty("year", input.getTargetYear());
+            }
+
+            dsBean.setProperty("name", rfObjName + " downscaled (taskid=" + watchable.getRunId() + ")"); // NOI18N
+            dsBean.setProperty("converter", rfBean.getProperty("converter"));                            // NOI18N
+            dsBean.setProperty("description", "Downscaled timeseries");                                  // NOI18N
+            dsBean.setProperty("forecast", Boolean.TRUE);                                                // NOI18N
 
             dsBean = dsBean.persist();
         } catch (final Exception ex) {
@@ -117,10 +132,11 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
         try {
             output.setModelInputId((Integer)cidsBean.getProperty("modelinput.id")); // NOI18N
             output.setModelRunId((Integer)cidsBean.getProperty("id"));              // NOI18N
-            output.setTsInputId(input.getTimeseriesId());
-            output.setTsInputName("Historical");
-            output.setTsResultId((Integer)dsBean.getProperty("id"));                // NOI18N
-            output.setTsResultName("Downscaled");
+            output.setRfObjInputId(input.getRainfallObjectId());
+            output.setRfObjInputName("Historical");
+            output.setRfObjResultId((Integer)dsBean.getProperty("id"));             // NOI18N
+            output.setRfObjResultName("Downscaled");
+            output.setRfObjTableName(input.getRainfallObjectTableName());
         } catch (final Exception e) {
             final String message = "cannot create model output";                    // NOI18N
             LOG.error(message, e);
@@ -154,30 +170,48 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
         }
 
         final Properties filter = new Properties();
-        filter.put(TimeSeries.PROCEDURE, RF_TS_DS_PROCEDURE);
+
+        // input == null means that it is IDF downscaling
+        if (input == null) {
+            filter.put(TimeSeries.PROCEDURE, RF_IDF_DS_PROCEDURE);
+        } else {
+            filter.put(TimeSeries.PROCEDURE, RF_TS_DS_PROCEDURE);
+        }
 
         final Datapoint dp = spsHandler.createDatapoint(filter, null, DataHandler.Access.READ_WRITE);
 
         final RainfallDownscalingInput rfInput = inputFromRun(cidsBean);
-
-        // the f***n uploaded ts only has a procedure and no offering, and on top of the s**t pile this is not the input
-        // param for the sps either. we have to strip some bull****
-        final String[] split = input.getValue().getProperty(TimeSeries.PROCEDURE).split(":"); // NOI18N
-        final String sourceRain = split[split.length - 2] + ":" + split[split.length - 1];    // NOI18N
+        final CidsBean rfObj = rfInput.fetchRainfallObject();
 
         final TimeSeries ts = new TimeSeriesImpl(dp.getProperties());
         final TimeStamp now = new TimeStamp();
         ts.setValue(now, PARAM_CLIMATE_SCENARIO, rfInput.getScenario());
-        ts.setValue(now, PARAM_SOURCE_RAIN, sourceRain);
-        ts.setValue(now, PARAM_CENTER_TIME, rfInput.getTargetYear() + "-01-01T10:10:10-00:00");
+
+        if (input == null) {
+            ts.setValue(now, "coordinate_system", "EPSG:4326");                                                // NOI18N
+            final Geometry geom = (Geometry)rfObj.getProperty("geom.geo_field");                               // NOI18N
+            ts.setValue(now, "coordinate_x", String.valueOf(geom.getCentroid().getX()));                       // NOI18N
+            ts.setValue(now, "coordinate_y", String.valueOf(geom.getCentroid().getY()));                       // NOI18N
+            ts.setValue(now, "historical_year", (Integer)rfObj.getProperty("year") + "-01-01T00:00:00-00:00"); // NOI18N
+            ts.setValue(now, "future_year", rfInput.getTargetYear() + "-01-01T00:00:00-00:00");                // NOI18N
+            ts.setValue(now, "idf_data", convertIDF(rfObj));                                                   // NOI18N
+        } else {
+            // the f***n uploaded ts only has a procedure and no offering, and on top of the s**t pile this is not the
+            // input param for the sps either. we have to strip some bull****
+            final String[] split = input.getValue().getProperty(TimeSeries.PROCEDURE).split(":"); // NOI18N
+            final String sourceRain = split[split.length - 2] + ":" + split[split.length - 1];    // NOI18N
+
+            ts.setValue(now, PARAM_SOURCE_RAIN, sourceRain);
+            ts.setValue(now, PARAM_CENTER_TIME, rfInput.getTargetYear() + "-01-01T00:00:00-00:00"); // NOI18N
+        }
+
         ts.setValue(now, PropertyNames.TaskAction, PropertyNames.TaskActionStart);
 
         // start sps task
         if (LOG.isDebugEnabled()) {
-            LOG.debug("start params: [" + rfInput.getScenario()
-                        + " | " + sourceRain
-                        + " | " + rfInput.getTargetYear() + "-01-01T10:10:10-00:00"
-                        + " | " + PropertyNames.TaskActionStart);
+            LOG.debug("start params: [" + rfInput.getScenario() // NOI18N
+                        + " | " + rfInput.getTargetYear() + "-01-01T10:10:10-00:00" // NOI18N
+                        + " | " + PropertyNames.TaskActionStart); // NOI18N
         }
 
         dp.putTimeSeries(ts);
@@ -189,7 +223,30 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
         return (String)dp.getProperties().get(PropertyNames.TASK_ID);
     }
 
-//    /**
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   idfBean  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    private String convertIDF(final CidsBean idfBean) {
+        final ObjectMapper mapper = new ObjectMapper();
+        final String uri = (String)idfBean.getProperty("uri"); // NOI18N
+
+        final IDFCurve idf;
+        try {
+            idf = mapper.readValue(uri, IDFCurve.class);
+        } catch (Exception ex) {
+            final String message = "cannot read idf data from uri"; // NOI18N
+            LOG.error(message, ex);
+            throw new IllegalStateException(message, ex);
+        }
+
+        return idf.toTSTBFormat();
+    }
 
     /**
      * DOCUMENT ME!
@@ -205,7 +262,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
         }
 
         final RainfallDownscalingInput rfInput = inputFromRun(cidsBean);
-        final CidsBean tsBean = rfInput.fetchTimeseries();
+        final CidsBean tsBean = rfInput.fetchRainfallObject();
 
         assert tsBean != null : "timeseries is null"; // NOI18N
 
@@ -360,7 +417,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
     @Override
     protected String getReloadId() {
-        return null;
+        return "rainfall.*"; // NOI18N
     }
 
     @Override
@@ -371,7 +428,15 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
         fireProgressed(-1, -1);
 
-        final Map.Entry<DataHandler, Properties> spsInput = uploadTimeseries();
+        final RainfallDownscalingInput input = inputFromRun(cidsBean);
+        final Map.Entry<DataHandler, Properties> spsInput;
+
+        // upload is only needed in case of timeseries downscaling
+        if (SMSUtils.TABLENAME_TIMESERIES.equals(input.getRainfallObjectTableName())) {
+            spsInput = uploadTimeseries();
+        } else {
+            spsInput = null;
+        }
 
         final String runId = dispatchDownscaling(spsInput);
 

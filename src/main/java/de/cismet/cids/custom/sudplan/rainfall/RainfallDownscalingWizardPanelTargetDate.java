@@ -96,6 +96,7 @@ public final class RainfallDownscalingWizardPanelTargetDate implements WizardDes
     public void readSettings(final Object settings) {
         wizard = (WizardDescriptor)settings;
         targetYear = (Integer)wizard.getProperty(RainfallDownscalingWizardAction.PROP_TARGET_YEAR);
+        final String procedure = (String)wizard.getProperty(RainfallDownscalingWizardAction.PROP_SPS_PROCEDURE);
 
         try {
             final DataHandler dh = DataHandlerCache.getInstance()
@@ -103,9 +104,12 @@ public final class RainfallDownscalingWizardPanelTargetDate implements WizardDes
                             RainfallDownscalingModelManager.RF_SPS_LOOKUP,
                             RainfallDownscalingModelManager.RF_SPS_URL);
             final Properties filter = new Properties();
-            filter.put(TimeSeries.PROCEDURE, RainfallDownscalingModelManager.RF_TS_DS_PROCEDURE);
+            filter.put(TimeSeries.PROCEDURE, procedure);
             final Datapoint dp = dh.createDatapoint(filter, null, DataHandler.Access.READ);
-            final InputDescriptor id = (InputDescriptor)dp.getProperties().get("jaxb_desc:center_time"); // NOI18N
+            final String idIdentifier = RainfallDownscalingModelManager.RF_TS_DS_PROCEDURE.equals(procedure)
+                ? "jaxb_desc:center_time"                                                     // NOI18N
+                : "jaxb_desc:future_year";                                                    // NOI18N
+            final InputDescriptor id = (InputDescriptor)dp.getProperties().get(idIdentifier); // NOI18N
             final List<String> beginEnd = id.getDefinition()
                         .getCommonData()
                         .getTime()
@@ -114,7 +118,7 @@ public final class RainfallDownscalingWizardPanelTargetDate implements WizardDes
                         .getIntervalOrValueList()
                         .get(0)
                         .getValue();
-            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");                  // NOI18N
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");       // NOI18N
             final Date begin = sdf.parse(beginEnd.get(0));
             final Date end = sdf.parse(beginEnd.get(1));
             final Calendar cal = GregorianCalendar.getInstance();
@@ -123,7 +127,7 @@ public final class RainfallDownscalingWizardPanelTargetDate implements WizardDes
             cal.setTime(end);
             endYear = cal.get(Calendar.YEAR);
         } catch (final Exception ex) {
-            LOG.error("error during begin and end year retrieval from SPS", ex);                         // NOI18N
+            LOG.error("error during begin and end year retrieval from SPS", ex);              // NOI18N
             beginYear = 0;
             endYear = 1;
             spsError = ex;

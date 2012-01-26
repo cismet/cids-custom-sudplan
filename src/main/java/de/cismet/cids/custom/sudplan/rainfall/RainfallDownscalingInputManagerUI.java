@@ -18,8 +18,6 @@ import org.openide.util.WeakListeners;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import de.cismet.cids.custom.sudplan.SMSUtils;
-
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 /**
@@ -32,23 +30,23 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient ActionListener openTsL;
+    private final transient ActionListener openRFObjL;
 
     private final transient RainfallDownscalingInput model;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private final transient org.jdesktop.swingx.JXHyperlink hypTimeseries = new org.jdesktop.swingx.JXHyperlink();
+    private final transient org.jdesktop.swingx.JXHyperlink hypRainfallObject = new org.jdesktop.swingx.JXHyperlink();
     private final transient javax.swing.JLabel lblCreated = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblCreatedBy = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblCreatedByValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblCreatedValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblName = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblNameValue = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblRainfallObject = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblScenario = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblScenarioValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblTargetYear = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblTargetYearValue = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblTimeseries = new javax.swing.JLabel();
     private final transient javax.swing.JPanel pnlFiller = new javax.swing.JPanel();
     // End of variables declaration//GEN-END:variables
 
@@ -60,14 +58,14 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
      * @param  model  DOCUMENT ME!
      */
     public RainfallDownscalingInputManagerUI(final RainfallDownscalingInput model) {
-        this.openTsL = new OpenTimeseriesActionListener();
+        this.openRFObjL = new OpenRainfallObjectActionListener();
         this.model = model;
 
         initComponents();
 
         init();
 
-        hypTimeseries.addActionListener(WeakListeners.create(ActionListener.class, openTsL, hypTimeseries));
+        hypRainfallObject.addActionListener(WeakListeners.create(ActionListener.class, openRFObjL, hypRainfallObject));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -81,7 +79,7 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
         lblCreatedByValue.setText(model.getCreatedBy());
         lblScenarioValue.setText(model.getScenario());
         lblTargetYearValue.setText(model.getTargetYear().toString());
-        hypTimeseries.setText(model.getTimeseriesName());
+        hypRainfallObject.setText(model.getRainfallObjectName());
     }
 
     /**
@@ -206,15 +204,15 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         add(lblTargetYearValue, gridBagConstraints);
 
-        lblTimeseries.setText(NbBundle.getMessage(
+        lblRainfallObject.setText(NbBundle.getMessage(
                 RainfallDownscalingInputManagerUI.class,
-                "RainfallDownscalingInputManagerUI.lblTimeseries.text")); // NOI18N
+                "RainfallDownscalingInputManagerUI.lblRainfallObject.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
-        add(lblTimeseries, gridBagConstraints);
+        add(lblRainfallObject, gridBagConstraints);
 
         pnlFiller.setOpaque(false);
 
@@ -232,9 +230,9 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         add(pnlFiller, gridBagConstraints);
 
-        hypTimeseries.setText(NbBundle.getMessage(
+        hypRainfallObject.setText(NbBundle.getMessage(
                 RainfallDownscalingInputManagerUI.class,
-                "RainfallDownscalingInputManagerUI.hypTimeseries.text")); // NOI18N
+                "RainfallDownscalingInputManagerUI.hypRainfallObject.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 5;
@@ -242,8 +240,8 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
-        add(hypTimeseries, gridBagConstraints);
-    }                                                                     // </editor-fold>//GEN-END:initComponents
+        add(hypRainfallObject, gridBagConstraints);
+    }                                                                         // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -252,7 +250,7 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
      *
      * @version  $Revision$, $Date$
      */
-    private final class OpenTimeseriesActionListener implements ActionListener {
+    private final class OpenRainfallObjectActionListener implements ActionListener {
 
         //~ Methods ------------------------------------------------------------
 
@@ -260,11 +258,13 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
         public void actionPerformed(final ActionEvent e) {
             final MetaClass metaclass = ClassCacheMultiple.getMetaClass(
                     SessionManager.getSession().getUser().getDomain(),
-                    SMSUtils.TABLENAME_TIMESERIES);
+                    model.getRainfallObjectTableName());
 
-            assert metaclass != null : "Timeseries metaclass not present"; // NOI18N
+            assert metaclass != null : "rainfall object metaclass not present"; // NOI18N
 
-            ComponentRegistry.getRegistry().getDescriptionPane().gotoMetaObject(metaclass, model.getTimeseriesId(), ""); // NOI18N
+            ComponentRegistry.getRegistry()
+                    .getDescriptionPane()
+                    .gotoMetaObject(metaclass, model.getRainfallObjectId(), ""); // NOI18N
         }
     }
 }

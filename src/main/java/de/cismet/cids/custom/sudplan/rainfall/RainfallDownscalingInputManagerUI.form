@@ -1,4 +1,4 @@
-<?xml version="1.1" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.5" maxVersion="1.7" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <Properties>
@@ -139,10 +139,10 @@
         </Constraint>
       </Constraints>
     </Component>
-    <Component class="javax.swing.JLabel" name="lblTimeseries">
+    <Component class="javax.swing.JLabel" name="lblRainfallObject">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cids/custom/sudplan/rainfall/Bundle.properties" key="RainfallDownscalingInputManagerUI.lblTimeseries.text" replaceFormat="NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cids/custom/sudplan/rainfall/Bundle.properties" key="RainfallDownscalingInputManagerUI.lblRainfallObject.text" replaceFormat="NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Constraints>
@@ -174,10 +174,10 @@
         </DimensionLayout>
       </Layout>
     </Container>
-    <Component class="org.jdesktop.swingx.JXHyperlink" name="hypTimeseries">
+    <Component class="org.jdesktop.swingx.JXHyperlink" name="hypRainfallObject">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cids/custom/sudplan/rainfall/Bundle.properties" key="RainfallDownscalingInputManagerUI.hypTimeseries.text" replaceFormat="NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cids/custom/sudplan/rainfall/Bundle.properties" key="RainfallDownscalingInputManagerUI.hypRainfallObject.text" replaceFormat="NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Constraints>

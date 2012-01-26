@@ -28,8 +28,9 @@ public final class RainfallDownscalingInput {
     private String name;
     private String scenario;
     private Integer targetYear;
-    private Integer timeseriesId;
-    private String timeseriesName;
+    private Integer rainfallObjectId;
+    private String rainfallObjectName;
+    private String rainfallObjectTableName;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -37,34 +38,37 @@ public final class RainfallDownscalingInput {
      * Creates a new RainfallDownscalingInput object.
      */
     public RainfallDownscalingInput() {
-        this(null, null, null, null, null, null, null);
+        this(null, null, null, null, null, null, null, null);
     }
 
     /**
      * Creates a new RainfallDownscalingInput object.
      *
-     * @param  created         DOCUMENT ME!
-     * @param  createdBy       DOCUMENT ME!
-     * @param  name            DOCUMENT ME!
-     * @param  scenario        DOCUMENT ME!
-     * @param  targetYear      DOCUMENT ME!
-     * @param  timeseriesId    DOCUMENT ME!
-     * @param  timeseriesName  DOCUMENT ME!
+     * @param  created                  DOCUMENT ME!
+     * @param  createdBy                DOCUMENT ME!
+     * @param  name                     DOCUMENT ME!
+     * @param  scenario                 DOCUMENT ME!
+     * @param  targetYear               DOCUMENT ME!
+     * @param  rainfallObjectId         DOCUMENT ME!
+     * @param  rainfallObjectName       DOCUMENT ME!
+     * @param  rainfallObjectTableName  DOCUMENT ME!
      */
     public RainfallDownscalingInput(final Date created,
             final String createdBy,
             final String name,
             final String scenario,
             final Integer targetYear,
-            final Integer timeseriesId,
-            final String timeseriesName) {
+            final Integer rainfallObjectId,
+            final String rainfallObjectName,
+            final String rainfallObjectTableName) {
         this.created = created;
         this.createdBy = createdBy;
         this.name = name;
         this.scenario = scenario;
         this.targetYear = targetYear;
-        this.timeseriesId = timeseriesId;
-        this.timeseriesName = timeseriesName;
+        this.rainfallObjectId = rainfallObjectId;
+        this.rainfallObjectName = rainfallObjectName;
+        this.rainfallObjectTableName = rainfallObjectTableName;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -117,19 +121,19 @@ public final class RainfallDownscalingInput {
     /**
      * DOCUMENT ME!
      *
-     * @param  timeseriesId  DOCUMENT ME!
+     * @param  rainfallObjectId  DOCUMENT ME!
      */
-    public void setTimeseriesId(final Integer timeseriesId) {
-        this.timeseriesId = timeseriesId;
+    public void setRainfallObjectId(final Integer rainfallObjectId) {
+        this.rainfallObjectId = rainfallObjectId;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  timeseriesName  DOCUMENT ME!
+     * @param  rainfallObjectName  DOCUMENT ME!
      */
-    public void setTimeseriesName(final String timeseriesName) {
-        this.timeseriesName = timeseriesName;
+    public void setRainfallObjectName(final String rainfallObjectName) {
+        this.rainfallObjectName = rainfallObjectName;
     }
 
     /**
@@ -182,8 +186,8 @@ public final class RainfallDownscalingInput {
      *
      * @return  DOCUMENT ME!
      */
-    public Integer getTimeseriesId() {
-        return timeseriesId;
+    public Integer getRainfallObjectId() {
+        return rainfallObjectId;
     }
 
     /**
@@ -191,8 +195,8 @@ public final class RainfallDownscalingInput {
      *
      * @return  DOCUMENT ME!
      */
-    public String getTimeseriesName() {
-        return timeseriesName;
+    public String getRainfallObjectName() {
+        return rainfallObjectName;
     }
 
     /**
@@ -200,7 +204,25 @@ public final class RainfallDownscalingInput {
      *
      * @return  DOCUMENT ME!
      */
-    public CidsBean fetchTimeseries() {
-        return SMSUtils.fetchCidsBean(timeseriesId, SMSUtils.TABLENAME_TIMESERIES);
+    public String getRainfallObjectTableName() {
+        return rainfallObjectTableName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  rainfallObjectTableName  DOCUMENT ME!
+     */
+    public void setRainfallObjectTableName(final String rainfallObjectTableName) {
+        this.rainfallObjectTableName = rainfallObjectTableName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public CidsBean fetchRainfallObject() {
+        return SMSUtils.fetchCidsBean(rainfallObjectId, rainfallObjectTableName);
     }
 }

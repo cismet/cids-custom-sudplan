@@ -51,7 +51,7 @@ import de.cismet.cismap.commons.features.Feature;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-@ServiceProvider(service = CommonFeatureAction.class)
+//@ServiceProvider(service = CommonFeatureAction.class)
 public final class AirqualityDownscalingWizardAction extends AbstractAction implements CommonFeatureAction {
 
     //~ Static fields/initializers ---------------------------------------------
@@ -265,6 +265,11 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
 
     @Override
     public boolean isActive() {
+        // TBD
+        if (true) {
+            return false;
+        }
+
         assert source != null : "source must be set before requesting isActive"; // NOI18N
 
         boolean active;

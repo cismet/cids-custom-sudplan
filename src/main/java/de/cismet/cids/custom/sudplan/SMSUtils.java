@@ -69,6 +69,7 @@ public final class SMSUtils {
     public static final String TABLENAME_MODELOUTPUT = "MODELOUTPUT"; // NOI18N
     public static final String TABLENAME_MODELRUN = "RUN";            // NOI18N
     public static final String TABLENAME_MODEL = "MODEL";             // NOI18N
+    public static final String TABLENAME_IDFCURVE = "IDF_CURVE";      // NOI18N
 
     private static final String CISMAP_PLUGIN_NAME = "cismap";
 
