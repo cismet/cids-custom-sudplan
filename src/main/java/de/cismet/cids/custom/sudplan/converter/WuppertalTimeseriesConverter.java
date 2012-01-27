@@ -37,7 +37,7 @@ import de.cismet.cids.custom.sudplan.Variable;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = Converter.class)
-public final class WuppertalTimeseriesConverter extends TimeseriesConverter {
+public final class WuppertalTimeseriesConverter implements TimeseriesConverter {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -121,8 +121,8 @@ public final class WuppertalTimeseriesConverter extends TimeseriesConverter {
                 }
 
                 if (Thread.currentThread().isInterrupted()) {
-//                    throw new ConversionException("execution was interrupted"); // NOI18N
                     LOG.warn("execution was interrupted"); // NOI18N
+
                     return null;
                 }
 

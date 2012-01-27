@@ -37,7 +37,7 @@ import de.cismet.cids.custom.sudplan.Variable;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = Converter.class)
-public final class LinzTimeseriesConverter extends TimeseriesConverter {
+public final class LinzTimeseriesConverter implements TimeseriesConverter {
 
     //~ Static fields/initializers ---------------------------------------------
 

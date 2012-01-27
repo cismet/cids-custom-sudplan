@@ -37,7 +37,7 @@ import java.util.zip.InflaterInputStream;
  * @author   Benjamin Friedrich benjamin.friedrich@cismet.de
  * @version  1.0, 04.01.2012
  */
-public final class TimeSeriesSerializer extends TimeseriesConverter {
+public final class TimeSeriesSerializer implements TimeseriesConverter {
 
     //~ Static fields/initializers ---------------------------------------------
 
