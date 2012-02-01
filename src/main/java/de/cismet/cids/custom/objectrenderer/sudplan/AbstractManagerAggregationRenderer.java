@@ -46,8 +46,32 @@ public abstract class AbstractManagerAggregationRenderer extends AbstractCidsBea
     protected void init() {
         String managerClass = null;
         boolean allSameManagers = true;
+
+        final String mProperty;
+        final String titleSuffix;
+        switch (getType()) {
+            case INPUT: {
+                mProperty = "inputmanager";                                    // NOI18N
+                titleSuffix = "Inputs";
+                break;
+            }
+            case OUTPUT: {
+                mProperty = "outputmanager";                                   // NOI18N
+                titleSuffix = "Outputs";
+                break;
+            }
+            case MODEL: {
+                mProperty = "modelmanager";                                    // NOI18N
+                titleSuffix = "Runs";
+                break;
+            }
+            default: {
+                throw new IllegalStateException("unknown type: " + getType()); // NOI18N
+            }
+        }
+
         for (final CidsBean bean : cidsBeans) {
-            final String candidateClass = (String)bean.getProperty("model.manager.definition"); // NOI18N
+            final String candidateClass = (String)bean.getProperty("model." + mProperty + ".definition"); // NOI18N
             if (candidateClass == null) {
                 allSameManagers = false;
                 break;
@@ -63,23 +87,7 @@ public abstract class AbstractManagerAggregationRenderer extends AbstractCidsBea
 
         if (allSameManagers) {
             // FIXME: proper title
-            switch (getType()) {
-                case INPUT: {
-                    setTitle(cidsBeans.size() + " Inputs");
-                    break;
-                }
-                case OUTPUT: {
-                    setTitle(cidsBeans.size() + " Outputs");
-                    break;
-                }
-                case MODEL: {
-                    setTitle(cidsBeans.size() + " Runs");
-                    break;
-                }
-                default: {
-                    throw new IllegalStateException("unknown type: " + getType()); // NOI18N
-                }
-            }
+            setTitle(cidsBeans.size() + " " + titleSuffix); // NOI18N
 
             final Manager candidate = SMSUtils.loadManagerFromDefinition(managerClass);
 
