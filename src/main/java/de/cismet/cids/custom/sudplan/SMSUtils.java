@@ -339,6 +339,19 @@ public final class SMSUtils {
 
         final String definition = (String)managerBean.getProperty("definition"); // NOI18N
 
+        return loadManagerFromDefinition(definition);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   definition  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    public static Manager loadManagerFromDefinition(final String definition) {
         final Class managerClass = BlacklistClassloading.forName(definition);
         if (managerClass == null) {
             throw new IllegalStateException("manager not in classpath: " + definition);          // NOI18N
