@@ -23,10 +23,10 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
-import de.cismet.cids.custom.sudplan.local.linz.SwmmInputManagerUI;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -48,16 +48,30 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
 
     private final transient SwmmProjectTitleComponent titleComponent = new SwmmProjectTitleComponent();
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton bntEtaSearch;
+    private javax.swing.JButton bntSwmmSearch;
+    private javax.swing.JComboBox cbSwmmProjects;
+    private javax.swing.JCheckBox chbEtaHyd;
+    private javax.swing.JCheckBox chbEtaSed;
     private javax.swing.JPanel configPanel;
     private javax.swing.JTextArea configurationArea;
+    private javax.swing.JPanel etaAnalysisPanel;
     private javax.swing.JPanel etaRunPanel;
+    private javax.swing.JTextField fldEtaHyd;
+    private javax.swing.JTextField fldEtaSed;
+    private javax.swing.JTextField fldOverflowVolume;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblDescription;
     private javax.swing.JLabel lblDescriptionText;
+    private javax.swing.JLabel lblOverflowUnit;
+    private javax.swing.JLabel lblSwmmAnalysisProject;
+    private javax.swing.JLabel lblSwmmAnalysisVolume;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JLabel lblTitleText;
     private javax.swing.JLabel previewLabel;
     private javax.swing.JPanel previewPanel;
+    private javax.swing.JPanel swmmAnalysisPanel;
     private javax.swing.JPanel swmmRunPanel;
     // End of variables declaration//GEN-END:variables
 
@@ -87,6 +101,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         final List<CidsBean> etaScenarios = (List)cidsBean.getProperty("eta_scenarios");   // NOI18N
         final HashMap beansMap = new HashMap(swmmScenarios.size() + etaScenarios.size());
         final ScenarioListener scenarioListener = new ScenarioListener(beansMap);
+        final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
 
         for (final CidsBean swmmBean : swmmScenarios) {
             final String key = "SWMM::" + swmmBean.getProperty("id");
@@ -115,11 +130,14 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
                     hyperLink));
             this.etaRunPanel.add(hyperLink, gridBagConstraints);
             gridBagConstraints.gridy++;
+
+            comboBoxModel.addElement(etaBean);
         }
 
         this.lblTitleText.setText(cidsBean.getProperty("title").toString());
         this.lblDescriptionText.setText(cidsBean.getProperty("description").toString());
         this.configurationArea.setText(cidsBean.getProperty("options").toString());
+        this.cbSwmmProjects.setModel(comboBoxModel);
         titleComponent.setCidsBean(cidsBean);
     }
 
@@ -130,39 +148,93 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+
+        fldEtaHyd = new javax.swing.JTextField();
+        fldEtaSed = new javax.swing.JTextField();
         lblTitle = new javax.swing.JLabel();
         lblTitleText = new javax.swing.JLabel();
         lblDescription = new javax.swing.JLabel();
         lblDescriptionText = new javax.swing.JLabel();
+        previewPanel = new javax.swing.JPanel();
+        previewLabel = new javax.swing.JLabel();
         configPanel = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         configurationArea = new javax.swing.JTextArea();
-        previewPanel = new javax.swing.JPanel();
-        previewLabel = new javax.swing.JLabel();
         swmmRunPanel = new javax.swing.JPanel();
+        swmmAnalysisPanel = new javax.swing.JPanel();
+        lblSwmmAnalysisProject = new javax.swing.JLabel();
+        lblSwmmAnalysisVolume = new javax.swing.JLabel();
+        cbSwmmProjects = new javax.swing.JComboBox();
+        fldOverflowVolume = new javax.swing.JTextField();
+        lblOverflowUnit = new javax.swing.JLabel();
+        bntSwmmSearch = new javax.swing.JButton();
         etaRunPanel = new javax.swing.JPanel();
+        etaAnalysisPanel = new javax.swing.JPanel();
+        chbEtaHyd = new javax.swing.JCheckBox();
+        chbEtaSed = new javax.swing.JCheckBox();
+        bntEtaSearch = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+
+        fldEtaHyd.setColumns(4);
+        fldEtaHyd.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.fldEtaHyd.text")); // NOI18N
+
+        fldEtaSed.setColumns(4);
+        fldEtaSed.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.fldEtaSed.text")); // NOI18N
 
         setOpaque(false);
+        setLayout(new java.awt.GridBagLayout());
 
         lblTitle.setText(NbBundle.getMessage(SwmmProjectRenderer.class, "SwmmProjectRenderer.lblTitle.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 44;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
+        add(lblTitle, gridBagConstraints);
+
+        lblTitleText.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.lblTitleText.text")); // NOI18N
+        lblTitleText.setMaximumSize(null);
+        lblTitleText.setMinimumSize(null);
+        lblTitleText.setPreferredSize(null);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblTitleText, gridBagConstraints);
 
         lblDescription.setText(NbBundle.getMessage(
                 SwmmProjectRenderer.class,
                 "SwmmProjectRenderer.lblDescription.text")); // NOI18N
+        lblDescription.setMaximumSize(null);
+        lblDescription.setMinimumSize(null);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
+        add(lblDescription, gridBagConstraints);
 
-        configPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
-                org.openide.util.NbBundle.getMessage(
-                    SwmmProjectRenderer.class,
-                    "SwmmProjectRenderer.configPanel.title"))); // NOI18N
-        configPanel.setOpaque(false);
-        configPanel.setLayout(new java.awt.GridLayout(1, 0));
-
-        configurationArea.setColumns(20);
-        configurationArea.setLineWrap(true);
-        configurationArea.setRows(6);
-        jScrollPane2.setViewportView(configurationArea);
-
-        configPanel.add(jScrollPane2);
+        lblDescriptionText.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.lblDescriptionText.text")); // NOI18N
+        lblDescriptionText.setMaximumSize(null);
+        lblDescriptionText.setMinimumSize(null);
+        lblDescriptionText.setPreferredSize(null);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblDescriptionText, gridBagConstraints);
 
         previewPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
@@ -189,7 +261,43 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
                 SwmmProjectRenderer.class,
                 "SwmmProjectRenderer.previewLabel.text")); // NOI18N
         previewLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        previewLabel.setMaximumSize(null);
+        previewLabel.setMinimumSize(new java.awt.Dimension(300, 300));
+        previewLabel.setPreferredSize(null);
         previewPanel.add(previewLabel);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 0.3;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(previewPanel, gridBagConstraints);
+
+        configPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                org.openide.util.NbBundle.getMessage(
+                    SwmmProjectRenderer.class,
+                    "SwmmProjectRenderer.configPanel.title"))); // NOI18N
+        configPanel.setOpaque(false);
+        configPanel.setLayout(new java.awt.GridLayout(1, 0));
+
+        configurationArea.setColumns(20);
+        configurationArea.setLineWrap(true);
+        configurationArea.setRows(6);
+        jScrollPane2.setViewportView(configurationArea);
+
+        configPanel.add(jScrollPane2);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 0.6;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(configPanel, gridBagConstraints);
 
         swmmRunPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
@@ -197,6 +305,87 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
                     "SwmmProjectRenderer.swmmRunPanel.border.title"))); // NOI18N
         swmmRunPanel.setOpaque(false);
         swmmRunPanel.setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(swmmRunPanel, gridBagConstraints);
+
+        swmmAnalysisPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                org.openide.util.NbBundle.getMessage(
+                    SwmmProjectRenderer.class,
+                    "SwmmProjectRenderer.swmmAnalysisPanel.border.title"))); // NOI18N
+        swmmAnalysisPanel.setOpaque(false);
+        swmmAnalysisPanel.setLayout(new java.awt.GridBagLayout());
+
+        lblSwmmAnalysisProject.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.lblSwmmAnalysisProject.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        swmmAnalysisPanel.add(lblSwmmAnalysisProject, gridBagConstraints);
+
+        lblSwmmAnalysisVolume.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.lblSwmmAnalysisVolume.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        swmmAnalysisPanel.add(lblSwmmAnalysisVolume, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        swmmAnalysisPanel.add(cbSwmmProjects, gridBagConstraints);
+
+        fldOverflowVolume.setColumns(6);
+        fldOverflowVolume.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.fldOverflowVolume.text")); // NOI18N
+        fldOverflowVolume.setMinimumSize(new java.awt.Dimension(54, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        swmmAnalysisPanel.add(fldOverflowVolume, gridBagConstraints);
+
+        lblOverflowUnit.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.lblOverflowUnit.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        swmmAnalysisPanel.add(lblOverflowUnit, gridBagConstraints);
+
+        bntSwmmSearch.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.bntSwmmSearch.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        swmmAnalysisPanel.add(bntSwmmSearch, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(swmmAnalysisPanel, gridBagConstraints);
 
         etaRunPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
@@ -204,90 +393,107 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
                     "SwmmProjectRenderer.etaRunPanel.border.title"))); // NOI18N
         etaRunPanel.setOpaque(false);
         etaRunPanel.setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(etaRunPanel, gridBagConstraints);
 
-        final org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                layout.createSequentialGroup().add(19, 19, 19).add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false).add(
-                        configPanel,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        360,
-                        Short.MAX_VALUE).add(
-                        layout.createSequentialGroup().add(
-                            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                                lblDescription).add(
-                                lblTitle,
-                                org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                                68,
-                                org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).add(50, 50, 50).add(
-                            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                                lblDescriptionText,
-                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                                Short.MAX_VALUE).add(
-                                lblTitleText,
-                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                                Short.MAX_VALUE))).add(
-                        swmmRunPanel,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE)).addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false).add(
-                        previewPanel,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                        360,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).add(
-                        etaRunPanel,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE)).addContainerGap(
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE)));
-        layout.setVerticalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                layout.createSequentialGroup().addContainerGap().add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                        org.jdesktop.layout.GroupLayout.TRAILING,
-                        lblTitleText,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                        14,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).add(
-                        lblTitle,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                        14,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.UNRELATED).add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false).add(
-                        lblDescription,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE).add(
-                        lblDescriptionText,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE)).addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED).add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false).add(
-                        previewPanel,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                        300,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).add(
-                        configPanel,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE)).addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                        swmmRunPanel,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE).add(
-                        etaRunPanel,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE)).addContainerGap()));
+        etaAnalysisPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                org.openide.util.NbBundle.getMessage(
+                    SwmmProjectRenderer.class,
+                    "SwmmProjectRenderer.etaAnalysisPanel.border.title"))); // NOI18N
+        etaAnalysisPanel.setOpaque(false);
+        etaAnalysisPanel.setLayout(new java.awt.GridBagLayout());
+
+        chbEtaHyd.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.chbEtaHyd.text")); // NOI18N
+        chbEtaHyd.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    chbEtaHydActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        etaAnalysisPanel.add(chbEtaHyd, gridBagConstraints);
+
+        chbEtaSed.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.chbEtaSed.text")); // NOI18N
+        chbEtaSed.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    chbEtaSedActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        etaAnalysisPanel.add(chbEtaSed, gridBagConstraints);
+
+        bntEtaSearch.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.bntEtaSearch.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        etaAnalysisPanel.add(bntEtaSearch, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(etaAnalysisPanel, gridBagConstraints);
+
+        final org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 767, Short.MAX_VALUE));
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 10, Short.MAX_VALUE));
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(jPanel1, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chbEtaHydActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_chbEtaHydActionPerformed
+    {                                                                           //GEN-HEADEREND:event_chbEtaHydActionPerformed
+                                                                                // TODO add your handling code here:
+    }                                                                           //GEN-LAST:event_chbEtaHydActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chbEtaSedActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_chbEtaSedActionPerformed
+    {                                                                           //GEN-HEADEREND:event_chbEtaSedActionPerformed
+                                                                                // TODO add your handling code here:
+    }                                                                           //GEN-LAST:event_chbEtaSedActionPerformed
 
     @Override
     public JComponent getTitleComponent() {

@@ -14,9 +14,21 @@ package de.cismet.cids.custom.sudplan.local.linz;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
+
+import java.awt.Color;
+import java.awt.Component;
+
 import java.io.IOException;
 
+import java.util.ArrayList;
+
+import javax.swing.JTable;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
+import de.cismet.cids.custom.objectrenderer.sudplan.LinzCsoRenderer;
 
 /**
  * DOCUMENT ME!
@@ -61,16 +73,13 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
     protected void init() {
         try {
             final SwmmOutput swmmOutput = outputManager.getUR();
-            final DefaultTableModel ctoTableModel = (DefaultTableModel)this.csoTable.getModel();
-            for (final CsoOverflow csoOverflow : swmmOutput.getCsoOverflows().values()) {
-                ctoTableModel.addRow(
-                    new Object[] {
-                        csoOverflow.getName(),
-                        csoOverflow.getOverflowVolume(),
-                        csoOverflow.getOverflowFrequency(),
-                        // csoOverflow.getOverflowFrequency()
-                    });
-            }
+            final ArrayList<CsoOverflow> csoOverflows = new ArrayList<CsoOverflow>(swmmOutput.getCsoOverflows().size());
+            csoOverflows.addAll(swmmOutput.getCsoOverflows().values());
+            final CsoTableModel csoTableModel = new CsoTableModel(csoOverflows);
+            this.csoTable.setModel(csoTableModel);
+            final CsoTableCellRenderer csoTableCellRenderer = new CsoTableCellRenderer();
+            this.csoTable.setDefaultRenderer(String.class, new CsoTableCellRenderer());
+            this.csoTable.setDefaultRenderer(Float.class, new CsoTableCellRenderer());
         } catch (IOException ex) {
             LOG.error("cannot initialise swmm output manager ui", ex); // NOI18N
         }
@@ -88,21 +97,7 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
 
         csoTable.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
-                new String[] { "Outfall", "Volumen", "Frequenz" }) {
-
-                Class[] types = new Class[] { java.lang.String.class, java.lang.Float.class, java.lang.Float.class };
-                boolean[] canEdit = new boolean[] { false, false, false };
-
-                @Override
-                public Class getColumnClass(final int columnIndex) {
-                    return types[columnIndex];
-                }
-
-                @Override
-                public boolean isCellEditable(final int rowIndex, final int columnIndex) {
-                    return canEdit[columnIndex];
-                }
-            });
+                new String[] {}));
         csoTableScrollPane.setViewportView(csoTable);
 
         final javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -122,4 +117,122 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
                     278,
                     Short.MAX_VALUE).addContainerGap()));
     } // </editor-fold>//GEN-END:initComponents
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class CsoTableCellRenderer extends DefaultTableCellRenderer {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public Component getTableCellRendererComponent(final JTable table,
+                final Object value,
+                final boolean isSelected,
+                final boolean hasFocus,
+                final int row,
+                final int column) {
+            final Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            final Object volume = csoTable.getModel().getValueAt(row, 1);
+            if ((volume != null) && (((Float)volume).floatValue() <= 0f)) {
+                cell.setBackground(Color.GREEN);
+            } else {
+                cell.setBackground(Color.WHITE);
+            }
+            return cell;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class CsoTableModel extends AbstractTableModel {
+
+        //~ Instance fields ----------------------------------------------------
+
+        final ArrayList<CsoOverflow> csoOverflows;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new CsoTableModel object.
+         *
+         * @param  csoOverflows  DOCUMENT ME!
+         */
+        public CsoTableModel(final ArrayList<CsoOverflow> csoOverflows) {
+            this.csoOverflows = csoOverflows;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public int getRowCount() {
+            return this.csoOverflows.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return 3;
+        }
+
+        @Override
+        public Class<?> getColumnClass(final int columnIndex) {
+            switch (columnIndex) {
+                case 0: {
+                    return String.class;
+                }
+                case 1: {
+                    return Float.class;
+                }
+                case 2: {
+                    return Float.class;
+                }
+                default: {
+                    return Object.class;
+                }
+            }
+        }
+
+        @Override
+        public String getColumnName(final int columnIndex) {
+            switch (columnIndex) {
+                case 0: {
+                    return NbBundle.getMessage(SwmmOutputManagerUI.class, "SwmmOutputManagerUI.column.name");
+                }
+                case 1: {
+                    return NbBundle.getMessage(SwmmOutputManagerUI.class, "SwmmOutputManagerUI.column.volume");
+                }
+                case 2: {
+                    return NbBundle.getMessage(SwmmOutputManagerUI.class, "SwmmOutputManagerUI.column.frequency");
+                }
+                default: {
+                    return "";
+                }
+            }
+        }
+
+        @Override
+        public Object getValueAt(final int rowIndex, final int columnIndex) {
+            switch (columnIndex) {
+                case 0: {
+                    return this.csoOverflows.get(rowIndex).getName();
+                }
+                case 1: {
+                    return this.csoOverflows.get(rowIndex).getOverflowVolume();
+                }
+                case 2: {
+                    return this.csoOverflows.get(rowIndex).getOverflowFrequency();
+                }
+                default: {
+                    return -1;
+                }
+            }
+        }
+    }
 }

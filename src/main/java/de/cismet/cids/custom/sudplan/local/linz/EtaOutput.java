@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import org.openide.util.Exceptions;
@@ -33,31 +31,108 @@ public class EtaOutput {
      * Wiederkehrperiode von 1 Jahr Engl: „statistical rainfall intensity with a duration of 12 h and return period once
      * per year (r720,1)”
      */
-    protected float r720;
+    private transient float r720 = -1;
     /**
      * Mindestwirkungsgrad (der Weiterleitung) für gelöste Stoffe (required CSO efficiency for dissolved pollutants),
      * definiert im ÖWAV Regelblatt 19.
      */
-    protected float etaHydRequired;
+    private transient float etaHydRequired = -1;
     /**
      * Mindestwirkungsgrad (der Weiterleitung) für abfiltrierbare Stoffe (required CSO efficiency for particulate
      * pollutants), definiert im ÖWAV Regelblatt 19.
      */
-    protected float etaSedRequired;
+    private transient float etaSedRequired = -1;
     /**
      * Vom Modell berechneter Wirkungsgrad (der Weiterleitung) für gelöste Stoffe (CSO efficiency for dissolved
      * pollutants).
      */
-    protected float etaHydActual;
+    private transient float etaHydActual = -1;
     /**
      * Vom Modell berechnete Wirkungsgrad (der Weiterleitung) für abfiltrierbare Stoffe (CSO efficiency for particulate
      * pollutants).
      */
-    protected float etaSedActual;
+    private transient float etaSedActual = -1;
     private transient Date created;
     private transient String user;
+    /** Total overflow volume in system. */
+    private transient float totalOverflowVolume = -1;
+    private transient int swmmRun = -1;
+    private transient String etaRunName;
+    private transient int etaRun = -1;
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * Get the value of totalOverflowVolume.
+     *
+     * @return  the value of totalOverflowVolume
+     */
+    public float getTotalOverflowVolume() {
+        return totalOverflowVolume;
+    }
+
+    /**
+     * Set the value of totalOverflowVolume.
+     *
+     * @param  totalOverflowVolume  new value of totalOverflowVolume
+     */
+    public void setTotalOverflowVolume(final float totalOverflowVolume) {
+        this.totalOverflowVolume = totalOverflowVolume;
+    }
+
+    /**
+     * Get the value of swmmRun.
+     *
+     * @return  the value of swmmRun
+     */
+    public int getSwmmRun() {
+        return swmmRun;
+    }
+
+    /**
+     * Set the value of swmmRun.
+     *
+     * @param  swmmRun  new value of swmmRun
+     */
+    public void setSwmmRun(final int swmmRun) {
+        this.swmmRun = swmmRun;
+    }
+
+    /**
+     * Get the value of etaRunName.
+     *
+     * @return  the value of etaRunName
+     */
+    public String getEtaRunName() {
+        return etaRunName;
+    }
+
+    /**
+     * Set the value of etaRunName.
+     *
+     * @param  etaRunName  new value of etaRunName
+     */
+    public void setEtaRunName(final String etaRunName) {
+        this.etaRunName = etaRunName;
+    }
+
+    /**
+     * Get the value of etaRun.
+     *
+     * @return  the value of etaRun
+     */
+    public int getEtaRun() {
+        return etaRun;
+    }
+
+    /**
+     * Set the value of etaRun.
+     *
+     * @param  etaRun  new value of etaRun
+     */
+    public void setEtaRun(final int etaRun) {
+        this.etaRun = etaRun;
+    }
 
     /**
      * Get the value of r720.
@@ -203,6 +278,7 @@ public class EtaOutput {
             etaOutput.setEtaSedActual((float)Math.random() * 100f);
             etaOutput.setEtaSedRequired((float)Math.random() * 100f);
             etaOutput.setR720((float)Math.random() * 10f);
+            etaOutput.setTotalOverflowVolume((float)Math.random() * 10f);
 
             mapper.writeValue(writer, etaOutput);
             System.out.println(writer.toString());

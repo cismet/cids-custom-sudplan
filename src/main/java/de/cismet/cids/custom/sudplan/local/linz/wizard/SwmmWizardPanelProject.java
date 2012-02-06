@@ -107,6 +107,9 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
 
     @Override
     public boolean isValid() {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("isValid called");
+        }
         boolean valid = true;
         try {
             if (this.swmmInput.getSwmmProject() == -1) {
@@ -115,12 +118,19 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
                     "Bitte wählen Sie ein SWMM Project aus");
                 valid = false;
             } else if ((this.swmmInput.getInpFile() == null) || this.swmmInput.getInpFile().isEmpty()) {
-                final String inpFile = this.getSwmmProject().getProperty("title") + ".inp";
-                LOG.warn("SWMM INP file not set, setting to " + inpFile);
+                Object inpFile = this.getSwmmProject().getProperty("inp_file_name");
+                if (inpFile != null) {
+                    swmmInput.setInpFile(inpFile.toString());
+                    LOG.warn("SWMM INP file not set, setting to " + swmmInput.getInpFile());
+                } else {
+                    inpFile = this.getSwmmProject().getProperty("title");
+                    LOG.warn("INP File not set in swmm model configuration, setting automatically to '"
+                                + inpFile + "'");
+                }
 
                 // dieser beansbinding und property change mist funktioniert einfach nicht
                 // warum sonst wird jetzt das textfield im UI nicht aktualisiert???!!!!
-                this.swmmInput.setInpFile(inpFile);
+                this.swmmInput.setInpFile(inpFile.toString());
 
                 wizard.putProperty(
                     WizardDescriptor.PROP_INFO_MESSAGE,

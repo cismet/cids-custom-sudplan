@@ -94,6 +94,9 @@ public abstract class AbstractManagerAggregationRenderer extends AbstractCidsBea
             if (candidate instanceof CidsBeanCollectionStore) {
                 this.manager = candidate;
                 ((CidsBeanCollectionStore)this.manager).setCidsBeans(cidsBeans);
+            } else {
+                LOG.warn("manager '" + candidate + "' (" + candidate.getClass()
+                            + ") is not of type CidsBeanCollectionStore");
             }
         }
 

@@ -14,7 +14,6 @@ import org.apache.log4j.Logger;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
-import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 
 import java.awt.Component;
@@ -116,13 +115,13 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
                     final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(timeseries);
                     final TimeInterval timeInterval = config.getInterval();
 
-                    if (!timeInterval.containsTimeStamp(startDate)
-                                || !timeInterval.containsTimeStamp(endDate)) {
-                        LOG.warn("time intervall " + timeInterval + " of timeseries " + timeseries
-                                    + " does not cover selected model timespan " + startDate + "<->" + endDate);
-                        this.validTimeIntervall = false;
-                        break;
-                    }
+                    // FIXME: BUG in timeInterval.containsTimeStamp if (!timeInterval.containsTimeStamp(startDate) ||
+                    // !timeInterval.containsTimeStamp(endDate)) { LOG.warn("time intervall '" + timeInterval + "' of
+                    // timeseries \n<" + timeseries + ">\n does not cover selected model timespan '" + startDate + "'
+                    // <-> '" + endDate+"'"); LOG.debug(timeInterval.getStart() + " compared to " + startDate + " = "+
+                    // timeInterval.getStart().compareTo(startDate)); LOG.debug(timeInterval.getEnd() + " compared to "
+                    // + endDate + " = "+ timeInterval.getEnd().compareTo(endDate)); this.validTimeIntervall = false;
+                    // break; }
                 }
             } else {
                 this.validTimeIntervall = false;
@@ -161,6 +160,7 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 "Bitte wählen Sie mindestens eine Regenzeitreihe aus");
             valid = false;
+            // FIXME: compare the intervals also here, not only in readSettings!
         } else if (!validTimeIntervall) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,

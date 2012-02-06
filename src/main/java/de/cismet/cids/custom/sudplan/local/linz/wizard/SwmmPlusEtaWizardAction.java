@@ -28,10 +28,9 @@ import java.io.IOException;
 
 import java.text.MessageFormat;
 
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JComponent;
@@ -40,7 +39,6 @@ import javax.swing.JOptionPane;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.local.linz.EtaInput;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
-import de.cismet.cids.custom.sudplan.rainfall.*;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -84,6 +82,9 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
      */
     public SwmmPlusEtaWizardAction() {
         super("Perform SWMM + ETA calculation");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Perform SWMM + ETA calculation");
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -141,6 +142,7 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
+        LOG.info("Wizard actionPerformed: " + e.getActionCommand());
         final CidsBean cidsBean = getCidsBean();
         assert cidsBean != null : "cidsbean not set";                            // NOI18N
         assert cidsBean.getMetaObject() != null : "cidsbean without metaobject"; // NOI18N
@@ -226,14 +228,12 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
         final SwmmInput swmmInput = (SwmmInput)wizard.getProperty(PROP_SWMM_INPUT);
         final Date created = GregorianCalendar.getInstance().getTime();
         final String user = SessionManager.getSession().getUser().getName();
+        final String name = (String)wizard.getProperty(PROP_NAME);
+        final String inputName = "SWMM Modellkonfiguration (" + name + ")";
 
         swmmInput.setCreated(created);
         swmmInput.setUser(user);
-
-        final String wizName = (String)wizard.getProperty(PROP_NAME);
-        final String name = "SWMM Modellkonfiguration (" + wizName + ")";
-
-        return SMSUtils.createModelInput(name, swmmInput, SMSUtils.Model.SWMM);
+        return SMSUtils.createModelInput(inputName, swmmInput, SMSUtils.Model.SWMM);
     }
 
     /**
@@ -250,15 +250,16 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
         final EtaInput etaInput = (EtaInput)wizard.getProperty(PROP_ETA_INPUT);
         final Date created = GregorianCalendar.getInstance().getTime();
         final String user = SessionManager.getSession().getUser().getName();
+        final String name = (String)wizard.getProperty(PROP_NAME);
+        final String inputName = "ETA Modellkonfiguration (" + name + ")";
+        final String swmmRunName = name + " (SWMM 5.0)";
 
         etaInput.setCreated(created);
         etaInput.setUser(user);
         etaInput.setSwmmRun(swmmRunId);
+        etaInput.setSwmmRunName(swmmRunName);
 
-        final String wizName = (String)wizard.getProperty(PROP_NAME);
-        final String name = "ETA Modellkonfiguration (" + wizName + ")";
-
-        return SMSUtils.createModelInput(name, etaInput, SMSUtils.Model.LINZ_ETA);
+        return SMSUtils.createModelInput(inputName, etaInput, SMSUtils.Model.LINZ_ETA);
     }
 
     /**
@@ -272,18 +273,18 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
      * @throws  IOException  DOCUMENT ME!
      */
     private CidsBean createSwmmModelRun(final WizardDescriptor wizard, final CidsBean inputBean) throws IOException {
-        final String wizName = (String)wizard.getProperty(PROP_NAME);
-        final String name = wizName + " (SWMM 5.0)";
+        final String name = (String)wizard.getProperty(PROP_NAME);
+        final String runName = name + " (SWMM 5.0)";
         final String description = (String)wizard.getProperty(PROP_DESCRIPTION);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("creating new swmm modelrun: " // NOI18N
-                        + "name=" + name       // NOI18N
+                        + "name=" + runName    // NOI18N
                         + " || description=" + description // NOI18N
                         + " || cidsbean=" + inputBean); // NOI18N
         }
 
-        return SMSUtils.createModelRun(name, description, inputBean);
+        return SMSUtils.createModelRun(runName, description, inputBean);
     }
 
     /**
@@ -297,17 +298,17 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
      * @throws  IOException  DOCUMENT ME!
      */
     private CidsBean createEtaModelRun(final WizardDescriptor wizard, final CidsBean inputBean) throws IOException {
-        final String wizName = (String)wizard.getProperty(PROP_NAME);
-        final String name = wizName + " (ETA)";
+        final String name = (String)wizard.getProperty(PROP_NAME);
+        final String runName = name + " (ETA)";
         final String description = (String)wizard.getProperty(PROP_DESCRIPTION);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("creating new swmm modelrun: " // NOI18N
-                        + "name=" + name       // NOI18N
+                        + "name=" + runName    // NOI18N
                         + " || description=" + description // NOI18N
                         + " || cidsbean=" + inputBean); // NOI18N
         }
 
-        return SMSUtils.createModelRun(name, description, inputBean);
+        return SMSUtils.createModelRun(runName, description, inputBean);
     }
 }

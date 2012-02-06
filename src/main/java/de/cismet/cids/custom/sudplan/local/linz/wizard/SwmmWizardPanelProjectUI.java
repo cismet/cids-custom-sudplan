@@ -32,11 +32,7 @@ import java.awt.event.ItemListener;
 
 import java.util.Date;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
@@ -548,14 +544,21 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                 final SwmmInput swmmInput = model.getSwmmInput();
 
                 // set default inp file name
-                if ((swmmInput.getInpFile() == null) || swmmInput.getInpFile().isEmpty()) {
-                    final String inpFile = (String)model.getSwmmProject().getProperty("title") + ".inp";
+                // if ((swmmInput.getInpFile() == null) || swmmInput.getInpFile().isEmpty()) {
+                if (swmmProject.getProperty("inp_file_name") != null) {
+                    swmmInput.setInpFile(swmmProject.getProperty("inp_file_name").toString());
+                } else {
+                    LOG.warn("INP File net set in swmm model configuration, setting automatically to '"
+                                + swmmProject.getProperty("title") + "'");
+                    final String inpFile = (String)swmmProject.getProperty("title") + ".inp";
                     swmmInput.setInpFile(inpFile);
                 }
+                // }
 
                 // fldInpFile.setText(inpFile);
                 // lblDescriptionText.setText((String)swmmProject.getProperty("description"));
 
+                // dieser mist funktioniert einfach nicht
                 bindingGroup.unbind();
                 bindingGroup.bind();
             }

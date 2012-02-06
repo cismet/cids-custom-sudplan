@@ -34,7 +34,6 @@ import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.concurrent.ProgressWatch;
-import de.cismet.cids.custom.sudplan.local.wupp.GeoCPMWatchable;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -61,6 +60,7 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
 
     @Override
     protected void internalExecute() throws IOException {
+        LOG.fatal("SwmmModelManager is currently not used: use eta model manager!!!!!");
         final SwmmInput swmmInput = (SwmmInput)this.getUR();
         final SwmmRunInfo runInfo = new SwmmRunInfo();
         LOG.info("executing run for model " + swmmInput.getInpFile());
@@ -92,7 +92,7 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
         final BufferedReader r = new BufferedReader(new InputStreamReader(
                     SwmmModelManager.class.getResourceAsStream("smlSensor.xml")));
         final StringBuilder sb = new StringBuilder();
-        String s = null;
+        String s;
         while ((s = r.readLine()) != null) {
             sb.append(s);
         }
@@ -201,11 +201,12 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
 
     @Override
     protected CidsBean createOutputBean() throws IOException {
+        LOG.fatal("SwmmModelManager is currently not used: use eta model manager!!!!!");
         if (!isFinished()) {
             throw new IllegalStateException("cannot create outputbean when not finished yet"); // NOI18N
         }
 
-        if (!(getWatchable() instanceof GeoCPMWatchable)) {
+        if (!(getWatchable() instanceof SwmmWatchable)) {
             throw new IllegalStateException("cannot create output if there is no valid watchable"); // NOI18N
         }
 

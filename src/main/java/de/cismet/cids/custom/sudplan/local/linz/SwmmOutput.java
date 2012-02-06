@@ -49,6 +49,10 @@ public class SwmmOutput {
     private transient Date created;
     private transient String user;
 
+    private int swmmRun;
+
+    private String swmmRunName;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -67,6 +71,42 @@ public class SwmmOutput {
      */
     public Map<String, CsoOverflow> getCsoOverflows() {
         return this.csoOverflows;
+    }
+
+    /**
+     * Get the value of swmmRun.
+     *
+     * @return  the value of swmmRun
+     */
+    public int getSwmmRun() {
+        return swmmRun;
+    }
+
+    /**
+     * Set the value of swmmRun.
+     *
+     * @param  swmmRun  new value of swmmRun
+     */
+    public void setSwmmRun(final int swmmRun) {
+        this.swmmRun = swmmRun;
+    }
+
+    /**
+     * Get the value of swmmRunName.
+     *
+     * @return  the value of swmmRunName
+     */
+    public String getSwmmRunName() {
+        return swmmRunName;
+    }
+
+    /**
+     * Set the value of swmmRunName.
+     *
+     * @param  swmmRunName  new value of swmmRunName
+     */
+    public void setSwmmRunName(final String swmmRunName) {
+        this.swmmRunName = swmmRunName;
     }
 
     /**
@@ -158,157 +198,159 @@ public class SwmmOutput {
     }
 
     /**
-     * DOCUMENT ME!
+     * Synchronizes the overflow results (per cso) with the local ids of the cso objects. The id is retrieved from the
+     * eta cso configuration.
      *
-     * @param  csoOverflows  DOCUMENT ME!
+     * @param  etaConfigurations  csoOverflows DOCUMENT ME!
      */
     @JsonIgnore
-    public void synchronizeCsoIds(final Map<String, CsoOverflow> csoOverflows) {
+    public void synchronizeCsoIds(final List<EtaConfiguration> etaConfigurations) {
         if ((this.csoOverflows != null) && !this.csoOverflows.isEmpty()) {
-            if (this.csoOverflows.size() == csoOverflows.size()) {
-                for (final String name : csoOverflows.keySet()) {
+            if (this.csoOverflows.size() == etaConfigurations.size()) {
+                for (final EtaConfiguration etaConfiguration : etaConfigurations) {
+                    final String name = etaConfiguration.getName();
                     if (this.csoOverflows.containsKey(name)) {
-                        this.csoOverflows.get(name).setCso(csoOverflows.get(name).getCso());
+                        this.csoOverflows.get(name).setCso(etaConfiguration.getCso());
                     } else {
                         LOG.warn("cso '" + name + "' not found in local cso map!");
                     }
                 }
             } else {
                 LOG.warn("CSO map size missmatch: " + this.csoOverflows.size()
-                            + " vs. " + csoOverflows.size());
+                            + " vs. " + etaConfigurations.size());
             }
         } else {
             LOG.warn("target cso map empty!");
         }
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        try {
-            final ObjectMapper mapper = new ObjectMapper();
-            final StringWriter writer = new StringWriter();
-
-            final SwmmOutput swmmOutput = new SwmmOutput();
-            swmmOutput.setSwmmProject(2);
-            swmmOutput.setUser("Pascal Dihé");
-            swmmOutput.setCreated(new Date());
-
-            final String[] csoNames = new String[] {
-                    "RDSRUE51",
-                    "ULKS1",
-                    "FUEAusl",
-                    "RKL_Ablauf",
-                    "AB_Plesching",
-                    "HSU12_1S5b",
-                    "HSU1_1RUE2",
-                    "ALBSP1nolink",
-                    "ALKSP1nolink",
-                    "ANFSP1nolink",
-                    "EDBSP1nolink",
-                    "ENNSP1nolink",
-                    "ENNSP2nolink",
-                    "RUEB_Traunnolink",
-                    "EWDSP1nolink",
-                    "FKDSP1nolink",
-                    "GLWSP1nolink",
-                    "GRSSP2nolink",
-                    "HEMSP1nolink",
-                    "HHSSP1nolink",
-                    "HOESP1nolink",
-                    "HOESP2nolink",
-                    "HZDSP1nolink",
-                    "KRTSP1nolink",
-                    "KSSSP1nolink",
-                    "LTBSP1nolink",
-                    "LTBSP2nolink",
-                    "LTBSP3nolink",
-                    "RUEB_Lunznolink",
-                    "NNKSP1nolink",
-                    "OFTSP1nolink",
-                    "OTHSP1nolink",
-                    "RUEB_Pleshnolink",
-                    "PNASP1nolink",
-                    "PUKSP1nolink",
-                    "RDS20_1S48nolink",
-                    "SMMSP1nolink",
-                    "STFSP1nolink",
-                    "STMSP1nolink",
-                    "STYSP1nolink",
-                    "RHHB_Wsee3nolink",
-                    "HSMSEntlnolink",
-                    "WLDSP1nolink",
-                    "WLDSP2nolink",
-                    "WLGSP1nolink"
-                };
-            final int[] csoIds = new int[] {
-                    2,
-                    3,
-                    4,
-                    5,
-                    6,
-                    7,
-                    8,
-                    9,
-                    10,
-                    11,
-                    12,
-                    13,
-                    14,
-                    15,
-                    16,
-                    17,
-                    18,
-                    19,
-                    20,
-                    21,
-                    22,
-                    23,
-                    24,
-                    25,
-                    26,
-                    27,
-                    28,
-                    29,
-                    30,
-                    31,
-                    32,
-                    33,
-                    34,
-                    35,
-                    36,
-                    37,
-                    38,
-                    39,
-                    40,
-                    41,
-                    42,
-                    43,
-                    44,
-                    45,
-                    46
-                };
-
-            int i = 0;
-            for (final String csoName : csoNames) {
-                final CsoOverflow csoOverflow = new CsoOverflow();
-                csoOverflow.setName(csoName);
-                csoOverflow.setSwmmProject(2);
-                csoOverflow.setCso(csoIds[i]);
-                csoOverflow.setOverflowDuration((float)Math.random() * 100f);
-                csoOverflow.setOverflowFrequency((float)Math.random() * 10f);
-                csoOverflow.setOverflowVolume((float)Math.random() * 1000f);
-                swmmOutput.getCsoOverflows().put(csoName, csoOverflow);
-                i++;
-            }
-
-            mapper.writeValue(writer, swmmOutput);
-            System.out.println(writer.toString());
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-    }
+//    /**
+//     * DOCUMENT ME!
+//     *
+//     * @param  args  DOCUMENT ME!
+//     */
+//    public static void main(final String[] args) {
+//        try {
+//            final ObjectMapper mapper = new ObjectMapper();
+//            final StringWriter writer = new StringWriter();
+//
+//            final SwmmOutput swmmOutput = new SwmmOutput();
+//            swmmOutput.setSwmmProject(2);
+//            swmmOutput.setUser("Pascal Dihé");
+//            swmmOutput.setCreated(new Date());
+//
+//            final String[] csoNames = new String[] {
+//                    "RDSRUE51",
+//                    "ULKS1",
+//                    "FUEAusl",
+//                    "RKL_Ablauf",
+//                    "AB_Plesching",
+//                    "HSU12_1S5b",
+//                    "HSU1_1RUE2",
+//                    "ALBSP1nolink",
+//                    "ALKSP1nolink",
+//                    "ANFSP1nolink",
+//                    "EDBSP1nolink",
+//                    "ENNSP1nolink",
+//                    "ENNSP2nolink",
+//                    "RUEB_Traunnolink",
+//                    "EWDSP1nolink",
+//                    "FKDSP1nolink",
+//                    "GLWSP1nolink",
+//                    "GRSSP2nolink",
+//                    "HEMSP1nolink",
+//                    "HHSSP1nolink",
+//                    "HOESP1nolink",
+//                    "HOESP2nolink",
+//                    "HZDSP1nolink",
+//                    "KRTSP1nolink",
+//                    "KSSSP1nolink",
+//                    "LTBSP1nolink",
+//                    "LTBSP2nolink",
+//                    "LTBSP3nolink",
+//                    "RUEB_Lunznolink",
+//                    "NNKSP1nolink",
+//                    "OFTSP1nolink",
+//                    "OTHSP1nolink",
+//                    "RUEB_Pleshnolink",
+//                    "PNASP1nolink",
+//                    "PUKSP1nolink",
+//                    "RDS20_1S48nolink",
+//                    "SMMSP1nolink",
+//                    "STFSP1nolink",
+//                    "STMSP1nolink",
+//                    "STYSP1nolink",
+//                    "RHHB_Wsee3nolink",
+//                    "HSMSEntlnolink",
+//                    "WLDSP1nolink",
+//                    "WLDSP2nolink",
+//                    "WLGSP1nolink"
+//                };
+//            final int[] csoIds = new int[] {
+//                    2,
+//                    3,
+//                    4,
+//                    5,
+//                    6,
+//                    7,
+//                    8,
+//                    9,
+//                    10,
+//                    11,
+//                    12,
+//                    13,
+//                    14,
+//                    15,
+//                    16,
+//                    17,
+//                    18,
+//                    19,
+//                    20,
+//                    21,
+//                    22,
+//                    23,
+//                    24,
+//                    25,
+//                    26,
+//                    27,
+//                    28,
+//                    29,
+//                    30,
+//                    31,
+//                    32,
+//                    33,
+//                    34,
+//                    35,
+//                    36,
+//                    37,
+//                    38,
+//                    39,
+//                    40,
+//                    41,
+//                    42,
+//                    43,
+//                    44,
+//                    45,
+//                    46
+//                };
+//
+//            int i = 0;
+//            for (final String csoName : csoNames) {
+//                final CsoOverflow csoOverflow = new CsoOverflow();
+//                csoOverflow.setName(csoName);
+//                csoOverflow.setSwmmProject(2);
+//                csoOverflow.setCso(csoIds[i]);
+//                csoOverflow.setOverflowDuration((float)Math.random() * 100f);
+//                csoOverflow.setOverflowFrequency((float)Math.random() * 10f);
+//                csoOverflow.setOverflowVolume((float)Math.random() * 1000f);
+//                swmmOutput.getCsoOverflows().put(csoName, csoOverflow);
+//                i++;
+//            }
+//
+//            mapper.writeValue(writer, swmmOutput);
+//            System.out.println(writer.toString());
+//        } catch (IOException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
+//    }
 }

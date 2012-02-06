@@ -7,6 +7,10 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import Sirius.navigator.connection.SessionManager;
+
+import Sirius.server.middleware.types.MetaClass;
+
 import at.ac.ait.enviro.sudplan.clientutil.SudplanSOSHelper;
 import at.ac.ait.enviro.sudplan.clientutil.SudplanSPSHelper;
 import at.ac.ait.enviro.sudplan.util.PropertyNames;
@@ -27,15 +31,19 @@ import java.io.StringWriter;
 import java.text.DateFormat;
 
 import java.util.*;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.cismet.cids.custom.sudplan.*;
-import de.cismet.cids.custom.sudplan.concurrent.ProgressWatch;
+import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
 
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.editors.converters.SqlTimestampToUtilDateConverter;
+
+import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 /**
  * DOCUMENT ME!
@@ -48,11 +56,13 @@ public class EtaModelManager extends AbstractAsyncModelManager {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(EtaModelManager.class);
+    public static final String TABLENAME_CSOS = SwmmPlusEtaWizardAction.TABLENAME_CSOS;
+    public static final String TABLENAME_LINZ_SWMM_RESULT = "linz_swmm_result";
+    public static final String TABLENAME_LINZ_ETA_RESULT = "linz_eta_result";
 
     //~ Instance fields --------------------------------------------------------
 
     private final String modelSosEndpoint = "http://sudplan.ait.ac.at:8081/";
-    /** FIXME: entfernen, sobald Instanz nicht mehr benötigt wird */
     private SudplanSPSHelper.Task spsTask;
 
     //~ Methods ----------------------------------------------------------------
@@ -67,47 +77,188 @@ public class EtaModelManager extends AbstractAsyncModelManager {
             throw new IllegalStateException("cannot create output if there is no valid watchable"); // NOI18N
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("creating output bean for run: " + cidsBean); // NOI18N
-        }
-
         final SwmmWatchable watch = (SwmmWatchable)this.getWatchable();
-        final String runId = watch.getSwmmRunInfo().getRunId();
+        final String spsRunId = watch.getSwmmRunInfo().getRunId();
 
+        // we need the ta ioput to sync ids and the set the swmm output
         try {
             final EtaInput etaInput = (EtaInput)this.getUR();
             if (etaInput.getSwmmRun() == -1) {
                 throw new IOException("ETA run without SWMM run");
             }
 
+            LOG.info("creating output beans for ETA RUN '" + cidsBean + "' ("
+                        + cidsBean.getProperty("id") + ") and SWMM RUN '" + etaInput.getSwmmRunName()
+                        + "' (" + etaInput.getSwmmRun() + ")"); // NOI18N
+
+            // update the swmm run too
+            // .................................................................
             CidsBean swmmRun = SMSUtils.fetchCidsBean(etaInput.getSwmmRun(), SMSUtils.TABLENAME_MODELRUN);
-            final Manager inputManager = SMSUtils.loadManagerFromRun(swmmRun, ManagerType.INPUT);
-            inputManager.setCidsBean((CidsBean)swmmRun.getProperty("modelinput")); // NOI18N
+            // ???:
 
             final SwmmOutput swmmOutput = watch.getSwmmOutput();
             swmmOutput.setSwmmProject(etaInput.getSwmmProject());
-            swmmOutput.synchronizeCsoIds(etaInput.getCsoOverflows());
-            final CidsBean swmmModelOutput = SMSUtils.createModelOutput("Output of SWMM Run: " + runId, // NOI18N
+            swmmOutput.setSwmmRun(etaInput.getSwmmRun());
+            swmmOutput.setSwmmRunName(etaInput.getSwmmRunName());
+            swmmOutput.synchronizeCsoIds(etaInput.getEtaConfigurations());
+            final CidsBean swmmModelOutput = SMSUtils.createModelOutput("Output of SPS SWMM Run: " + spsRunId, // NOI18N
                     swmmOutput,
                     SMSUtils.Model.SWMM);
-
-            final CidsBean etaModelOutput = SMSUtils.createModelOutput("Output of ETA Run: " + runId, // NOI18N
-                    watch.getEtaOutput(),
-                    SMSUtils.Model.LINZ_ETA);
-
+            // here we create the swmmm model output and update the swmm run
+            // this is normally performed by the swmm model manager (watchable)
+            // FIXME: separate when independet eta calculation is available
             final SqlTimestampToUtilDateConverter dateConverter = new SqlTimestampToUtilDateConverter();
             swmmRun.setProperty(
                 "finished", // NOI18N
                 dateConverter.convertReverse(GregorianCalendar.getInstance().getTime()));
             swmmRun.setProperty("modeloutput", swmmModelOutput); // NOI18N
             swmmRun = swmmRun.persist();
+            // .................................................................
+
+            // TODO: update the eta input with the swmm output
+            // final Manager inputManager = SMSUtils.loadManagerFromRun(swmmRun, ManagerType.INPUT);
+            // inputManager.setCidsBean((CidsBean)swmmRun.getProperty("modelinput")); // NOI18N
+            // etaInput.setCsoOverflows(swmmOutput.getCsoOverflows());
+            // how to persist?
+
+            // update eta output
+            final EtaOutput etaOutput = watch.getEtaOutput();
+            etaOutput.setSwmmRun(etaInput.getSwmmRun());
+            // this.cidsBean == etaRun
+            etaOutput.setEtaRun((Integer)this.cidsBean.getProperty("id"));
+            etaOutput.setEtaRunName((String)this.cidsBean.getProperty("name"));
+            final float totalOverflowVolume = this.computeTotalOverflowVolume(etaInput, swmmOutput);
+            etaOutput.setTotalOverflowVolume(totalOverflowVolume);
+            final CidsBean etaModelOutput = SMSUtils.createModelOutput((String)cidsBean.getProperty("name"), // NOI18N
+                    etaOutput,
+                    SMSUtils.Model.LINZ_ETA);
+
+            this.updateCSOs(swmmOutput, etaOutput);
 
             return etaModelOutput.persist();
         } catch (final Exception e) {
-            final String message = "cannot get results for run: " + runId; // NOI18N
+            final String message = "cannot get results for SPS SWMM run: " + spsRunId; // NOI18N
             LOG.error(message, e);
             throw new IOException(message, e);
         }
+    }
+
+    /**
+     * updates the model results (swmm+eta) attached to the CSO objects.
+     *
+     * @param   swmmOutput  DOCUMENT ME!
+     * @param   etaOutput   totalOverflowVolume DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
+    private void updateCSOs(final SwmmOutput swmmOutput, final EtaOutput etaOutput) throws IOException {
+        LOG.info("updating " + swmmOutput.getCsoOverflows().size() + " CSOs with model results for SWMM Run {"
+                    + etaOutput.getSwmmRun() + "} and ETA RUN {" + etaOutput.getEtaRun() + "}");
+        final String domain = SessionManager.getSession().getUser().getDomain();
+        final MetaClass swmmResultClass = ClassCacheMultiple.getMetaClass(domain, TABLENAME_LINZ_SWMM_RESULT);
+        final MetaClass etaResultClass = ClassCacheMultiple.getMetaClass(domain, TABLENAME_LINZ_ETA_RESULT);
+        CidsBean etaResultBean = null;
+
+        try {
+            // first we create one eta reuslt isntance for all CSOs
+            etaResultBean = etaResultClass.getEmptyInstance().getBean();
+            etaResultBean.setProperty("name", etaOutput.getEtaRunName());
+            etaResultBean.setProperty("eta_scenario_id", etaOutput.getEtaRun());
+            etaResultBean.setProperty("swmm_scenario_id", etaOutput.getSwmmRun());
+            etaResultBean.setProperty("eta_sed_required", etaOutput.getEtaSedRequired());
+            etaResultBean.setProperty("eta_sed_actual", etaOutput.getEtaSedActual());
+            etaResultBean.setProperty("eta_hyd_required", etaOutput.getEtaHydRequired());
+            etaResultBean.setProperty("eta_hyd_actual", etaOutput.getEtaHydActual());
+            etaResultBean.setProperty("r720", etaOutput.getR720());
+            etaResultBean.setProperty("total_overflow_volume", etaOutput.getTotalOverflowVolume());
+
+            etaResultBean = etaResultBean.persist();
+        } catch (Throwable t) {
+            final String message = "could not save eta result '" + etaOutput.getEtaRunName() + "': " + t.getMessage();
+            LOG.error(message, t);
+            throw new IOException(message, t);
+        }
+
+        for (final CsoOverflow csoOverflow : swmmOutput.getCsoOverflows().values()) {
+            // we know the ids! :-)
+            final CidsBean csoBean = SMSUtils.fetchCidsBean(csoOverflow.getCso(), TABLENAME_CSOS);
+            if (csoBean != null) {
+                try {
+                    // todo: once swmm + eta are separate runs, we have to split saving  eta + swmm results
+
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("adding swmm & eta results (" + swmmOutput.getSwmmRunName() + ") to CSO '"
+                                    + csoOverflow.getName() + "'");
+                    }
+
+                    final CidsBean swmmResultBean = swmmResultClass.getEmptyInstance().getBean();
+                    swmmResultBean.setProperty("name", swmmOutput.getSwmmRunName());
+                    swmmResultBean.setProperty("swmm_scenario_id", swmmOutput.getSwmmRun());
+                    swmmResultBean.setProperty("overflow_frequency", csoOverflow.getOverflowFrequency());
+                    swmmResultBean.setProperty("overflow_duration", csoOverflow.getOverflowDuration());
+                    swmmResultBean.setProperty("overflow_volume", csoOverflow.getOverflowVolume());
+
+                    if (etaResultBean != null) {
+                        final Collection<CidsBean> etaResults = (Collection)swmmResultBean.getProperty("eta_results"); // NOI18N
+                        etaResults.add(etaResultBean);
+                    } else {
+                        LOG.warn("no eta result bean available for swmm result '" + swmmOutput.getSwmmRunName() + "'");
+                    }
+
+                    final Collection<CidsBean> swmmResults = (Collection)csoBean.getProperty("swmm_results"); // NOI18N
+                    swmmResults.add(swmmResultBean);
+
+                    csoBean.persist();
+                } catch (Exception ex) {
+                    final String message = "could not update  CSO '" + csoOverflow.getName() + "': " + ex.getMessage();
+                    LOG.error(message, ex);
+                    throw new IOException(message, ex);
+                }
+            } else {
+                LOG.error("CSO '" + csoOverflow.getName() + "' with id " + csoOverflow.getCso()
+                            + " not found in database!");
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   etaInput    DOCUMENT ME!
+     * @param   swmmOutput  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private float computeTotalOverflowVolume(final EtaInput etaInput, final SwmmOutput swmmOutput) {
+        float totalOverflowVolume = 0;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("computing total overflow volume for " + etaInput.getEtaConfigurations().size() + " CSOs");
+        }
+        if (etaInput.getEtaConfigurations().size() != swmmOutput.getCsoOverflows().size()) {
+            LOG.warn("cannot compute Total Overflow Volume, eta cso input ("
+                        + etaInput.getEtaConfigurations().size() + ") and swmm overflow output "
+                        + "(" + swmmOutput.getCsoOverflows() + ") size missmatch");
+        } else {
+            int i = 0;
+            for (final EtaConfiguration etaConfiguration : etaInput.getEtaConfigurations()) {
+                final CsoOverflow csoOverflow = swmmOutput.getCsoOverflows().get(etaConfiguration.getName());
+                if (csoOverflow != null) {
+                    if (etaConfiguration.isEnabled()) {
+                        totalOverflowVolume += csoOverflow.getOverflowVolume();
+                        i++;
+                    }
+                } else {
+                    LOG.warn("cannot consider Overflow Volume of cso '"
+                                + etaConfiguration.getName() + "': not in result list of overflows");
+                }
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(i + " out of " + etaInput.getEtaConfigurations().size()
+                            + " CSOs considered in total overflow volume calculation");
+            }
+        }
+
+        return totalOverflowVolume;
     }
 
     @Override

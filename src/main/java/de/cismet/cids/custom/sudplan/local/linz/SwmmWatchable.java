@@ -393,4 +393,10 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
     public EtaOutput getEtaOutput() {
         return this.etaOutput;
     }
+
+    @Override
+    public String toString() {
+        return (runInfo != null) ? (runInfo.getModelName() + ": " + runInfo.getRunId())
+                                 : "ERROR: no run info attached to SWMM Run";
+    }
 }

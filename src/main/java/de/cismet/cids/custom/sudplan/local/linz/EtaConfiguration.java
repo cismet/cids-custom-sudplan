@@ -21,6 +21,8 @@ public class EtaConfiguration {
     protected transient float sedimentationEfficency;
     protected transient String name;
 
+    protected transient int cso;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -30,6 +32,24 @@ public class EtaConfiguration {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * Get the value of cso.
+     *
+     * @return  the value of cso
+     */
+    public int getCso() {
+        return cso;
+    }
+
+    /**
+     * Set the value of cso.
+     *
+     * @param  cso  new value of cso
+     */
+    public void setCso(final int cso) {
+        this.cso = cso;
+    }
 
     /**
      * Get the value of name.
