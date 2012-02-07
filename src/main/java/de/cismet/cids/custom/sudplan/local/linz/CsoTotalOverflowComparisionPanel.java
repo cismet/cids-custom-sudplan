@@ -7,23 +7,39 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
+import org.jfree.chart.labels.StandardPieToolTipGenerator;
+import org.jfree.chart.plot.MultiplePiePlot;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.util.TableOrder;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
+import java.awt.*;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import de.cismet.cids.client.tools.DevelopmentTools;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -55,44 +71,9 @@ public class CsoTotalOverflowComparisionPanel extends javax.swing.JPanel {
      */
     public CsoTotalOverflowComparisionPanel() {
         initComponents();
-
-        NbBundle.getMessage(
-            CsoTotalOverflowComparisionPanel.class,
-            "CsoTotalOverflowComparisionPanel.chart.overflowVolume");
-        NbBundle.getMessage(
-            CsoTotalOverflowComparisionPanel.class,
-            "CsoTotalOverflowComparisionPanel.chart.totalOverflowVolume");
     }
 
     //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   etaScenarioName      DOCUMENT ME!
-     * @param   overflowVolume       DOCUMENT ME!
-     * @param   totalOverflowVolume  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    protected JFreeChart getTotalOverflowChart(final String etaScenarioName,
-            final float overflowVolume,
-            final float totalOverflowVolume) {
-        // create a dataset...
-        final DefaultPieDataset dataset = new DefaultPieDataset();
-        dataset.setValue(this.totalOverflowVolumeLabel, totalOverflowVolume);
-        dataset.setValue(this.overflowVolumeLabel, overflowVolume);
-
-        final JFreeChart chart = ChartFactory.createPieChart(
-                etaScenarioName,
-                dataset,
-                false, // legend?
-                true, // tooltips?
-                false // URLs?
-                );
-
-        return chart;
-    }
 
     /**
      * DOCUMENT ME!
@@ -112,28 +93,58 @@ public class CsoTotalOverflowComparisionPanel extends javax.swing.JPanel {
         gridBagConstraints.weightx = 0.0;
         gridBagConstraints.weighty = 0.0;
 
+        // int i = 0;
         final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         for (final CidsBean swmmResultBean : swmmResults) {
             final Object overflowVolume = swmmResultBean.getProperty("overflow_volume");
             final Collection etaResults = (Collection)swmmResultBean.getProperty("eta_results");
             for (final Object etaResult : etaResults) {
                 final CidsBean etaResultBean = (CidsBean)etaResult;
-                final String name = (String)etaResultBean.getProperty("name");
+                final String etaRunName = (String)etaResultBean.getProperty("name");
                 final Object totalOverflowVolume = etaResultBean.getProperty("total_overflow_volume");
-
-                final JFreeChart totalOverflowChart = this.getTotalOverflowChart(
-                        name,
-                        ((overflowVolume != null) ? (Float)overflowVolume : 0),
-                        ((totalOverflowVolume != null) ? (Float)totalOverflowVolume : 0));
-
-                final ChartPanel chartPanel = new ChartPanel(totalOverflowChart);
-                chartPanel.setPreferredSize(new Dimension(200, 150));
-                chartPanel.setMaximumDrawHeight(150);
-                chartPanel.setMaximumDrawWidth(200);
-                this.add(chartPanel, gridBagConstraints);
-                gridBagConstraints.gridx++;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("plotting eta results: " + totalOverflowVolume + " / " + overflowVolume);
+                }
+                dataset.addValue(((totalOverflowVolume != null) ? (Float)totalOverflowVolume : 0),
+                    etaRunName,
+                    this.totalOverflowVolumeLabel);
+                dataset.addValue(((overflowVolume != null) ? (Float)overflowVolume : 0),
+                    etaRunName,
+                    this.overflowVolumeLabel);
             }
         }
+
+        System.out.println(dataset.getRowCount());
+        System.out.println(dataset.getColumnCount());
+
+        final JFreeChart chart = ChartFactory.createMultiplePieChart(
+                null,
+                dataset,
+                TableOrder.BY_ROW,
+                true, // legend?
+                true, // tooltips?
+                false // URLs?
+                );
+
+        final MultiplePiePlot plot = (MultiplePiePlot)chart.getPlot();
+        // plot.setBackgroundAlpha(1.0f);
+        plot.setBackgroundPaint(new Color(228, 228, 197));
+
+        final JFreeChart subchart = plot.getPieChart();
+        final PiePlot p = (PiePlot)subchart.getPlot();
+        p.setExplodePercent(dataset.getColumnKey(1).toString(), 0.25);
+        p.setSectionPaint(dataset.getColumnKey(0).toString(), new Color(125, 26, 12));
+        p.setSectionPaint(dataset.getColumnKey(1).toString(), new Color(168, 107, 76));
+        p.setLabelGenerator(new StandardPieSectionLabelGenerator(
+                "{1}",
+                new DecimalFormat("0.0"),
+                new DecimalFormat("0.0")));
+        p.setBackgroundPaint(new Color(228, 228, 197));
+
+        final ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setOpaque(false);
+        chartPanel.setBackground(new Color(255, 255, 255, 0));
+        this.add(chartPanel, BorderLayout.CENTER);
     }
 
     /**
@@ -143,9 +154,50 @@ public class CsoTotalOverflowComparisionPanel extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        setMinimumSize(new java.awt.Dimension(150, 150));
-        setLayout(new java.awt.GridBagLayout());
+        setMinimumSize(null);
+        setOpaque(false);
+        setLayout(new java.awt.BorderLayout());
     } // </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  DOCUMENT ME!
+     */
+    public static void main(final String[] args) {
+        try {
+            BasicConfigurator.configure();
+            final CidsBean[] swmmResults = DevelopmentTools.createCidsBeansFromRMIConnectionOnLocalhost(
+                    "SUDPLAN",
+                    "Administratoren",
+                    "admin",
+                    "cismetz12",
+                    "linz_swmm_result");
+
+//            final ArrayList<CidsBean> etaBeans = new ArrayList<CidsBean>();
+//            final ArrayList<CidsBean> swmmBeans = new ArrayList<CidsBean>();
+//            final CidsBean swmmBean = new CidsBean();
+//            swmmBean.setProperty("overflow_volume", 20000f);
+//            final CidsBean etaBean1 = new CidsBean();
+//            etaBean1.setProperty("total_overflow_volume", 600000f);
+//            etaBeans.add(etaBean1);
+//            swmmBean.setProperty("eta_results", etaBeans);
+//            swmmBeans.add(swmmBean);
+
+            System.out.println(swmmResults.length);
+            final CsoTotalOverflowComparisionPanel csoTotalOverflowComparisionPanel =
+                new CsoTotalOverflowComparisionPanel();
+            csoTotalOverflowComparisionPanel.setPreferredSize(new java.awt.Dimension(600, 400));
+            csoTotalOverflowComparisionPanel.setSwmmResults(Arrays.asList(swmmResults));
+            final JFrame frame = new JFrame("EfficiencyRatesComparisionPanel");
+            frame.setContentPane(csoTotalOverflowComparisionPanel);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.pack();
+            frame.setVisible(true);
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
 }

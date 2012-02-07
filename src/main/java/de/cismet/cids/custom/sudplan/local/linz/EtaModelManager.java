@@ -65,6 +65,8 @@ public class EtaModelManager extends AbstractAsyncModelManager {
     private final String modelSosEndpoint = "http://sudplan.ait.ac.at:8081/";
     private SudplanSPSHelper.Task spsTask;
 
+    private final SwmmResultGeoserverUpdater swmmResultGeoserverUpdater = new SwmmResultGeoserverUpdater();
+
     //~ Methods ----------------------------------------------------------------
 
     @Override
@@ -101,7 +103,8 @@ public class EtaModelManager extends AbstractAsyncModelManager {
             swmmOutput.setSwmmRun(etaInput.getSwmmRun());
             swmmOutput.setSwmmRunName(etaInput.getSwmmRunName());
             swmmOutput.synchronizeCsoIds(etaInput.getEtaConfigurations());
-            final CidsBean swmmModelOutput = SMSUtils.createModelOutput("Output of SPS SWMM Run: " + spsRunId, // NOI18N
+            final CidsBean swmmModelOutput = SMSUtils.createModelOutput("Modellergebnisse "
+                            + swmmOutput.getSwmmRunName(), // NOI18N
                     swmmOutput,
                     SMSUtils.Model.SWMM);
             // here we create the swmmm model output and update the swmm run
@@ -129,11 +132,13 @@ public class EtaModelManager extends AbstractAsyncModelManager {
             etaOutput.setEtaRunName((String)this.cidsBean.getProperty("name"));
             final float totalOverflowVolume = this.computeTotalOverflowVolume(etaInput, swmmOutput);
             etaOutput.setTotalOverflowVolume(totalOverflowVolume);
-            final CidsBean etaModelOutput = SMSUtils.createModelOutput((String)cidsBean.getProperty("name"), // NOI18N
+            final CidsBean etaModelOutput = SMSUtils.createModelOutput("Modellergebnisse " + etaOutput.getEtaRunName(), // NOI18N
                     etaOutput,
                     SMSUtils.Model.LINZ_ETA);
 
             this.updateCSOs(swmmOutput, etaOutput);
+
+            this.swmmResultGeoserverUpdater.importToGeoServer(swmmOutput.getSwmmRun(), swmmOutput.getSwmmRunName());
 
             return etaModelOutput.persist();
         } catch (final Exception e) {

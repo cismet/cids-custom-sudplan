@@ -15,15 +15,20 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.CategoryItemLabelGenerator;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
 import java.awt.GradientPaint;
+
+import java.text.DecimalFormat;
 
 import java.util.Collection;
 
@@ -89,16 +94,12 @@ public class CsoOverflowComparisionPanel extends javax.swing.JPanel {
                 false                     // URLs?
                 );
 
-        chart.setBackgroundPaint(Color.white);
-
-        // set the background color for the chart...
-        // chart.setBackgroundPaint(Color.white);
         chart.setBackgroundPaint(new Color(255, 255, 255, 0));
         chart.setBackgroundImageAlpha(0.0f);
 
         // get a reference to the plot for further customisation...
         final CategoryPlot plot = chart.getCategoryPlot();
-        plot.setBackgroundPaint(Color.lightGray);
+        plot.setBackgroundPaint(new Color(228, 228, 197));
         plot.setDomainGridlinePaint(Color.white);
         plot.setRangeGridlinePaint(Color.white);
 
@@ -114,12 +115,19 @@ public class CsoOverflowComparisionPanel extends javax.swing.JPanel {
         final GradientPaint gp0 = new GradientPaint(
                 0.0f,
                 0.0f,
-                Color.blue,
+                new Color(128, 26, 12),
                 0.0f,
                 0.0f,
-                Color.lightGray);
+                new Color(168, 107, 76));
 
         renderer.setSeriesPaint(0, gp0);
+
+        final CategoryItemRenderer categoryRenderer = (CategoryItemRenderer)plot.getRenderer();
+        final CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(
+                "{2}",
+                new DecimalFormat("0"));
+        categoryRenderer.setBaseItemLabelGenerator(generator);
+        categoryRenderer.setBaseItemLabelsVisible(true);
 
         final CategoryAxis domainAxis = plot.getDomainAxis();
         domainAxis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);
@@ -128,6 +136,7 @@ public class CsoOverflowComparisionPanel extends javax.swing.JPanel {
         // OPTIONAL CUSTOMISATION COMPLETED.
 
         final ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setOpaque(false);
         this.add(chartPanel);
     }
 

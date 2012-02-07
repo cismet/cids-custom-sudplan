@@ -12,8 +12,14 @@
  */
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
+import it.geosolutions.geoserver.rest.encoder.GSLayerEncoder;
+import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
+
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
@@ -21,14 +27,32 @@ import java.awt.Component;
 
 import java.io.IOException;
 
-import java.util.ArrayList;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+import de.cismet.cids.client.tools.DevelopmentTools;
+
 import de.cismet.cids.custom.objectrenderer.sudplan.LinzCsoRenderer;
+import de.cismet.cids.custom.sudplan.geoserver.AttributesAwareGSFeatureTypeEncoder;
+import de.cismet.cids.custom.sudplan.geoserver.GSAttributeEncoder;
+
+import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
+import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 
 /**
  * DOCUMENT ME!
@@ -40,6 +64,11 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
 
     //~ Static fields/initializers ---------------------------------------------
 
+    public static final String SWMM_WMS_TEMPLATE = "http://sudplanwp6.cismet.de/geoserver/sudplan/wms?service=WMS"
+                + "&version=1.1.0&request=GetMap&layers=%LAYERS%"
+                + "&styles=&bbox=<cismap:boundingBox>&width=<cismap:width>"
+                + "&height=<cismap:height>&srs=EPSG:4326"
+                + "&format=image%2Fpng&TRANSPARENT=TRUE";
     private static final transient Logger LOG = Logger.getLogger(SwmmOutputManagerUI.class);
 
     //~ Instance fields --------------------------------------------------------
@@ -48,6 +77,8 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable csoTable;
     private javax.swing.JScrollPane csoTableScrollPane;
+    private javax.swing.JLabel lblTitle;
+    private javax.swing.JButton showInMapButton;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -80,8 +111,10 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
             final CsoTableCellRenderer csoTableCellRenderer = new CsoTableCellRenderer();
             this.csoTable.setDefaultRenderer(String.class, new CsoTableCellRenderer());
             this.csoTable.setDefaultRenderer(Float.class, new CsoTableCellRenderer());
-        } catch (IOException ex) {
-            LOG.error("cannot initialise swmm output manager ui", ex); // NOI18N
+            this.lblTitle.setText(lblTitle.getText() + swmmOutput.getSwmmRunName());
+        } catch (Exception ex) {
+            LOG.error("cannot initialise swmm output manager ui: "
+                        + ex.getMessage(), ex); // NOI18N
         }
     }
 
@@ -92,31 +125,127 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+
+        lblTitle = new javax.swing.JLabel();
+        showInMapButton = new javax.swing.JButton();
         csoTableScrollPane = new javax.swing.JScrollPane();
         csoTable = new javax.swing.JTable();
+
+        setOpaque(false);
+        setLayout(new java.awt.GridBagLayout());
+
+        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblTitle.setForeground(new java.awt.Color(51, 51, 51));
+        lblTitle.setText(org.openide.util.NbBundle.getMessage(
+                SwmmOutputManagerUI.class,
+                "SwmmOutputManagerUI.lblTitle.text"));        // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblTitle, gridBagConstraints);
+
+        showInMapButton.setText(org.openide.util.NbBundle.getMessage(
+                SwmmOutputManagerUI.class,
+                "SwmmOutputManagerUI.showInMapButton.text")); // NOI18N
+        showInMapButton.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    showInMapButtonActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(showInMapButton, gridBagConstraints);
 
         csoTable.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
                 new String[] {}));
         csoTableScrollPane.setViewportView(csoTable);
 
-        final javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addComponent(
-                    csoTableScrollPane,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    380,
-                    Short.MAX_VALUE).addContainerGap()));
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addComponent(
-                    csoTableScrollPane,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    278,
-                    Short.MAX_VALUE).addContainerGap()));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 2.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(csoTableScrollPane, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void showInMapButtonActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_showInMapButtonActionPerformed
+        try {
+            // TODO add your handling code here:
+            final SwmmOutput swmmOutput = outputManager.getUR();
+            final String layerName = SwmmResultGeoserverUpdater.GEOSERVER_WORKSPACE
+                        + ':' + SwmmResultGeoserverUpdater.VIEW_NAME_BASE + swmmOutput.getSwmmRun();
+
+            LOG.info("showing result of SWMM RUN '" + swmmOutput.getSwmmRunName()
+                        + "' (" + swmmOutput.getSwmmRun() + ") in layer '" + layerName + "'");
+
+            final String wmsURL = SWMM_WMS_TEMPLATE.replace("%LAYERS%", layerName);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(wmsURL);
+            }
+
+            final SimpleWMS swms = new SimpleWMS(new SimpleWmsGetMapUrl(wmsURL));
+            swms.setName(swmmOutput.getSwmmRunName());
+            CismapBroker.getInstance().getMappingComponent().getMappingModel().addLayer(swms);
+        } catch (Exception ex) {
+            LOG.error("could not show result of SWMM RUN in map:" + ex.getMessage(), ex);
+
+            JOptionPane.showMessageDialog(
+                this,
+                "<html>"
+                        + NbBundle.getMessage(SwmmOutputManagerUI.class,
+                            "SwmmOutputManagerUI.msgError.text")
+                        + "<br/>"
+                        + ex.getMessage()
+                        + "</html>",
+                NbBundle.getMessage(SwmmOutputManagerUI.class,
+                    "SwmmOutputManagerUI.msgError.title"),
+                JOptionPane.ERROR_MESSAGE);
+        }
+    } //GEN-LAST:event_showInMapButtonActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  DOCUMENT ME!
+     */
+    public static void main(final String[] args) {
+        try {
+            BasicConfigurator.configure();
+            final CidsBean swmmResult = DevelopmentTools.createCidsBeanFromRMIConnectionOnLocalhost(
+                    "SUDPLAN",
+                    "Administratoren",
+                    "admin",
+                    "cismetz12",
+                    "modeloutput",
+                    253);
+
+            final SwmmOutputManager swmmOutputManager = new SwmmOutputManager();
+            swmmOutputManager.setCidsBean(swmmResult);
+            final SwmmOutputManagerUI swmmOutputManagerUI = new SwmmOutputManagerUI(swmmOutputManager);
+            swmmOutputManagerUI.setPreferredSize(new java.awt.Dimension(600, 400));
+            final JFrame frame = new JFrame("EfficiencyRatesComparisionPanel");
+            frame.setContentPane(swmmOutputManagerUI);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.pack();
+            frame.setVisible(true);
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -127,6 +256,10 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
      */
     class CsoTableCellRenderer extends DefaultTableCellRenderer {
 
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient Color green = new Color(209, 231, 81);
+
         //~ Methods ------------------------------------------------------------
 
         @Override
@@ -136,14 +269,25 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
                 final boolean hasFocus,
                 final int row,
                 final int column) {
-            final Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            final Object volume = csoTable.getModel().getValueAt(row, 1);
-            if ((volume != null) && (((Float)volume).floatValue() <= 0f)) {
-                cell.setBackground(Color.GREEN);
+            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            if (isSelected) {
+                super.setForeground(table.getSelectionForeground());
+                super.setBackground(table.getSelectionBackground());
             } else {
-                cell.setBackground(Color.WHITE);
+                final Object volume = csoTable.getModel().getValueAt(row, 1);
+                Color background = table.getBackground();
+
+                if ((volume != null) && (((Float)volume).floatValue() <= 0f)) {
+                    background = green;
+                } else if (background == null) {
+                    background = Color.WHITE;
+                }
+
+                super.setBackground(background);
+                super.setForeground(table.getForeground());
             }
-            return cell;
+            return this;
         }
     }
 

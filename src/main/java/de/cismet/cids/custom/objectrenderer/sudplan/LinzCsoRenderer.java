@@ -95,6 +95,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
 
     //~ Instance fields --------------------------------------------------------
 
+    private final transient LinzCsoTitleComponent titleComponent = new LinzCsoTitleComponent();
+
     private final Timer timer;
     private final CardLayout cardLayout;
     private ImageResizeWorker currentResizeWorker;
@@ -887,7 +889,14 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
 
     @Override
     public JComponent getTitleComponent() {
-        return new JLabel("titlecomp");
+        return titleComponent;
+    }
+
+    @Override
+    public void setTitle(final String title) {
+        super.setTitle(title);
+
+        titleComponent.setTitle(title);
     }
 
     //~ Inner Classes ----------------------------------------------------------

@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import java.awt.EventQueue;
 import java.awt.GridLayout;
 
 import java.io.IOException;
@@ -30,6 +31,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -51,6 +53,11 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
             new Section(0, 65, new java.awt.Color(1.0f, 0.0f, 0.0f, 0.3f)),
             new Section(65, 75, new java.awt.Color(1.0f, 1.0f, 0.0f, 0.3f)),
             new Section(75, 100, new java.awt.Color(0.0f, 1.0f, 0.0f, 0.3f)),
+        };
+    final Section[] R720 = {
+            new Section(0, 30, new java.awt.Color(1.0f, 0.0f, 0.0f, 0.3f)),
+            new Section(30, 50, new java.awt.Color(1.0f, 1.0f, 0.0f, 0.3f)),
+            new Section(50, 100, new java.awt.Color(0.0f, 1.0f, 0.0f, 0.3f)),
         };
     private final Section[] SECTION_ETA_HYD_50 = {
             new Section(0, 40, new java.awt.Color(1.0f, 0.0f, 0.0f, 0.3f)),
@@ -78,13 +85,19 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
     private javax.swing.JTextField fld_etaSedActual;
     private javax.swing.JTextField fld_etaSedRequired;
     private javax.swing.JTextField fld_totalOverflowVolume;
+    private javax.swing.JLabel lblEtaHyd;
+    private javax.swing.JLabel lblEtaSed;
+    private javax.swing.JLabel lblR720;
+    private javax.swing.JLabel lblTotalOverflow;
     private javax.swing.JLabel lbl_etaHydActual;
     private javax.swing.JLabel lbl_etaHydRequired;
     private javax.swing.JLabel lbl_etaSedActual;
     private javax.swing.JLabel lbl_etaSedRequired;
     private javax.swing.JLabel lbl_r720;
     private javax.swing.JLabel lbl_totalOverflowVolume;
+    private eu.hansolo.steelseries.gauges.Radial2Top r720Gauge;
     private javax.swing.JPanel singleResultPanel;
+    private eu.hansolo.steelseries.gauges.Radial2Top totalOverflowGauge;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -97,6 +110,8 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
     public EtaOutputManagerUI(final EtaOutputManager outputManager) {
         this.outputManager = outputManager;
         initComponents();
+        this.r720Gauge.setFrameEffect(eu.hansolo.steelseries.tools.FrameEffect.EFFECT_INNER_FRAME);
+        this.totalOverflowGauge.setFrameEffect(eu.hansolo.steelseries.tools.FrameEffect.EFFECT_INNER_FRAME);
         init();
     }
 
@@ -106,6 +121,8 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
     private EtaOutputManagerUI() {
         this.outputManager = null;
         initComponents();
+        this.r720Gauge.setFrameEffect(eu.hansolo.steelseries.tools.FrameEffect.EFFECT_INNER_FRAME);
+        this.totalOverflowGauge.setFrameEffect(eu.hansolo.steelseries.tools.FrameEffect.EFFECT_INNER_FRAME);
         this.add(this.fancyResultPanel);
     }
 
@@ -118,8 +135,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
      */
     private void updateGauges(final EtaOutput etaOutput) {
         this.etaHydGauge.setThreshold(etaOutput.getEtaHydRequired());
-        this.etaHydGauge.setUnitString(new DecimalFormat("#.##").format(etaOutput.getEtaHydActual()));
-        this.etaHydGauge.setValueAnimated(etaOutput.getEtaHydActual());
+        this.etaHydGauge.setToolTipText(new DecimalFormat("#.##").format(etaOutput.getEtaHydActual()));
         switch ((int)etaOutput.getEtaHydRequired()) {
             case 50: {
                 this.etaHydGauge.setSections(SECTION_ETA_HYD_50);
@@ -147,8 +163,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
         }
 
         this.etaSedGauge.setThreshold(etaOutput.getEtaSedRequired());
-        this.etaSedGauge.setUnitString(new DecimalFormat("#.##").format(etaOutput.getEtaSedActual()));
-        this.etaSedGauge.setValueAnimated(etaOutput.getEtaSedActual());
+        this.etaSedGauge.setToolTipText(new DecimalFormat("#.##").format(etaOutput.getEtaSedActual()));
         switch ((int)etaOutput.getEtaSedRequired()) {
             case 50: {
                 this.etaSedGauge.setSections(SECTION_ETA_SED_65);
@@ -174,13 +189,23 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
             this.etaSedGauge.setUserLedBlinking(true);
             this.etaSedGauge.setUserLedColor(LedColor.RED_LED);
         }
+
+        this.r720Gauge.setToolTipText(new DecimalFormat("#.##").format(etaOutput.getR720()));
+        this.totalOverflowGauge.setToolTipText(new DecimalFormat("#.##").format(etaOutput.getTotalOverflowVolume()));
+        this.totalOverflowGauge.setMaxValue(etaOutput.getTotalOverflowVolume() * 1.5);
+
+        this.etaHydGauge.setValueAnimated(etaOutput.getEtaHydActual());
+        this.r720Gauge.setValueAnimated(etaOutput.getR720());
+        this.totalOverflowGauge.setValueAnimated(etaOutput.getTotalOverflowVolume());
+        this.etaSedGauge.setValueAnimated(etaOutput.getEtaSedActual());
+
+        System.out.println(SwingUtilities.isEventDispatchThread());
     }
 
     /**
      * DOCUMENT ME!
      */
     private void init() {
-        this.removeAll();
         if (LOG.isDebugEnabled()) {
             LOG.debug("initilaising EtaOutputManagerUI V2");
         }
@@ -205,22 +230,54 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
                 }
             }
 
-            etaOutputComparisionPanel.setEtaOutputs(etaRunNames, etaOutputs);
-            totalOverflowComparisionPanel.setEtaOutputs(etaRunNames, etaOutputs);
+            if (EventQueue.isDispatchThread()) {
+                etaOutputComparisionPanel.setEtaOutputs(etaRunNames, etaOutputs);
+                totalOverflowComparisionPanel.setEtaOutputs(etaRunNames, etaOutputs);
 
-            final JPanel contentPanel = new JPanel(new GridLayout(2, 0, 10, 0));
-            contentPanel.setOpaque(false);
-            contentPanel.add(etaOutputComparisionPanel);
-            contentPanel.add(totalOverflowComparisionPanel);
+                final JPanel contentPanel = new JPanel(new GridLayout(2, 0, 10, 0));
+                contentPanel.setOpaque(false);
+                contentPanel.add(etaOutputComparisionPanel);
+                contentPanel.add(totalOverflowComparisionPanel);
+                this.removeAll();
+                this.add(contentPanel);
+            } else {
+                EventQueue.invokeLater(new Runnable() {
 
-            this.add(contentPanel);
+                        @Override
+                        public void run() {
+                            etaOutputComparisionPanel.setEtaOutputs(etaRunNames, etaOutputs);
+                            totalOverflowComparisionPanel.setEtaOutputs(etaRunNames, etaOutputs);
+
+                            final JPanel contentPanel = new JPanel(new GridLayout(2, 0, 10, 0));
+                            contentPanel.setOpaque(false);
+                            contentPanel.add(etaOutputComparisionPanel);
+                            contentPanel.add(totalOverflowComparisionPanel);
+                            removeAll();
+                            add(contentPanel);
+                        }
+                    });
+            }
         } else if (this.outputManager.getCidsBean() != null) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("showing only one eta result");
             }
             final EtaOutput etaOutput = this.getEtaOutput();
-            this.updateGauges(etaOutput);
-            this.add(this.fancyResultPanel);
+
+            if (EventQueue.isDispatchThread()) {
+                this.updateGauges(etaOutput);
+                this.removeAll();
+                this.add(this.fancyResultPanel);
+            } else {
+                EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            updateGauges(etaOutput);
+                            removeAll();
+                            add(fancyResultPanel);
+                        }
+                    });
+            }
 
 //            this.fld_etaHydActual.setText(String.valueOf(etaOutput.getEtaHydActual()));
 //            this.fld_etaHydRequired.setText(String.valueOf(etaOutput.getEtaHydRequired()));
@@ -248,6 +305,8 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
         etaOutput.setEtaHydRequired(60);
         etaOutput.setEtaSedActual(78.41792f);
         etaOutput.setEtaSedRequired(75);
+        etaOutput.setR720(14.227189f);
+        etaOutput.setTotalOverflowVolume(610.362f);
 
         etaOutputManagerUI.updateGauges(etaOutput);
 
@@ -312,8 +371,14 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
         fld_etaSedActual = new javax.swing.JTextField();
         fld_totalOverflowVolume = new javax.swing.JTextField();
         fancyResultPanel = new javax.swing.JPanel();
+        lblEtaHyd = new javax.swing.JLabel();
         etaHydGauge = new eu.hansolo.steelseries.gauges.Radial();
+        lblEtaSed = new javax.swing.JLabel();
         etaSedGauge = new eu.hansolo.steelseries.gauges.Radial();
+        lblR720 = new javax.swing.JLabel();
+        r720Gauge = new eu.hansolo.steelseries.gauges.Radial2Top();
+        lblTotalOverflow = new javax.swing.JLabel();
+        totalOverflowGauge = new eu.hansolo.steelseries.gauges.Radial2Top();
 
         singleResultPanel.setOpaque(false);
         singleResultPanel.setLayout(new java.awt.GridBagLayout());
@@ -466,6 +531,17 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
         fancyResultPanel.setPreferredSize(new java.awt.Dimension(600, 400));
         fancyResultPanel.setLayout(new java.awt.GridBagLayout());
 
+        lblEtaHyd.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lblEtaHyd.setForeground(new java.awt.Color(51, 51, 51));
+        lblEtaHyd.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblEtaHyd.setText(org.openide.util.NbBundle.getMessage(
+                EtaOutputManagerUI.class,
+                "EtaOutputManagerUI.lblEtaHyd.text"));         // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        fancyResultPanel.add(lblEtaHyd, gridBagConstraints);
+
         etaHydGauge.setAreasVisible(true);
         etaHydGauge.setFrameDesign(eu.hansolo.steelseries.tools.FrameDesign.GLOSSY_METAL);
         etaHydGauge.setFrameEffect(eu.hansolo.steelseries.tools.FrameEffect.EFFECT_INNER_FRAME);
@@ -497,8 +573,22 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
                 Short.MAX_VALUE));
 
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.weighty = 0.75;
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
         fancyResultPanel.add(etaHydGauge, gridBagConstraints);
+
+        lblEtaSed.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lblEtaSed.setForeground(new java.awt.Color(51, 51, 51));
+        lblEtaSed.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblEtaSed.setText(org.openide.util.NbBundle.getMessage(
+                EtaOutputManagerUI.class,
+                "EtaOutputManagerUI.lblEtaSed.text"));         // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        fancyResultPanel.add(lblEtaSed, gridBagConstraints);
 
         etaSedGauge.setAreasVisible(true);
         etaSedGauge.setFrameDesign(eu.hansolo.steelseries.tools.FrameDesign.GLOSSY_METAL);
@@ -534,8 +624,104 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
                 Short.MAX_VALUE));
 
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.weighty = 0.75;
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
         fancyResultPanel.add(etaSedGauge, gridBagConstraints);
+
+        lblR720.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lblR720.setForeground(new java.awt.Color(51, 51, 51));
+        lblR720.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblR720.setText(org.openide.util.NbBundle.getMessage(
+                EtaOutputManagerUI.class,
+                "EtaOutputManagerUI.lblR720.text"));         // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        fancyResultPanel.add(lblR720, gridBagConstraints);
+
+        r720Gauge.setAreasVisible(true);
+        r720Gauge.setFrameDesign(eu.hansolo.steelseries.tools.FrameDesign.SHINY_METAL);
+        r720Gauge.setGaugeType(eu.hansolo.steelseries.tools.GaugeType.TYPE1);
+        r720Gauge.setLedVisible(false);
+        r720Gauge.setMaxValue(60.0);
+        r720Gauge.setTitle(org.openide.util.NbBundle.getMessage(
+                EtaOutputManagerUI.class,
+                "EtaOutputManagerUI.r720Gauge.title")); // NOI18N
+        r720Gauge.setTrackSection(30.0);
+        r720Gauge.setTrackVisible(true);
+        r720Gauge.setUnitString(org.openide.util.NbBundle.getMessage(
+                EtaOutputManagerUI.class,
+                "EtaOutputManagerUI.r720Gauge.unit"));  // NOI18N
+
+        final javax.swing.GroupLayout r720GaugeLayout = new javax.swing.GroupLayout(r720Gauge);
+        r720Gauge.setLayout(r720GaugeLayout);
+        r720GaugeLayout.setHorizontalGroup(
+            r720GaugeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
+                0,
+                200,
+                Short.MAX_VALUE));
+        r720GaugeLayout.setVerticalGroup(
+            r720GaugeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
+                0,
+                200,
+                Short.MAX_VALUE));
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 0.25;
+        gridBagConstraints.insets = new java.awt.Insets(25, 10, 10, 10);
+        fancyResultPanel.add(r720Gauge, gridBagConstraints);
+
+        lblTotalOverflow.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lblTotalOverflow.setForeground(new java.awt.Color(51, 51, 51));
+        lblTotalOverflow.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblTotalOverflow.setText(org.openide.util.NbBundle.getMessage(
+                EtaOutputManagerUI.class,
+                "EtaOutputManagerUI.lblTotalOverflow.text"));         // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        fancyResultPanel.add(lblTotalOverflow, gridBagConstraints);
+
+        totalOverflowGauge.setToolTipText(org.openide.util.NbBundle.getMessage(
+                EtaOutputManagerUI.class,
+                "EtaOutputManagerUI.totalOverflowGauge.toolTipText")); // NOI18N
+        totalOverflowGauge.setAreasVisible(true);
+        totalOverflowGauge.setFrameDesign(eu.hansolo.steelseries.tools.FrameDesign.SHINY_METAL);
+        totalOverflowGauge.setGaugeType(eu.hansolo.steelseries.tools.GaugeType.TYPE1);
+        totalOverflowGauge.setLedVisible(false);
+        totalOverflowGauge.setMaxValue(60.0);
+        totalOverflowGauge.setTitle(org.openide.util.NbBundle.getMessage(
+                EtaOutputManagerUI.class,
+                "EtaOutputManagerUI.totalOverflowGauge.title"));       // NOI18N
+        totalOverflowGauge.setTrackSection(30.0);
+        totalOverflowGauge.setUnitString(org.openide.util.NbBundle.getMessage(
+                EtaOutputManagerUI.class,
+                "EtaOutputManagerUI.totalOverflowGauge.unitString"));  // NOI18N
+
+        final javax.swing.GroupLayout totalOverflowGaugeLayout = new javax.swing.GroupLayout(totalOverflowGauge);
+        totalOverflowGauge.setLayout(totalOverflowGaugeLayout);
+        totalOverflowGaugeLayout.setHorizontalGroup(
+            totalOverflowGaugeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
+                0,
+                200,
+                Short.MAX_VALUE));
+        totalOverflowGaugeLayout.setVerticalGroup(
+            totalOverflowGaugeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
+                0,
+                200,
+                Short.MAX_VALUE));
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 0.25;
+        gridBagConstraints.insets = new java.awt.Insets(25, 10, 10, 10);
+        fancyResultPanel.add(totalOverflowGauge, gridBagConstraints);
 
         setOpaque(false);
         setLayout(new java.awt.GridLayout(1, 0));

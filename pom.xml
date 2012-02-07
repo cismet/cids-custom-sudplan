@@ -180,7 +180,7 @@
                     <groupId>xerces</groupId>
                     <artifactId>xmlParserAPIs</artifactId>
                 </exclusion>
-             </exclusions>
+            </exclusions>
         </dependency>
         <dependency> 
             <groupId>at.ac.ait.enviro.sudplan</groupId> 
@@ -210,6 +210,11 @@
                     <artifactId>commons-lang</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>it.geosolutions</groupId>
+            <artifactId>geoserver-manager</artifactId>
+            <version>1.3.0</version>
         </dependency>
     </dependencies>
 

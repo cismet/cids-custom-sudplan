@@ -68,24 +68,22 @@ public class EfficiencyRatesComparisionPanel extends javax.swing.JPanel {
         if (LOG.isDebugEnabled()) {
             LOG.debug("setEtaOutputs: " + etaRunNames.size());
         }
+        final String etaHydRequired = NbBundle.getMessage(
+                EfficiencyRatesComparisionPanel.class,
+                "EfficiencyRatesComparisionPanel.chart.etaHydRequired");
+        final String etaHydActual = NbBundle.getMessage(
+                EfficiencyRatesComparisionPanel.class,
+                "EfficiencyRatesComparisionPanel.chart.etaHydActual");
+        final String etaSedRequired = NbBundle.getMessage(
+                EfficiencyRatesComparisionPanel.class,
+                "EfficiencyRatesComparisionPanel.chart.etaSedRequired");
+        final String etaSedActual = NbBundle.getMessage(
+                EfficiencyRatesComparisionPanel.class,
+                "EfficiencyRatesComparisionPanel.chart.etaSedActual");
         final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         int i = 0;
         for (final String etaRunName : etaRunNames) {
             final EtaOutput etaOutput = etaOutputs.get(i);
-
-            final String etaHydRequired = NbBundle.getMessage(
-                    EfficiencyRatesComparisionPanel.class,
-                    "EfficiencyRatesComparisionPanel.chart.etaHydRequired");
-            final String etaHydActual = NbBundle.getMessage(
-                    EfficiencyRatesComparisionPanel.class,
-                    "EfficiencyRatesComparisionPanel.chart.etaHydActual");
-            final String etaSedRequired = NbBundle.getMessage(
-                    EfficiencyRatesComparisionPanel.class,
-                    "EfficiencyRatesComparisionPanel.chart.etaSedRequired");
-            final String etaSedActual = NbBundle.getMessage(
-                    EfficiencyRatesComparisionPanel.class,
-                    "EfficiencyRatesComparisionPanel.chart.etaSedActual");
-
             dataset.addValue(etaOutput.getEtaHydRequired(), etaHydRequired, etaRunName);
             dataset.addValue(etaOutput.getEtaHydActual(), etaHydActual, etaRunName);
             dataset.addValue(etaOutput.getEtaSedRequired(), etaSedRequired, etaRunName);

@@ -229,7 +229,8 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
         final Date created = GregorianCalendar.getInstance().getTime();
         final String user = SessionManager.getSession().getUser().getName();
         final String name = (String)wizard.getProperty(PROP_NAME);
-        final String inputName = "SWMM Modellkonfiguration (" + name + ")";
+        final String runName = name + " (SWMM 5.0)";
+        final String inputName = "Modellkonfiguration " + runName;
 
         swmmInput.setCreated(created);
         swmmInput.setUser(user);
@@ -251,7 +252,8 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
         final Date created = GregorianCalendar.getInstance().getTime();
         final String user = SessionManager.getSession().getUser().getName();
         final String name = (String)wizard.getProperty(PROP_NAME);
-        final String inputName = "ETA Modellkonfiguration (" + name + ")";
+        final String runName = name + " (ETA)";
+        final String inputName = "Modellkonfiguration " + runName;
         final String swmmRunName = name + " (SWMM 5.0)";
 
         etaInput.setCreated(created);

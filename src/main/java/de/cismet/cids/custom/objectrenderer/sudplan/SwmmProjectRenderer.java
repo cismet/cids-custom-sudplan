@@ -503,7 +503,6 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
     @Override
     public void setTitle(final String title) {
         super.setTitle(title);
-
         titleComponent.setTitle(title);
     }
 
