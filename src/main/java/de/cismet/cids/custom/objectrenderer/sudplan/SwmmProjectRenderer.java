@@ -7,12 +7,15 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import Sirius.navigator.search.CidsSearchExecutor;
 import Sirius.navigator.ui.ComponentRegistry;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import org.jdesktop.swingx.JXHyperlink;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
@@ -22,11 +25,21 @@ import java.awt.event.ActionListener;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringTokenizer;
 
+import javax.swing.*;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.InputVerifier;
 import javax.swing.JComponent;
+import javax.swing.JTextField;
+
+import de.cismet.cids.client.tools.DevelopmentTools;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
+import de.cismet.cids.custom.sudplan.local.linz.SwmmOutputManager;
+import de.cismet.cids.custom.sudplan.local.linz.SwmmOutputManagerUI;
+import de.cismet.cids.custom.sudplan.server.search.CsoByOverflowSearch;
+import de.cismet.cids.custom.sudplan.server.search.EtaResultSearch;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -46,11 +59,25 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
 
     //~ Instance fields --------------------------------------------------------
 
+    private final InputVerifier overflowVerifier = new InputVerifier() {
+
+            @Override
+            public boolean verify(final JComponent input) {
+                final JTextField textField = ((JTextField)input);
+                try {
+                    final Float isFloat = Float.valueOf(textField.getText());
+                    return isFloat.floatValue() >= 0;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            }
+        };
+
     private final transient SwmmProjectTitleComponent titleComponent = new SwmmProjectTitleComponent();
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bntEtaSearch;
     private javax.swing.JButton bntSwmmSearch;
-    private javax.swing.JComboBox cbSwmmProjects;
+    private javax.swing.JComboBox cbSwmmRuns;
     private javax.swing.JCheckBox chbEtaHyd;
     private javax.swing.JCheckBox chbEtaSed;
     private javax.swing.JPanel configPanel;
@@ -60,7 +87,6 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
     private javax.swing.JTextField fldEtaHyd;
     private javax.swing.JTextField fldEtaSed;
     private javax.swing.JTextField fldOverflowVolume;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblDescription;
     private javax.swing.JLabel lblDescriptionText;
@@ -69,6 +95,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
     private javax.swing.JLabel lblSwmmAnalysisVolume;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JLabel lblTitleText;
+    private javax.swing.JPanel pnlSpacer;
     private javax.swing.JLabel previewLabel;
     private javax.swing.JPanel previewPanel;
     private javax.swing.JPanel swmmAnalysisPanel;
@@ -115,10 +142,12 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
                     hyperLink));
             this.swmmRunPanel.add(hyperLink, gridBagConstraints);
             gridBagConstraints.gridy++;
+
+            comboBoxModel.addElement(swmmBean);
         }
 
         gridBagConstraints.gridx = 0;
-        for (final CidsBean etaBean : etaScenarios) {
+        for (final CidsBean etaBean : swmmScenarios) {
             final String key = "ETA::" + etaBean.getProperty("id");
             beansMap.put(key, etaBean);
             final JXHyperlink hyperLink = new JXHyperlink();
@@ -130,15 +159,19 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
                     hyperLink));
             this.etaRunPanel.add(hyperLink, gridBagConstraints);
             gridBagConstraints.gridy++;
-
-            comboBoxModel.addElement(etaBean);
         }
 
         this.lblTitleText.setText(cidsBean.getProperty("title").toString());
         this.lblDescriptionText.setText(cidsBean.getProperty("description").toString());
+
         this.configurationArea.setText(cidsBean.getProperty("options").toString());
-        this.cbSwmmProjects.setModel(comboBoxModel);
-        titleComponent.setCidsBean(cidsBean);
+        this.cbSwmmRuns.setModel(comboBoxModel);
+        this.titleComponent.setCidsBean(cidsBean);
+        this.bntSwmmSearch.setEnabled(!swmmScenarios.isEmpty());
+        this.bntEtaSearch.setEnabled(!etaScenarios.isEmpty());
+        if (!swmmScenarios.isEmpty()) {
+            this.cbSwmmRuns.setSelectedIndex(0);
+        }
     }
 
     /**
@@ -165,7 +198,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         swmmAnalysisPanel = new javax.swing.JPanel();
         lblSwmmAnalysisProject = new javax.swing.JLabel();
         lblSwmmAnalysisVolume = new javax.swing.JLabel();
-        cbSwmmProjects = new javax.swing.JComboBox();
+        cbSwmmRuns = new javax.swing.JComboBox();
         fldOverflowVolume = new javax.swing.JTextField();
         lblOverflowUnit = new javax.swing.JLabel();
         bntSwmmSearch = new javax.swing.JButton();
@@ -174,7 +207,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         chbEtaHyd = new javax.swing.JCheckBox();
         chbEtaSed = new javax.swing.JCheckBox();
         bntEtaSearch = new javax.swing.JButton();
-        jPanel1 = new javax.swing.JPanel();
+        pnlSpacer = new javax.swing.JPanel();
 
         fldEtaHyd.setColumns(4);
         fldEtaHyd.setText(org.openide.util.NbBundle.getMessage(
@@ -284,8 +317,13 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         configPanel.setLayout(new java.awt.GridLayout(1, 0));
 
         configurationArea.setColumns(20);
+        configurationArea.setFont(new java.awt.Font("Monospaced", 1, 12)); // NOI18N
         configurationArea.setLineWrap(true);
         configurationArea.setRows(6);
+        configurationArea.setTabSize(16);
+        configurationArea.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectRenderer.class,
+                "SwmmProjectRenderer.configurationArea.text"));            // NOI18N
         jScrollPane2.setViewportView(configurationArea);
 
         configPanel.add(jScrollPane2);
@@ -327,7 +365,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
         swmmAnalysisPanel.add(lblSwmmAnalysisProject, gridBagConstraints);
 
         lblSwmmAnalysisVolume.setText(org.openide.util.NbBundle.getMessage(
@@ -336,18 +374,19 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
         swmmAnalysisPanel.add(lblSwmmAnalysisVolume, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        swmmAnalysisPanel.add(cbSwmmProjects, gridBagConstraints);
+        swmmAnalysisPanel.add(cbSwmmRuns, gridBagConstraints);
 
         fldOverflowVolume.setColumns(6);
         fldOverflowVolume.setText(org.openide.util.NbBundle.getMessage(
                 SwmmProjectRenderer.class,
                 "SwmmProjectRenderer.fldOverflowVolume.text")); // NOI18N
+        fldOverflowVolume.setInputVerifier(this.overflowVerifier);
         fldOverflowVolume.setMinimumSize(new java.awt.Dimension(54, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -369,6 +408,13 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         bntSwmmSearch.setText(org.openide.util.NbBundle.getMessage(
                 SwmmProjectRenderer.class,
                 "SwmmProjectRenderer.bntSwmmSearch.text")); // NOI18N
+        bntSwmmSearch.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    bntSwmmSearchActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 3;
@@ -411,13 +457,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         chbEtaHyd.setText(org.openide.util.NbBundle.getMessage(
                 SwmmProjectRenderer.class,
                 "SwmmProjectRenderer.chbEtaHyd.text")); // NOI18N
-        chbEtaHyd.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    chbEtaHydActionPerformed(evt);
-                }
-            });
+        chbEtaHyd.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -426,13 +466,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         chbEtaSed.setText(org.openide.util.NbBundle.getMessage(
                 SwmmProjectRenderer.class,
                 "SwmmProjectRenderer.chbEtaSed.text")); // NOI18N
-        chbEtaSed.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    chbEtaSedActionPerformed(evt);
-                }
-            });
+        chbEtaSed.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -442,6 +476,13 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         bntEtaSearch.setText(org.openide.util.NbBundle.getMessage(
                 SwmmProjectRenderer.class,
                 "SwmmProjectRenderer.bntEtaSearch.text")); // NOI18N
+        bntEtaSearch.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    bntEtaSearchActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -457,22 +498,13 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(etaAnalysisPanel, gridBagConstraints);
-
-        final org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 767, Short.MAX_VALUE));
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 10, Short.MAX_VALUE));
-
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        add(jPanel1, gridBagConstraints);
+        add(pnlSpacer, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
     /**
@@ -480,20 +512,51 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chbEtaHydActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_chbEtaHydActionPerformed
-    {                                                                           //GEN-HEADEREND:event_chbEtaHydActionPerformed
-                                                                                // TODO add your handling code here:
-    }                                                                           //GEN-LAST:event_chbEtaHydActionPerformed
+    private void bntSwmmSearchActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_bntSwmmSearchActionPerformed
+        if (this.cbSwmmRuns.getSelectedItem() != null) {
+            final int swmmRun = (Integer)((CidsBean)this.cbSwmmRuns.getSelectedItem()).getProperty("id");
+            float overflowVolume = 0f;
+
+            try {
+                overflowVolume = Float.valueOf(this.fldOverflowVolume.getText());
+            } catch (Throwable t) {
+                LOG.warn(t.getMessage());
+            }
+
+            final CsoByOverflowSearch csoByOverflowSearch = new CsoByOverflowSearch(swmmRun, overflowVolume);
+
+            LOG.info("performing search for SWMM RUN #" + swmmRun
+                        + " and max. overflow volume " + overflowVolume);
+
+            CidsSearchExecutor.searchAndDisplayResultsWithDialog(csoByOverflowSearch);
+        } else {
+            LOG.warn("no SWMM runs available to perform search");
+        }
+    } //GEN-LAST:event_bntSwmmSearchActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chbEtaSedActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_chbEtaSedActionPerformed
-    {                                                                           //GEN-HEADEREND:event_chbEtaSedActionPerformed
-                                                                                // TODO add your handling code here:
-    }                                                                           //GEN-LAST:event_chbEtaSedActionPerformed
+    private void bntEtaSearchActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_bntEtaSearchActionPerformed
+
+        final int swmmProjectId = (Integer)this.getCidsBean().getProperty("id");
+        int parameter = EtaResultSearch.NONE;
+        if (this.chbEtaSed.isSelected()) {
+            parameter += EtaResultSearch.ETA_SED;
+        }
+        if (this.chbEtaHyd.isSelected()) {
+            parameter += EtaResultSearch.ETA_HYD;
+        }
+
+        final EtaResultSearch etaResultSearch = new EtaResultSearch(swmmProjectId, parameter);
+
+        LOG.info("performing search for SWMM PROJECT #" + swmmProjectId
+                    + " and parameter " + parameter);
+
+        CidsSearchExecutor.searchAndDisplayResultsWithDialog(etaResultSearch);
+    } //GEN-LAST:event_bntEtaSearchActionPerformed
 
     @Override
     public JComponent getTitleComponent() {
@@ -504,6 +567,36 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
     public void setTitle(final String title) {
         super.setTitle(title);
         titleComponent.setTitle(title);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  DOCUMENT ME!
+     */
+    public static void main(final String[] args) {
+        try {
+            BasicConfigurator.configure();
+            final CidsBean swmmProject = DevelopmentTools.createCidsBeanFromRMIConnectionOnLocalhost(
+                    "SUDPLAN",
+                    "Administratoren",
+                    "admin",
+                    "cismetz12",
+                    "swmm_project",
+                    2);
+
+            final SwmmProjectRenderer swmmProjectRenderer = new SwmmProjectRenderer();
+            swmmProjectRenderer.setCidsBean(swmmProject);
+            swmmProjectRenderer.init();
+            swmmProjectRenderer.setPreferredSize(new java.awt.Dimension(600, 400));
+            final JFrame frame = new JFrame("SwmmProjectRenderer");
+            frame.setContentPane(swmmProjectRenderer);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.pack();
+            frame.setVisible(true);
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     //~ Inner Classes ----------------------------------------------------------

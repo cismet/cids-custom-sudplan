@@ -86,8 +86,13 @@ public class EtaInputManagerUI extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        final java.awt.GridBagConstraints gridBagConstraints;
+
         etaTableScrollPane = new javax.swing.JScrollPane();
         etaTable = new javax.swing.JTable();
+
+        setOpaque(false);
+        setLayout(new java.awt.GridBagLayout());
 
         etaTable.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
@@ -108,21 +113,13 @@ public class EtaInputManagerUI extends javax.swing.JPanel {
             });
         etaTableScrollPane.setViewportView(etaTable);
 
-        final javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addComponent(
-                    etaTableScrollPane,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    380,
-                    Short.MAX_VALUE).addContainerGap()));
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addComponent(
-                    etaTableScrollPane,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    278,
-                    Short.MAX_VALUE).addContainerGap()));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        add(etaTableScrollPane, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 }
