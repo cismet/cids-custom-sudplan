@@ -34,6 +34,7 @@ import de.cismet.tools.gui.TitleComponentProvider;
 public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvider,
     CidsBeanRenderer,
     FooterComponentProvider,
+    TitleComponentProvider,
     RequestsFullSizeComponent {
 
     //~ Static fields/initializers ---------------------------------------------
@@ -53,12 +54,14 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel lblBack;
     private javax.swing.JLabel lblForw;
+    private javax.swing.JLabel lblTitle;
     private javax.swing.JPanel panButtons;
     private javax.swing.JPanel panFooter;
     private javax.swing.JPanel panFooterLeft;
     private javax.swing.JPanel panFooterRight;
     private javax.swing.JPanel panPage1;
     private javax.swing.JPanel panPage2;
+    private javax.swing.JPanel panTitle;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -94,6 +97,8 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
         panFooterRight = new javax.swing.JPanel();
         btnForward = new javax.swing.JButton();
         lblForw = new javax.swing.JLabel();
+        panTitle = new javax.swing.JPanel();
+        lblTitle = new javax.swing.JLabel();
         panPage1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         panPage2 = new javax.swing.JPanel();
@@ -186,6 +191,21 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
 
         panFooter.add(panButtons, java.awt.BorderLayout.CENTER);
 
+        panTitle.setOpaque(false);
+        panTitle.setLayout(new java.awt.GridBagLayout());
+
+        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        lblTitle.setForeground(new java.awt.Color(255, 255, 255));
+        lblTitle.setText(org.openide.util.NbBundle.getMessage(
+                LinzWwtpRenderer.class,
+                "LinzWwtpRenderer.lblTitle.text"));           // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
+        panTitle.add(lblTitle, gridBagConstraints);
+
         setLayout(new java.awt.CardLayout());
 
         panPage1.setOpaque(false);
@@ -213,44 +233,44 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblBackMouseClicked(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblBackMouseClicked
+    private void lblBackMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblBackMouseClicked
         btnBackActionPerformed(null);
-    }//GEN-LAST:event_lblBackMouseClicked
+    }                                                                       //GEN-LAST:event_lblBackMouseClicked
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnBackActionPerformed
         cardLayout.show(this, CARD_1);
         btnBack.setEnabled(false);
         btnForward.setEnabled(true);
         lblBack.setEnabled(false);
         lblForw.setEnabled(true);
-    }//GEN-LAST:event_btnBackActionPerformed
+    }                                                                           //GEN-LAST:event_btnBackActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnForwardActionPerformed
+    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnForwardActionPerformed
         cardLayout.show(this, CARD_2);
         btnBack.setEnabled(true);
         btnForward.setEnabled(false);
         lblBack.setEnabled(true);
         lblForw.setEnabled(false);
-    }//GEN-LAST:event_btnForwardActionPerformed
+    }                                                                              //GEN-LAST:event_btnForwardActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblForwMouseClicked(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblForwMouseClicked
+    private void lblForwMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblForwMouseClicked
         btnForwardActionPerformed(null);
-    }//GEN-LAST:event_lblForwMouseClicked
+    }                                                                       //GEN-LAST:event_lblForwMouseClicked
 
     @Override
     public Border getCenterrBorder() {
@@ -289,11 +309,17 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
     @Override
     public void setTitle(final String title) {
         this.title = title;
+        lblTitle.setText(this.title);
     }
 
     @Override
     public JComponent getFooterComponent() {
         return panFooter;
+    }
+
+    @Override
+    public JComponent getTitleComponent() {
+        return panTitle;
     }
 
     /**
