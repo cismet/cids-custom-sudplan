@@ -9,6 +9,7 @@ package de.cismet.cids.custom.objectrenderer.sudplan;
 
 import Sirius.navigator.search.CidsSearchExecutor;
 import Sirius.navigator.ui.ComponentRegistry;
+import Sirius.navigator.ui.RequestsFullSizeComponent;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -51,7 +52,8 @@ import de.cismet.tools.gui.TitleComponentProvider;
  * @author   pascal.dihe@cismet.de
  * @version  $Revision$, $Date$
  */
-public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider {
+public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider,
+    RequestsFullSizeComponent {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -147,7 +149,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         }
 
         gridBagConstraints.gridx = 0;
-        for (final CidsBean etaBean : swmmScenarios) {
+        for (final CidsBean etaBean : etaScenarios) {
             final String key = "ETA::" + etaBean.getProperty("id");
             beansMap.put(key, etaBean);
             final JXHyperlink hyperLink = new JXHyperlink();
@@ -498,6 +500,8 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(etaAnalysisPanel, gridBagConstraints);
+
+        pnlSpacer.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridwidth = 3;

@@ -12,8 +12,19 @@
  */
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
-import org.apache.commons.io.IOUtils;
+import Sirius.navigator.ui.ComponentRegistry;
+import Sirius.navigator.ui.RequestsFullSizeComponent;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.BasicConfigurator;
+
+import org.jdesktop.swingx.JXHyperlink;
+
+import org.openide.util.Exceptions;
+import org.openide.util.WeakListeners;
+
+import java.awt.*;
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -36,6 +47,7 @@ import java.lang.ref.SoftReference;
 import java.net.URLEncoder;
 
 import java.util.*;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
@@ -47,6 +59,7 @@ import javax.imageio.stream.ImageInputStream;
 
 import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.border.Border;
 
 import de.cismet.cids.client.tools.DevelopmentTools;
 
@@ -55,15 +68,15 @@ import de.cismet.cids.custom.sudplan.ImageUtil;
 
 import de.cismet.cids.dynamics.CidsBean;
 
+import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
+
 import de.cismet.netutil.Proxy;
 
 import de.cismet.security.WebDavClient;
 
 import de.cismet.tools.CismetThreadPool;
 
-import de.cismet.tools.gui.CurvedFlowBackgroundPanel;
-import de.cismet.tools.gui.RoundedPanel;
-import de.cismet.tools.gui.TitleComponentProvider;
+import de.cismet.tools.gui.*;
 
 /**
  * DOCUMENT ME!
@@ -71,11 +84,17 @@ import de.cismet.tools.gui.TitleComponentProvider;
  * @author   stefan
  * @version  $Revision$, $Date$
  */
-public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider {
+public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderProvider,
+    CidsBeanRenderer,
+    FooterComponentProvider,
+    TitleComponentProvider,
+    RequestsFullSizeComponent {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(LinzCsoRenderer.class);
+    private static final String CARD_1 = "CARD1";
+    private static final String CARD_2 = "CARD2";
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(LinzCsoRenderer.class);
     private static final ImageIcon ERROR_ICON = new ImageIcon(LinzCsoRenderer.class.getResource(
                 "/de/cismet/cids/custom/objectrenderer/sudplan/file-broken.png"));
     private static final ImageIcon FOLDER_ICON = new ImageIcon(LinzCsoRenderer.class.getResource(
@@ -95,8 +114,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient LinzCsoTitleComponent titleComponent = new LinzCsoTitleComponent();
-
+    // private final transient LinzCsoTitleComponent titleComponent = new LinzCsoTitleComponent();
     private final Timer timer;
     private final CardLayout cardLayout;
     private ImageResizeWorker currentResizeWorker;
@@ -107,6 +125,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBack;
     private javax.swing.JButton btnForward;
+    private javax.swing.JButton btnNextPage;
+    private javax.swing.JButton btnPrevPage;
     private de.cismet.cids.custom.sudplan.local.linz.CsoOverflowComparisionPanel csoOverflowComparisionPanel;
     private de.cismet.cids.custom.sudplan.local.linz.CsoTotalOverflowComparisionPanel csoTotalOverflowComparisionPanel;
     private de.cismet.tools.gui.RoundedPanel etaScenarioPanel;
@@ -115,28 +135,43 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
     private javax.swing.JLabel lblDescriptionText;
     private javax.swing.JLabel lblEtaScenarios;
     private javax.swing.JLabel lblFotoList;
-    private javax.swing.JLabel lblHeading;
     private javax.swing.JLabel lblHeadingPhotos;
+    private javax.swing.JLabel lblLinksHeading;
     private javax.swing.JLabel lblName;
     private javax.swing.JLabel lblNameText;
+    private javax.swing.JLabel lblNextPage;
+    private javax.swing.JLabel lblOutfall;
     private javax.swing.JLabel lblPicture;
+    private javax.swing.JLabel lblPrevPage;
+    private javax.swing.JLabel lblPropertiesHeading;
+    private javax.swing.JLabel lblStorageUnit;
     private javax.swing.JLabel lblSwmmScenarios;
+    private javax.swing.JLabel lblTitle;
     private javax.swing.JLabel lblVolume;
     private javax.swing.JLabel lblVolumeText;
+    private de.cismet.tools.gui.RoundedPanel linksPanel;
     private javax.swing.JList lstFotos;
     private javax.swing.JPanel panButtons;
+    private javax.swing.JPanel panButtons1;
     private javax.swing.JPanel panCard;
+    private javax.swing.JPanel panFooter;
     private javax.swing.JPanel panFooterLeft;
+    private javax.swing.JPanel panFooterNextPage;
+    private javax.swing.JPanel panFooterPrevPage;
     private javax.swing.JPanel panFooterRight;
     private de.cismet.tools.gui.SemiRoundedPanel panHeadInfo;
     private de.cismet.tools.gui.SemiRoundedPanel panHeadInfo1;
     private de.cismet.tools.gui.SemiRoundedPanel panHeadInfoScenario;
     private de.cismet.tools.gui.SemiRoundedPanel panHeadInfoScenario1;
+    private de.cismet.tools.gui.SemiRoundedPanel panLinksHeadInfo;
+    private javax.swing.JPanel panLinksSpacer;
+    private javax.swing.JPanel panPage1;
+    private javax.swing.JPanel panPage2;
     private javax.swing.JPanel panPreview;
+    private javax.swing.JPanel panTitle;
     private de.cismet.tools.gui.RoundedPanel photosPanel;
     private de.cismet.tools.gui.RoundedPanel propertiesPanel;
     private javax.swing.JScrollPane scpFotoList;
-    private javax.swing.JScrollPane scrollPane;
     private de.cismet.tools.gui.RoundedPanel swmmScenarioPanel;
     // End of variables declaration//GEN-END:variables
 
@@ -146,7 +181,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
      * Creates new form FotosEditor.
      */
     public LinzCsoRenderer() {
-        this(true);
+        this(false);
     }
 
     /**
@@ -212,14 +247,14 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
      * @throws  IOException  DOCUMENT ME!
      */
     private BufferedImage downloadImageFromWebDAV(final String fileName) throws IOException {
-        if (log.isDebugEnabled()) {
-            log.debug("downloadImageFromWebDAV:" + fileName);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("downloadImageFromWebDAV:" + fileName);
         }
         final String encodedFileName = encodeURL(fileName);
         final InputStream iStream = webDavClient.getInputStream(WEB_DAV_DIRECTORY
                         + encodedFileName);
-        if (log.isDebugEnabled()) {
-            log.debug("original: " + fileName + "\nweb dav path: " + WEB_DAV_DIRECTORY + encodedFileName);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("original: " + fileName + "\nweb dav path: " + WEB_DAV_DIRECTORY + encodedFileName);
         }
         try {
             final ImageInputStream iiStream = ImageIO.createImageInputStream(iStream);
@@ -326,7 +361,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
                 return "";
             }
         } catch (final UnsupportedEncodingException e) {
-            log.error("Unsupported encoding.", e);
+            LOG.error("Unsupported encoding.", e);
         }
         return url;
     }
@@ -340,9 +375,20 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
+        panFooter = new javax.swing.JPanel();
+        panButtons1 = new javax.swing.JPanel();
+        panFooterPrevPage = new javax.swing.JPanel();
+        lblPrevPage = new javax.swing.JLabel();
+        btnPrevPage = new javax.swing.JButton();
+        panFooterNextPage = new javax.swing.JPanel();
+        btnNextPage = new javax.swing.JButton();
+        lblNextPage = new javax.swing.JLabel();
+        panTitle = new javax.swing.JPanel();
+        lblTitle = new javax.swing.JLabel();
+        panPage1 = new javax.swing.JPanel();
         propertiesPanel = new de.cismet.tools.gui.RoundedPanel();
         panHeadInfo = new de.cismet.tools.gui.SemiRoundedPanel();
-        lblHeading = new javax.swing.JLabel();
+        lblPropertiesHeading = new javax.swing.JLabel();
         lblName = new javax.swing.JLabel();
         lblNameText = new javax.swing.JLabel();
         lblDescription = new javax.swing.JLabel();
@@ -352,6 +398,12 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
         scpFotoList = new javax.swing.JScrollPane();
         lstFotos = new javax.swing.JList();
         lblFotoList = new javax.swing.JLabel();
+        linksPanel = new de.cismet.tools.gui.RoundedPanel();
+        panLinksHeadInfo = new de.cismet.tools.gui.SemiRoundedPanel();
+        lblLinksHeading = new javax.swing.JLabel();
+        lblOutfall = new javax.swing.JLabel();
+        lblStorageUnit = new javax.swing.JLabel();
+        panLinksSpacer = new javax.swing.JPanel();
         photosPanel = new de.cismet.tools.gui.RoundedPanel();
         panHeadInfo1 = new de.cismet.tools.gui.SemiRoundedPanel();
         lblHeadingPhotos = new javax.swing.JLabel();
@@ -367,6 +419,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
         btnBack = new javax.swing.JButton();
         panFooterRight = new javax.swing.JPanel();
         btnForward = new javax.swing.JButton();
+        panPage2 = new javax.swing.JPanel();
         swmmScenarioPanel = new de.cismet.tools.gui.RoundedPanel();
         panHeadInfoScenario = new de.cismet.tools.gui.SemiRoundedPanel();
         lblSwmmScenarios = new javax.swing.JLabel();
@@ -374,11 +427,117 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
         etaScenarioPanel = new de.cismet.tools.gui.RoundedPanel();
         panHeadInfoScenario1 = new de.cismet.tools.gui.SemiRoundedPanel();
         lblEtaScenarios = new javax.swing.JLabel();
-        scrollPane = new javax.swing.JScrollPane();
         csoTotalOverflowComparisionPanel =
             new de.cismet.cids.custom.sudplan.local.linz.CsoTotalOverflowComparisionPanel();
 
-        setLayout(new java.awt.GridBagLayout());
+        panFooter.setOpaque(false);
+        panFooter.setLayout(new java.awt.BorderLayout());
+
+        panButtons1.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 6, 0));
+        panButtons1.setOpaque(false);
+        panButtons1.setLayout(new java.awt.GridBagLayout());
+
+        panFooterPrevPage.setMaximumSize(new java.awt.Dimension(124, 40));
+        panFooterPrevPage.setMinimumSize(new java.awt.Dimension(124, 40));
+        panFooterPrevPage.setOpaque(false);
+        panFooterPrevPage.setPreferredSize(new java.awt.Dimension(124, 40));
+        panFooterPrevPage.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 10, 5));
+
+        lblPrevPage.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblPrevPage.setForeground(new java.awt.Color(255, 255, 255));
+        lblPrevPage.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblPrevPage.text"));            // NOI18N
+        lblPrevPage.setEnabled(false);
+        lblPrevPage.addMouseListener(new java.awt.event.MouseAdapter() {
+
+                @Override
+                public void mouseClicked(final java.awt.event.MouseEvent evt) {
+                    lblPrevPageMouseClicked(evt);
+                }
+            });
+        panFooterPrevPage.add(lblPrevPage);
+
+        btnPrevPage.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/arrow-left.png"))); // NOI18N
+        btnPrevPage.setBorderPainted(false);
+        btnPrevPage.setContentAreaFilled(false);
+        btnPrevPage.setEnabled(false);
+        btnPrevPage.setFocusPainted(false);
+        btnPrevPage.setMaximumSize(new java.awt.Dimension(30, 30));
+        btnPrevPage.setMinimumSize(new java.awt.Dimension(30, 30));
+        btnPrevPage.setPreferredSize(new java.awt.Dimension(30, 30));
+        btnPrevPage.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnPrevPageActionPerformed(evt);
+                }
+            });
+        panFooterPrevPage.add(btnPrevPage);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        panButtons1.add(panFooterPrevPage, gridBagConstraints);
+
+        panFooterNextPage.setMaximumSize(new java.awt.Dimension(124, 40));
+        panFooterNextPage.setOpaque(false);
+        panFooterNextPage.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 5));
+
+        btnNextPage.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/arrow-right.png"))); // NOI18N
+        btnNextPage.setBorderPainted(false);
+        btnNextPage.setContentAreaFilled(false);
+        btnNextPage.setFocusPainted(false);
+        btnNextPage.setMaximumSize(new java.awt.Dimension(30, 30));
+        btnNextPage.setMinimumSize(new java.awt.Dimension(30, 30));
+        btnNextPage.setPreferredSize(new java.awt.Dimension(30, 30));
+        btnNextPage.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnNextPageActionPerformed(evt);
+                }
+            });
+        panFooterNextPage.add(btnNextPage);
+
+        lblNextPage.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblNextPage.setForeground(new java.awt.Color(255, 255, 255));
+        lblNextPage.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblNextPage.text"));            // NOI18N
+        lblNextPage.addMouseListener(new java.awt.event.MouseAdapter() {
+
+                @Override
+                public void mouseClicked(final java.awt.event.MouseEvent evt) {
+                    lblNextPageMouseClicked(evt);
+                }
+            });
+        panFooterNextPage.add(lblNextPage);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        panButtons1.add(panFooterNextPage, gridBagConstraints);
+
+        panFooter.add(panButtons1, java.awt.BorderLayout.CENTER);
+
+        panTitle.setOpaque(false);
+        panTitle.setLayout(new java.awt.GridBagLayout());
+
+        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18));                                                           // NOI18N
+        lblTitle.setForeground(new java.awt.Color(255, 255, 255));
+        lblTitle.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblTitle.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 15, 10, 10);
+        panTitle.add(lblTitle, gridBagConstraints);
+
+        setLayout(new java.awt.CardLayout());
+
+        panPage1.setOpaque(false);
+        panPage1.setLayout(new java.awt.GridBagLayout());
 
         propertiesPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -387,11 +546,11 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
         panHeadInfo.setPreferredSize(new java.awt.Dimension(109, 24));
         panHeadInfo.setLayout(new java.awt.FlowLayout());
 
-        lblHeading.setForeground(new java.awt.Color(255, 255, 255));
-        lblHeading.setText(org.openide.util.NbBundle.getMessage(
+        lblPropertiesHeading.setForeground(new java.awt.Color(255, 255, 255));
+        lblPropertiesHeading.setText(org.openide.util.NbBundle.getMessage(
                 LinzCsoRenderer.class,
-                "LinzCsoRenderer.lblHeading.text")); // NOI18N
-        panHeadInfo.add(lblHeading);
+                "LinzCsoRenderer.lblPropertiesHeading.text")); // NOI18N
+        panHeadInfo.add(lblPropertiesHeading);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -492,8 +651,66 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(propertiesPanel, gridBagConstraints);
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 10);
+        panPage1.add(propertiesPanel, gridBagConstraints);
+
+        linksPanel.setLayout(new java.awt.GridBagLayout());
+
+        panLinksHeadInfo.setBackground(new java.awt.Color(51, 51, 51));
+        panLinksHeadInfo.setMinimumSize(new java.awt.Dimension(109, 24));
+        panLinksHeadInfo.setPreferredSize(new java.awt.Dimension(109, 24));
+        panLinksHeadInfo.setLayout(new java.awt.FlowLayout());
+
+        lblLinksHeading.setForeground(new java.awt.Color(255, 255, 255));
+        lblLinksHeading.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblLinksHeading.text")); // NOI18N
+        panLinksHeadInfo.add(lblLinksHeading);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.weightx = 1.0;
+        linksPanel.add(panLinksHeadInfo, gridBagConstraints);
+
+        lblOutfall.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblOutfall.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 10);
+        linksPanel.add(lblOutfall, gridBagConstraints);
+
+        lblStorageUnit.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblStorageUnit.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 10);
+        linksPanel.add(lblStorageUnit, gridBagConstraints);
+
+        panLinksSpacer.setOpaque(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        linksPanel.add(panLinksSpacer, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
+        panPage1.add(linksPanel, gridBagConstraints);
 
         photosPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -625,15 +842,22 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         photosPanel.add(panButtons, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 5);
-        add(photosPanel, gridBagConstraints);
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
+        panPage1.add(photosPanel, gridBagConstraints);
+
+        add(panPage1, "CARD1");
+
+        panPage2.setLayout(new java.awt.GridBagLayout());
 
         swmmScenarioPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -669,13 +893,12 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 0.25;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(swmmScenarioPanel, gridBagConstraints);
+        panPage2.add(swmmScenarioPanel, gridBagConstraints);
 
         etaScenarioPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -698,31 +921,24 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
         gridBagConstraints.weightx = 1.0;
         etaScenarioPanel.add(panHeadInfoScenario1, gridBagConstraints);
 
-        scrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-        scrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        scrollPane.setPreferredSize(new java.awt.Dimension(400, 200));
-
         csoTotalOverflowComparisionPanel.setPreferredSize(new java.awt.Dimension(400, 200));
-        csoTotalOverflowComparisionPanel.setLayout(new java.awt.FlowLayout());
-        scrollPane.setViewportView(csoTotalOverflowComparisionPanel);
-
+        csoTotalOverflowComparisionPanel.setLayout(new java.awt.GridLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        etaScenarioPanel.add(scrollPane, gridBagConstraints);
+        etaScenarioPanel.add(csoTotalOverflowComparisionPanel, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 0.75;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(etaScenarioPanel, gridBagConstraints);
+        panPage2.add(etaScenarioPanel, gridBagConstraints);
+
+        add(panPage2, "CARD2");
     } // </editor-fold>//GEN-END:initComponents
 
     /**
@@ -731,8 +947,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
      * @param  wait  DOCUMENT ME!
      */
     private void showWait(final boolean wait) {
-        if (log.isDebugEnabled()) {
-            log.debug("showWait:" + wait);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("showWait:" + wait);
         }
         if (wait) {
             if (!lblBusy.isBusy()) {
@@ -757,7 +973,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
      * @param  tooltip  DOCUMENT ME!
      */
     private void indicateError(final String tooltip) {
-        log.error("indicateError:" + tooltip);
+        LOG.error("indicateError:" + tooltip);
         lblPicture.setIcon(ERROR_ICON);
         lblPicture.setText("Fehler beim Übertragen des Bildes!");
         lblPicture.setToolTipText(tooltip);
@@ -767,25 +983,30 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
      * DOCUMENT ME!
      */
     private void loadFoto() {
-        if (log.isDebugEnabled()) {
-            log.debug("loadFoto: " + lstFotos.getSelectedValue());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("loadFoto: " + lstFotos.getSelectedValue());
         }
-        final String photo = lstFotos.getSelectedValue().toString();
-        boolean cacheHit = false;
-        if (photo != null) {
-            final SoftReference<BufferedImage> cachedImageRef = IMAGE_CACHE.get(photo);
-            if (cachedImageRef != null) {
-                final BufferedImage cachedImage = cachedImageRef.get();
-                if (cachedImage != null) {
-                    cacheHit = true;
-                    image = cachedImage;
-                    showWait(true);
-                    timer.restart();
+
+        if (lstFotos.getSelectedValue() != null) {
+            final String photo = lstFotos.getSelectedValue().toString();
+            boolean cacheHit = false;
+            if (photo != null) {
+                final SoftReference<BufferedImage> cachedImageRef = IMAGE_CACHE.get(photo);
+                if (cachedImageRef != null) {
+                    final BufferedImage cachedImage = cachedImageRef.get();
+                    if (cachedImage != null) {
+                        cacheHit = true;
+                        image = cachedImage;
+                        showWait(true);
+                        timer.restart();
+                    }
+                }
+                if (!cacheHit) {
+                    CismetThreadPool.execute(new LoadSelectedImageWorker(photo));
                 }
             }
-            if (!cacheHit) {
-                CismetThreadPool.execute(new LoadSelectedImageWorker(photo));
-            }
+        } else {
+            LOG.warn("cannot load photo: no photo selected!");
         }
     }
 
@@ -806,8 +1027,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
      * DOCUMENT ME!
      */
     public void defineButtonStatus() {
-        if (log.isDebugEnabled()) {
-            log.debug("defineButtonStatus");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("defineButtonStatus");
         }
         final int selectedIdx = lstFotos.getSelectedIndex();
         btnBack.setEnabled(selectedIdx > 0);
@@ -831,6 +1052,55 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
     private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnForwardActionPerformed
         lstFotos.setSelectedIndex(lstFotos.getSelectedIndex() + 1);
     }                                                                              //GEN-LAST:event_btnForwardActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void lblPrevPageMouseClicked(final java.awt.event.MouseEvent evt) //GEN-FIRST:event_lblPrevPageMouseClicked
+    {                                                                         //GEN-HEADEREND:event_lblPrevPageMouseClicked
+        btnPrevPageActionPerformed(null);
+    }                                                                         //GEN-LAST:event_lblPrevPageMouseClicked
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_btnPrevPageActionPerformed
+    {                                                                             //GEN-HEADEREND:event_btnPrevPageActionPerformed
+        ((CardLayout)this.getLayout()).show(this, CARD_1);
+        btnPrevPage.setEnabled(false);
+        btnNextPage.setEnabled(true);
+        lblPrevPage.setEnabled(false);
+        lblNextPage.setEnabled(true);
+    }                                                                             //GEN-LAST:event_btnPrevPageActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_btnNextPageActionPerformed
+    {                                                                             //GEN-HEADEREND:event_btnNextPageActionPerformed
+
+        ((CardLayout)this.getLayout()).show(this, CARD_2);
+        btnPrevPage.setEnabled(true);
+        btnNextPage.setEnabled(false);
+        lblPrevPage.setEnabled(true);
+        lblNextPage.setEnabled(false);
+    } //GEN-LAST:event_btnNextPageActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void lblNextPageMouseClicked(final java.awt.event.MouseEvent evt) //GEN-FIRST:event_lblNextPageMouseClicked
+    {                                                                         //GEN-HEADEREND:event_lblNextPageMouseClicked
+        btnNextPageActionPerformed(null);
+    }                                                                         //GEN-LAST:event_lblNextPageMouseClicked
 
     /**
      * DOCUMENT ME!
@@ -873,7 +1143,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
                     cardLayout.show(panCard, "preview");
                 }
             } else {
-                log.warn("CSO has no photos assigned");
+                LOG.warn("CSO has no photos assigned");
                 lstFotos.setModel(new DefaultListModel());
             }
 
@@ -884,19 +1154,116 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
             }
 
             defineButtonStatus();
+
+            final GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
+            gridBagConstraints.gridx = 1;
+            gridBagConstraints.gridy = 1;
+            gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+            gridBagConstraints.weightx = 1.0;
+            gridBagConstraints.weighty = 0.0;
+            gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
+            gridBagConstraints.fill = GridBagConstraints.NONE;
+
+            final Object outfall = cidsBean.getProperty("outfall");          // NOI18N
+            final Object storageUnit = cidsBean.getProperty("storage_unit"); // NOI18N
+            final HashMap beansMap = new HashMap(2);
+            final LinksListener linksListener = new LinksListener(beansMap);
+            final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
+
+            if (outfall != null) {
+                final CidsBean linkBean = (CidsBean)outfall;
+                final String key = "OUTFALL::" + linkBean.getProperty("id");
+                final JXHyperlink hyperLink = new JXHyperlink();
+                hyperLink.setText((String)linkBean.getProperty("name")); // NOI18N
+                hyperLink.setActionCommand(key);
+                hyperLink.addActionListener(WeakListeners.create(
+                        ActionListener.class,
+                        linksListener,
+                        hyperLink));
+
+                this.linksPanel.add(hyperLink, gridBagConstraints);
+            }
+
+            if (storageUnit != null) {
+                final CidsBean linkBean = (CidsBean)storageUnit;
+                final String key = "STORAGE_UNIT::" + linkBean.getProperty("id");
+                final JXHyperlink hyperLink = new JXHyperlink();
+                hyperLink.setText((String)linkBean.getProperty("name")); // NOI18N
+                hyperLink.setActionCommand(key);
+                hyperLink.addActionListener(WeakListeners.create(
+                        ActionListener.class,
+                        linksListener,
+                        hyperLink));
+
+                gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 5);
+                gridBagConstraints.gridy++;
+                this.linksPanel.add(hyperLink, gridBagConstraints);
+            }
         }
     }
 
     @Override
     public JComponent getTitleComponent() {
-        return titleComponent;
+        return panTitle;
     }
 
     @Override
     public void setTitle(final String title) {
         super.setTitle(title);
+        this.lblTitle.setText(title);
+        // titleComponent.setTitle(title);
+    }
 
-        titleComponent.setTitle(title);
+    @Override
+    public Border getTitleBorder() {
+        return null;
+    }
+
+    @Override
+    public Border getFooterBorder() {
+        return null;
+    }
+
+    @Override
+    public Border getCenterrBorder() {
+        return null;
+    }
+
+    @Override
+    public JComponent getFooterComponent() {
+        return panFooter;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  DOCUMENT ME!
+     */
+    public static void main(final String[] args) {
+        try {
+            BasicConfigurator.configure();
+            final CidsBean cso = DevelopmentTools.createCidsBeanFromRMIConnectionOnLocalhost(
+                    "SUDPLAN",
+                    "Administratoren",
+                    "admin",
+                    "cismetz12",
+                    "linz_cso",
+                    6);
+
+            final LinzCsoRenderer linzCsoRenderer = new LinzCsoRenderer();
+            linzCsoRenderer.setCidsBean(cso);
+            // linzCsoRenderer.init();
+            linzCsoRenderer.setPreferredSize(new java.awt.Dimension(800, 600));
+            final JFrame frame = new JFrame("LinzCsoRenderer");
+            frame.getContentPane().add(linzCsoRenderer, BorderLayout.CENTER);
+            frame.getContentPane().add(linzCsoRenderer.getTitleComponent(), BorderLayout.NORTH);
+            frame.getContentPane().add(linzCsoRenderer.getFooterComponent(), BorderLayout.SOUTH);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.pack();
+            frame.setVisible(true);
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -919,7 +1286,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
                 lblPicture.setText("Wird neu skaliert...");
                 lstFotos.setEnabled(false);
             }
-//            log.fatal("RESIZE Image!", new Exception());
+//            LOG.fatal("RESIZE Image!", new Exception());
         }
 
         //~ Methods ------------------------------------------------------------
@@ -949,9 +1316,9 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
                     lblPicture.setText("");
                     lblPicture.setToolTipText(null);
                 } catch (InterruptedException ex) {
-                    log.warn(ex, ex);
+                    LOG.warn(ex, ex);
                 } catch (ExecutionException ex) {
-                    log.error(ex, ex);
+                    LOG.error(ex, ex);
                     lblPicture.setText("Fehler beim Skalieren!");
                 } finally {
                     showWait(false);
@@ -1011,10 +1378,10 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
                 }
             } catch (InterruptedException ex) {
                 image = null;
-                log.warn(ex, ex);
+                LOG.warn(ex, ex);
             } catch (ExecutionException ex) {
                 image = null;
-                log.error(ex, ex);
+                LOG.error(ex, ex);
                 String causeMessage = "";
                 final Throwable cause = ex.getCause();
                 if (cause != null) {
@@ -1025,6 +1392,42 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements TitleCo
                 if (image == null) {
                     showWait(false);
                 }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class LinksListener implements ActionListener {
+
+        //~ Instance fields ----------------------------------------------------
+
+        final HashMap<String, CidsBean> beansMap;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new ScenarioListener object.
+         *
+         * @param  beansMap  DOCUMENT ME!
+         */
+        public LinksListener(final HashMap<String, CidsBean> beansMap) {
+            this.beansMap = beansMap;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            if ((beansMap != null) && beansMap.containsKey(e.getActionCommand())) {
+                ComponentRegistry.getRegistry()
+                        .getDescriptionPane()
+                        .gotoMetaObject(beansMap.get(e.getActionCommand()).getMetaObject(), null);
+            } else {
+                LOG.warn("beans map does not contain cids bean '" + e.getActionCommand() + "'");
             }
         }
     }

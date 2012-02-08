@@ -38,6 +38,7 @@ import java.util.Collection;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 
 import de.cismet.cids.client.tools.DevelopmentTools;
 
@@ -127,23 +128,24 @@ public class CsoTotalOverflowComparisionPanel extends javax.swing.JPanel {
                 );
 
         final MultiplePiePlot plot = (MultiplePiePlot)chart.getPlot();
-        // plot.setBackgroundAlpha(1.0f);
-        plot.setBackgroundPaint(new Color(228, 228, 197));
-
+        plot.setBackgroundAlpha(1.0f);
+        // plot.setBackgroundPaint(new Color(228, 228, 197));
         final JFreeChart subchart = plot.getPieChart();
-        final PiePlot p = (PiePlot)subchart.getPlot();
-        p.setExplodePercent(dataset.getColumnKey(1).toString(), 0.25);
-        p.setSectionPaint(dataset.getColumnKey(0).toString(), new Color(125, 26, 12));
-        p.setSectionPaint(dataset.getColumnKey(1).toString(), new Color(168, 107, 76));
-        p.setLabelGenerator(new StandardPieSectionLabelGenerator(
+
+        final PiePlot subChartsPlot = (PiePlot)subchart.getPlot();
+        subChartsPlot.setExplodePercent(dataset.getColumnKey(1).toString(), 0.25);
+        subChartsPlot.setSectionPaint(dataset.getColumnKey(0).toString(), new Color(125, 26, 12));
+        subChartsPlot.setSectionPaint(dataset.getColumnKey(1).toString(), new Color(168, 107, 76));
+        subChartsPlot.setLabelGenerator(new StandardPieSectionLabelGenerator(
                 "{1}",
                 new DecimalFormat("0.0"),
                 new DecimalFormat("0.0")));
-        p.setBackgroundPaint(new Color(228, 228, 197));
+        subChartsPlot.setBackgroundPaint(new Color(228, 228, 197));
 
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setOpaque(false);
         chartPanel.setBackground(new Color(255, 255, 255, 0));
+        chartPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         this.add(chartPanel, BorderLayout.CENTER);
     }
 

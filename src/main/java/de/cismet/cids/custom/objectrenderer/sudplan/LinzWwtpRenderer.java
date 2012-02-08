@@ -9,17 +9,35 @@ package de.cismet.cids.custom.objectrenderer.sudplan;
 
 import Sirius.navigator.ui.RequestsFullSizeComponent;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.LayoutManager;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.image.BufferedImage;
 
+import java.util.concurrent.ExecutionException;
+
+import javax.imageio.ImageIO;
+
+import javax.swing.*;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 
 import de.cismet.cids.client.tools.DevelopmentTools;
 
+import de.cismet.cids.custom.sudplan.ImageUtil;
+
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
+
+import de.cismet.tools.CismetThreadPool;
 
 import de.cismet.tools.gui.BorderProvider;
 import de.cismet.tools.gui.FooterComponentProvider;
@@ -39,21 +57,29 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
 
     //~ Static fields/initializers ---------------------------------------------
 
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(LinzWwtpRenderer.class);
     private static final String CARD_1 = "CARD1";
     private static final String CARD_2 = "CARD2";
 
     //~ Instance fields --------------------------------------------------------
 
-    CardLayout cardLayout = null;
-    CidsBean cidsBean = null;
-    String title;
+    private CardLayout cardLayout = null;
+    private CidsBean cidsBean = null;
+    private String title;
+    private final Timer timer;
+    private LinzWwtpRenderer.ImageResizeWorker currentResizeWorker;
+    private boolean firstPageShowing = true;
+    private transient BufferedImage firstPageImage;
+    private transient BufferedImage secondPageImage;
+
+    private boolean resizeListenerEnabled = true;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBack;
     private javax.swing.JButton btnForward;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel lblBack;
     private javax.swing.JLabel lblForw;
+    private javax.swing.JLabel lblPage1;
+    private javax.swing.JLabel lblPage2;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JPanel panButtons;
     private javax.swing.JPanel panFooter;
@@ -76,6 +102,39 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
             cardLayout = (CardLayout)layoutManager;
             cardLayout.show(this, CARD_1);
         }
+
+        try {
+            firstPageImage = ImageIO.read(getClass().getResource(
+                        "/de/cismet/cids/custom/sudplan/local/linz/wwtp1.png"));
+            secondPageImage = ImageIO.read(getClass().getResource(
+                        "/de/cismet/cids/custom/sudplan/local/linz/wwtp2.png"));
+        } catch (Throwable t) {
+            firstPageImage = null;
+            LOG.error(t);
+        }
+
+        timer = new Timer(300, new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        if (resizeListenerEnabled) {
+                            if (currentResizeWorker != null) {
+                                currentResizeWorker.cancel(true);
+                            }
+                            currentResizeWorker = new LinzWwtpRenderer.ImageResizeWorker();
+                            CismetThreadPool.execute(currentResizeWorker);
+                        }
+                    }
+                });
+        timer.setRepeats(false);
+
+        this.addComponentListener(new ComponentAdapter() {
+
+                @Override
+                public void componentResized(final ComponentEvent e) {
+                    timer.restart();
+                }
+            });
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -100,9 +159,9 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
         panTitle = new javax.swing.JPanel();
         lblTitle = new javax.swing.JLabel();
         panPage1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        lblPage1 = new javax.swing.JLabel();
         panPage2 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
+        lblPage2 = new javax.swing.JLabel();
 
         panFooter.setOpaque(false);
         panFooter.setLayout(new java.awt.BorderLayout());
@@ -200,30 +259,39 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
                 LinzWwtpRenderer.class,
                 "LinzWwtpRenderer.lblTitle.text"));           // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(10, 15, 10, 5);
         panTitle.add(lblTitle, gridBagConstraints);
 
+        setBackground(new java.awt.Color(0, 51, 204));
         setLayout(new java.awt.CardLayout());
 
-        panPage1.setOpaque(false);
-        panPage1.setLayout(new java.awt.BorderLayout());
+        panPage1.setBackground(new java.awt.Color(102, 255, 102));
+        panPage1.setLayout(new java.awt.GridLayout(1, 1));
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/wwtp1.png")));                        // NOI18N
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(LinzWwtpRenderer.class, "LinzWwtpRenderer.jLabel1.text")); // NOI18N
-        panPage1.add(jLabel1, java.awt.BorderLayout.CENTER);
+        lblPage1.setBackground(new java.awt.Color(204, 0, 204));
+        lblPage1.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/wwtp1.png"))); // NOI18N
+        lblPage1.setText(org.openide.util.NbBundle.getMessage(
+                LinzWwtpRenderer.class,
+                "LinzWwtpRenderer.lblPage1.text"));                                              // NOI18N
+        lblPage1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        lblPage1.setIconTextGap(0);
+        lblPage1.setOpaque(true);
+        panPage1.add(lblPage1);
 
         add(panPage1, "CARD1");
 
         panPage2.setLayout(new java.awt.BorderLayout());
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/wwtp2.png")));                        // NOI18N
-        jLabel2.setText(org.openide.util.NbBundle.getMessage(LinzWwtpRenderer.class, "LinzWwtpRenderer.jLabel2.text")); // NOI18N
-        panPage2.add(jLabel2, java.awt.BorderLayout.CENTER);
+        lblPage2.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/wwtp2.png"))); // NOI18N
+        lblPage2.setText(org.openide.util.NbBundle.getMessage(
+                LinzWwtpRenderer.class,
+                "LinzWwtpRenderer.lblPage2.text"));                                              // NOI18N
+        panPage2.add(lblPage2, java.awt.BorderLayout.CENTER);
 
         add(panPage2, "CARD2");
     } // </editor-fold>//GEN-END:initComponents
@@ -244,6 +312,8 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
      */
     private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnBackActionPerformed
         cardLayout.show(this, CARD_1);
+        firstPageShowing = true;
+        timer.restart();
         btnBack.setEnabled(false);
         btnForward.setEnabled(true);
         lblBack.setEnabled(false);
@@ -257,6 +327,8 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
      */
     private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnForwardActionPerformed
         cardLayout.show(this, CARD_2);
+        firstPageShowing = false;
+        timer.restart();
         btnBack.setEnabled(true);
         btnForward.setEnabled(false);
         lblBack.setEnabled(true);
@@ -299,6 +371,9 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
 
     @Override
     public void dispose() {
+        if (currentResizeWorker != null) {
+            currentResizeWorker.cancel(true);
+        }
     }
 
     @Override
@@ -330,6 +405,73 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
      * @throws  Exception  DOCUMENT ME!
      */
     public static void main(final String[] args) throws Exception {
-        DevelopmentTools.showTestFrame(new LinzWwtpRenderer(), 1024, 768);
+        // DevelopmentTools.showTestFrame(new LinzWwtpRenderer(), 1024, 768);
+        final LinzWwtpRenderer linzWwtpRenderer = new LinzWwtpRenderer();
+        linzWwtpRenderer.setPreferredSize(new java.awt.Dimension(1024, 768));
+        final JFrame frame = new JFrame("LinzWwtpRenderer");
+        frame.getContentPane().add(linzWwtpRenderer, BorderLayout.CENTER);
+        frame.getContentPane().add(linzWwtpRenderer.getTitleComponent(), BorderLayout.NORTH);
+        frame.getContentPane().add(linzWwtpRenderer.getFooterComponent(), BorderLayout.SOUTH);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    final class ImageResizeWorker extends SwingWorker<ImageIcon, Void> {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new ImageResizeWorker object.
+         */
+        public ImageResizeWorker() {
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        protected ImageIcon doInBackground() throws Exception {
+            ImageIcon result = null;
+            if (firstPageShowing) {
+                result = new ImageIcon(ImageUtil.adjustScale(firstPageImage, panPage1, 0, 0));
+            } else {
+                result = new ImageIcon(ImageUtil.adjustScale(secondPageImage, panPage2, 0, 0));
+            }
+
+            return result;
+        }
+
+        @Override
+        protected void done() {
+            if (!isCancelled()) {
+                try {
+                    resizeListenerEnabled = false;
+                    final ImageIcon result = get();
+
+                    if (firstPageShowing) {
+                        lblPage1.setIcon(result);
+                    } else {
+                        lblPage2.setIcon(result);
+                    }
+                } catch (InterruptedException ex) {
+                    LOG.warn(ex, ex);
+                } catch (ExecutionException ex) {
+                    LOG.error(ex, ex);
+                    lblPage1.setText("Fehler beim Skalieren!");
+                } finally {
+                    if (currentResizeWorker == this) {
+                        currentResizeWorker = null;
+                    }
+                    resizeListenerEnabled = true;
+                }
+            }
+        }
     }
 }

@@ -42,6 +42,8 @@ import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 
 import de.cismet.cids.dynamics.CidsBean;
 
+import de.cismet.cids.editors.converters.SqlTimestampToUtilDateConverter;
+
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 
 /**
@@ -182,7 +184,15 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
                 try {
                     final CidsBean swmmModelInput = this.createSwmmModelInput(wizard);
                     CidsBean swmmModelRun = this.createSwmmModelRun(wizard, swmmModelInput);
+
+                    final SqlTimestampToUtilDateConverter dateConverter = new SqlTimestampToUtilDateConverter();
+                    swmmModelRun.setProperty(
+                        "started", // NOI18N
+                        dateConverter.convertReverse(GregorianCalendar.getInstance().getTime()));
+
                     swmmModelRun = swmmModelRun.persist();
+
+                    // .........................................................
 
                     final CidsBean etaModelInput = this.createEtaModelInput(
                             wizard,

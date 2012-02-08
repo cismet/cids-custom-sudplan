@@ -130,41 +130,41 @@ public class EfficiencyRatesComparisionPanel extends javax.swing.JPanel {
         renderer.setItemMargin(0.0);
 
         // set up gradient paints for series...
-        final GradientPaint gp0 = new GradientPaint(
-                0.0f,
-                0.0f,
-                new Color(27, 103, 107),
-                0.0f,
-                0.0f,
-                new Color(81, 149, 72));
-
-        final GradientPaint gp1 = new GradientPaint(
-                0.0f,
-                0.0f,
-                new Color(11, 16, 140),
-                0.0f,
-                0.0f,
-                new Color(14, 78, 173));
-
-        final GradientPaint gp2 = new GradientPaint(
-                0.0f,
-                0.0f,
-                new Color(136, 196, 37),
-                0.0f,
-                0.0f,
-                new Color(190, 242, 2));
-
-        final GradientPaint gp3 = new GradientPaint(
-                0.0f,
-                0.0f,
-                new Color(14, 78, 173),
-                0.0f,
-                0.0f,
-                new Color(16, 127, 201));
-        renderer.setSeriesPaint(0, gp0);
-        renderer.setSeriesPaint(1, gp1);
-        renderer.setSeriesPaint(2, gp2);
-        renderer.setSeriesPaint(3, gp3);
+// final GradientPaint gp0 = new GradientPaint(
+// 0.0f,
+// 0.0f,
+// new Color(27, 103, 107),
+// 0.0f,
+// 0.0f,
+// new Color(81, 149, 72));
+//
+// final GradientPaint gp1 = new GradientPaint(
+// 0.0f,
+// 0.0f,
+// new Color(11, 16, 140),
+// 0.0f,
+// 0.0f,
+// new Color(14, 78, 173));
+//
+// final GradientPaint gp2 = new GradientPaint(
+// 0.0f,
+// 0.0f,
+// new Color(136, 196, 37),
+// 0.0f,
+// 0.0f,
+// new Color(190, 242, 2));
+//
+// final GradientPaint gp3 = new GradientPaint(
+// 0.0f,
+// 0.0f,
+// new Color(14, 78, 173),
+// 0.0f,
+// 0.0f,
+// new Color(16, 127, 201));
+        renderer.setSeriesPaint(0, new Color(27, 103, 107));
+        renderer.setSeriesPaint(1, new Color(11, 16, 140));
+        renderer.setSeriesPaint(2, new Color(136, 196, 37));
+        renderer.setSeriesPaint(3, new Color(14, 78, 173));
 
         final CategoryItemRenderer categoryRenderer = (CategoryItemRenderer)plot.getRenderer();
         final CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(
