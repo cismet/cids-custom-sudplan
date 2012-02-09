@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 
+import java.net.URL;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -42,6 +44,7 @@ import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.SMSUtils.Model;
 import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
+import de.cismet.cids.custom.sudplan.Variable;
 import de.cismet.cids.custom.sudplan.converter.TimeSeriesSerializer;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -100,11 +103,26 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
             final String rfObjName = (String)rfBean.getProperty("name"); // NOI18N
 
             if (SMSUtils.TABLENAME_TIMESERIES.equals(input.getRainfallObjectTableName())) {
-                final TimeseriesRetrieverConfig cfg = TimeseriesRetrieverConfig.fromUrl((String)rfBean.getProperty(
-                            "uri"));                                                                          // NOI18N
-                final String cfgUrl = cfg.toUrl().replace(rfObjName, rfObjName + "_" + watchable.getRunId()); // NOI18N
-                dsBean.setProperty("uri", cfgUrl);
-                dsBean.setProperty("station", rfBean.getProperty("station"));                                 // NOI18N
+                final String urlString = watchable.getOrigResolutionResult().toExternalForm();
+                final String baseurl = urlString.substring(0, urlString.lastIndexOf('/'));
+                final String resultFullName = urlString.substring(urlString.lastIndexOf('/') + 1);
+                final String resultName = resultFullName.substring(0, resultFullName.lastIndexOf('_'));
+                final String resultRes = resultFullName.substring(resultFullName.lastIndexOf('_') + 1);
+                final TimeseriesRetrieverConfig config = new TimeseriesRetrieverConfig(
+                        TimeseriesRetrieverConfig.PROTOCOL_DAV,
+                        null,
+                        new URL(baseurl),
+                        "urn:ogc:object:"
+                                + resultName
+                                + ":prec:"
+                                + resultRes, // NOI18N
+                        null,
+                        Variable.PRECIPITATION.getPropertyKey(),
+                        resultFullName,
+                        null,
+                        null);
+                dsBean.setProperty("uri", config.toUrl());
+                dsBean.setProperty("station", rfBean.getProperty("station")); // NOI18N
             } else {
                 final ObjectMapper mapper = new ObjectMapper();
                 final StringWriter sw = new StringWriter();
