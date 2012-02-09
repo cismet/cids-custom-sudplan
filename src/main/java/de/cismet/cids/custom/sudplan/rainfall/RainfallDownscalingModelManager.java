@@ -112,16 +112,16 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
                         TimeseriesRetrieverConfig.PROTOCOL_DAV,
                         null,
                         new URL(baseurl),
-                        "urn:ogc:object:"
+                        "urn:ogc:object:"  // NOI18N
                                 + resultName
-                                + ":prec:"
-                                + resultRes, // NOI18N
+                                + ":prec:" // NOI18N
+                                + resultRes,
                         null,
                         Variable.PRECIPITATION.getPropertyKey(),
                         resultFullName,
                         null,
                         null);
-                dsBean.setProperty("uri", config.toUrl());
+                dsBean.setProperty("uri", config.toUrl()); // NOI18N
                 dsBean.setProperty("station", rfBean.getProperty("station")); // NOI18N
             } else {
                 final ObjectMapper mapper = new ObjectMapper();
@@ -129,7 +129,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
                 mapper.writeValue(sw, watchable.getResultCurve());
 
-                dsBean.setProperty("uri", sw.toString());
+                dsBean.setProperty("uri", sw.toString());               // NOI18N
                 dsBean.setProperty("geom", rfBean.getProperty("geom")); // NOI18N
                 dsBean.setProperty("year", input.getTargetYear());
             }
