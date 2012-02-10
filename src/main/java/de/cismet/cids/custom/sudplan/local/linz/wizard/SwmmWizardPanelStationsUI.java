@@ -55,6 +55,7 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
     private javax.swing.JScrollPane jScrollPaneStations;
     private javax.swing.JPanel stationsPanel;
     private javax.swing.JTable tblStations;
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -88,8 +89,8 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
     void init() {
         this.stationsTableModel.setSelectedStations(model.getStationsIds());
 
-        // this.bindingGroup.unbind();
-        // this.bindingGroup.bind();
+        this.bindingGroup.unbind();
+        this.bindingGroup.bind();
     }
 
     /**
@@ -155,6 +156,7 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
+        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         stationsPanel = new javax.swing.JPanel();
         jScrollPaneStations = new javax.swing.JScrollPane();
@@ -207,6 +209,17 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
             org.openide.util.NbBundle.getMessage(
                 SwmmWizardPanelStationsUI.class,
                 "SwmmWizardPanelStationsUI.chbForecast.text")); // NOI18N
+
+        final org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${model.swmmInput.forecast}"),
+                chbForecast,
+                org.jdesktop.beansbinding.BeanProperty.create("selected"));
+        binding.setSourceNullValue(false);
+        binding.setSourceUnreadableValue(false);
+        bindingGroup.addBinding(binding);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -222,6 +235,8 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 10, 10, 10);
         add(forecastPanel, gridBagConstraints);
+
+        bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
 
     /**
