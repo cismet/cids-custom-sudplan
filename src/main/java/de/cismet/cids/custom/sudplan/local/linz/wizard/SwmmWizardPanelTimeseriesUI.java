@@ -163,7 +163,7 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
         final MetaObject[] metaObjects;
         try {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("executinh SQL statement: \n" + sb);
+                LOG.debug(sb);
             }
             metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
         } catch (final ConnectionException ex) {
