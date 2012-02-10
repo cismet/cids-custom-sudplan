@@ -111,63 +111,56 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
             LOG.debug("isValid called");
         }
         boolean valid = true;
-        try {
-            if (this.swmmInput.getSwmmProject() == -1) {
-                // FIXME: i18n
-                wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
-                    "Bitte wählen Sie ein SWMM Project aus");
-                valid = false;
-            } else if ((this.swmmInput.getInpFile() == null) || this.swmmInput.getInpFile().isEmpty()) {
-                Object inpFile = this.getSwmmProject().getProperty("inp_file_name");
-                if (inpFile != null) {
-                    swmmInput.setInpFile(inpFile.toString());
-                    LOG.warn("SWMM INP file not set, setting to " + swmmInput.getInpFile());
-                } else {
-                    inpFile = this.getSwmmProject().getProperty("title");
-                    LOG.warn("INP File not set in swmm model configuration, setting automatically to '"
-                                + inpFile + "'");
-                }
 
-                // dieser beansbinding und property change mist funktioniert einfach nicht
-                // warum sonst wird jetzt das textfield im UI nicht aktualisiert???!!!!
-                this.swmmInput.setInpFile(inpFile.toString());
-
-                wizard.putProperty(
-                    WizardDescriptor.PROP_INFO_MESSAGE,
-                    "<html>Da keine INP Datei angegeben wurde, "
-                            + "wurde der Name automatich auf '"
-                            + inpFile
-                            + "' festgelegt.</html>");
-            } else if ((this.swmmInput.getStartDate() == null) || this.swmmInput.getStartDate().isEmpty()) {
-                wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
-                    "Bitte geben Sie ein Startdatum an");
-                valid = false;
-            } else if ((this.swmmInput.getEndDate() == null) || this.swmmInput.getEndDate().isEmpty()) {
-                wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
-                    "Bitte geben Sie ein Enddatum an");
-                valid = false;
-            } else if (this.swmmInput.getStartDateDate().getTime() >= this.swmmInput.getEndDateDate().getTime()) {
-                wizard.putProperty(
-                    WizardDescriptor.PROP_WARNING_MESSAGE,
-                    "Das Startdatum muss vor dem Enddatum liegen");
-                valid = false;
-            } else if ((this.swmmInput.getEndDateDate().getTime()
-                            - this.swmmInput.getStartDateDate().getTime()) < 200) {
-                wizard.putProperty(
-                    WizardDescriptor.PROP_INFO_MESSAGE,
-                    "Bitte wählen sie einen Zitrum von mindestens 6.5 Monaten aus");
-                valid = false;
+        if (this.swmmInput.getSwmmProject() == -1) {
+            // FIXME: i18n
+            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                "Bitte wählen Sie ein SWMM Project aus");
+            valid = false;
+        } else if ((this.swmmInput.getInpFile() == null) || this.swmmInput.getInpFile().isEmpty()) {
+            Object inpFile = this.getSwmmProject().getProperty("inp_file_name");
+            if (inpFile != null) {
+                swmmInput.setInpFile(inpFile.toString());
+                LOG.warn("SWMM INP file not set, setting to " + swmmInput.getInpFile());
             } else {
-                wizard.putProperty(
-                    WizardDescriptor.PROP_INFO_MESSAGE,
-                    null);
+                inpFile = this.getSwmmProject().getProperty("title");
+                LOG.warn("INP File not set in swmm model configuration, setting automatically to '"
+                            + inpFile + "'");
             }
-        } catch (ParseException ex) {
-            LOG.warn("invalid date format", ex);
+
+            // dieser beansbinding und property change mist funktioniert einfach nicht
+            // warum sonst wird jetzt das textfield im UI nicht aktualisiert???!!!!
+            this.swmmInput.setInpFile(inpFile.toString());
+
+            wizard.putProperty(
+                WizardDescriptor.PROP_INFO_MESSAGE,
+                "<html>Da keine INP Datei angegeben wurde, "
+                        + "wurde der Name automatich auf '"
+                        + inpFile
+                        + "' festgelegt.</html>");
+        } else if ((this.swmmInput.getStartDate() == null)) {
+            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                "Bitte geben Sie ein Startdatum an");
+            valid = false;
+        } else if ((this.swmmInput.getEndDate() == null)) {
+            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                "Bitte geben Sie ein Enddatum an");
+            valid = false;
+        } else if (this.swmmInput.getStartDate().getTime() >= this.swmmInput.getEndDate().getTime()) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Das eingegebenen Datumsformat wird nicht unterstützt");
+                "Das Startdatum muss vor dem Enddatum liegen");
             valid = false;
+        } else if ((this.swmmInput.getEndDate().getTime()
+                        - this.swmmInput.getStartDate().getTime()) < 200) {
+            wizard.putProperty(
+                WizardDescriptor.PROP_INFO_MESSAGE,
+                "Bitte wählen sie einen Zeitraum von mindestens 6.5 Monaten aus");
+            valid = false;
+        } else {
+            wizard.putProperty(
+                WizardDescriptor.PROP_INFO_MESSAGE,
+                null);
         }
 
         return valid;

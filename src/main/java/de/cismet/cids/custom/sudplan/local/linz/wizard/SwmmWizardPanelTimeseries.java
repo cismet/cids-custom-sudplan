@@ -161,11 +161,12 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
                 "Bitte wählen Sie mindestens eine Regenzeitreihe aus");
             valid = false;
             // FIXME: compare the intervals also here, not only in readSettings!
-        } else if (!validTimeIntervall) {
-            wizard.putProperty(
-                WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Der Modellzeitrum wird nicht von den ausgewählten Zeitreihen abgedeckt");
-            valid = false;
+            // FIXME: downscaled timeseries has not interval information !!???!!!
+// } else if (!validTimeIntervall) {
+// wizard.putProperty(
+// WizardDescriptor.PROP_WARNING_MESSAGE,
+// "Der Modellzeitrum wird nicht von den ausgewählten Zeitreihen abgedeckt");
+// valid = false;
         } else {
             // TODO: check time intervall!
 

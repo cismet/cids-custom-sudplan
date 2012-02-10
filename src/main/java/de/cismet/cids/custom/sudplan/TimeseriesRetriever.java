@@ -152,8 +152,6 @@ public final class TimeseriesRetriever {
                  * the right converter) in other components.
                  */
                 this.converter = TimeSeriesSerializer.getInstance();
-                LOG.info("Specified Converter " + converter.getClass().getName()
-                            + " is ignored and replaced by the TimeSeriesSerializer converter");
             } else {
                 this.converter = converter;
             }

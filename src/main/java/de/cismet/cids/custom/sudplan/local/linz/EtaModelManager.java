@@ -23,6 +23,8 @@ import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import org.openide.util.Exceptions;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,6 +37,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import de.cismet.cids.custom.sudplan.*;
 import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
@@ -64,7 +68,6 @@ public class EtaModelManager extends AbstractAsyncModelManager {
 
     private final String modelSosEndpoint = "http://sudplan.ait.ac.at:8081/";
     private SudplanSPSHelper.Task spsTask;
-
     private final SwmmResultGeoserverUpdater swmmResultGeoserverUpdater = new SwmmResultGeoserverUpdater();
 
     //~ Methods ----------------------------------------------------------------
@@ -308,19 +311,42 @@ public class EtaModelManager extends AbstractAsyncModelManager {
         LOG.info("executing run for model " + swmmInput.getInpFile());
 
         assert !swmmInput.getTimeseriesURLs().isEmpty() : "improperly configures swmm run, no timiseries configured";
-        final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromTSTBUrl(swmmInput.getTimeseriesURLs(0));
+        final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(swmmInput.getTimeseriesURLs(0));
         LOG.info("STEP 1: retrieving timeseries from " + swmmInput.getTimeseriesURLs(0));
 
-        LOG.info("List available sensor data (In the moment only historical rain data are available)");
-        final SudplanSOSHelper sensorSOSHelper = new SudplanSOSHelper(config.getLocation().toString());
+        TimeSeries rainTS;
+        if (config.getProtocol().equals(TimeseriesRetrieverConfig.PROTOCOL_TSTB)) {
+            LOG.info("downloading timeseries from SOS: " + config);
+            final SudplanSOSHelper sensorSOSHelper = new SudplanSOSHelper(config.getLocation().toString());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Download timeseries data for offering '" + config.getOffering()
+                            + "', time intervall '" + config.getInterval() + "'");
+            }
 
-        LOG.info("Download timeseries data for offering '" + config.getOffering()
-                    + "', time intervall '" + config.getInterval() + "'");
-
-        final TimeSeries rainTS = sensorSOSHelper.getTimeseries(config.getOffering(), config.getInterval());
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Downloaded {} values" + rainTS.getTimeStamps().size());
+            rainTS = sensorSOSHelper.getTimeseries(config.getOffering(), config.getInterval());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Downloaded {} values" + rainTS.getTimeStamps().size());
+            }
+        } else if (config.getProtocol().equals(TimeseriesRetrieverConfig.PROTOCOL_DAV)) {
+            LOG.info("downloading timeseries from WEBDAV: " + config);
+            try {
+                final Future<TimeSeries> rainTsFuture = TimeseriesRetriever.getInstance().retrieve(config);
+                rainTS = rainTsFuture.get();
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("finished downloading timeseries from WEBDAV");
+                }
+            } catch (Throwable t) {
+                final String message = "could not download rain timeseries from '"
+                            + config + "': " + t.getMessage();
+                LOG.error(message, t);
+                throw new IOException(message, t);
+            }
+        } else {
+            final String message = "unsupported timeseries protocol: '" + config.getProtocol() + "'";
+            LOG.error(message);
+            throw new IOException(message);
         }
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("Upload rain timeseries as model input to " + modelSosEndpoint);
         }
@@ -356,43 +382,55 @@ public class EtaModelManager extends AbstractAsyncModelManager {
         }
         if (!rainTS.getTSKeys().contains(PropertyNames.DESCRIPTION)) {
             rainTS.setTSProperty(PropertyNames.DESCRIPTION, "Rain as input to the Linz model");
-            LOG.warn("Inserting missing Timeseries property}" + PropertyNames.DESCRIPTION);
+            LOG.warn("Inserting missing Timeseries property '" + PropertyNames.DESCRIPTION);
         }
         if (!rainTS.getTSKeys().contains(PropertyNames.COORDINATE_SYSTEM)) {
             rainTS.setTSProperty(PropertyNames.COORDINATE_SYSTEM, "EPSG:3423");
-            LOG.warn("Inserting missing Timeseries property" + PropertyNames.COORDINATE_SYSTEM);
+            LOG.warn("Inserting missing Timeseries property '" + PropertyNames.COORDINATE_SYSTEM);
         }
         if (!rainTS.getTSKeys().contains(PropertyNames.SPATIAL_RESOLUTION)) {
             rainTS.setTSProperty(
                 PropertyNames.SPATIAL_RESOLUTION,
                 new Integer[] { 1 }); // Need to be 1 value!!
-            LOG.warn("Inserting missing Timeseries property" + PropertyNames.SPATIAL_RESOLUTION);
+            LOG.warn("Inserting missing Timeseries property '" + PropertyNames.SPATIAL_RESOLUTION);
         }
         if (!rainTS.getTSKeys().contains(PropertyNames.TEMPORAL_RESOLUTION)) {
             rainTS.setTSProperty(PropertyNames.TEMPORAL_RESOLUTION, "NONE");
-            LOG.warn("Inserting missing Timeseries property" + PropertyNames.TEMPORAL_RESOLUTION);
+            LOG.warn("Inserting missing Timeseries property '" + PropertyNames.TEMPORAL_RESOLUTION + "' = " + "NONE");
         }
         if (!rainTS.getTSKeys().contains(TimeSeries.VALUE_JAVA_CLASS_NAMES)) {
             rainTS.setTSProperty(
                 TimeSeries.VALUE_JAVA_CLASS_NAMES,
                 new String[] { Float.class.getName() });
-            LOG.warn("Inserting missing Timeseries property" + TimeSeries.VALUE_JAVA_CLASS_NAMES);
+            LOG.warn("Inserting missing Timeseries property '" + TimeSeries.VALUE_JAVA_CLASS_NAMES + "' = "
+                        + Float.class.getName());
         }
         if (!rainTS.getTSKeys().contains(TimeSeries.VALUE_TYPES)) {
             rainTS.setTSProperty(
                 TimeSeries.VALUE_TYPES,
                 new String[] { TimeSeries.VALUE_TYPE_NUMBER });
-            LOG.warn("Inserting missing Timeseries property" + TimeSeries.VALUE_TYPES);
+            LOG.warn("Inserting missing Timeseries property '" + TimeSeries.VALUE_TYPES + "'");
         }
         if (!rainTS.getTSKeys().contains(TimeSeries.VALUE_UNITS)) {
             rainTS.setTSProperty(
                 TimeSeries.VALUE_UNITS,
                 new String[] { "urn:ogc:def:uom:OGC:mm" });
-            LOG.warn("Inserting missing Timeseries property" + TimeSeries.VALUE_UNITS);
+            LOG.warn("Inserting missing Timeseries property '" + TimeSeries.VALUE_UNITS + "' = urn:ogc:def:uom:OGC:mm");
         }
         if (!rainTS.getTSKeys().contains(TimeSeries.GEOMETRY)) {
             rainTS.setTSProperty(TimeSeries.GEOMETRY, new Envelope(14.18, 14.38, 48.24, 48.34));
-            LOG.warn("Inserting missing Timeseries property" + TimeSeries.GEOMETRY);
+            LOG.warn("Inserting missing Timeseries property '" + TimeSeries.GEOMETRY
+                        + "' = 14.18, 14.38, 48.24, 48.34");
+        }
+        if (!rainTS.getTSKeys().contains(TimeSeries.AVAILABLE_DATA_MIN)) {
+            rainTS.setTSProperty(TimeSeries.AVAILABLE_DATA_MIN, rainTS.getTimeStamps().first().asDate());
+            LOG.warn("Inserting missing Timeseries property '" + TimeSeries.AVAILABLE_DATA_MIN + "' = "
+                        + rainTS.getTimeStamps().first().asDate());
+        }
+        if (!rainTS.getTSKeys().contains(TimeSeries.AVAILABLE_DATA_MAX)) {
+            rainTS.setTSProperty(TimeSeries.AVAILABLE_DATA_MAX, rainTS.getTimeStamps().last().asDate());
+            LOG.warn("Inserting missing Timeseries property '" + TimeSeries.AVAILABLE_DATA_MAX + "' = "
+                        + rainTS.getTimeStamps().last().asDate());
         }
 
         rainTS.setTSProperty(PropertyNames.DESCRIPTION, "Data from " + config.getOffering());
@@ -408,8 +446,8 @@ public class EtaModelManager extends AbstractAsyncModelManager {
         this.spsTask = modelSPSHelper.createTask(swmmRunInfo.getModelName());
 
         try {
-            spsTask.setParameter("start", isoDf.format(swmmInput.getStartDateDate()));
-            spsTask.setParameter("end", isoDf.format(swmmInput.getEndDateDate()));
+            spsTask.setParameter("start", isoDf.format(swmmInput.getStartDate()));
+            spsTask.setParameter("end", isoDf.format(swmmInput.getEndDate()));
         } catch (Throwable t) {
             LOG.error(t.getMessage());
             throw new IOException(t.getMessage(), t);

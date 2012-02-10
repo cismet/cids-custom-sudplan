@@ -11,9 +11,15 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import org.openide.util.Exceptions;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+
+import java.io.IOException;
+import java.io.StringWriter;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -61,23 +67,14 @@ public final class SwmmInput {
     //~ Instance fields --------------------------------------------------------
 
     private transient List<Integer> timeseries = new ArrayList<Integer>();
-
     private transient String inpFile;
-
-    private transient String startDate;
-
+    private transient Date startDate;
     private transient int swmmProject = -1;
-
-    private transient String endDate;
-
+    private transient Date endDate;
     private boolean forecast = false;
-
     private transient List<String> timeseriesURLs = new ArrayList<String>();
-
     private transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-
     private transient Date created;
-
     private transient String user;
 
     //~ Methods ----------------------------------------------------------------
@@ -169,15 +166,6 @@ public final class SwmmInput {
     }
 
     /**
-     * Get the value of startDate.
-     *
-     * @return  the value of startDate
-     */
-    public String getStartDate() {
-        return startDate;
-    }
-
-    /**
      * Get the value of swmmProject.
      *
      * @return  the value of swmmProject
@@ -198,34 +186,25 @@ public final class SwmmInput {
     }
 
     /**
-     * Set the value of startDate.
+     * DOCUMENT ME!
      *
-     * @param  startDate  new value of startDate
+     * @param  endDate  DOCUMENT ME!
      */
-    public void setStartDate(final String startDate) {
-        final String oldStartDate = this.startDate;
-        this.startDate = startDate;
-        propertyChangeSupport.firePropertyChange(PROP_STARTDATE, oldStartDate, startDate);
-    }
-
-    /**
-     * Get the value of endDate.
-     *
-     * @return  the value of endDate
-     */
-    public String getEndDate() {
-        return endDate;
-    }
-
-    /**
-     * Set the value of endDate.
-     *
-     * @param  endDate  new value of endDate
-     */
-    public void setEndDate(final String endDate) {
-        final String oldEndDate = this.endDate;
+    public void setEndDate(final Date endDate) {
+        final Date oldEndDate = this.endDate;
         this.endDate = endDate;
         propertyChangeSupport.firePropertyChange(PROP_ENDDATE, oldEndDate, endDate);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  startDate  DOCUMENT ME!
+     */
+    public void setStartDate(final Date startDate) {
+        final Date oldStartDate = this.startDate;
+        this.startDate = startDate;
+        propertyChangeSupport.firePropertyChange(PROP_STARTDATE, oldStartDate, startDate);
     }
 
     /**
@@ -252,24 +231,18 @@ public final class SwmmInput {
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
-     *
-     * @throws  ParseException  DOCUMENT ME!
      */
-    @JsonIgnore
-    public Date getEndDateDate() throws ParseException {
-        return DATE_FORMAT.parse(this.getEndDate());
+    public Date getEndDate() {
+        return this.endDate;
     }
 
     /**
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
-     *
-     * @throws  ParseException  DOCUMENT ME!
      */
-    @JsonIgnore
-    public Date getStartDateDate() throws ParseException {
-        return DATE_FORMAT.parse(this.getStartDate());
+    public Date getStartDate() {
+        return this.startDate;
     }
 
     /**
@@ -343,7 +316,7 @@ public final class SwmmInput {
      */
     @JsonIgnore
     public TimeStamp getStartDateTimestamp() throws ParseException {
-        final Date startDateDate = this.getStartDateDate();
+        final Date startDateDate = this.getStartDate();
         return new TimeStamp(startDateDate.getTime());
     }
 
@@ -356,7 +329,7 @@ public final class SwmmInput {
      */
     @JsonIgnore
     public TimeStamp getEndDateTimestamp() throws ParseException {
-        final Date endDateDate = this.getEndDateDate();
+        final Date endDateDate = this.getEndDate();
         return new TimeStamp(endDateDate.getTime());
     }
 
@@ -398,5 +371,45 @@ public final class SwmmInput {
         final String oldUser = this.user;
         this.user = user;
         propertyChangeSupport.firePropertyChange(PROP_USER, oldUser, user);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  DOCUMENT ME!
+     */
+    public static void main(final String[] args) {
+        try {
+            System.out.println(DATE_FORMAT.parse("01.01.1994").getTime());
+            System.out.println(DATE_FORMAT.parse("31.07.1994").getTime());
+
+            System.out.println(DATE_FORMAT.parse("01.08.1994").getTime());
+
+            System.out.println(DATE_FORMAT.parse("06.01.1995").getTime());
+
+            System.out.println(DATE_FORMAT.parse("06.12.2000").getTime());
+
+            System.out.println(DATE_FORMAT.parse("01.01.2000").getTime());
+            System.out.println(DATE_FORMAT.parse("31.12.2000").getTime());
+
+            System.out.println(DATE_FORMAT.parse("31.12.2048").getTime());
+            System.out.println(DATE_FORMAT.parse("30.07.2049").getTime());
+            System.exit(0);
+
+            final ObjectMapper mapper = new ObjectMapper();
+            final StringWriter writer = new StringWriter();
+
+            final SwmmInput swmmInput = new SwmmInput();
+
+            swmmInput.setCreated(new Date());
+            swmmInput.setUser("Pascal Dihé");
+            swmmInput.setStartDate(new Date());
+            swmmInput.setEndDate(new Date());
+
+            mapper.writeValue(writer, swmmInput);
+            System.out.println(writer.toString());
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 }

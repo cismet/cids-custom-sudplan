@@ -265,13 +265,15 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
         gridBagConstraints.insets = new java.awt.Insets(10, 15, 10, 5);
         panTitle.add(lblTitle, gridBagConstraints);
 
-        setBackground(new java.awt.Color(0, 51, 204));
+        setBackground(new java.awt.Color(204, 204, 204));
+        setOpaque(false);
         setLayout(new java.awt.CardLayout());
 
-        panPage1.setBackground(new java.awt.Color(102, 255, 102));
+        panPage1.setBackground(new java.awt.Color(255, 255, 255));
+        panPage1.setOpaque(false);
         panPage1.setLayout(new java.awt.GridLayout(1, 1));
 
-        lblPage1.setBackground(new java.awt.Color(204, 0, 204));
+        lblPage1.setBackground(new java.awt.Color(255, 255, 255));
         lblPage1.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/wwtp1.png"))); // NOI18N
         lblPage1.setText(org.openide.util.NbBundle.getMessage(
@@ -279,7 +281,6 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
                 "LinzWwtpRenderer.lblPage1.text"));                                              // NOI18N
         lblPage1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         lblPage1.setIconTextGap(0);
-        lblPage1.setOpaque(true);
         panPage1.add(lblPage1);
 
         add(panPage1, "CARD1");

@@ -51,24 +51,19 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(SwmmWizardPanelProjectUI.class);
-    private static final transient String START_DATE_ACTION = "startDate";
-    private static final transient String END_DATE_ACTION = "endDate";
 
     //~ Instance fields --------------------------------------------------------
 
     private final transient SwmmWizardPanelProject model;
     private final transient ItemListener projectListener;
-    private final transient ActionListener dateListener;
-    private transient DateChooser dateChooser;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnEndDate;
-    private javax.swing.JButton btnStartDate;
     private javax.swing.JCheckBox chbEta;
     private javax.swing.JComboBox cobProjects;
     private javax.swing.JPanel configurationPanel;
-    private javax.swing.JTextField fldEndDate;
     private javax.swing.JTextField fldInpFile;
-    private javax.swing.JTextField fldStartDate;
+    private com.toedter.calendar.JDateChooser jdcEndDate;
+    private com.toedter.calendar.JDateChooser jdcStartDate;
     private javax.swing.JLabel lblDescription;
     private javax.swing.JLabel lblDescriptionText;
     private javax.swing.JLabel lblEndDate;
@@ -92,8 +87,6 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
     public SwmmWizardPanelProjectUI(final SwmmWizardPanelProject model) throws WizardInitialisationException {
         this.model = model;
         this.projectListener = new ProjectListener();
-        this.dateListener = new DateListener();
-        this.dateChooser = new DateChooser();
 
         initComponents();
         // name of the wizard step
@@ -102,18 +95,6 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                 "SwmmWizardPanelProject.this.name")); // NOI18N
 
         this.initProjectList();
-
-        this.btnStartDate.setActionCommand(START_DATE_ACTION);
-        this.btnStartDate.addActionListener(WeakListeners.create(
-                ActionListener.class,
-                this.dateListener,
-                this.btnStartDate));
-
-        this.btnEndDate.setActionCommand(END_DATE_ACTION);
-        this.btnEndDate.addActionListener(WeakListeners.create(
-                ActionListener.class,
-                this.dateListener,
-                this.btnEndDate));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -204,13 +185,11 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
         lblStartDate = new javax.swing.JLabel();
         lblEndDate = new javax.swing.JLabel();
         lblEta = new javax.swing.JLabel();
-        fldStartDate = new javax.swing.JTextField();
-        fldEndDate = new javax.swing.JTextField();
         lblInpFile = new javax.swing.JLabel();
         fldInpFile = new javax.swing.JTextField();
         chbEta = new javax.swing.JCheckBox();
-        btnStartDate = new javax.swing.JButton();
-        btnEndDate = new javax.swing.JButton();
+        jdcStartDate = new com.toedter.calendar.JDateChooser();
+        jdcEndDate = new com.toedter.calendar.JDateChooser();
 
         projectPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
@@ -230,12 +209,6 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
             org.openide.util.NbBundle.getMessage(
                 SwmmWizardPanelProjectUI.class,
                 "SwmmWizardPanelProjectUI.lblDescription.text")); // NOI18N
-
-        org.openide.awt.Mnemonics.setLocalizedText(
-            lblDescriptionText,
-            org.openide.util.NbBundle.getMessage(
-                SwmmWizardPanelProjectUI.class,
-                "SwmmWizardPanelProjectUI.lblDescriptionText.text")); // NOI18N
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
@@ -303,28 +276,6 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                 SwmmWizardPanelProjectUI.class,
                 "SwmmWizardPanelProjectUI.lblEta.text")); // NOI18N
 
-        fldStartDate.setEditable(false);
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${model.swmmInput.startDate}"),
-                fldStartDate,
-                org.jdesktop.beansbinding.BeanProperty.create("text_ON_FOCUS_LOST"),
-                "startDate");
-        bindingGroup.addBinding(binding);
-
-        fldEndDate.setEditable(false);
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${model.swmmInput.endDate}"),
-                fldEndDate,
-                org.jdesktop.beansbinding.BeanProperty.create("text_ON_FOCUS_LOST"),
-                "endDate");
-        bindingGroup.addBinding(binding);
-
         org.openide.awt.Mnemonics.setLocalizedText(
             lblInpFile,
             org.openide.util.NbBundle.getMessage(
@@ -348,9 +299,25 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                 "SwmmWizardPanelProjectUI.chbEta.text")); // NOI18N
         chbEta.setEnabled(false);
 
-        org.openide.awt.Mnemonics.setLocalizedText(btnStartDate, "..."); // NOI18N
+        jdcStartDate.setOpaque(false);
 
-        org.openide.awt.Mnemonics.setLocalizedText(btnEndDate, "..."); // NOI18N
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${model.swmmInput.startDate}"),
+                jdcStartDate,
+                org.jdesktop.beansbinding.BeanProperty.create("date"));
+        bindingGroup.addBinding(binding);
+
+        jdcEndDate.setOpaque(false);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${model.swmmInput.endDate}"),
+                jdcEndDate,
+                org.jdesktop.beansbinding.BeanProperty.create("date"));
+        bindingGroup.addBinding(binding);
 
         final javax.swing.GroupLayout configurationPanelLayout = new javax.swing.GroupLayout(configurationPanel);
         configurationPanel.setLayout(configurationPanelLayout);
@@ -360,25 +327,16 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                     configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(lblStartDate).addComponent(lblEndDate).addComponent(lblInpFile)
                                 .addComponent(lblEta)).addGap(33, 33, 33).addGroup(
-                    configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                        configurationPanelLayout.createSequentialGroup().addGroup(
-                            configurationPanelLayout.createParallelGroup(
-                                javax.swing.GroupLayout.Alignment.LEADING,
-                                false).addComponent(fldEndDate).addComponent(
-                                fldStartDate,
-                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                154,
-                                Short.MAX_VALUE)).addPreferredGap(
-                            javax.swing.LayoutStyle.ComponentPlacement.RELATED).addGroup(
-                            configurationPanelLayout.createParallelGroup(
-                                javax.swing.GroupLayout.Alignment.LEADING).addComponent(btnStartDate).addComponent(
-                                btnEndDate))).addComponent(
-                        fldInpFile,
-                        javax.swing.GroupLayout.PREFERRED_SIZE,
-                        181,
-                        javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(chbEta)).addContainerGap(
-                    124,
-                    Short.MAX_VALUE)));
+                    configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(chbEta).addComponent(fldInpFile).addComponent(
+                        jdcStartDate,
+                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                        219,
+                        Short.MAX_VALUE).addComponent(
+                        jdcEndDate,
+                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                        Short.MAX_VALUE)).addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
         configurationPanelLayout.setVerticalGroup(
             configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
                 configurationPanelLayout.createSequentialGroup().addContainerGap().addGroup(
@@ -388,25 +346,23 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                                     javax.swing.GroupLayout.PREFERRED_SIZE,
                                     javax.swing.GroupLayout.DEFAULT_SIZE,
                                     javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(lblInpFile)).addGap(
-                    11,
-                    11,
-                    11).addGroup(
-                    configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addComponent(lblStartDate).addGroup(
-                        configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(
-                                        fldStartDate,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE,
-                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(btnStartDate)))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED).addGroup(
-                    configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(lblEndDate).addComponent(
-                        fldEndDate,
-                        javax.swing.GroupLayout.PREFERRED_SIZE,
-                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                        javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(btnEndDate)).addPreferredGap(
-                    javax.swing.LayoutStyle.ComponentPlacement.UNRELATED).addGroup(
+                    14,
+                    14,
+                    14).addGroup(
+                    configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                        configurationPanelLayout.createSequentialGroup().addComponent(lblStartDate).addGap(
+                            18,
+                            18,
+                            18).addComponent(lblEndDate)).addGroup(
+                        configurationPanelLayout.createSequentialGroup().addComponent(
+                            jdcStartDate,
+                            javax.swing.GroupLayout.PREFERRED_SIZE,
+                            javax.swing.GroupLayout.DEFAULT_SIZE,
+                            javax.swing.GroupLayout.PREFERRED_SIZE).addGap(11, 11, 11).addComponent(
+                            jdcEndDate,
+                            javax.swing.GroupLayout.PREFERRED_SIZE,
+                            javax.swing.GroupLayout.DEFAULT_SIZE,
+                            javax.swing.GroupLayout.PREFERRED_SIZE))).addGap(18, 18, 18).addGroup(
                     configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(lblEta, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
                                 .addComponent(chbEta)).addContainerGap()));
@@ -438,7 +394,7 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                     configurationPanel,
                     javax.swing.GroupLayout.PREFERRED_SIZE,
                     javax.swing.GroupLayout.DEFAULT_SIZE,
-                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(21, Short.MAX_VALUE)));
+                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(17, Short.MAX_VALUE)));
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
@@ -453,72 +409,6 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
     }
 
     //~ Inner Classes ----------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class DateListener implements ActionListener {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            String title;
-            Date date = null;
-            final boolean startDate = e.getActionCommand().equals(START_DATE_ACTION);
-            final SwmmInput swmmInput = getModel().getSwmmInput();
-
-            if (startDate) {
-                title = NbBundle.getMessage(
-                        SwmmWizardPanelProjectUI.class,
-                        "SwmmWizardPanelProjectUI.dateChooser.startDate");
-
-                try {
-                    date = swmmInput.getStartDateDate();
-                } catch (Throwable t) {
-                    LOG.warn("could not fetch start date DATE", t);
-                }
-            } else {
-                title = NbBundle.getMessage(
-                        SwmmWizardPanelProjectUI.class,
-                        "SwmmWizardPanelProjectUI.dateChooser.endDate");
-
-                try {
-                    date = swmmInput.getEndDateDate();
-                } catch (Throwable t) {
-                    LOG.warn("could not fetch end date DATE", t);
-                }
-            }
-
-            dateChooser.setLocationRelativeTo(SwmmWizardPanelProjectUI.this);
-            dateChooser.setTitle(title);
-
-            if (date != null) {
-                dateChooser.show(date);
-            } else {
-                dateChooser.show();
-            }
-
-            if (dateChooser.isDateAccepted()) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("set date: " + SwmmInput.DATE_FORMAT.format(dateChooser.getDate()));
-                }
-
-                if (startDate) {
-                    getModel().getSwmmInput().setStartDate(
-                        SwmmInput.DATE_FORMAT.format(dateChooser.getDate()));
-
-                    // beansbinding:
-                    // fldStartDate.setText(getModel().getSwmmInput().getStartDate());
-                } else {
-                    getModel().getSwmmInput().setEndDate(
-                        SwmmInput.DATE_FORMAT.format(dateChooser.getDate()));
-                }
-            }
-        }
-    }
 
     /**
      * DOCUMENT ME!

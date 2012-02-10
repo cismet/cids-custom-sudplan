@@ -172,6 +172,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
     private de.cismet.tools.gui.RoundedPanel photosPanel;
     private de.cismet.tools.gui.RoundedPanel propertiesPanel;
     private javax.swing.JScrollPane scpFotoList;
+    private javax.swing.JScrollPane scrollPane;
     private de.cismet.tools.gui.RoundedPanel swmmScenarioPanel;
     // End of variables declaration//GEN-END:variables
 
@@ -427,6 +428,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         etaScenarioPanel = new de.cismet.tools.gui.RoundedPanel();
         panHeadInfoScenario1 = new de.cismet.tools.gui.SemiRoundedPanel();
         lblEtaScenarios = new javax.swing.JLabel();
+        scrollPane = new javax.swing.JScrollPane();
         csoTotalOverflowComparisionPanel =
             new de.cismet.cids.custom.sudplan.local.linz.CsoTotalOverflowComparisionPanel();
 
@@ -437,10 +439,10 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panButtons1.setOpaque(false);
         panButtons1.setLayout(new java.awt.GridBagLayout());
 
-        panFooterPrevPage.setMaximumSize(new java.awt.Dimension(124, 40));
-        panFooterPrevPage.setMinimumSize(new java.awt.Dimension(124, 40));
+        panFooterPrevPage.setMaximumSize(null);
+        panFooterPrevPage.setMinimumSize(null);
         panFooterPrevPage.setOpaque(false);
-        panFooterPrevPage.setPreferredSize(new java.awt.Dimension(124, 40));
+        panFooterPrevPage.setPreferredSize(null);
         panFooterPrevPage.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 10, 5));
 
         lblPrevPage.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
@@ -449,6 +451,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
                 LinzCsoRenderer.class,
                 "LinzCsoRenderer.lblPrevPage.text"));            // NOI18N
         lblPrevPage.setEnabled(false);
+        lblPrevPage.setMaximumSize(null);
+        lblPrevPage.setPreferredSize(null);
         lblPrevPage.addMouseListener(new java.awt.event.MouseAdapter() {
 
                 @Override
@@ -478,10 +482,13 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
         panButtons1.add(panFooterPrevPage, gridBagConstraints);
 
-        panFooterNextPage.setMaximumSize(new java.awt.Dimension(124, 40));
+        panFooterNextPage.setMaximumSize(null);
+        panFooterNextPage.setMinimumSize(null);
         panFooterNextPage.setOpaque(false);
+        panFooterNextPage.setPreferredSize(null);
         panFooterNextPage.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 5));
 
         btnNextPage.setIcon(new javax.swing.ImageIcon(
@@ -517,6 +524,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
         panButtons1.add(panFooterNextPage, gridBagConstraints);
 
         panFooter.add(panButtons1, java.awt.BorderLayout.CENTER);
@@ -922,13 +930,15 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         etaScenarioPanel.add(panHeadInfoScenario1, gridBagConstraints);
 
         csoTotalOverflowComparisionPanel.setPreferredSize(new java.awt.Dimension(400, 200));
-        csoTotalOverflowComparisionPanel.setLayout(new java.awt.GridLayout());
+        csoTotalOverflowComparisionPanel.setLayout(new java.awt.GridLayout(1, 0));
+        scrollPane.setViewportView(csoTotalOverflowComparisionPanel);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        etaScenarioPanel.add(csoTotalOverflowComparisionPanel, gridBagConstraints);
+        etaScenarioPanel.add(scrollPane, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1423,6 +1433,9 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         @Override
         public void actionPerformed(final ActionEvent e) {
             if ((beansMap != null) && beansMap.containsKey(e.getActionCommand())) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("goto metaobject: " + e.getActionCommand());
+                }
                 ComponentRegistry.getRegistry()
                         .getDescriptionPane()
                         .gotoMetaObject(beansMap.get(e.getActionCommand()).getMetaObject(), null);
