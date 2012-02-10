@@ -30,6 +30,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.time.TimeSeriesDataItem;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
@@ -425,7 +426,10 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         data.setRangeDescription(SMSUtils.unitFromTimeseries(ts).getLocalisedName());
         for (final TimeStamp stamp : timeStamps) {
             final Float value = (Float)ts.getValue(stamp, valueKey);
-            data.add(new Millisecond(stamp.asDate()), value);
+            /*
+             * TODO: change to normal add, otherwise data could be lost. Quick Bugfix for atr
+             */
+            data.addOrUpdate(new Millisecond(stamp.asDate()), value);
         }
 
         final TimeSeriesDatasetAdapter dataset = new TimeSeriesDatasetAdapter(data);
