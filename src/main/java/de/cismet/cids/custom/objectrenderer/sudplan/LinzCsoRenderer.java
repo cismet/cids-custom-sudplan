@@ -1184,6 +1184,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
             if (outfall != null) {
                 final CidsBean linkBean = (CidsBean)outfall;
                 final String key = "OUTFALL::" + linkBean.getProperty("id");
+                beansMap.put(key, linkBean);
                 final JXHyperlink hyperLink = new JXHyperlink();
                 hyperLink.setText((String)linkBean.getProperty("name")); // NOI18N
                 hyperLink.setActionCommand(key);
