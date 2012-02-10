@@ -31,6 +31,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.openide.util.NbBundle;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
@@ -49,6 +50,9 @@ import java.awt.print.PageFormat;
 import java.io.File;
 import java.io.IOException;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EventListener;
@@ -60,8 +64,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
 import javax.swing.MenuElement;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -673,7 +677,6 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
         }
 
         centerPanel.add(innerChartPanel, BorderLayout.CENTER);
-
         timeSeriesMaxVal = timeAxis.getMaximumDate().getTime();
         timeSeriesMinVal = timeAxis.getMinimumDate().getTime();
         timeSeriesInterval = timeSeriesMaxVal - timeSeriesMinVal;
@@ -706,15 +709,19 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
         gridBagConstraints.gridwidth = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new Insets(0, 0, 5, 21);
+        gridBagConstraints.insets = new Insets(10, 0, 5, 21);
 
         scrollbarPanel.add(scrollbar, gridBagConstraints);
+        scrollbar.setBackground(Color.white);
 
         centerPanel.add(scrollbarPanel, BorderLayout.SOUTH);
-//        centerPanel.add(scrollbarPanel, BorderLayout.SOUTH);
+        centerPanel.setBorder(new EmptyBorder(new Insets(10, 5, 10, 5)));
+        centerPanel.setBackground(Color.WHITE);
 
+//        centerPanel.add(scrollbarPanel, BorderLayout.SOUTH);
         this.setLayout(new BorderLayout());
         this.add(centerPanel, BorderLayout.CENTER);
+        this.setBackground(Color.WHITE);
 //        this.add(new JScrollPane(centerPanel), BorderLayout.CENTER);
     }
 
@@ -762,9 +769,10 @@ public class CustomChartPanel extends ChartPanel implements AxisChangeListener, 
         gridBagConstraints.gridwidth = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new Insets(0, 0, 5, (int)Math.round(scrollBarInset) + 5);
+        gridBagConstraints.insets = new Insets(10, 0, 5, (int)Math.round(scrollBarInset) + 5);
 
         scrollbarPanel.add(scrollbar, gridBagConstraints);
+        scrollbarPanel.setBackground(Color.white);
         this.invalidate();
         this.validate();
     }
