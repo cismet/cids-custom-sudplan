@@ -226,16 +226,12 @@
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
+            <Property name="horizontalAlignment" type="int" value="0"/>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/de/cismet/cids/custom/sudplan/local/linz/wwtp1.png"/>
             </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
               <ResourceString bundle="de/cismet/cids/custom/objectrenderer/sudplan/Bundle.properties" key="LinzWwtpRenderer.lblPage1.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-            </Property>
-            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-              <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
-                <LineBorder/>
-              </Border>
             </Property>
             <Property name="iconTextGap" type="int" value="0"/>
           </Properties>
@@ -243,6 +239,9 @@
       </SubComponents>
     </Container>
     <Container class="javax.swing.JPanel" name="panPage2">
+      <Properties>
+        <Property name="opaque" type="boolean" value="false"/>
+      </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignCardLayout" value="org.netbeans.modules.form.compat2.layouts.DesignCardLayout$CardConstraintsDescription">
           <CardConstraints cardName="CARD2"/>
@@ -253,6 +252,7 @@
       <SubComponents>
         <Component class="javax.swing.JLabel" name="lblPage2">
           <Properties>
+            <Property name="horizontalAlignment" type="int" value="0"/>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/de/cismet/cids/custom/sudplan/local/linz/wwtp2.png"/>
             </Property>

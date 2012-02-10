@@ -7,6 +7,7 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import org.jfree.chart.ChartFactory;
@@ -23,6 +24,7 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
@@ -30,7 +32,12 @@ import java.awt.GradientPaint;
 
 import java.text.DecimalFormat;
 
+import java.util.Arrays;
 import java.util.Collection;
+
+import javax.swing.JFrame;
+
+import de.cismet.cids.client.tools.DevelopmentTools;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -94,8 +101,8 @@ public class CsoOverflowComparisionPanel extends javax.swing.JPanel {
                 false                     // URLs?
                 );
 
-        chart.setBackgroundPaint(new Color(255, 255, 255, 0));
-        chart.setBackgroundImageAlpha(0.0f);
+        chart.setBackgroundPaint(new Color(255, 255, 255));
+        // chart.setBackgroundImageAlpha(0.0f);
 
         // get a reference to the plot for further customisation...
         final CategoryPlot plot = chart.getCategoryPlot();
@@ -112,15 +119,15 @@ public class CsoOverflowComparisionPanel extends javax.swing.JPanel {
         renderer.setDrawBarOutline(false);
 
         // set up gradient paints for series...
-        final GradientPaint gp0 = new GradientPaint(
-                0.0f,
-                0.0f,
-                new Color(128, 26, 12),
-                0.0f,
-                0.0f,
-                new Color(168, 107, 76));
+// final GradientPaint gp0 = new GradientPaint(
+// 0.0f,
+// 0.0f,
+// new Color(128, 26, 12),
+// 0.0f,
+// 0.0f,
+// new Color(168, 107, 76));
 
-        renderer.setSeriesPaint(0, gp0);
+        renderer.setSeriesPaint(0, new Color(128, 26, 12));
 
         final CategoryItemRenderer categoryRenderer = (CategoryItemRenderer)plot.getRenderer();
         final CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(
@@ -136,7 +143,8 @@ public class CsoOverflowComparisionPanel extends javax.swing.JPanel {
         // OPTIONAL CUSTOMISATION COMPLETED.
 
         final ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setOpaque(false);
+        // chartPanel.setOpaque(false);
+        chartPanel.setBackground(new Color(255, 255, 255));
         this.add(chartPanel);
     }
 
@@ -147,10 +155,49 @@ public class CsoOverflowComparisionPanel extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        setOpaque(false);
+        setBackground(new java.awt.Color(255, 255, 255));
         setPreferredSize(new java.awt.Dimension(150, 150));
         setLayout(new java.awt.GridLayout(1, 1));
     } // </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  DOCUMENT ME!
+     */
+    public static void main(final String[] args) {
+        try {
+            BasicConfigurator.configure();
+            final CidsBean[] swmmResults = DevelopmentTools.createCidsBeansFromRMIConnectionOnLocalhost(
+                    "SUDPLAN",
+                    "Administratoren",
+                    "admin",
+                    "cismetz12",
+                    "linz_swmm_result");
+
+//            final ArrayList<CidsBean> etaBeans = new ArrayList<CidsBean>();
+//            final ArrayList<CidsBean> swmmBeans = new ArrayList<CidsBean>();
+//            final CidsBean swmmBean = new CidsBean();
+//            swmmBean.setProperty("overflow_volume", 20000f);
+//            final CidsBean etaBean1 = new CidsBean();
+//            etaBean1.setProperty("total_overflow_volume", 600000f);
+//            etaBeans.add(etaBean1);
+//            swmmBean.setProperty("eta_results", etaBeans);
+//            swmmBeans.add(swmmBean);
+
+            System.out.println(swmmResults.length);
+            final CsoOverflowComparisionPanel csoOverflowComparisionPanel = new CsoOverflowComparisionPanel();
+            csoOverflowComparisionPanel.setPreferredSize(new java.awt.Dimension(600, 400));
+            csoOverflowComparisionPanel.setSwmmResults(Arrays.asList(swmmResults));
+            final JFrame frame = new JFrame("CsoOverflowComparisionPanel");
+            frame.setContentPane(csoOverflowComparisionPanel);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.pack();
+            frame.setVisible(true);
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
 }

@@ -115,13 +115,14 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
     //~ Instance fields --------------------------------------------------------
 
     // private final transient LinzCsoTitleComponent titleComponent = new LinzCsoTitleComponent();
-    private final Timer timer;
-    private final CardLayout cardLayout;
-    private ImageResizeWorker currentResizeWorker;
-    private BufferedImage image;
-    private boolean listListenerEnabled = true;
-    private boolean resizeListenerEnabled;
-    private final WebDavClient webDavClient;
+    private final transient Timer timer;
+    private final transient CardLayout cardLayout;
+    private transient ImageResizeWorker currentResizeWorker;
+    private transient BufferedImage image;
+    private transient boolean listListenerEnabled = true;
+    private transient boolean resizeListenerEnabled;
+    private final transient WebDavClient webDavClient;
+    private transient LinksListener linksListener;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBack;
     private javax.swing.JButton btnForward;
@@ -440,9 +441,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panButtons1.setLayout(new java.awt.GridBagLayout());
 
         panFooterPrevPage.setMaximumSize(null);
-        panFooterPrevPage.setMinimumSize(null);
         panFooterPrevPage.setOpaque(false);
-        panFooterPrevPage.setPreferredSize(null);
         panFooterPrevPage.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 10, 5));
 
         lblPrevPage.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
@@ -486,9 +485,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panButtons1.add(panFooterPrevPage, gridBagConstraints);
 
         panFooterNextPage.setMaximumSize(null);
-        panFooterNextPage.setMinimumSize(null);
         panFooterNextPage.setOpaque(false);
-        panFooterNextPage.setPreferredSize(null);
         panFooterNextPage.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 5));
 
         btnNextPage.setIcon(new javax.swing.ImageIcon(
@@ -542,6 +539,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         gridBagConstraints.insets = new java.awt.Insets(10, 15, 10, 10);
         panTitle.add(lblTitle, gridBagConstraints);
 
+        setOpaque(false);
         setLayout(new java.awt.CardLayout());
 
         panPage1.setOpaque(false);
@@ -865,6 +863,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
 
         add(panPage1, "CARD1");
 
+        panPage2.setOpaque(false);
         panPage2.setLayout(new java.awt.GridBagLayout());
 
         swmmScenarioPanel.setLayout(new java.awt.GridBagLayout());
@@ -928,6 +927,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.weightx = 1.0;
         etaScenarioPanel.add(panHeadInfoScenario1, gridBagConstraints);
+
+        scrollPane.setBorder(null);
 
         csoTotalOverflowComparisionPanel.setPreferredSize(new java.awt.Dimension(400, 200));
         csoTotalOverflowComparisionPanel.setLayout(new java.awt.GridLayout(1, 0));
@@ -1177,7 +1178,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
             final Object outfall = cidsBean.getProperty("outfall");          // NOI18N
             final Object storageUnit = cidsBean.getProperty("storage_unit"); // NOI18N
             final HashMap beansMap = new HashMap(2);
-            final LinksListener linksListener = new LinksListener(beansMap);
+            linksListener = new LinksListener(beansMap);
             final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
 
             if (outfall != null) {

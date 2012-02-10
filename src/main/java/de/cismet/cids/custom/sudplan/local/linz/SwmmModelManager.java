@@ -29,10 +29,7 @@ import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.cismet.cids.custom.sudplan.AbstractAsyncModelManager;
-import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
-import de.cismet.cids.custom.sudplan.SMSUtils;
-import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
+import de.cismet.cids.custom.sudplan.*;
 import de.cismet.cids.custom.sudplan.concurrent.ProgressWatch;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -43,7 +40,7 @@ import de.cismet.cids.dynamics.CidsBean;
  * @author   pd
  * @version  $Revision$, $Date$
  */
-public class SwmmModelManager extends AbstractAsyncModelManager {
+public class SwmmModelManager extends AbstractModelManager {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -191,7 +188,7 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
             cidsBean.setProperty("runInfo", writer.toString()); // NOI18N
             cidsBean = cidsBean.persist();
 
-            ProgressWatch.getWatch().submit(createWatchable());
+            // ProgressWatch.getWatch().submit(createWatchable());
         } catch (final Exception ex) {
             final String message = "cannot store runinfo: " + runInfo.getRunId(); // NOI18N
             LOG.error(message, ex);
@@ -206,20 +203,20 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
             throw new IllegalStateException("cannot create outputbean when not finished yet"); // NOI18N
         }
 
-        if (!(getWatchable() instanceof SwmmWatchable)) {
-            throw new IllegalStateException("cannot create output if there is no valid watchable"); // NOI18N
-        }
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("creating output bean for run: " + cidsBean); // NOI18N
-        }
-
-        final SwmmWatchable watch = (SwmmWatchable)this.getWatchable();
-        final String runId = watch.getSwmmRunInfo().getRunId();
+//        if (!(getWatchable() instanceof SwmmWatchable)) {
+//            throw new IllegalStateException("cannot create output if there is no valid watchable"); // NOI18N
+//        }
+//
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("creating output bean for run: " + cidsBean); // NOI18N
+//        }
+//
+//        final SwmmWatchable watch = (SwmmWatchable)this.getWatchable();
+//        final String runId = watch.getSwmmRunInfo().getRunId();
 
         try {
-            final CidsBean swmmModelOutput = SMSUtils.createModelOutput("Output of SWMM Run: " + runId, // NOI18N
-                    watch.getSwmmOutput(),
+            final CidsBean swmmModelOutput = SMSUtils.createModelOutput("Output of SWMM Run: " + -1, // NOI18N
+                    new SwmmOutput(),
                     SMSUtils.Model.SWMM);
 
             // FIXME: separate ETA Run
@@ -236,7 +233,7 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
 // etaModelOutput.persist();
             return swmmModelOutput.persist();
         } catch (final Exception e) {
-            final String message = "cannot get results for run: " + runId; // NOI18N
+            final String message = "cannot get results for run: " + -1; // NOI18N
             LOG.error(message, e);
             throw new IOException(message, e);
         }
@@ -254,18 +251,18 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
         }
     }
 
-    @Override
-    public AbstractModelRunWatchable createWatchable() throws IOException {
-        return new SwmmWatchable(this.cidsBean);
-    }
-
-    @Override
-    protected boolean needsDownload() {
-        return true;
-    }
-
-    @Override
-    protected void prepareExecution() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+//    @Override
+//    public AbstractModelRunWatchable createWatchable() throws IOException {
+//        return new SwmmWatchable(this.cidsBean);
+//    }
+//
+//    @Override
+//    protected boolean needsDownload() {
+//        return true;
+//    }
+//
+//    @Override
+//    protected void prepareExecution() throws IOException {
+//        throw new UnsupportedOperationException("Not supported yet.");
+//    }
 }

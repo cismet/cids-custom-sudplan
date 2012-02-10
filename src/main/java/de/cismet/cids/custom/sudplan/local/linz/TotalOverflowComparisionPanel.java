@@ -84,8 +84,6 @@ public class TotalOverflowComparisionPanel extends javax.swing.JPanel {
                 false                     // URLs?
                 );
 
-        chart.setBackgroundPaint(Color.white);
-
         // set the background color for the chart...
         // chart.setBackgroundPaint(Color.white);
         chart.setBackgroundPaint(new Color(255, 255, 255, 0));
@@ -93,7 +91,7 @@ public class TotalOverflowComparisionPanel extends javax.swing.JPanel {
 
         // get a reference to the plot for further customisation...
         final CategoryPlot plot = chart.getCategoryPlot();
-        plot.setBackgroundPaint(Color.lightGray);
+        plot.setBackgroundPaint(new Color(228, 228, 197));
         plot.setDomainGridlinePaint(Color.white);
         plot.setRangeGridlinePaint(Color.white);
 
@@ -106,15 +104,15 @@ public class TotalOverflowComparisionPanel extends javax.swing.JPanel {
         renderer.setDrawBarOutline(false);
 
         // set up gradient paints for series...
-        final GradientPaint gp0 = new GradientPaint(
-                0.0f,
-                0.0f,
-                Color.blue,
-                0.0f,
-                0.0f,
-                Color.lightGray);
+// final GradientPaint gp0 = new GradientPaint(
+// 0.0f,
+// 0.0f,
+// Color.blue,
+// 0.0f,
+// 0.0f,
+// Color.lightGray);
 
-        renderer.setSeriesPaint(0, gp0);
+        renderer.setSeriesPaint(0, new Color(128, 26, 12));
 
         final CategoryAxis domainAxis = plot.getDomainAxis();
         domainAxis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);

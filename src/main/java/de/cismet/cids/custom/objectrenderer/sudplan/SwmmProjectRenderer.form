@@ -135,20 +135,17 @@
           <Properties>
             <Property name="horizontalAlignment" type="int" value="0"/>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="1" name="http://sudplan.cismet.de/geoserver/wms?SERVICE=WMS&amp;&amp;VERSION=1.1.1&amp;REQUEST=GetMap&amp;BBOX=13.966774023257251,48.045408747871186,14.539433634959217,48.535798950568086&amp;WIDTH=355&amp;HEIGHT=304&amp;SRS=EPSG:4326&amp;FORMAT=image/png&amp;TRANSPARENT=TRUE&amp;BGCOLOR=0xF0F0F0&amp;EXCEPTIONS=application/vnd.ogc.se_xml&amp;LAYERS=Sudplan-Linz:Linz_TUG_WS_2011-05-09_SUBCATCHMENTS,Sudplan-Linz:Linz_TUG_WS_2011-05-09_CONDUITS,Sudplan-Linz:Linz_TUG_WS_2011-05-09_WEIRS,Sudplan-Linz:Linz_TUG_WS_2011-05-09_PUMPS,Sudplan-Linz:Linz_TUG_WS_2011-05-09_JUNCTIONS,Sudplan-Linz:Linz_TUG_WS_2011-05-09_STORAGE_UNITS,Sudplan-Linz:Linz_TUG_WS_2011-05-09_OUTFALLS&amp;STYLES=Subcatchment,Conduit,line,pump,Junction,Storage_Unit,Outfall"/>
+              <Image iconType="3" name="/de/cismet/cids/custom/sudplan/local/linz/swmm_wms.png"/>
             </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
               <ResourceString bundle="de/cismet/cids/custom/objectrenderer/sudplan/Bundle.properties" key="SwmmProjectRenderer.previewLabel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
             <Property name="horizontalTextPosition" type="int" value="0"/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-              <Dimension value="null"/>
+              <Dimension value="[350, 300]"/>
             </Property>
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[300, 300]"/>
-            </Property>
-            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-              <Dimension value="null"/>
             </Property>
           </Properties>
         </Component>

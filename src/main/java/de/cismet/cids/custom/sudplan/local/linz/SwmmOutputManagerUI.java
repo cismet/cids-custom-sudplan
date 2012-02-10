@@ -69,17 +69,13 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final XBoundingBox LINZ_BB = new XBoundingBox(13.979, 48.102, 14.521, 48.473, "EPSG:4326", false);
-
-//    public static final String SWMM_WMS_TEMPLATE = "http://sudplanwp6.cismet.de/geoserver/sudplan/wms?service=WMS"
-//                + "&version=1.1.0&request=GetMap&layers=%LAYERS%"
-//                + "&styles=&bbox=<cismap:boundingBox>&width=<cismap:width>"
-//                + "&height=<cismap:height>&srs=EPSG:4326"
-//                + "&format=image%2Fpng&TRANSPARENT=TRUE";
-    public static final String SWMM_WMS_TEMPLATE = "http://sudplanwp6.cismet.de/geoserver/sudplan/wms?service=WMS"
+    public static final String GEOSERVER_HOST = "http://schlob-pc:9987";
+    public static final String SWMM_WMS_TEMPLATE = GEOSERVER_HOST + "/geoserver/sudplan/wms?service=WMS"
                 + "&version=1.1.0&request=GetMap&layers=%LAYERS%"
-                + "&styles=&bbox=13.979,48.102,14.521,48.473&width=<cismap:width>"
+                + "&styles=&bbox=<cismap:boundingBox>&width=<cismap:width>"
                 + "&height=<cismap:height>&srs=EPSG:4326"
                 + "&format=image%2Fpng&TRANSPARENT=TRUE";
+
     private static final transient Logger LOG = Logger.getLogger(SwmmOutputManagerUI.class);
 
     //~ Instance fields --------------------------------------------------------
@@ -211,7 +207,7 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
             final SimpleWMS swms = new SimpleWMS(new SimpleWmsGetMapUrl(wmsURL));
             swms.setName(swmmOutput.getSwmmRunName());
             CismapBroker.getInstance().getMappingComponent().getMappingModel().addLayer(swms);
-            // CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(LINZ_BB);
+            CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(LINZ_BB);
             ComponentRegistry.getRegistry().showComponent("cismap");
         } catch (Exception ex) {
             LOG.error("could not show result of SWMM RUN in map:" + ex.getMessage(), ex);

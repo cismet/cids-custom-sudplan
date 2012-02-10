@@ -61,7 +61,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
 
     //~ Instance fields --------------------------------------------------------
 
-    private final InputVerifier overflowVerifier = new InputVerifier() {
+    private final transient InputVerifier overflowVerifier = new InputVerifier() {
 
             @Override
             public boolean verify(final JComponent input) {
@@ -76,6 +76,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         };
 
     private final transient SwmmProjectTitleComponent titleComponent = new SwmmProjectTitleComponent();
+    private transient ScenarioListener scenarioListener;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bntEtaSearch;
     private javax.swing.JButton bntSwmmSearch;
@@ -129,7 +130,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         final List<CidsBean> swmmScenarios = (List)cidsBean.getProperty("swmm_scenarios"); // NOI18N
         final List<CidsBean> etaScenarios = (List)cidsBean.getProperty("eta_scenarios");   // NOI18N
         final HashMap beansMap = new HashMap(swmmScenarios.size() + etaScenarios.size());
-        final ScenarioListener scenarioListener = new ScenarioListener(beansMap);
+        scenarioListener = new ScenarioListener(beansMap);
         final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
 
         for (final CidsBean swmmBean : swmmScenarios) {
@@ -174,6 +175,8 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         if (!swmmScenarios.isEmpty()) {
             this.cbSwmmRuns.setSelectedIndex(0);
         }
+
+        this.doLayout();
     }
 
     /**
@@ -279,26 +282,15 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         previewPanel.setLayout(new java.awt.GridLayout(1, 0));
 
         previewLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        previewLabel.setIcon(new javax.swing.JLabel() {
-
-                @Override
-                public javax.swing.Icon getIcon() {
-                    try {
-                        return new javax.swing.ImageIcon(
-                                new java.net.URL(
-                                    "http://sudplan.cismet.de/geoserver/wms?SERVICE=WMS&&VERSION=1.1.1&REQUEST=GetMap&BBOX=13.966774023257251,48.045408747871186,14.539433634959217,48.535798950568086&WIDTH=355&HEIGHT=304&SRS=EPSG:4326&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=Sudplan-Linz:Linz_TUG_WS_2011-05-09_SUBCATCHMENTS,Sudplan-Linz:Linz_TUG_WS_2011-05-09_CONDUITS,Sudplan-Linz:Linz_TUG_WS_2011-05-09_WEIRS,Sudplan-Linz:Linz_TUG_WS_2011-05-09_PUMPS,Sudplan-Linz:Linz_TUG_WS_2011-05-09_JUNCTIONS,Sudplan-Linz:Linz_TUG_WS_2011-05-09_STORAGE_UNITS,Sudplan-Linz:Linz_TUG_WS_2011-05-09_OUTFALLS&STYLES=Subcatchment,Conduit,line,pump,Junction,Storage_Unit,Outfall"));
-                    } catch (java.net.MalformedURLException e) {
-                    }
-                    return null;
-                }
-            }.getIcon());
+        previewLabel.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/swmm_wms.png"))); // NOI18N
         previewLabel.setText(org.openide.util.NbBundle.getMessage(
                 SwmmProjectRenderer.class,
-                "SwmmProjectRenderer.previewLabel.text")); // NOI18N
+                "SwmmProjectRenderer.previewLabel.text"));                                          // NOI18N
         previewLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        previewLabel.setMaximumSize(null);
+        previewLabel.setMaximumSize(new java.awt.Dimension(350, 300));
         previewLabel.setMinimumSize(new java.awt.Dimension(300, 300));
-        previewLabel.setPreferredSize(null);
+        previewLabel.setPreferredSize(new java.awt.Dimension(350, 250));
         previewPanel.add(previewLabel);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -631,6 +623,9 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
 
         @Override
         public void actionPerformed(final ActionEvent e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("showing cids bean: " + e.getActionCommand());
+            }
             if ((beansMap != null) && beansMap.containsKey(e.getActionCommand())) {
                 ComponentRegistry.getRegistry()
                         .getDescriptionPane()

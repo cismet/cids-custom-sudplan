@@ -274,19 +274,21 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
         panPage1.setLayout(new java.awt.GridLayout(1, 1));
 
         lblPage1.setBackground(new java.awt.Color(255, 255, 255));
+        lblPage1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblPage1.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/wwtp1.png"))); // NOI18N
         lblPage1.setText(org.openide.util.NbBundle.getMessage(
                 LinzWwtpRenderer.class,
                 "LinzWwtpRenderer.lblPage1.text"));                                              // NOI18N
-        lblPage1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         lblPage1.setIconTextGap(0);
         panPage1.add(lblPage1);
 
         add(panPage1, "CARD1");
 
+        panPage2.setOpaque(false);
         panPage2.setLayout(new java.awt.BorderLayout());
 
+        lblPage2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblPage2.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/wwtp2.png"))); // NOI18N
         lblPage2.setText(org.openide.util.NbBundle.getMessage(

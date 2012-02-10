@@ -147,10 +147,12 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
             }
         }
 
-        sb.append(") ");
+        sb.append(") AND forecast = ");
 
         if (forecast) {
-            sb.append("AND forecast = TRUE ");
+            sb.append("TRUE ");
+        } else {
+            sb.append("FALSE ");
         }
 
         final ClassAttribute ca = mc.getClassAttribute("sortingColumn"); // NOI18N
@@ -179,55 +181,40 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+
         timeseriesPanel = new javax.swing.JPanel();
         jScrollPaneTimeseries = new javax.swing.JScrollPane();
         tblTimeseries = new javax.swing.JTable();
+
+        setLayout(new java.awt.GridBagLayout());
 
         timeseriesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
                     SwmmWizardPanelTimeseriesUI.class,
                     "SwmmWizardPanelTimeseriesUI.timeseriesPanel.border.title"))); // NOI18N
+        timeseriesPanel.setLayout(new java.awt.GridBagLayout());
 
         tblTimeseries.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
                 new String[] {}));
         jScrollPaneTimeseries.setViewportView(tblTimeseries);
 
-        final javax.swing.GroupLayout timeseriesPanelLayout = new javax.swing.GroupLayout(timeseriesPanel);
-        timeseriesPanel.setLayout(timeseriesPanelLayout);
-        timeseriesPanelLayout.setHorizontalGroup(
-            timeseriesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                timeseriesPanelLayout.createSequentialGroup().addContainerGap().addComponent(
-                    jScrollPaneTimeseries,
-                    javax.swing.GroupLayout.PREFERRED_SIZE,
-                    452,
-                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE)));
-        timeseriesPanelLayout.setVerticalGroup(
-            timeseriesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                timeseriesPanelLayout.createSequentialGroup().addComponent(
-                    jScrollPaneTimeseries,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    254,
-                    Short.MAX_VALUE).addContainerGap()));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 10, 10);
+        timeseriesPanel.add(jScrollPaneTimeseries, gridBagConstraints);
 
-        final javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addComponent(
-                    timeseriesPanel,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE).addContainerGap()));
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addComponent(
-                    timeseriesPanel,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE).addContainerGap()));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        add(timeseriesPanel, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
     /**
@@ -252,8 +239,10 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
 
         private final MetaObject[] timeseries;
         private final boolean[] selectedTimeseries;
-        private final String[] columnNames = { "Name", "Beschreibung", "Auswahl" };
-        private final Class[] columnClasses = { String.class, String.class, Boolean.class };
+        // private final String[] columnNames = { "Name", "Beschreibung", "Auswahl" };
+        // private final Class[] columnClasses = { String.class, String.class, Boolean.class };
+        private final String[] columnNames = { "Name", "Auswahl" };
+        private final Class[] columnClasses = { String.class, Boolean.class };
 
         //~ Constructors -------------------------------------------------------
 
@@ -285,10 +274,10 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
                 case 0: {
                     return timeseries[rowIndex].getName();
                 }
+//                case 1: {
+//                    return "keine Beschreibung vorhanden";
+//                }
                 case 1: {
-                    return "keine Beschreibung vorhanden";
-                }
-                case 2: {
                     return selectedTimeseries[rowIndex];
                 }
             }
@@ -303,7 +292,7 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
 //                            + " to " + value + " (an instance of " + value.getClass() + ")");
 //            }
 
-            if (col == 2) {
+            if (col == 1) {
                 this.selectedTimeseries[row] = (Boolean)value;
             }
 
@@ -331,7 +320,7 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
 
         @Override
         public boolean isCellEditable(final int row, final int col) {
-            return col == 2;
+            return col == 1;
         }
 
         /**

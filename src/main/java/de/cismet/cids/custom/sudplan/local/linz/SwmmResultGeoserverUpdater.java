@@ -37,7 +37,7 @@ public class SwmmResultGeoserverUpdater {
     public static final Logger LOG = Logger.getLogger(SwmmResultGeoserverUpdater.class);
     public static final String DOMAIN = "SUDPLAN";
     public static final String CREATE_VIEW_STATEMENT_TEMPLATE = "CREATE OR REPLACE VIEW %VIEW% AS "
-                + "SELECT CSO.\"name\", SWMM_RESULT.\"name\" AS \"scenario_name\", SWMM_RESULT.overflow_volume, GEOM.geo_field AS \"geom\" FROM \"public\".linz_cso CSO "
+                + "SELECT CSO.\"name\", SWMM_RESULT.\"name\" AS \"scenario_name\", (swmm_result.overflow_volume+0.5)::int AS overflow_volume, GEOM.geo_field AS \"geom\" FROM \"public\".linz_cso CSO "
                 + "JOIN \"public\".geom AS GEOM ON GEOM.id = CSO.geom AND GEOM.geo_field IS NOT NULL "
                 + "JOIN \"public\".linz_swmm_scenarios AS SWMM_RUN ON CSO.id = SWMM_RUN.linz_cso_reference "
                 + "JOIN \"public\".linz_swmm_result AS SWMM_RESULT ON SWMM_RESULT.id = SWMM_RUN.linz_swmm_result AND SWMM_RESULT.swmm_scenario_id = ";
@@ -93,7 +93,7 @@ public class SwmmResultGeoserverUpdater {
         // this.restPassword = "2904raJRGa";
         this.restPassword = "cismetz12";
         // this.restUrl = "http://sudplan.cismet.de:8080/geoserver";
-        this.restUrl = "http://sudplanwp6.cismet.de/geoserver/";
+        this.restUrl = SwmmOutputManagerUI.GEOSERVER_HOST + "/geoserver/";
     }
 
     /**

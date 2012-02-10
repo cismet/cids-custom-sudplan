@@ -82,6 +82,11 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
     private javax.swing.JButton btnForward;
     private eu.hansolo.steelseries.gauges.Radial codDeqGauge;
     private eu.hansolo.steelseries.gauges.Radial2Top inflowGauge;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField2;
     private javax.swing.JLabel lblBack;
     private javax.swing.JLabel lblEtaHyd;
     private javax.swing.JLabel lblEtaSed;
@@ -90,6 +95,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
     private javax.swing.JLabel lblTitle;
     private javax.swing.JLabel lblTotalOverflow;
     private javax.swing.JPanel panButtons;
+    private javax.swing.JPanel panControl;
     private javax.swing.JPanel panFooter;
     private javax.swing.JPanel panFooterLeft;
     private javax.swing.JPanel panFooterRight;
@@ -177,6 +183,12 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         waterLevelGauge = new eu.hansolo.steelseries.gauges.Radial2Top();
         inflowGauge = new eu.hansolo.steelseries.gauges.Radial2Top();
         panPage2 = new javax.swing.JPanel();
+        panControl = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        jTextField2 = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
         wwtpSensorsLabel = new javax.swing.JLabel();
 
         panFooter.setOpaque(false);
@@ -194,21 +206,16 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
 
         lblBack.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblBack.setForeground(new java.awt.Color(255, 255, 255));
-        lblBack.setText(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.lblBack.text"));         // NOI18N
+        lblBack.setText("Current");
         lblBack.setEnabled(false);
         lblBack.addMouseListener(new java.awt.event.MouseAdapter() {
-
-                @Override
-                public void mouseClicked(final java.awt.event.MouseEvent evt) {
-                    lblBackMouseClicked(evt);
-                }
-            });
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblBackMouseClicked(evt);
+            }
+        });
         panFooterLeft.add(lblBack);
 
-        btnBack.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/arrow-left.png"))); // NOI18N
+        btnBack.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/arrow-left.png"))); // NOI18N
         btnBack.setBorderPainted(false);
         btnBack.setContentAreaFilled(false);
         btnBack.setEnabled(false);
@@ -217,12 +224,10 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         btnBack.setMinimumSize(new java.awt.Dimension(30, 30));
         btnBack.setPreferredSize(new java.awt.Dimension(30, 30));
         btnBack.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    btnBackActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBackActionPerformed(evt);
+            }
+        });
         panFooterLeft.add(btnBack);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -233,8 +238,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         panFooterRight.setOpaque(false);
         panFooterRight.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 5));
 
-        btnForward.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/arrow-right.png"))); // NOI18N
+        btnForward.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/arrow-right.png"))); // NOI18N
         btnForward.setBorderPainted(false);
         btnForward.setContentAreaFilled(false);
         btnForward.setFocusPainted(false);
@@ -242,26 +246,20 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         btnForward.setMinimumSize(new java.awt.Dimension(30, 30));
         btnForward.setPreferredSize(new java.awt.Dimension(30, 30));
         btnForward.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    btnForwardActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnForwardActionPerformed(evt);
+            }
+        });
         panFooterRight.add(btnForward);
 
         lblForw.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblForw.setForeground(new java.awt.Color(255, 255, 255));
-        lblForw.setText(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.lblForw.text"));         // NOI18N
+        lblForw.setText("Historic");
         lblForw.addMouseListener(new java.awt.event.MouseAdapter() {
-
-                @Override
-                public void mouseClicked(final java.awt.event.MouseEvent evt) {
-                    lblForwMouseClicked(evt);
-                }
-            });
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblForwMouseClicked(evt);
+            }
+        });
         panFooterRight.add(lblForw);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -275,9 +273,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
 
         lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         lblTitle.setForeground(new java.awt.Color(255, 255, 255));
-        lblTitle.setText(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.lblTitle.text"));         // NOI18N
+        lblTitle.setText(org.openide.util.NbBundle.getMessage(LinzSensorRenderer.class, "LinzSensorRenderer.lblTitle.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -286,13 +282,14 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         panTitle.add(lblTitle, gridBagConstraints);
 
         setBackground(new java.awt.Color(204, 204, 204));
+        setMinimumSize(new java.awt.Dimension(0, 0));
         setOpaque(false);
         setLayout(new java.awt.CardLayout());
 
         panPage1.setBackground(new java.awt.Color(204, 204, 204));
         panPage1.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 0, 15));
         panPage1.setOpaque(false);
-        panPage1.setPreferredSize(new java.awt.Dimension(600, 400));
+        panPage1.setPreferredSize(new java.awt.Dimension(800, 500));
         panPage1.setLayout(new java.awt.GridBagLayout());
 
         lblEtaHyd.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
@@ -302,7 +299,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 40);
         panPage1.add(lblEtaHyd, gridBagConstraints);
 
@@ -313,7 +310,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(10, 40, 10, 10);
         panPage1.add(lblEtaSed, gridBagConstraints);
 
@@ -324,30 +321,29 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         codDeqGauge.setLedVisible(false);
         codDeqGauge.setMaxValue(2000.0);
         codDeqGauge.setMaximumSize(new java.awt.Dimension(400, 400));
+        codDeqGauge.setPreferredSize(new java.awt.Dimension(220, 220));
         codDeqGauge.setSectionsVisible(true);
         codDeqGauge.setThreshold(0.0);
         codDeqGauge.setThresholdType(eu.hansolo.steelseries.tools.ThresholdType.ARROW);
         codDeqGauge.setTitle("CODeq");
         codDeqGauge.setUnitString("mg/L");
 
-        final org.jdesktop.layout.GroupLayout codDeqGaugeLayout = new org.jdesktop.layout.GroupLayout(codDeqGauge);
+        org.jdesktop.layout.GroupLayout codDeqGaugeLayout = new org.jdesktop.layout.GroupLayout(codDeqGauge);
         codDeqGauge.setLayout(codDeqGaugeLayout);
         codDeqGaugeLayout.setHorizontalGroup(
-            codDeqGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
+            codDeqGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 200, Short.MAX_VALUE)
+        );
         codDeqGaugeLayout.setVerticalGroup(
-            codDeqGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
+            codDeqGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 200, Short.MAX_VALUE)
+        );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 40);
         panPage1.add(codDeqGauge, gridBagConstraints);
@@ -359,33 +355,30 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         tssSeqGauge.setLedVisible(false);
         tssSeqGauge.setMaxValue(1800.0);
         tssSeqGauge.setMaximumSize(new java.awt.Dimension(400, 400));
-        tssSeqGauge.setName(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.tssSeqGauge.name")); // NOI18N
+        tssSeqGauge.setName(org.openide.util.NbBundle.getMessage(LinzSensorRenderer.class, "LinzSensorRenderer.tssSeqGauge.name")); // NOI18N
+        tssSeqGauge.setPreferredSize(new java.awt.Dimension(220, 220));
         tssSeqGauge.setSectionsVisible(true);
         tssSeqGauge.setThreshold(0.0);
         tssSeqGauge.setThresholdType(eu.hansolo.steelseries.tools.ThresholdType.ARROW);
         tssSeqGauge.setTitle("TSSeq");
         tssSeqGauge.setUnitString("mg/L");
 
-        final org.jdesktop.layout.GroupLayout tssSeqGaugeLayout = new org.jdesktop.layout.GroupLayout(tssSeqGauge);
+        org.jdesktop.layout.GroupLayout tssSeqGaugeLayout = new org.jdesktop.layout.GroupLayout(tssSeqGauge);
         tssSeqGauge.setLayout(tssSeqGaugeLayout);
         tssSeqGaugeLayout.setHorizontalGroup(
-            tssSeqGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
+            tssSeqGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 200, Short.MAX_VALUE)
+        );
         tssSeqGaugeLayout.setVerticalGroup(
-            tssSeqGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
+            tssSeqGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 200, Short.MAX_VALUE)
+        );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(10, 40, 10, 10);
         panPage1.add(tssSeqGauge, gridBagConstraints);
@@ -397,7 +390,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 40);
         panPage1.add(lblR720, gridBagConstraints);
 
@@ -408,7 +401,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(10, 40, 10, 10);
         panPage1.add(lblTotalOverflow, gridBagConstraints);
 
@@ -420,35 +413,29 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         waterLevelGauge.setMaximumSize(new java.awt.Dimension(300, 300));
         waterLevelGauge.setTitle("Water level");
         waterLevelGauge.setTransparentAreasEnabled(true);
-        waterLevelGauge.setUnitString(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.waterLevelGauge.unitString")); // NOI18N
+        waterLevelGauge.setUnitString(org.openide.util.NbBundle.getMessage(LinzSensorRenderer.class, "LinzSensorRenderer.waterLevelGauge.unitString")); // NOI18N
 
-        final org.jdesktop.layout.GroupLayout waterLevelGaugeLayout = new org.jdesktop.layout.GroupLayout(
-                waterLevelGauge);
+        org.jdesktop.layout.GroupLayout waterLevelGaugeLayout = new org.jdesktop.layout.GroupLayout(waterLevelGauge);
         waterLevelGauge.setLayout(waterLevelGaugeLayout);
         waterLevelGaugeLayout.setHorizontalGroup(
-            waterLevelGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
+            waterLevelGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 200, Short.MAX_VALUE)
+        );
         waterLevelGaugeLayout.setVerticalGroup(
-            waterLevelGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
+            waterLevelGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 200, Short.MAX_VALUE)
+        );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 40);
         panPage1.add(waterLevelGauge, gridBagConstraints);
 
-        inflowGauge.setToolTipText(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.inflowGauge.toolTipText")); // NOI18N
+        inflowGauge.setToolTipText(org.openide.util.NbBundle.getMessage(LinzSensorRenderer.class, "LinzSensorRenderer.inflowGauge.toolTipText")); // NOI18N
         inflowGauge.setAreasVisible(true);
         inflowGauge.setFrameDesign(eu.hansolo.steelseries.tools.FrameDesign.SHINY_METAL);
         inflowGauge.setGaugeType(eu.hansolo.steelseries.tools.GaugeType.TYPE1);
@@ -458,43 +445,92 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         inflowGauge.setTitle("Qinflow");
         inflowGauge.setTrackSection(600.0);
         inflowGauge.setTrackStop(2000.0);
-        inflowGauge.setUnitString(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.inflowGauge.unitString"));  // NOI18N
+        inflowGauge.setUnitString(org.openide.util.NbBundle.getMessage(LinzSensorRenderer.class, "LinzSensorRenderer.inflowGauge.unitString")); // NOI18N
 
-        final org.jdesktop.layout.GroupLayout inflowGaugeLayout = new org.jdesktop.layout.GroupLayout(inflowGauge);
+        org.jdesktop.layout.GroupLayout inflowGaugeLayout = new org.jdesktop.layout.GroupLayout(inflowGauge);
         inflowGauge.setLayout(inflowGaugeLayout);
         inflowGaugeLayout.setHorizontalGroup(
-            inflowGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
+            inflowGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 200, Short.MAX_VALUE)
+        );
         inflowGaugeLayout.setVerticalGroup(
-            inflowGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
+            inflowGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 200, Short.MAX_VALUE)
+        );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(10, 40, 0, 10);
         panPage1.add(inflowGauge, gridBagConstraints);
 
         add(panPage1, "CARD1");
 
+        panPage2.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));
         panPage2.setOpaque(false);
-        panPage2.setLayout(new java.awt.BorderLayout());
+        panPage2.setPreferredSize(new java.awt.Dimension(400, 400));
+        panPage2.setLayout(new java.awt.BorderLayout(15, 15));
 
-        wwtpSensorsLabel.setText(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.wwtpSensorsLabel.text")); // NOI18N
+        panControl.setOpaque(false);
+        panControl.setPreferredSize(new java.awt.Dimension(800, 40));
+        panControl.setRequestFocusEnabled(false);
+        panControl.setLayout(new java.awt.GridBagLayout());
+
+        jLabel1.setText(org.openide.util.NbBundle.getMessage(LinzSensorRenderer.class, "LinzSensorRenderer.jLabel1.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        panControl.add(jLabel1, gridBagConstraints);
+
+        jTextField1.setText(org.openide.util.NbBundle.getMessage(LinzSensorRenderer.class, "LinzSensorRenderer.jTextField1.text")); // NOI18N
+        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField1ActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        panControl.add(jTextField1, gridBagConstraints);
+
+        jLabel3.setText(org.openide.util.NbBundle.getMessage(LinzSensorRenderer.class, "LinzSensorRenderer.jLabel3.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
+        panControl.add(jLabel3, gridBagConstraints);
+
+        jTextField2.setText(org.openide.util.NbBundle.getMessage(LinzSensorRenderer.class, "LinzSensorRenderer.jTextField2.text")); // NOI18N
+        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField2ActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        panControl.add(jTextField2, gridBagConstraints);
+
+        jButton1.setText("OK");
+        jButton1.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 10);
+        panControl.add(jButton1, gridBagConstraints);
+
+        panPage2.add(panControl, java.awt.BorderLayout.PAGE_START);
+
+        wwtpSensorsLabel.setBackground(new java.awt.Color(255, 255, 255));
+        wwtpSensorsLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        wwtpSensorsLabel.setText(org.openide.util.NbBundle.getMessage(LinzSensorRenderer.class, "LinzSensorRenderer.wwtpSensorsLabel.text")); // NOI18N
         panPage2.add(wwtpSensorsLabel, java.awt.BorderLayout.CENTER);
 
         add(panPage2, "CARD2");
-    } // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
@@ -543,6 +579,26 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
     private void lblForwMouseClicked(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblForwMouseClicked
         btnForwardActionPerformed(null);
     }//GEN-LAST:event_lblForwMouseClicked
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jTextField1ActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_jTextField1ActionPerformed
+    {//GEN-HEADEREND:event_jTextField1ActionPerformed
+                                                                                  // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField1ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jTextField2ActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_jTextField2ActionPerformed
+    {//GEN-HEADEREND:event_jTextField2ActionPerformed
+                                                                                  // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField2ActionPerformed
 
     @Override
     public Border getCenterrBorder() {
@@ -616,7 +672,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
                 this.codDeqGauge.setValueAnimated(codDeq);
             }
 
-            final double waterLevel = Math.random() * 10;
+            final double waterLevel = Math.random() * 3;
             if ((waterLevel > 0.2) && (waterLevel < 2.2)) {
                 this.waterLevelGauge.setValueAnimated(waterLevel);
             }
@@ -661,7 +717,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         @Override
         protected ImageIcon doInBackground() throws Exception {
             ImageIcon result = null;
-            result = new ImageIcon(ImageUtil.adjustScale(wwtpSensorsImage, panPage2, 0, 0));
+            result = new ImageIcon(ImageUtil.adjustScale(wwtpSensorsImage, wwtpSensorsLabel, 0, 0));
 
             return result;
         }

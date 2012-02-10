@@ -55,7 +55,6 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
     private javax.swing.JScrollPane jScrollPaneStations;
     private javax.swing.JPanel stationsPanel;
     private javax.swing.JTable tblStations;
-    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -89,8 +88,8 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
     void init() {
         this.stationsTableModel.setSelectedStations(model.getStationsIds());
 
-        this.bindingGroup.unbind();
-        this.bindingGroup.bind();
+        // this.bindingGroup.unbind();
+        // this.bindingGroup.bind();
     }
 
     /**
@@ -155,7 +154,7 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
+        java.awt.GridBagConstraints gridBagConstraints;
 
         stationsPanel = new javax.swing.JPanel();
         jScrollPaneStations = new javax.swing.JScrollPane();
@@ -163,100 +162,66 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
         forecastPanel = new javax.swing.JPanel();
         chbForecast = new javax.swing.JCheckBox();
 
+        setLayout(new java.awt.GridBagLayout());
+
         stationsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
                     SwmmWizardPanelStationsUI.class,
                     "SwmmWizardPanelStationsUI.stationsPanel.border.title"))); // NOI18N
+        stationsPanel.setLayout(new java.awt.GridBagLayout());
+
+        jScrollPaneStations.setPreferredSize(new java.awt.Dimension(200, 150));
 
         tblStations.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
                 new String[] {}));
         jScrollPaneStations.setViewportView(tblStations);
 
-        final javax.swing.GroupLayout stationsPanelLayout = new javax.swing.GroupLayout(stationsPanel);
-        stationsPanel.setLayout(stationsPanelLayout);
-        stationsPanelLayout.setHorizontalGroup(
-            stationsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                stationsPanelLayout.createSequentialGroup().addContainerGap().addComponent(
-                    jScrollPaneStations,
-                    javax.swing.GroupLayout.PREFERRED_SIZE,
-                    425,
-                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE)));
-        stationsPanelLayout.setVerticalGroup(
-            stationsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(
-                jScrollPaneStations,
-                javax.swing.GroupLayout.PREFERRED_SIZE,
-                184,
-                javax.swing.GroupLayout.PREFERRED_SIZE));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 10, 10);
+        stationsPanel.add(jScrollPaneStations, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 5, 10);
+        add(stationsPanel, gridBagConstraints);
 
         forecastPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
                     SwmmWizardPanelStationsUI.class,
                     "SwmmWizardPanelStationsUI.forecastPanel.border.title"))); // NOI18N
+        forecastPanel.setLayout(new java.awt.GridBagLayout());
 
         org.openide.awt.Mnemonics.setLocalizedText(
             chbForecast,
             org.openide.util.NbBundle.getMessage(
                 SwmmWizardPanelStationsUI.class,
                 "SwmmWizardPanelStationsUI.chbForecast.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        forecastPanel.add(chbForecast, gridBagConstraints);
 
-        final org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${model.swmmInput.forecast}"),
-                chbForecast,
-                org.jdesktop.beansbinding.BeanProperty.create("selected"),
-                "forecast");
-        binding.setSourceNullValue(false);
-        binding.setSourceUnreadableValue(false);
-        bindingGroup.addBinding(binding);
-
-        final javax.swing.GroupLayout forecastPanelLayout = new javax.swing.GroupLayout(forecastPanel);
-        forecastPanel.setLayout(forecastPanelLayout);
-        forecastPanelLayout.setHorizontalGroup(
-            forecastPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                forecastPanelLayout.createSequentialGroup().addComponent(chbForecast).addContainerGap(
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE)));
-        forecastPanelLayout.setVerticalGroup(
-            forecastPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                javax.swing.GroupLayout.Alignment.TRAILING,
-                forecastPanelLayout.createSequentialGroup().addContainerGap(
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE).addComponent(chbForecast).addContainerGap()));
-
-        final javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addGroup(
-                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false).addComponent(
-                        stationsPanel,
-                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE).addComponent(
-                        forecastPanel,
-                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE)).addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addComponent(
-                    stationsPanel,
-                    javax.swing.GroupLayout.PREFERRED_SIZE,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    javax.swing.GroupLayout.PREFERRED_SIZE).addPreferredGap(
-                    javax.swing.LayoutStyle.ComponentPlacement.UNRELATED).addComponent(
-                    forecastPanel,
-                    javax.swing.GroupLayout.PREFERRED_SIZE,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE)));
-
-        bindingGroup.bind();
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 10, 10);
+        add(forecastPanel, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
     /**
@@ -281,8 +246,10 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
 
         private final MetaObject[] stations;
         private final boolean[] selectedStations;
-        private final String[] columnNames = { "Name", "Beschreibung", "Auswahl" };
-        private final Class[] columnClasses = { String.class, String.class, Boolean.class };
+        // private final String[] columnNames = { "Name", "Beschreibung", "Auswahl" };
+        // private final Class[] columnClasses = { String.class, String.class, Boolean.class };
+        private final String[] columnNames = { "Name", "Auswahl" };
+        private final Class[] columnClasses = { String.class, Boolean.class };
 
         //~ Constructors -------------------------------------------------------
 
@@ -314,10 +281,10 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
                 case 0: {
                     return stations[rowIndex].getName();
                 }
+//                case 1: {
+//                    return "keine Beschreibung vorhanden";
+//                }
                 case 1: {
-                    return "keine Beschreibung vorhanden";
-                }
-                case 2: {
                     return selectedStations[rowIndex];
                 }
             }
@@ -332,7 +299,7 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
 //                            + " to " + value + " (an instance of " + value.getClass() + ")");
 //            }
 
-            if (col == 2) {
+            if (col == 1) {
                 this.selectedStations[row] = (Boolean)value;
             }
 
@@ -354,7 +321,7 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
 
         @Override
         public boolean isCellEditable(final int row, final int col) {
-            return col == 2;
+            return col == 1;
         }
 
         /**
