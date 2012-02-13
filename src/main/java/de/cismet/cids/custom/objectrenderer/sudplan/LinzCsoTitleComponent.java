@@ -25,9 +25,8 @@ public class LinzCsoTitleComponent extends javax.swing.JPanel {
 
     private static final transient Logger LOG = Logger.getLogger(LinzCsoTitleComponent.class);
 
-    //~ Instance fields --------------------------------------------------------
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel lblIcon;
     private javax.swing.JLabel lblTitle;
     // End of variables declaration//GEN-END:variables
 
@@ -68,18 +67,29 @@ public class LinzCsoTitleComponent extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        final java.awt.GridBagConstraints gridBagConstraints;
+        java.awt.GridBagConstraints gridBagConstraints;
 
+        lblIcon = new javax.swing.JLabel();
         lblTitle = new javax.swing.JLabel();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
+        lblIcon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblIcon.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/EPAlogo32bt.png"))); // NOI18N
+        lblIcon.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoTitleComponent.class,
+                "LinzCsoTitleComponent.lblIcon.text"));                                                // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 15, 5, 5);
+        add(lblIcon, gridBagConstraints);
+
         lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18));                                                      // NOI18N
         lblTitle.setForeground(new java.awt.Color(255, 255, 255));
         lblTitle.setText(NbBundle.getMessage(LinzCsoTitleComponent.class, "LinzCsoTitleComponent.lblTitle.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;

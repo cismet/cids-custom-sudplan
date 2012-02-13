@@ -134,7 +134,7 @@ public class CsoTotalOverflowComparisionPanel extends javax.swing.JPanel {
 
         final PiePlot subChartsPlot = (PiePlot)subchart.getPlot();
         subChartsPlot.setExplodePercent(dataset.getColumnKey(1).toString(), 0.25);
-        subChartsPlot.setSectionPaint(dataset.getColumnKey(0).toString(), new Color(125, 26, 12));
+        subChartsPlot.setSectionPaint(dataset.getColumnKey(0).toString(), new Color(142, 91, 62));
         subChartsPlot.setSectionPaint(dataset.getColumnKey(1).toString(), new Color(168, 107, 76));
         subChartsPlot.setLabelGenerator(new StandardPieSectionLabelGenerator(
                 "{1}",

@@ -112,7 +112,8 @@ public class TotalOverflowComparisionPanel extends javax.swing.JPanel {
 // 0.0f,
 // Color.lightGray);
 
-        renderer.setSeriesPaint(0, new Color(128, 26, 12));
+        // renderer.setSeriesPaint(0, new Color(128, 26, 12));
+        renderer.setSeriesPaint(0, new Color(142, 91, 62));
 
         final CategoryAxis domainAxis = plot.getDomainAxis();
         domainAxis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);

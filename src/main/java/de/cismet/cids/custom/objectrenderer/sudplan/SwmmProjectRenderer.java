@@ -52,8 +52,8 @@ import de.cismet.tools.gui.TitleComponentProvider;
  * @author   pascal.dihe@cismet.de
  * @version  $Revision$, $Date$
  */
-public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider,
-    RequestsFullSizeComponent {
+public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider
+/*, RequestsFullSizeComponent*/ {
 
     //~ Static fields/initializers ---------------------------------------------
 

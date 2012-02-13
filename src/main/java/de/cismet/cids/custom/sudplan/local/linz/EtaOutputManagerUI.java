@@ -35,13 +35,15 @@ import javax.swing.SwingUtilities;
 
 import de.cismet.cids.dynamics.CidsBean;
 
+import de.cismet.cids.tools.metaobjectrenderer.Titled;
+
 /**
  * DOCUMENT ME!
  *
  * @author   pd
  * @version  $Revision$, $Date$
  */
-public class EtaOutputManagerUI extends javax.swing.JPanel {
+public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -747,4 +749,23 @@ public class EtaOutputManagerUI extends javax.swing.JPanel {
         setOpaque(false);
         setLayout(new java.awt.GridLayout(1, 0, 50, 50));
     } // </editor-fold>//GEN-END:initComponents
+
+    @Override
+    public String getTitle() {
+        if ((this.outputManager.getCidsBeans() != null) && !this.outputManager.getCidsBeans().isEmpty()) {
+            org.openide.util.NbBundle.getMessage(
+                    EtaOutputManagerUI.class,
+                    "EtaOutputManagerUI.title.aggregated")
+                    .replaceAll("%n", String.valueOf(this.outputManager.getCidsBeans().size()));
+        } else if (this.outputManager.getCidsBean() != null) {
+            return this.outputManager.getCidsBean().getProperty("name").toString();
+        }
+
+        return "";
+    }
+
+    @Override
+    public void setTitle(final String title) {
+        LOG.warn("set title '" + title + "' not supported by this UI");
+    }
 }

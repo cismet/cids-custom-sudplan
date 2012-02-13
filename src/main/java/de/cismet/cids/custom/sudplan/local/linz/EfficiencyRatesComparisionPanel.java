@@ -27,7 +27,6 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
-import java.awt.GradientPaint;
 
 import java.text.DecimalFormat;
 

@@ -114,6 +114,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
 
     //~ Instance fields --------------------------------------------------------
 
+    private final transient LinzCsoTitleComponent linzCsoTitleComponent = new LinzCsoTitleComponent();
+
     // private final transient LinzCsoTitleComponent titleComponent = new LinzCsoTitleComponent();
     private final transient Timer timer;
     private final transient CardLayout cardLayout;
@@ -704,6 +706,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panLinksSpacer.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
@@ -1199,6 +1202,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
             if (storageUnit != null) {
                 final CidsBean linkBean = (CidsBean)storageUnit;
                 final String key = "STORAGE_UNIT::" + linkBean.getProperty("id");
+                beansMap.put(key, linkBean);
                 final JXHyperlink hyperLink = new JXHyperlink();
                 hyperLink.setText((String)linkBean.getProperty("name")); // NOI18N
                 hyperLink.setActionCommand(key);
@@ -1216,14 +1220,15 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
 
     @Override
     public JComponent getTitleComponent() {
-        return panTitle;
+        return this.linzCsoTitleComponent;
     }
 
     @Override
     public void setTitle(final String title) {
         super.setTitle(title);
-        this.lblTitle.setText(title);
+        // this.lblTitle.setText(title);
         // titleComponent.setTitle(title);
+        this.linzCsoTitleComponent.setTitle(title);
     }
 
     @Override

@@ -9,21 +9,19 @@ package de.cismet.cids.custom.featurerenderer.sudplan;
 
 import org.apache.log4j.Logger;
 
-import java.awt.BorderLayout;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import java.net.MalformedURLException;
-
 import javax.imageio.ImageIO;
 
-import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
+import javax.swing.JComponent;
 
 import de.cismet.cids.featurerenderer.CustomCidsFeatureRenderer;
 
+import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 
 /**
@@ -32,15 +30,15 @@ import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
-public class TimeseriesFeatureRenderer extends CustomCidsFeatureRenderer {
+public class LinzSensorFeatureRenderer extends CustomCidsFeatureRenderer {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final transient Logger LOG = Logger.getLogger(TimeseriesFeatureRenderer.class);
+    private static final transient Logger LOG = Logger.getLogger(LinzSensorFeatureRenderer.class);
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient Image rainPointSymbolUnselected;
+    private final transient Image rainstationPointSymbolUnselected;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -50,17 +48,17 @@ public class TimeseriesFeatureRenderer extends CustomCidsFeatureRenderer {
     /**
      * Creates new form TimeseriesFeatureRenderer.
      */
-    public TimeseriesFeatureRenderer() {
+    public LinzSensorFeatureRenderer() {
         initComponents();
         BufferedImage image = null;
         try {
-            final InputStream is = getClass().getResourceAsStream("rain.png"); // NOI18N
+            final InputStream is = getClass().getResourceAsStream("sensor.png"); // NOI18N
             image = ImageIO.read(is);
         } catch (final IOException ex) {
-            LOG.warn("cannot load timeseries feature icon", ex);               // NOI18N
+            LOG.warn("cannot load sensor feature icon", ex);                     // NOI18N
         }
 
-        rainPointSymbolUnselected = image;
+        rainstationPointSymbolUnselected = image;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -80,32 +78,20 @@ public class TimeseriesFeatureRenderer extends CustomCidsFeatureRenderer {
 
     /**
      * DOCUMENT ME!
-     *
-     * @throws  IllegalStateException  DOCUMENT ME!
      */
     @Override
     public void assign() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("assign");                                                                              // NOI18N
-        }
-        try {
-            final TimeseriesChartPanel panel = new TimeseriesChartPanel((String)cidsBean.getProperty("uri")); // NOI18N
-            add(panel, BorderLayout.CENTER);
-        } catch (final MalformedURLException ex) {
-            final String message = "cidsbean contains invalid uri";                                           // NOI18N
-            LOG.error(message, ex);
-            throw new IllegalStateException(message, ex);
-        }
+        // nothing to do
     }
 
     // TODO: not necessarily only rain symbol, symbol selection must be cidsbean dependent
     @Override
     public FeatureAnnotationSymbol getPointSymbol() {
-        if (rainPointSymbolUnselected == null) {
+        if (rainstationPointSymbolUnselected == null) {
             return super.getPointSymbol();
         } else {
             return FeatureAnnotationSymbol.newCustomSweetSpotFeatureAnnotationSymbol(
-                    rainPointSymbolUnselected,
+                    rainstationPointSymbolUnselected,
                     null,
                     0.5,
                     0.9);
@@ -115,5 +101,10 @@ public class TimeseriesFeatureRenderer extends CustomCidsFeatureRenderer {
     @Override
     public float getTransparency() {
         return 0.9f;
+    }
+
+    @Override
+    public JComponent getInfoComponent(final Refreshable refresh) {
+        return null;
     }
 }

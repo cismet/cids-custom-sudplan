@@ -65,16 +65,17 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
     //~ Instance fields --------------------------------------------------------
 
     private CardLayout cardLayout = null;
-    private String title;
+    // private String title;
     private final Timer timer;
     private LinzSensorRenderer.ImageResizeWorker currentResizeWorker;
     private boolean firstPageShowing = true;
     private transient BufferedImage wwtpSensorsImage;
-    private transient BufferedImage secondPageImage;
+    // private transient BufferedImage secondPageImage;
+    private final transient LinzSensorTitleComponent linzSensorTitleComponent = new LinzSensorTitleComponent();
 
     private final javax.swing.Timer TIMER = new javax.swing.Timer(3000, this);
     private final javax.swing.Timer TIMER1 = new javax.swing.Timer(3500, this);
-    private final javax.swing.Timer TIMER2 = new javax.swing.Timer(2500, this);
+    // private final javax.swing.Timer TIMER2 = new javax.swing.Timer(2500, this);
 
     private boolean resizeListenerEnabled = true;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -667,14 +668,11 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
     }
 
     @Override
-    public String getTitle() {
-        return title;
-    }
-
-    @Override
     public void setTitle(final String title) {
-        this.title = title;
-        lblTitle.setText(this.title);
+        super.setTitle(title);
+        this.linzSensorTitleComponent.setTitle(title);
+        // this.title = title;
+        // lblTitle.setText(this.title);
     }
 
     @Override
@@ -684,7 +682,8 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
 
     @Override
     public JComponent getTitleComponent() {
-        return panTitle;
+        // return panTitle;
+        return linzSensorTitleComponent;
     }
 
     /**

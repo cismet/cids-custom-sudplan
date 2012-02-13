@@ -127,7 +127,7 @@ public class CsoOverflowComparisionPanel extends javax.swing.JPanel {
 // 0.0f,
 // new Color(168, 107, 76));
 
-        renderer.setSeriesPaint(0, new Color(128, 26, 12));
+        renderer.setSeriesPaint(0, new Color(142, 91, 62));
 
         final CategoryItemRenderer categoryRenderer = (CategoryItemRenderer)plot.getRenderer();
         final CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(

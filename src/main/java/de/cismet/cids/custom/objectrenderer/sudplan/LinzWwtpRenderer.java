@@ -71,6 +71,7 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
     private boolean firstPageShowing = true;
     private transient BufferedImage firstPageImage;
     private transient BufferedImage secondPageImage;
+    private final transient LinzWwtpTitleComponent linzWwtpTitleComponent = new LinzWwtpTitleComponent();
 
     private boolean resizeListenerEnabled = true;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -387,7 +388,8 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
     @Override
     public void setTitle(final String title) {
         this.title = title;
-        lblTitle.setText(this.title);
+        // lblTitle.setText(this.title);
+        linzWwtpTitleComponent.setTitle(title);
     }
 
     @Override
@@ -397,7 +399,8 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
 
     @Override
     public JComponent getTitleComponent() {
-        return panTitle;
+        // return panTitle;
+        return this.linzWwtpTitleComponent;
     }
 
     /**
