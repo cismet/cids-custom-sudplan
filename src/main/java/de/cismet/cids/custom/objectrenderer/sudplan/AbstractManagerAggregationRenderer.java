@@ -14,6 +14,7 @@ import java.awt.EventQueue;
 
 import java.io.IOException;
 
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanAggregationRenderer;
@@ -23,6 +24,8 @@ import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 import de.cismet.cids.dynamics.CidsBeanCollectionStore;
+
+import de.cismet.cids.tools.metaobjectrenderer.Titled;
 
 /**
  * DOCUMENT ME!
@@ -86,17 +89,15 @@ public abstract class AbstractManagerAggregationRenderer extends AbstractCidsBea
         }
 
         if (allSameManagers) {
-            // FIXME: proper title
-            setTitle(cidsBeans.size() + " " + titleSuffix); // NOI18N
-
             final Manager candidate = SMSUtils.loadManagerFromDefinition(managerClass);
 
             if (candidate instanceof CidsBeanCollectionStore) {
                 this.manager = candidate;
                 ((CidsBeanCollectionStore)this.manager).setCidsBeans(cidsBeans);
+                setTitle(cidsBeans.size() + " " + titleSuffix);                 // NOI18N
             } else {
-                LOG.warn("manager '" + candidate + "' (" + candidate.getClass()
-                            + ") is not of type CidsBeanCollectionStore");
+                LOG.warn("manager '" + candidate + "' (" + candidate.getClass() // NOI18N
+                            + ") is not of type CidsBeanCollectionStore");      // NOI18N
             }
         }
 
@@ -134,7 +135,11 @@ public abstract class AbstractManagerAggregationRenderer extends AbstractCidsBea
             // FIXME: proper error panel
             this.add(new JLabel("Manager does not support aggregation"), BorderLayout.CENTER); // NOI18N
         } else {
-            this.add(manager.getUI(), BorderLayout.CENTER);
+            final JComponent ui = manager.getUI();
+            if (ui instanceof Titled) {
+                setTitle(((Titled)ui).getTitle());
+            }
+            this.add(ui, BorderLayout.CENTER);
         }
         this.revalidate();
     }

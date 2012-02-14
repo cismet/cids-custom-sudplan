@@ -34,7 +34,8 @@ public final class RunoffModelManager extends AbstractAsyncModelManager {
 
     private static final transient Logger LOG = Logger.getLogger(RunoffModelManager.class);
 
-    public static final String CLIENT_URL = "http://192.168.100.12:9986/GeoCPM"; // NOI18N
+//    public static final String CLIENT_URL = "http://192.168.100.12:9986/GeoCPM"; // NOI18N
+    public static final String CLIENT_URL = "http://localhost:9988/GeoCPM"; // NOI18N
 
     //~ Methods ----------------------------------------------------------------
 

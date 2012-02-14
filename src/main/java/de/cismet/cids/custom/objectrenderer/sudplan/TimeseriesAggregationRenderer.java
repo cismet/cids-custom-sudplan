@@ -48,7 +48,6 @@ public class TimeseriesAggregationRenderer extends JPanel implements CidsBeanAgg
     //~ Instance fields --------------------------------------------------------
 
     private Collection<CidsBean> cidsBeans;
-    private String title;
     private transient TimeseriesChartPanel panel;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
@@ -115,13 +114,15 @@ public class TimeseriesAggregationRenderer extends JPanel implements CidsBeanAgg
 
     @Override
     public String getTitle() {
-        return title;
+        if (cidsBeans == null) {
+            return "Comparison of 0 Time series";                        // NOI18N
+        } else {
+            return "Comparison of " + cidsBeans.size() + " Time series"; // NOI18N
+        }
     }
 
     @Override
     public void setTitle(final String title) {
-        if (title != null) {
-            this.title = title;
-        }
+        // noop
     }
 }

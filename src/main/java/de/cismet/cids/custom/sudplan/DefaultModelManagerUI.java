@@ -36,6 +36,7 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnRun;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JProgressBar jpbStatus;
     private javax.swing.JLabel lblExecStatus;
     private javax.swing.JLabel lblStatus;
@@ -153,6 +154,7 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
         btnRun = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
@@ -188,7 +190,7 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
-        gridBagConstraints.insets = new java.awt.Insets(8, 0, 5, 10);
+        gridBagConstraints.insets = new java.awt.Insets(5, 1, 5, 5);
         add(btnRun, gridBagConstraints);
 
         btnCancel.setText(NbBundle.getMessage(DefaultModelManagerUI.class, "DefaultModelManagerUI.btnCancel.text")); // NOI18N
@@ -196,8 +198,7 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(8, 10, 5, 8);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 1);
         add(btnCancel, gridBagConstraints);
 
         lblStatus.setText(NbBundle.getMessage(DefaultModelManagerUI.class, "DefaultModelManagerUI.lblStatus.text")); // NOI18N
@@ -209,7 +210,15 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 5);
         add(lblStatus, gridBagConstraints);
-    }                                                                                                                // </editor-fold>//GEN-END:initComponents
+
+        jPanel1.setOpaque(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        add(jPanel1, gridBagConstraints);
+    } // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
 

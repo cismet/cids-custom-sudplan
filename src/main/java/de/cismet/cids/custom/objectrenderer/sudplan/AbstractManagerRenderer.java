@@ -21,13 +21,15 @@ import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 
+import de.cismet.tools.gui.TitleComponentProvider;
+
 /**
  * DOCUMENT ME!
  *
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
-public abstract class AbstractManagerRenderer extends AbstractCidsBeanRenderer {
+public abstract class AbstractManagerRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -37,6 +39,8 @@ public abstract class AbstractManagerRenderer extends AbstractCidsBeanRenderer {
 
     private transient Manager manager;
 
+    private transient volatile ManagerTitleComponent titleComp;
+
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -44,7 +48,8 @@ public abstract class AbstractManagerRenderer extends AbstractCidsBeanRenderer {
      */
     @Override
     protected void init() {
-        setTitle((String)cidsBean.getProperty("name"));                     // NOI18N
+        getTitleComponent().setTitle((String)cidsBean.getProperty("name")); // NOI18N
+        getTitleComponent().setIcon(getType());
         final CidsBean modelBean = (CidsBean)cidsBean.getProperty("model"); // NOI18N
         manager = SMSUtils.loadManagerFromModel(modelBean, getType());
         manager.setCidsBean(cidsBean);
@@ -97,5 +102,18 @@ public abstract class AbstractManagerRenderer extends AbstractCidsBeanRenderer {
             LOG.error(message, ex);
             throw new IllegalStateException(message, ex);
         }
+    }
+
+    @Override
+    public ManagerTitleComponent getTitleComponent() {
+        if (titleComp == null) {
+            synchronized (this) {
+                if (titleComp == null) {
+                    titleComp = new ManagerTitleComponent();
+                }
+            }
+        }
+
+        return titleComp;
     }
 }
