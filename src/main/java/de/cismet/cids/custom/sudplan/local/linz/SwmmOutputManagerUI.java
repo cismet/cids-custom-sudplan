@@ -12,6 +12,7 @@
  */
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import Sirius.navigator.resource.PropertyManager;
 import Sirius.navigator.ui.ComponentRegistry;
 
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
@@ -69,8 +70,8 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final XBoundingBox LINZ_BB = new XBoundingBox(13.979, 48.102, 14.521, 48.473, "EPSG:4326", false);
-    public static final String GEOSERVER_HOST = "http://schlob-pc:9987";
-    public static final String SWMM_WMS_TEMPLATE = GEOSERVER_HOST + "/geoserver/sudplan/wms?service=WMS"
+    // public static final String GEOSERVER_HOST = "http://schlob-pc:9987";
+    public static final String SWMM_WMS_TEMPLATE = "geoserver/sudplan/wms?service=WMS"
                 + "&version=1.1.0&request=GetMap&layers=%LAYERS%"
                 + "&styles=&bbox=<cismap:boundingBox>&width=<cismap:width>"
                 + "&height=<cismap:height>&srs=EPSG:4326"
@@ -79,6 +80,8 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
     private static final transient Logger LOG = Logger.getLogger(SwmmOutputManagerUI.class);
 
     //~ Instance fields --------------------------------------------------------
+
+    private final String geoserverHost;
 
     private final transient SwmmOutputManager outputManager;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -97,6 +100,19 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
      */
     public SwmmOutputManagerUI(final SwmmOutputManager outputManager) {
         // TODO: Better Visualisation (Charts?), Links to CSOs
+
+        if (
+            PropertyManager.getManager().getProperties().getProperty(SwmmResultGeoserverUpdater.GEOSERVER_HOST_PROPERTY)
+                    != null) {
+            this.geoserverHost = PropertyManager.getManager().getProperties()
+                        .getProperty(SwmmResultGeoserverUpdater.GEOSERVER_HOST_PROPERTY);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("GEOSERVER_HOST set to '" + geoserverHost + "'");
+            }
+        } else {
+            LOG.warn("GEOSERVER_HOST property not set, setting to default 'http://sudplan.cismet.de/'");
+            geoserverHost = "http://sudplan.cismet.de/";
+        }
 
         this.outputManager = outputManager;
         initComponents();
@@ -199,7 +215,7 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
             LOG.info("showing result of SWMM RUN '" + swmmOutput.getSwmmRunName()
                         + "' (" + swmmOutput.getSwmmRun() + ") in layer '" + layerName + "'");
 
-            final String wmsURL = SWMM_WMS_TEMPLATE.replace("%LAYERS%", layerName);
+            final String wmsURL = geoserverHost + (SWMM_WMS_TEMPLATE.replace("%LAYERS%", layerName));
             if (LOG.isDebugEnabled()) {
                 LOG.debug(wmsURL);
             }

@@ -290,7 +290,6 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         previewLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         previewLabel.setMaximumSize(new java.awt.Dimension(350, 300));
         previewLabel.setMinimumSize(new java.awt.Dimension(300, 300));
-        previewLabel.setPreferredSize(new java.awt.Dimension(350, 250));
         previewPanel.add(previewLabel);
 
         gridBagConstraints = new java.awt.GridBagConstraints();

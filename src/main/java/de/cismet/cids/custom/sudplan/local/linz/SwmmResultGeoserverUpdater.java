@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import Sirius.navigator.resource.PropertyManager;
+
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.encoder.GSLayerEncoder;
 import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
@@ -35,6 +37,10 @@ public class SwmmResultGeoserverUpdater {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final Logger LOG = Logger.getLogger(SwmmResultGeoserverUpdater.class);
+
+    public static final String GEOSERVER_HOST_PROPERTY = "sudplan.geoserver-host";
+    public static final String GEOSERVER_DBURL_PROPERTY = "sudplan.geoserver-dburl";
+
     public static final String DOMAIN = "SUDPLAN";
     public static final String CREATE_VIEW_STATEMENT_TEMPLATE = "CREATE OR REPLACE VIEW %VIEW% AS "
                 + "SELECT CSO.\"name\", SWMM_RESULT.\"name\" AS \"scenario_name\", (swmm_result.overflow_volume+0.5)::int AS overflow_volume, GEOM.geo_field AS \"geom\" FROM \"public\".linz_cso CSO "
@@ -88,12 +94,33 @@ public class SwmmResultGeoserverUpdater {
     public SwmmResultGeoserverUpdater() {
         this.dbUser = "postgres";
         this.dbPassword = "cismetz12";
-        this.dbUrl = "jdbc:postgresql://sudplan.cismet.de:5433/sudplan_linz";
+
+        String geoserverHost = PropertyManager.getManager().getProperties().getProperty(GEOSERVER_HOST_PROPERTY);
+        if ((geoserverHost != null) && !geoserverHost.isEmpty()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("GEOSERVER_HOST set to '" + geoserverHost + "'");
+            }
+        } else {
+            LOG.warn("GEOSERVER_HOST property not set, setting to default 'http://sudplan.cismet.de/'");
+            geoserverHost = "http://sudplan.cismet.de/";
+        }
+
+        if (PropertyManager.getManager().getProperties().getProperty(GEOSERVER_DBURL_PROPERTY) != null) {
+            this.dbUrl = PropertyManager.getManager().getProperties().getProperty(GEOSERVER_DBURL_PROPERTY);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("GEOSERVER_DBURL set to '" + this.dbUrl + "'");
+            }
+        } else {
+            this.dbUrl = "jdbc:postgresql://sudplan.cismet.de:5433/sudplan_linz";
+            LOG.warn("GEOSERVER_DBURL property not set, setting to default '" + this.dbUrl + "'");
+        }
+
+        // this.dbUrl = "jdbc:postgresql://sudplan.cismet.de:5433/sudplan_linz";
         this.restUser = "admin";
         // this.restPassword = "2904raJRGa";
         this.restPassword = "cismetz12";
-        // this.restUrl = "http://sudplan.cismet.de:8080/geoserver";
-        this.restUrl = SwmmOutputManagerUI.GEOSERVER_HOST + "/geoserver/";
+        // this.restUrl = "http://sudplan.cismet.de/geoserver";
+        this.restUrl = geoserverHost + "geoserver/";
     }
 
     /**

@@ -137,7 +137,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
      */
     private void updateGauges(final EtaOutput etaOutput) {
         this.etaHydGauge.setThreshold(etaOutput.getEtaHydRequired());
-        this.etaHydGauge.setToolTipText(new DecimalFormat("#.##").format(etaOutput.getEtaHydActual()));
+        this.etaHydGauge.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaHydActual()));
         switch ((int)etaOutput.getEtaHydRequired()) {
             case 50: {
                 this.etaHydGauge.setSections(SECTION_ETA_HYD_50);
@@ -165,7 +165,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         }
 
         this.etaSedGauge.setThreshold(etaOutput.getEtaSedRequired());
-        this.etaSedGauge.setToolTipText(new DecimalFormat("#.##").format(etaOutput.getEtaSedActual()));
+        this.etaSedGauge.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaSedActual()));
         switch ((int)etaOutput.getEtaSedRequired()) {
             case 50: {
                 this.etaSedGauge.setSections(SECTION_ETA_SED_65);
@@ -192,8 +192,8 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
             this.etaSedGauge.setUserLedColor(LedColor.RED_LED);
         }
 
-        this.r720Gauge.setToolTipText(new DecimalFormat("#.##").format(etaOutput.getR720()));
-        this.totalOverflowGauge.setToolTipText(new DecimalFormat("#.##").format(etaOutput.getTotalOverflowVolume()));
+        this.r720Gauge.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getR720()));
+        this.totalOverflowGauge.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getTotalOverflowVolume()));
         if (etaOutput.getTotalOverflowVolume() > 0) {
             this.totalOverflowGauge.setMaxValue(etaOutput.getTotalOverflowVolume() * 1.5);
         } else {
