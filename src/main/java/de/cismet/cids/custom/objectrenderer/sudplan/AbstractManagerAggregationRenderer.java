@@ -27,13 +27,16 @@ import de.cismet.cids.dynamics.CidsBeanCollectionStore;
 
 import de.cismet.cids.tools.metaobjectrenderer.Titled;
 
+import de.cismet.tools.gui.TitleComponentProvider;
+
 /**
  * DOCUMENT ME!
  *
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public abstract class AbstractManagerAggregationRenderer extends AbstractCidsBeanAggregationRenderer {
+public abstract class AbstractManagerAggregationRenderer extends AbstractCidsBeanAggregationRenderer
+        implements TitleComponentProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -42,6 +45,9 @@ public abstract class AbstractManagerAggregationRenderer extends AbstractCidsBea
     //~ Instance fields --------------------------------------------------------
 
     private transient Manager manager;
+
+    // FIXME: should create a default title component
+    private transient volatile ManagerTitleComponent titleComp;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -94,10 +100,10 @@ public abstract class AbstractManagerAggregationRenderer extends AbstractCidsBea
             if (candidate instanceof CidsBeanCollectionStore) {
                 this.manager = candidate;
                 ((CidsBeanCollectionStore)this.manager).setCidsBeans(cidsBeans);
-                setTitle(cidsBeans.size() + " " + titleSuffix);                 // NOI18N
+                getTitleComponent().setTitle(cidsBeans.size() + " " + titleSuffix); // NOI18N
             } else {
-                LOG.warn("manager '" + candidate + "' (" + candidate.getClass() // NOI18N
-                            + ") is not of type CidsBeanCollectionStore");      // NOI18N
+                LOG.warn("manager '" + candidate + "' (" + candidate.getClass()     // NOI18N
+                            + ") is not of type CidsBeanCollectionStore");          // NOI18N
             }
         }
 
@@ -137,7 +143,7 @@ public abstract class AbstractManagerAggregationRenderer extends AbstractCidsBea
         } else {
             final JComponent ui = manager.getUI();
             if (ui instanceof Titled) {
-                setTitle(((Titled)ui).getTitle());
+                getTitleComponent().setTitle(((Titled)ui).getTitle());
             }
             this.add(ui, BorderLayout.CENTER);
         }
@@ -160,5 +166,18 @@ public abstract class AbstractManagerAggregationRenderer extends AbstractCidsBea
             LOG.error(message, ex);
             throw new IllegalStateException(message, ex);
         }
+    }
+
+    @Override
+    public ManagerTitleComponent getTitleComponent() {
+        if (titleComp == null) {
+            synchronized (this) {
+                if (titleComp == null) {
+                    titleComp = new ManagerTitleComponent();
+                }
+            }
+        }
+
+        return titleComp;
     }
 }

@@ -36,7 +36,11 @@ public class ManagerTitleComponent extends javax.swing.JPanel {
             "de/cismet/cids/custom/objectrenderer/sudplan/modeloutput.png",
             false); // NOI18N
 
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+
     //~ Instance fields --------------------------------------------------------
+
+    // NOI18N
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblTitle;
@@ -111,14 +115,14 @@ public class ManagerTitleComponent extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
+        final java.awt.GridBagConstraints gridBagConstraints;
 
         lblTitle = new javax.swing.JLabel();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18));                                                      // NOI18N
         lblTitle.setForeground(new java.awt.Color(255, 255, 255));
         lblTitle.setText(NbBundle.getMessage(ManagerTitleComponent.class, "ManagerTitleComponent.lblTitle.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -129,5 +133,5 @@ public class ManagerTitleComponent extends javax.swing.JPanel {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblTitle, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
+    }                                                                                                              // </editor-fold>//GEN-END:initComponents
 }

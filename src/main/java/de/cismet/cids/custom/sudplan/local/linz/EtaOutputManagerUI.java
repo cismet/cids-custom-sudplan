@@ -753,10 +753,10 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
     @Override
     public String getTitle() {
         if ((this.outputManager.getCidsBeans() != null) && !this.outputManager.getCidsBeans().isEmpty()) {
-            org.openide.util.NbBundle.getMessage(
-                    EtaOutputManagerUI.class,
-                    "EtaOutputManagerUI.title.aggregated")
-                    .replaceAll("%n", String.valueOf(this.outputManager.getCidsBeans().size()));
+            return org.openide.util.NbBundle.getMessage(
+                        EtaOutputManagerUI.class,
+                        "EtaOutputManagerUI.title.aggregated")
+                        .replaceAll("%n", String.valueOf(this.outputManager.getCidsBeans().size()));
         } else if (this.outputManager.getCidsBean() != null) {
             return this.outputManager.getCidsBean().getProperty("name").toString();
         }
