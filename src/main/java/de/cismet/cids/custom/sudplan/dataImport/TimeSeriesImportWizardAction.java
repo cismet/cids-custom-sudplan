@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
+import org.openide.util.ImageUtilities;
 
 import java.awt.Component;
 import java.awt.Dialog;
@@ -55,8 +56,7 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
      * Creates a new RainfallDownscalingWizardAction object.
      */
     public TimeSeriesImportWizardAction() {
-        super(java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                "TimeSeriesImportWizardAction.this.name"));
+        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/dataImport/ts_import.png", false)); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------

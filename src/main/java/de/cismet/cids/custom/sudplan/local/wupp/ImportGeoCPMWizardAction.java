@@ -17,6 +17,7 @@ import org.jdesktop.swingx.error.ErrorInfo;
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
+import org.openide.util.ImageUtilities;
 
 import java.awt.Component;
 import java.awt.Dialog;
@@ -58,7 +59,7 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
      * Creates a new ImportGeoCPMWizardAction object.
      */
     public ImportGeoCPMWizardAction() {
-        super("GeoCPM Konfiguration importieren"); // NOI18N
+        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/dataImport/geocpm_import.png", false)); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------

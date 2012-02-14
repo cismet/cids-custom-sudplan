@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import org.openide.WizardDescriptor;
+import org.openide.util.ImageUtilities;
 
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -27,6 +28,7 @@ import java.text.NumberFormat;
 
 import java.util.Locale;
 
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 import de.cismet.cids.custom.sudplan.IDFCurve;
@@ -65,7 +67,7 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
      * Creates a new RainfallDownscalingWizardAction object.
      */
     public IDFImportWizardAction() {
-        super("IDF import");
+        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/dataImport/idf_import.png", false)); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
