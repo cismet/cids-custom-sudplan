@@ -36,9 +36,9 @@ public class ManagerTitleComponent extends javax.swing.JPanel {
             "de/cismet/cids/custom/objectrenderer/sudplan/modeloutput.png",
             false); // NOI18N
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-
     //~ Instance fields --------------------------------------------------------
+
+    // Variables declaration - do not modify
 
     // NOI18N
 
@@ -125,6 +125,7 @@ public class ManagerTitleComponent extends javax.swing.JPanel {
         lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18));                                                      // NOI18N
         lblTitle.setForeground(new java.awt.Color(255, 255, 255));
         lblTitle.setText(NbBundle.getMessage(ManagerTitleComponent.class, "ManagerTitleComponent.lblTitle.text")); // NOI18N
+        lblTitle.setIconTextGap(10);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;

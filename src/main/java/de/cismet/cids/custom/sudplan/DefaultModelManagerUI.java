@@ -153,6 +153,9 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
         lblExecStatus = new javax.swing.JLabel();
         btnRun = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
+        btnCancel.setMaximumSize(new java.awt.Dimension(86, 29));
+        btnCancel.setMinimumSize(new java.awt.Dimension(86, 29));
+        btnCancel.setPreferredSize(new java.awt.Dimension(86, 29));
         lblStatus = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
 
@@ -190,7 +193,7 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 1, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(5, 1, 5, 10);
         add(btnRun, gridBagConstraints);
 
         btnCancel.setText(NbBundle.getMessage(DefaultModelManagerUI.class, "DefaultModelManagerUI.btnCancel.text")); // NOI18N
@@ -213,8 +216,9 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
 
         jPanel1.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
         add(jPanel1, gridBagConstraints);
