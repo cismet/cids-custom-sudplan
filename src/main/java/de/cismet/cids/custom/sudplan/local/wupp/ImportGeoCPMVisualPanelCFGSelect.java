@@ -60,7 +60,9 @@ public class ImportGeoCPMVisualPanelCFGSelect extends javax.swing.JPanel {
 
         initComponents();
 
-        setName("Select Configuration");
+        setName(NbBundle.getMessage(
+                ImportGeoCPMVisualPanelCFGSelect.class,
+                "ImportGeoCPMVisualPanelCFGSelect.constructor(ImportGeoCPMWizardPanelCFGSelect).panelName")); // NOI18N
 
         geocpmDocL = new DocL(true);
         dynaDocL = new DocL(false);
@@ -80,10 +82,14 @@ public class ImportGeoCPMVisualPanelCFGSelect extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     void init() {
-        if (model.getGeocpmFile() != null) {
+        if (model.getGeocpmFile() == null) {
+            txtGeoCPMConfig.setText(null);
+        } else {
             txtGeoCPMConfig.setText(model.getGeocpmFile().getAbsolutePath());
         }
-        if (model.getDynaFile() != null) {
+        if (model.getDynaFile() == null) {
+            txtDynaConfig.setText(null);
+        } else {
             txtDynaConfig.setText(model.getDynaFile().getAbsolutePath());
         }
     }
@@ -116,7 +122,7 @@ public class ImportGeoCPMVisualPanelCFGSelect extends javax.swing.JPanel {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(20, 5, 5, 5);
         add(lblGeoCPMConfig, gridBagConstraints);
 
         txtGeoCPMConfig.setText(NbBundle.getMessage(
@@ -128,7 +134,7 @@ public class ImportGeoCPMVisualPanelCFGSelect extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(20, 5, 5, 5);
         add(txtGeoCPMConfig, gridBagConstraints);
 
         btnGeoCPMConfig.setText(NbBundle.getMessage(
@@ -139,7 +145,7 @@ public class ImportGeoCPMVisualPanelCFGSelect extends javax.swing.JPanel {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(20, 5, 5, 5);
         add(btnGeoCPMConfig, gridBagConstraints);
 
         lblDynaConfig.setText(NbBundle.getMessage(
@@ -221,6 +227,7 @@ public class ImportGeoCPMVisualPanelCFGSelect extends javax.swing.JPanel {
         @Override
         public void actionPerformed(final ActionEvent e) {
             final JFileChooser jfc = new JFileChooser();
+            jfc.setFileSelectionMode(geocpm ? JFileChooser.FILES_ONLY : JFileChooser.DIRECTORIES_ONLY);
             jfc.setSelectedFile(geocpm ? new File(txtGeoCPMConfig.getText()) : new File(txtDynaConfig.getText()));
             final int answer = jfc.showOpenDialog(ImportGeoCPMVisualPanelCFGSelect.this);
             if (JFileChooser.APPROVE_OPTION == answer) {
@@ -270,9 +277,11 @@ public class ImportGeoCPMVisualPanelCFGSelect extends javax.swing.JPanel {
         @Override
         public void changedUpdate(final DocumentEvent e) {
             if (geocpm) {
-                model.setGeocpmFile(new File(txtGeoCPMConfig.getText()));
+                final String text = txtGeoCPMConfig.getText();
+                model.setGeocpmFile(text.isEmpty() ? null : new File(text));
             } else {
-                model.setDynaFile(new File(txtDynaConfig.getText()));
+                final String text = txtDynaConfig.getText();
+                model.setDynaFile(text.isEmpty() ? null : new File(text));
             }
         }
     }

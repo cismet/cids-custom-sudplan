@@ -31,6 +31,7 @@
         <menu name="Get Components" collapse="false">
             <item name="Download" href="download.html"/>
             <item name="Instant Run" href="run.html"/>
+            <item name="3D component" href="threeD.html"/>
             <item name="License" href="license.html" />
         </menu>
 

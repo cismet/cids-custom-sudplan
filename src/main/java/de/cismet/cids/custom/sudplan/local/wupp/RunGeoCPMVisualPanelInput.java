@@ -23,10 +23,15 @@ import java.awt.Component;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.tostringconverter.sudplan.DeltaConfigurationToStringConverter;
+import de.cismet.cids.custom.tostringconverter.sudplan.GeocpmConfigurationToStringConverter;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -51,9 +56,8 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
     private final transient ListSelectionListener listL;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private final transient javax.swing.JCheckBox chkDyna = new javax.swing.JCheckBox();
     private final transient javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
-    private final transient javax.swing.JList jlsAvailableInput = new javax.swing.JList();
+    private final transient javax.swing.JList lstAvailableInput = new javax.swing.JList();
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -87,25 +91,26 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
      *
      * @throws  WizardInitialisationException  DOCUMENT ME!
      */
+    // TODO: create clean init code and use jtree for visualisation
     private void initInputList() throws WizardInitialisationException {
-        final String domain = SessionManager.getSession().getUser().getDomain();
-        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, RunGeoCPMWizardAction.TABLENAME_GEOCPM_CONFIG);
+        // FIXME: hardcoded domain
+        final String domain = "SUDPLAN-WUPP"; // NOI18N
+        MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SMSUtils.TABLENAME_GEOCPM_CONFIGURATION);
 
         if (mc == null) {
-            throw new WizardInitialisationException("cannot fetch geocpm config metaclass"); // NOI18N
+            throw new WizardInitialisationException("cannot fetch geocpm configuration metaclass"); // NOI18N
         }
 
-        final StringBuilder sb = new StringBuilder();
-
+        StringBuilder sb = new StringBuilder();
         sb.append("SELECT ").append(mc.getID()).append(',').append(mc.getPrimaryKey()); // NOI18N
         sb.append(" FROM ").append(mc.getTableName());                                  // NOI18N
 
-        final ClassAttribute ca = mc.getClassAttribute("sortingColumn"); // NOI18N
+        ClassAttribute ca = mc.getClassAttribute("sortingColumn"); // NOI18N
         if (ca != null) {
-            sb.append(" ORDER BY ").append(ca.getValue());               // NOI18N
+            sb.append(" ORDER BY ").append(ca.getValue());         // NOI18N
         }
 
-        final MetaObject[] metaObjects;
+        MetaObject[] metaObjects;
         try {
             metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
         } catch (final ConnectionException ex) {
@@ -119,12 +124,39 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
             dlm.addElement(metaObjects[i].getBean());
         }
 
-        jlsAvailableInput.setModel(dlm);
-        jlsAvailableInput.setCellRenderer(new NameRenderer());
-        jlsAvailableInput.addListSelectionListener(WeakListeners.create(
+        mc = ClassCacheMultiple.getMetaClass(domain, SMSUtils.TABLENAME_DELTA_CONFIGURATION);
+
+        if (mc == null) {
+            throw new WizardInitialisationException("cannot fetch delta configuration metaclass"); // NOI18N
+        }
+
+        sb = new StringBuilder();
+        sb.append("SELECT ").append(mc.getID()).append(',').append(mc.getPrimaryKey()); // NOI18N
+        sb.append(" FROM ").append(mc.getTableName());                                  // NOI18N
+
+        ca = mc.getClassAttribute("sortingColumn");        // NOI18N
+        if (ca != null) {
+            sb.append(" ORDER BY ").append(ca.getValue()); // NOI18N
+        }
+
+        try {
+            metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
+        } catch (final ConnectionException ex) {
+            final String message = "cannot get input meta objects from database"; // NOI18N
+            LOG.error(message, ex);
+            throw new WizardInitialisationException(message, ex);
+        }
+
+        for (int i = 0; i < metaObjects.length; ++i) {
+            dlm.addElement(metaObjects[i].getBean());
+        }
+
+        lstAvailableInput.setModel(dlm);
+        lstAvailableInput.setCellRenderer(new NameRenderer());
+        lstAvailableInput.addListSelectionListener(WeakListeners.create(
                 ListSelectionListener.class,
                 listL,
-                jlsAvailableInput));
+                lstAvailableInput));
     }
 
     /**
@@ -132,11 +164,11 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
      */
     void init() {
         if (model.getInput() == null) {
-            jlsAvailableInput.getSelectionModel().clearSelection();
+            lstAvailableInput.getSelectionModel().clearSelection();
         }
 
         // why is this not sufficient to clear the selection if rainevent is null
-        jlsAvailableInput.setSelectedValue(model.getInput(), true);
+        lstAvailableInput.setSelectedValue(model.getInput(), true);
     }
 
     /**
@@ -146,17 +178,17 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
+        final java.awt.GridBagConstraints gridBagConstraints;
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        jlsAvailableInput.setBorder(javax.swing.BorderFactory.createTitledBorder(
+        lstAvailableInput.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 NbBundle.getMessage(
                     RunGeoCPMVisualPanelInput.class,
-                    "RunGeoCPMVisualPanelInput.jlsAvailableInput.border.title"))); // NOI18N
-        jlsAvailableInput.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jScrollPane1.setViewportView(jlsAvailableInput);
+                    "RunGeoCPMVisualPanelInput.lstAvailableInput.border.title"))); // NOI18N
+        lstAvailableInput.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane1.setViewportView(lstAvailableInput);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -166,16 +198,7 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jScrollPane1, gridBagConstraints);
-
-        chkDyna.setText(NbBundle.getMessage(RunGeoCPMVisualPanelInput.class, "RunGeoCPMVisualPanelInput.chkDyna.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(chkDyna, gridBagConstraints);
-    }                                                                                                                    // </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -191,7 +214,7 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
         @Override
         public void valueChanged(final ListSelectionEvent e) {
             if (!e.getValueIsAdjusting()) {
-                model.setInput((CidsBean)jlsAvailableInput.getSelectedValue());
+                model.setInput((CidsBean)lstAvailableInput.getSelectedValue());
             }
         }
     }
@@ -202,6 +225,13 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
      * @version  $Revision$, $Date$
      */
     private static final class NameRenderer extends DefaultListCellRenderer {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient GeocpmConfigurationToStringConverter geocpmConv =
+            new GeocpmConfigurationToStringConverter();
+        private final transient DeltaConfigurationToStringConverter deltaConv =
+            new DeltaConfigurationToStringConverter();
 
         //~ Methods ------------------------------------------------------------
 
@@ -216,8 +246,32 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
             if ((comp instanceof JLabel) && (value instanceof CidsBean)) {
                 final JLabel label = (JLabel)comp;
                 final CidsBean obj = (CidsBean)value;
-                final String name = (String)obj.getProperty("name"); // NOI18N
+                final MetaObject mo = obj.getMetaObject();
+                final MetaClass mc = mo.getMetaClass();
+
+                String name = null;
+                try {
+                    if (SMSUtils.TABLENAME_GEOCPM_CONFIGURATION.equalsIgnoreCase(mc.getTableName())) {
+                        name = geocpmConv.convert(mo);
+                    } else if (SMSUtils.TABLENAME_DELTA_CONFIGURATION.equalsIgnoreCase(mc.getTableName())) {
+                        name = deltaConv.convert(mo);
+                    } else {
+                        throw new IllegalStateException("unknown metaclass"); // NOI18N
+                    }
+                } catch (final Exception e) {
+                    LOG.warn("cannot fetch name for bean: " + obj, e);        // NOI18N
+
+                    name = (String)obj.getProperty("name"); // NOI18N
+                }
+
                 label.setText(name);
+
+                assert mc != null : "metaobject without metaclass"; // NOI18N
+
+                final byte[] iconData = mc.getObjectIconData();
+                if (iconData != null) {
+                    label.setIcon(new ImageIcon(iconData));
+                }
             }
 
             return comp;

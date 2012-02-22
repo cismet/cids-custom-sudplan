@@ -7,36 +7,20 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.dataImport;
 
-import Sirius.server.middleware.types.MetaClass;
-
 import org.apache.log4j.Logger;
-
-import org.codehaus.jackson.map.ObjectMapper;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.ImageUtilities;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.StringWriter;
-
-import java.text.NumberFormat;
-
-import java.util.Locale;
-
-import javax.swing.ImageIcon;
+import javax.swing.Action;
 import javax.swing.JComponent;
 
-import de.cismet.cids.custom.sudplan.IDFCurve;
-
-import de.cismet.cids.dynamics.CidsBean;
-
 import de.cismet.cids.navigator.utils.CidsClientToolbarItem;
-import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 
@@ -68,6 +52,10 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
      */
     public IDFImportWizardAction() {
         super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/dataImport/idf_import.png", false)); // NOI18N
+
+        putValue(
+            Action.SHORT_DESCRIPTION,
+            NbBundle.getMessage(IDFImportWizardAction.class, "IDFImportWizardAction.shortDescription")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -142,6 +130,6 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }

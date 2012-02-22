@@ -63,7 +63,7 @@ public final class RunGeoCPMWizardPanelMetadata implements WizardDescriptor.Pane
      *
      * @return  DOCUMENT ME!
      */
-    String getName() {
+    public String getName() {
         return name;
     }
 
@@ -82,7 +82,7 @@ public final class RunGeoCPMWizardPanelMetadata implements WizardDescriptor.Pane
      *
      * @return  DOCUMENT ME!
      */
-    String getDescription() {
+    public String getDescription() {
         return description;
     }
 

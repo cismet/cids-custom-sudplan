@@ -45,7 +45,7 @@ public final class RunoffModelManager extends AbstractAsyncModelManager {
             return;
         }
 
-        final RunoffIO io = (RunoffIO)getUR();
+        final RunoffInput io = (RunoffInput)getUR();
         final CidsBean geocpmBean = io.fetchGeocpmInput();
         final CidsBean rainevent = io.fetchRainevent();
         final GeoCPMInput input = new GeoCPMInput();
@@ -127,7 +127,7 @@ public final class RunoffModelManager extends AbstractAsyncModelManager {
     @Override
     protected String getReloadId() {
         try {
-            final RunoffIO io = (RunoffIO)getUR();
+            final RunoffInput io = (RunoffInput)getUR();
             final CidsBean geocpmBean = io.fetchGeocpmInput();
 
             final CidsBean iaBean = (CidsBean)geocpmBean.getProperty("investigation_area"); // NOI18N

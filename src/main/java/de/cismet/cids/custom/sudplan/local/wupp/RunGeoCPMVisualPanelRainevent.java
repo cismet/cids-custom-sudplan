@@ -23,6 +23,7 @@ import java.awt.Component;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.event.ListSelectionEvent;
@@ -90,6 +91,7 @@ public class RunGeoCPMVisualPanelRainevent extends javax.swing.JPanel {
      * @throws  WizardInitialisationException  DOCUMENT ME!
      */
     private void initRaineventsList() throws WizardInitialisationException {
+        // FIXME: user domain
         final String domain = SessionManager.getSession().getUser().getDomain();
         final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SMSUtils.TABLENAME_RAINEVENT);
 
@@ -216,6 +218,14 @@ public class RunGeoCPMVisualPanelRainevent extends javax.swing.JPanel {
                     label.setText(name + " (forecast)");
                 } else {
                     label.setText(name);
+                }
+
+                final MetaClass mc = obj.getMetaObject().getMetaClass();
+                assert mc != null : "metaobject without metaclass"; // NOI18N
+
+                final byte[] iconData = mc.getObjectIconData();
+                if (iconData != null) {
+                    label.setIcon(new ImageIcon(iconData));
                 }
             }
 

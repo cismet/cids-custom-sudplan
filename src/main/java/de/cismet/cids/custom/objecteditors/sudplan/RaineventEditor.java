@@ -44,8 +44,10 @@ public class RaineventEditor extends AbstractCidsBeanRenderer implements EditorS
     private transient javax.swing.JScrollPane jScrollPane1;
     private transient javax.swing.JLabel lblFiller;
     private transient javax.swing.JLabel lblGeometry;
+    private transient javax.swing.JLabel lblInterval;
     private transient javax.swing.JLabel lblName;
     private transient javax.swing.JTextArea txaRainevent;
+    private transient javax.swing.JTextField txtInterval;
     private transient javax.swing.JTextField txtName;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
@@ -73,6 +75,7 @@ public class RaineventEditor extends AbstractCidsBeanRenderer implements EditorS
         txtName.setEditable(editable);
         cboGeom.setEnabled(editable);
         chkForecast.setEnabled(editable);
+        txtInterval.setEditable(editable);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -95,6 +98,8 @@ public class RaineventEditor extends AbstractCidsBeanRenderer implements EditorS
         chkForecast = new javax.swing.JCheckBox();
         cboGeom = new de.cismet.cismap.cids.geometryeditor.DefaultCismapGeometryComboBoxEditor(editable);
         lblFiller = new javax.swing.JLabel();
+        lblInterval = new javax.swing.JLabel();
+        txtInterval = new javax.swing.JTextField();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
@@ -117,7 +122,7 @@ public class RaineventEditor extends AbstractCidsBeanRenderer implements EditorS
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -196,6 +201,35 @@ public class RaineventEditor extends AbstractCidsBeanRenderer implements EditorS
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         add(lblFiller, gridBagConstraints);
+
+        lblInterval.setText(NbBundle.getMessage(
+                RaineventEditor.class,
+                "RaineventEditor.lblInterval.text",
+                new Object[] {})); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblInterval, gridBagConstraints);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.interval}"),
+                txtInterval,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(txtInterval, gridBagConstraints);
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents

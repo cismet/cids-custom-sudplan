@@ -14,7 +14,7 @@ import java.io.IOException;
 import javax.swing.JComponent;
 
 import de.cismet.cids.custom.sudplan.Manager;
-import de.cismet.cids.custom.sudplan.geocpmrest.io.GeoCPMOutput;
+import de.cismet.cids.custom.sudplan.geocpmrest.io.SimulationResult;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -36,11 +36,11 @@ public final class RunoffOutputManager implements Manager {
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public GeoCPMOutput getUR() throws IOException {
+    public SimulationResult getUR() throws IOException {
         final String json = (String)modelOutputBean.getProperty("ur"); // NOI18N
         final ObjectMapper mapper = new ObjectMapper();
 
-        return mapper.readValue(json, GeoCPMOutput.class);
+        return mapper.readValue(json, SimulationResult.class);
     }
 
     @Override

@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.wupp;
 
-import Sirius.navigator.connection.SessionManager;
-
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
 
@@ -17,8 +15,13 @@ import org.apache.log4j.Logger;
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
 import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
 
 import java.awt.Component;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.event.ChangeListener;
 
@@ -51,6 +54,8 @@ public final class ImportGeoCPMWizardPanelMetadata implements WizardDescriptor.P
 
     private transient CidsBean cidsBean;
 
+    private final transient PropertyChangeListener beanL;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -58,6 +63,7 @@ public final class ImportGeoCPMWizardPanelMetadata implements WizardDescriptor.P
      */
     public ImportGeoCPMWizardPanelMetadata() {
         changeSupport = new ChangeSupport(this);
+        beanL = new PropertyChangetoChangeListener();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -87,23 +93,21 @@ public final class ImportGeoCPMWizardPanelMetadata implements WizardDescriptor.P
         cidsBean = (CidsBean)wizard.getProperty(PROP_GEOCPM_BEAN);
 
         if (cidsBean == null) {
-            final Integer geocpmId = (Integer)wizard.getProperty(ImportGeoCPMWizardPanelUpload.PROP_GEOCPM_ID);
-            assert geocpmId != null : "geocpm id must not be null"; // NOI18N
-
             try {
                 // FIXME: hardcoded domain
-                final MetaClass mc = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", "geocpm_configuration");
-                final MetaObject mo = SessionManager.getProxy().getMetaObject(geocpmId, mc.getID(), "SUDPLAN-WUPP");
+                final MetaClass mc = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", "geocpm_configuration"); // NOI18N
+                final MetaObject mo = mc.getEmptyInstance();
                 cidsBean = mo.getBean();
-
-                component.init();
             } catch (final Exception ex) {
-                LOG.error("cannot initialise wizard visual panel", ex); // NOI18N
+                LOG.error("cannot initialise wizard visual panel", ex);                                       // NOI18N
                 initialisationException = ex;
 
                 changeSupport.fireChange();
             }
         }
+
+        cidsBean.addPropertyChangeListener(beanL);
+        component.init();
     }
 
     @Override
@@ -111,6 +115,8 @@ public final class ImportGeoCPMWizardPanelMetadata implements WizardDescriptor.P
         wizard = (WizardDescriptor)settings;
 
         wizard.putProperty(PROP_GEOCPM_BEAN, cidsBean);
+
+        cidsBean.removePropertyChangeListener(beanL);
     }
 
     @Override
@@ -118,16 +124,28 @@ public final class ImportGeoCPMWizardPanelMetadata implements WizardDescriptor.P
         if (initialisationException == null) {
             wizard.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, null);
 
-            if (cidsBean.getProperty("name") == null) {
-                wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, "Please enter a name");
+            if (cidsBean.getProperty("name") == null) { // NOI18N
+                wizard.putProperty(
+                    WizardDescriptor.PROP_INFO_MESSAGE,
+                    NbBundle.getMessage(
+                        ImportGeoCPMWizardPanelMetadata.class,
+                        "ImportGeoCPMWizardPanelMetadata.isValid().info.enterName"));
 
                 return false;
-            } else if (cidsBean.getProperty("investigation_area") == null) {
-                wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, "Please choose an area");
+            } else if (cidsBean.getProperty("investigation_area") == null) { // NOI18N
+                wizard.putProperty(
+                    WizardDescriptor.PROP_INFO_MESSAGE,
+                    NbBundle.getMessage(
+                        ImportGeoCPMWizardPanelMetadata.class,
+                        "ImportGeoCPMWizardPanelMetadata.isValid().info.chooseArea"));
 
                 return false;
-            } else if (cidsBean.getProperty("description") == null) {
-                wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, "Descriptions are appreciated");
+            } else if (cidsBean.getProperty("description") == null) { // NOI18N
+                wizard.putProperty(
+                    WizardDescriptor.PROP_INFO_MESSAGE,
+                    NbBundle.getMessage(
+                        ImportGeoCPMWizardPanelMetadata.class,
+                        "ImportGeoCPMWizardPanelMetadata.isValid().info.enterDescription"));
 
                 return true;
             } else {
@@ -138,8 +156,10 @@ public final class ImportGeoCPMWizardPanelMetadata implements WizardDescriptor.P
         } else {
             wizard.putProperty(
                 WizardDescriptor.PROP_ERROR_MESSAGE,
-                "Error while fetching GeoCPM cidsBean: "
-                        + initialisationException);
+                NbBundle.getMessage(
+                    ImportGeoCPMWizardPanelMetadata.class,
+                    "ImportGeoCPMWizardPanelMetadata.isValid().error.errorCreatingBean(exMessage)",
+                    initialisationException));
 
             return false;
         }
@@ -171,5 +191,22 @@ public final class ImportGeoCPMWizardPanelMetadata implements WizardDescriptor.P
      */
     public void setCidsBean(final CidsBean cidsBean) {
         this.cidsBean = cidsBean;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class PropertyChangetoChangeListener implements PropertyChangeListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void propertyChange(final PropertyChangeEvent evt) {
+            changeSupport.fireChange();
+        }
     }
 }

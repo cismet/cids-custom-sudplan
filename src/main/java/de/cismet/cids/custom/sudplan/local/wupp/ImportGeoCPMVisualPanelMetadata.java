@@ -10,6 +10,7 @@ package de.cismet.cids.custom.sudplan.local.wupp;
 import org.openide.util.NbBundle;
 
 import de.cismet.cids.dynamics.CidsBean;
+import de.cismet.cids.dynamics.CidsBeanStore;
 
 import de.cismet.cids.editors.DefaultCustomObjectEditor;
 
@@ -19,7 +20,7 @@ import de.cismet.cids.editors.DefaultCustomObjectEditor;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
-public class ImportGeoCPMVisualPanelMetadata extends javax.swing.JPanel {
+public class ImportGeoCPMVisualPanelMetadata extends javax.swing.JPanel implements CidsBeanStore {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -51,7 +52,9 @@ public class ImportGeoCPMVisualPanelMetadata extends javax.swing.JPanel {
 
         initComponents();
 
-        setName("Enter Metadata");
+        setName(NbBundle.getMessage(
+                ImportGeoCPMVisualPanelMetadata.class,
+                "ImportGeoCPMVisualPanelMetadata.constructor(ImportGeoCPMWizardPanelMetadata).panelName")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -60,12 +63,16 @@ public class ImportGeoCPMVisualPanelMetadata extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     void init() {
-        this.cidsBean = model.getCidsBean();
+        setCidsBean(model.getCidsBean());
 
         if (cidsBean == null) {
-            txtName.setText("<error>");
+            txtName.setText(NbBundle.getMessage(
+                    ImportGeoCPMVisualPanelMetadata.class,
+                    "ImportGeoCPMVisualPanelMetadata.init().txtName.text.error"));
             cboArea.setSelectedItem(null);
-            txaDescription.setText("<error>");
+            txaDescription.setText(NbBundle.getMessage(
+                    ImportGeoCPMVisualPanelMetadata.class,
+                    "ImportGeoCPMVisualPanelMetadata.init().txtDescription.text.error"));
         } else {
             DefaultCustomObjectEditor.setMetaClassInformationToMetaClassStoreComponentsInBindingGroup(
                 bindingGroup,
@@ -181,4 +188,14 @@ public class ImportGeoCPMVisualPanelMetadata extends javax.swing.JPanel {
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
+
+    @Override
+    public CidsBean getCidsBean() {
+        return cidsBean;
+    }
+
+    @Override
+    public void setCidsBean(final CidsBean cidsBean) {
+        this.cidsBean = cidsBean;
+    }
 }

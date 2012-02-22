@@ -35,11 +35,11 @@ public final class RunoffInputManager implements Manager {
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public RunoffIO getUR() throws IOException {
+    public RunoffInput getUR() throws IOException {
         final String json = (String)modelInputBean.getProperty("ur"); // NOI18N
         final ObjectMapper mapper = new ObjectMapper();
 
-        return mapper.readValue(json, RunoffIO.class);
+        return mapper.readValue(json, RunoffInput.class);
     }
 
     @Override

@@ -39,6 +39,8 @@ import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 
+import de.cismet.cids.navigator.utils.ClassCacheMultiple;
+
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 
 /**
@@ -56,8 +58,6 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
     public static final String PROP_NAME = "__prop_name__";                     // NOI18N
     public static final String PROP_DESCRIPTION = "__prop_description__";       // NOI18N
 
-    public static final String TABLENAME_GEOCPM_CONFIG = "GEOCPM_CONFIG"; // NOI18N
-
     private static final transient Logger LOG = Logger.getLogger(RunGeoCPMWizardAction.class);
 
     //~ Instance fields --------------------------------------------------------
@@ -70,7 +70,8 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
      * Creates a new RunGeoCPMWizardAction object.
      */
     public RunGeoCPMWizardAction() {
-        super("Perform GeoCPM Run");
+        // TODO: add icon
+        super(NbBundle.getMessage(RunGeoCPMWizardAction.class, "RunGeoCPMWizardAction.constructor().actionName")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -140,7 +141,8 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
                 RunGeoCPMWizardAction.class,
                 "RunGeoCPMWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
 
-        if (TABLENAME_GEOCPM_CONFIG.equalsIgnoreCase(mc.getTableName())) {
+        if (SMSUtils.TABLENAME_GEOCPM_CONFIGURATION.equalsIgnoreCase(mc.getTableName())
+                    || SMSUtils.TABLENAME_DELTA_CONFIGURATION.equalsIgnoreCase(mc.getTableName())) {
             wizard.putProperty(PROP_INPUT_BEAN, cidsBean);
         } else if (SMSUtils.TABLENAME_RAINEVENT.equalsIgnoreCase(mc.getTableName())) {
             wizard.putProperty(PROP_RAINEVENT_BEAN, cidsBean);
@@ -153,18 +155,79 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
         dialog.toFront();
 
         final boolean cancelled = wizard.getValue() != WizardDescriptor.FINISH_OPTION;
+
+        // FIXME: for validation
+        if (!cancelled) {
+            final MetaClass mcI = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", SMSUtils.TABLENAME_MODELINPUT);
+            final MetaClass mcO = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", SMSUtils.TABLENAME_MODELOUTPUT);
+            final MetaClass mcR = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", SMSUtils.TABLENAME_MODELRUN);
+
+            final Thread t = new Thread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            EventQueue.invokeLater(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        ComponentRegistry.getRegistry()
+                                                .getDescriptionPane()
+                                                .gotoMetaObject(mcI, 387, ""); // NOI18N
+                                    }
+                                });
+
+                            try {
+                                Thread.currentThread().sleep(1300);
+                            } catch (final InterruptedException ex) {
+                                // skip
+                            }
+
+                            EventQueue.invokeLater(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        ComponentRegistry.getRegistry()
+                                                .getDescriptionPane()
+                                                .gotoMetaObject(mcR, 387, ""); // NOI18N
+                                    }
+                                });
+
+                            try {
+                                Thread.currentThread().sleep(1800);
+                            } catch (final InterruptedException ex) {
+                                // skip
+                            }
+
+                            EventQueue.invokeLater(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        ComponentRegistry.getRegistry()
+                                                .getDescriptionPane()
+                                                .gotoMetaObject(mcO, 238, ""); // NOI18N
+                                    }
+                                });
+                        }
+                    });
+            t.start();
+
+            return;
+        } else if (true) {
+            return;
+        }
+
         if (!cancelled) {
             try {
-                CidsBean modelInput = createModelInput(wizard);
+                final CidsBean modelInput = createModelInput(wizard);
                 CidsBean modelRun = createModelRun(wizard, modelInput);
 
                 modelRun = modelRun.persist();
-                modelInput = (CidsBean)modelRun.getProperty("modelinput"); // NOI18N
 
                 attachScenario(modelRun, wizard);
 
                 SMSUtils.executeAndShowRun(modelRun);
             } catch (final Exception ex) {
+                // TODO: proper error panel
                 final String message = "Cannot perform geocpm run";
                 LOG.error(message, ex);
                 JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
@@ -223,9 +286,9 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
         final String wizName = (String)wizard.getProperty(PROP_NAME);
         final String name = "GeoCPM run input (" + wizName + ")";
 
-        final RunoffIO runoffIO = new RunoffIO();
-        runoffIO.setGeocpmInput(input.getMetaObject().getID());
-        runoffIO.setRainevent(rainevent.getMetaObject().getID());
+        final RunoffInput runoffIO = new RunoffInput();
+        runoffIO.setGeocpmInputId(input.getMetaObject().getID());
+        runoffIO.setRaineventId(rainevent.getMetaObject().getID());
 
         return SMSUtils.createModelInput(name, runoffIO, SMSUtils.Model.GEOCPM);
     }

@@ -21,7 +21,7 @@ import de.cismet.cids.utils.interfaces.CidsBeanActionsProvider;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class GeocpmConfigActionsProvider implements CidsBeanActionsProvider {
+public final class GeocpmConfigurationActionsProvider implements CidsBeanActionsProvider {
 
     //~ Methods ----------------------------------------------------------------
 

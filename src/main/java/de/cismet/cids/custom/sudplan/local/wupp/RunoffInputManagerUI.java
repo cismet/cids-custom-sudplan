@@ -63,8 +63,8 @@ public class RunoffInputManagerUI extends javax.swing.JPanel {
 
         init();
 
-        WeakListeners.create(ActionListener.class, geoCfgL, hypCalculationModel);
-        WeakListeners.create(ActionListener.class, rainL, hypRainevent);
+        hypCalculationModel.addActionListener(WeakListeners.create(ActionListener.class, geoCfgL, hypCalculationModel));
+        hypRainevent.addActionListener(WeakListeners.create(ActionListener.class, rainL, hypRainevent));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -74,7 +74,7 @@ public class RunoffInputManagerUI extends javax.swing.JPanel {
      */
     private void init() {
         try {
-            final RunoffIO io = model.getUR();
+            final RunoffInput io = model.getUR();
             final CidsBean geocpmBean = io.fetchGeocpmInput();
             final CidsBean raineventBean = io.fetchRainevent();
 
@@ -175,8 +175,9 @@ public class RunoffInputManagerUI extends javax.swing.JPanel {
         @Override
         public void actionPerformed(final ActionEvent e) {
             try {
-                final RunoffIO io = model.getUR();
-                final CidsBean bean = geocpm ? io.fetchGeocpmInput() : io.fetchRainevent();
+                final RunoffInput io = model.getUR();
+                final CidsBean bean = geocpm
+                    ? ((io.getDeltaInputId() < 0) ? io.fetchGeocpmInput() : io.fetchDeltaInput()) : io.fetchRainevent();
 
                 ComponentRegistry.getRegistry().getDescriptionPane().gotoMetaObject(bean.getMetaObject(), null);
             } catch (final IOException ex) {

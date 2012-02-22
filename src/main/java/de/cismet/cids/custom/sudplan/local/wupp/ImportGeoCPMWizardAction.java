@@ -18,6 +18,7 @@ import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
 import org.openide.util.ImageUtilities;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 import java.awt.Dialog;
@@ -28,6 +29,7 @@ import java.text.MessageFormat;
 
 import java.util.logging.Level;
 
+import javax.swing.Action;
 import javax.swing.JComponent;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -60,6 +62,10 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
      */
     public ImportGeoCPMWizardAction() {
         super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/dataImport/geocpm_import.png", false)); // NOI18N
+
+        putValue(
+            Action.SHORT_DESCRIPTION,
+            NbBundle.getMessage(ImportGeoCPMWizardAction.class, "ImportGeoCPMWizardAction.shortDescription")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -75,8 +81,8 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
                     new ImportGeoCPMWizardPanelCFGSelect(),
-                    new ImportGeoCPMWizardPanelUpload(),
-                    new ImportGeoCPMWizardPanelMetadata()
+                    new ImportGeoCPMWizardPanelMetadata(),
+                    new ImportGeoCPMWizardPanelUpload()
                 };
 
             final String[] steps = new String[panels.length];
@@ -115,8 +121,8 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
     @Override
     public void actionPerformed(final ActionEvent e) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
-        wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
-        wizard.setTitle("Import GeoCPM configuration");
+        wizard.setTitleFormat(new MessageFormat("{0}"));                                                               // NOI18N
+        wizard.setTitle(NbBundle.getMessage(ImportGeoCPMWizardAction.class, "ImportGeoCPMWizardAction.wizard.title")); // NOI18N
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -132,29 +138,13 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
                     ((Cancellable)o).cancel();
                 }
             }
-        } else {
-            final CidsBean cidsBean = (CidsBean)wizard.getProperty(ImportGeoCPMWizardPanelMetadata.PROP_GEOCPM_BEAN);
-            assert cidsBean != null : "cidsBean must not be null"; // NOI18N
-            try {
-                cidsBean.persist();
-            } catch (final Exception ex) {
-                LOG.error("error during import", ex);              // NOI18N
-                final ErrorInfo info = new ErrorInfo(
-                        "Import error",
-                        "Error during import",
-                        "The GeoCPM import encountered an error. Please report the error details to your administrator.",
-                        "GeoCPM",
-                        ex,
-                        Level.WARNING,
-                        null);
-                JXErrorPane.showDialog(ComponentRegistry.getRegistry().getMainWindow(), info);
-            }
         }
+        // there is no need to do anything, when finished successfully
     }
 
     @Override
     public String getSorterString() {
-        return "Z";
+        return "Z"; // NOI18N
     }
 
     @Override
@@ -164,6 +154,6 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }

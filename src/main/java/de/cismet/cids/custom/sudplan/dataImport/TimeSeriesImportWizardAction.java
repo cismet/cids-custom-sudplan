@@ -15,6 +15,7 @@ import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
 import org.openide.util.ImageUtilities;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 import java.awt.Dialog;
@@ -23,6 +24,7 @@ import java.awt.event.ActionEvent;
 
 import java.text.MessageFormat;
 
+import javax.swing.Action;
 import javax.swing.JComponent;
 
 import de.cismet.cids.navigator.utils.CidsClientToolbarItem;
@@ -57,6 +59,10 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
      */
     public TimeSeriesImportWizardAction() {
         super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/dataImport/ts_import.png", false)); // NOI18N
+
+        putValue(
+            Action.SHORT_DESCRIPTION,
+            NbBundle.getMessage(TimeSeriesImportWizardAction.class, "TimeSeriesImportWizardAction.shortDescription")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -114,9 +120,10 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
     @Override
     public void actionPerformed(final ActionEvent e) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
-        wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
-        wizard.setTitle(java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                "TimeSeriesImportWizardAction.actionPerformed(ActionEvent).wizard.title"));
+        wizard.setTitleFormat(new MessageFormat("{0}"));                                    // NOI18N
+        wizard.setTitle(NbBundle.getMessage(
+                TimeSeriesImportWizardAction.class,
+                "TimeSeriesImportWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();

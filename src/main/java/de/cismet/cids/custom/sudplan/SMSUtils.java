@@ -63,15 +63,19 @@ public final class SMSUtils {
 
     private static final transient Logger LOG = Logger.getLogger(SMSUtils.class);
 
-    public static final String TABLENAME_TIMESERIES = "TIMESERIES";   // NOI18N
-    public static final String TABLENAME_RAINEVENT = "RAINEVENT";     // NOI18N
-    public static final String TABLENAME_MODELINPUT = "MODELINPUT";   // NOI18N
-    public static final String TABLENAME_MODELOUTPUT = "MODELOUTPUT"; // NOI18N
-    public static final String TABLENAME_MODELRUN = "RUN";            // NOI18N
-    public static final String TABLENAME_MODEL = "MODEL";             // NOI18N
-    public static final String TABLENAME_IDFCURVE = "IDF_CURVE";      // NOI18N
+    public static final String TABLENAME_TIMESERIES = "TIMESERIES";                     // NOI18N
+    public static final String TABLENAME_RAINEVENT = "RAINEVENT";                       // NOI18N
+    public static final String TABLENAME_MODELINPUT = "MODELINPUT";                     // NOI18N
+    public static final String TABLENAME_MODELOUTPUT = "MODELOUTPUT";                   // NOI18N
+    public static final String TABLENAME_MODELRUN = "RUN";                              // NOI18N
+    public static final String TABLENAME_MODEL = "MODEL";                               // NOI18N
+    public static final String TABLENAME_IDFCURVE = "IDF_CURVE";                        // NOI18N
+    public static final String TABLENAME_GEOCPM_CONFIGURATION = "geocpm_configuration"; // NOI18N
+    public static final String TABLENAME_DELTA_CONFIGURATION = "delta_configuration";   // NOI18N
 
-    private static final String CISMAP_PLUGIN_NAME = "cismap";
+    public static final String CISMAP_PLUGIN_NAME = "cismap";
+
+    public static final String EPSG_WUPP = "EPSG:31466"; // NOI18N
 
     //~ Enums ------------------------------------------------------------------
 

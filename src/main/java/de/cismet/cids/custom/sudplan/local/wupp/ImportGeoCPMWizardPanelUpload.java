@@ -7,12 +7,18 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.wupp;
 
+import Sirius.navigator.connection.SessionManager;
+
+import Sirius.server.middleware.types.MetaClass;
+import Sirius.server.middleware.types.MetaObject;
+
 import org.apache.log4j.Logger;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
 import org.openide.util.ChangeSupport;
 import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 import java.awt.EventQueue;
 
@@ -24,11 +30,11 @@ import javax.swing.event.ChangeListener;
 
 import de.cismet.cids.custom.sudplan.StatusPanel;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
-import de.cismet.cids.custom.sudplan.geocpmrest.GeoCPMRestClient;
-import de.cismet.cids.custom.sudplan.geocpmrest.GeoCPMService;
-import de.cismet.cids.custom.sudplan.geocpmrest.io.GeoCPMUtils;
-import de.cismet.cids.custom.sudplan.geocpmrest.io.ImportConfig;
 import de.cismet.cids.custom.sudplan.geocpmrest.io.ImportStatus;
+
+import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 /**
  * DOCUMENT ME!
@@ -61,7 +67,9 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
      * Creates a new ImportGeoCPMWizardPanelCFGSelect object.
      */
     public ImportGeoCPMWizardPanelUpload() {
-        component = new StatusPanel("Upload status");
+        component = new StatusPanel(NbBundle.getMessage(
+                    ImportGeoCPMWizardPanelUpload.class,
+                    "ImportGeoCPMWizardPanelUpload.constructor().panelName")); // NOI18N
         changeSupport = new ChangeSupport(this);
         lock = new Object();
     }
@@ -85,10 +93,17 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
 
             final File geocpmFile = (File)wizard.getProperty(ImportGeoCPMWizardPanelCFGSelect.PROP_GEOCPM_FILE);
             final File dynaFile = (File)wizard.getProperty(ImportGeoCPMWizardPanelCFGSelect.PROP_DYNA_FILE);
+            final CidsBean cfgBean = (CidsBean)wizard.getProperty(ImportGeoCPMWizardPanelMetadata.PROP_GEOCPM_BEAN);
 
-            assert geocpmFile != null : "empty geocpm file"; // NOI18N
+            assert geocpmFile != null : "empty geocpm file";  // NOI18N
+            assert dynaFile != null : "empty dyna file";      // NOI18N
+            assert cfgBean != null : "empty geocpm cfg bean"; // NOI18N
 
-            setStatusEDT(true, "Begin work...");
+            setStatusEDT(
+                true,
+                NbBundle.getMessage(
+                    ImportGeoCPMWizardPanelUpload.class,
+                    "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.beginWork")); // NOI18N
 
             uploadTask = SudplanConcurrency.getSudplanGeneralPurposePool().submit(new Runnable() {
 
@@ -96,49 +111,121 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
                         public void run() {
                             try {
                                 if (Thread.currentThread().isInterrupted()) {
-                                    setStatusEDT(true, "Upload is cancelled");
+                                    setStatusEDT(
+                                        true,
+                                        NbBundle.getMessage(
+                                            ImportGeoCPMWizardPanelUpload.class,
+                                            "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.uploadCancelled")); // NOI18N
                                 }
 
-                                setStatusEDT(true, "Reading GeoCPM Configuration");
-                                final String geocpmGzip = GeoCPMUtils.readContentGzip(geocpmFile);
+                                setStatusEDT(
+                                    true,
+                                    NbBundle.getMessage(
+                                        ImportGeoCPMWizardPanelUpload.class,
+                                        "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.readingCfg")); // NOI18N
+
+                                // FIXME: for the validation
+                                Thread.currentThread().sleep(1333);
+                                // FIXME: read geocpm file final String geocpmGzip =
+                                // GeoCPMUtils.readContentGzip(geocpmFile);
 
                                 if (Thread.currentThread().isInterrupted()) {
-                                    setStatusEDT(true, "Upload is cancelled");
+                                    setStatusEDT(
+                                        true,
+                                        NbBundle.getMessage(
+                                            ImportGeoCPMWizardPanelUpload.class,
+                                            "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.uploadCancelled")); // NOI18N
                                 }
 
-                                final String dynaGzip;
-                                if (dynaFile == null) {
-                                    dynaGzip = null;
-                                } else {
-                                    setStatusEDT(true, "Reading DYNA Configuration");
-                                    dynaGzip = GeoCPMUtils.readContentGzip(dynaFile);
-                                }
+                                setStatusEDT(
+                                    true,
+                                    NbBundle.getMessage(
+                                        ImportGeoCPMWizardPanelUpload.class,
+                                        "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.readingDyna")); // NOI18N
+                                // FIXME: read dyna files
+// dynaGzip = GeoCPMUtils.readContentGzip(dynaFile);
+
+                                // FIXME: for the validation
+                                Thread.currentThread().sleep(1333);
 
                                 if (Thread.currentThread().isInterrupted()) {
-                                    setStatusEDT(true, "Upload is cancelled");
+                                    setStatusEDT(
+                                        true,
+                                        NbBundle.getMessage(
+                                            ImportGeoCPMWizardPanelUpload.class,
+                                            "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.uploadCancelled")); // NOI18N
                                 }
 
-                                setStatusEDT(true, "Uploading new configuration");
+                                setStatusEDT(
+                                    true,
+                                    NbBundle.getMessage(
+                                        ImportGeoCPMWizardPanelUpload.class,
+                                        "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.uploading")); // NOI18N
+
+                                // FIXME: for the validation
+                                Thread.currentThread().sleep(1333);
 
                                 // FIXME: hardcoded geocpm service url
-                                final GeoCPMService client = new GeoCPMRestClient(RunoffModelManager.CLIENT_URL);
-                                final ImportConfig cfg = new ImportConfig(geocpmGzip, dynaGzip);
+// final GeoCPMService client = new GeoCPMRestClient(RunoffModelManager.CLIENT_URL);
+// final ImportConfig cfg = new ImportConfig(geocpmGzip, dynaGzip);
 
                                 if (Thread.currentThread().isInterrupted()) {
-                                    setStatusEDT(true, "Upload is cancelled");
+                                    setStatusEDT(
+                                        true,
+                                        NbBundle.getMessage(
+                                            ImportGeoCPMWizardPanelUpload.class,
+                                            "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.uploadCancelled")); // NOI18N
                                 }
 
-                                final ImportStatus status = client.importConfiguration(cfg);
+                                // FIXME: validation adaption
+// final ImportStatus status = client.importConfiguration(cfg);
+
+                                final ImportStatus status = new ImportStatus(-1);
 
                                 geocpmId = status.getGeocpmId();
 
-                                setStatusEDT(false, "Import successful");
+                                setStatusEDT(
+                                    true,
+                                    NbBundle.getMessage(
+                                        ImportGeoCPMWizardPanelUpload.class,
+                                        "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.saveCidsBean")); // NOI18N
+
+                                // FIXME: for the validation
+                                Thread.currentThread().sleep(1333);
+
+                                // FIXME: hardcoded domain final MetaClass mc = ClassCacheMultiple.getMetaClass(
+                                // "SUDPLAN-WUPP", // NOI18N "geocpm_configuration"); // NOI18N final MetaObject mo =
+                                // SessionManager.getProxy() .getMetaObject(geocpmId, mc.getID(), "SUDPLAN-WUPP"); //
+                                // NOI18N final CidsBean importBean = mo.getBean(); importBean.setProperty("name",
+                                // cfgBean.getProperty("name")); // NOI18N importBean.setProperty("description",
+                                // cfgBean.getProperty("description")); // NOI18N
+                                // importBean.setProperty("investigation_area",
+                                // cfgBean.getProperty("investigation_area")); // NOI18N
+                                //
+                                // importBean.persist();
+
+                                setStatusEDT(
+                                    false,
+                                    NbBundle.getMessage(
+                                        ImportGeoCPMWizardPanelUpload.class,
+                                        "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.importSuccessful")); // NOI18N
 
                                 synchronized (lock) {
                                     ImportGeoCPMWizardPanelUpload.this.uploadTask = null;
                                 }
-                            } catch (final Exception e) {
-                                setStatusEDT(false, "Import encountered an error: " + e);
+                            } catch (final Throwable e) {
+                                LOG.error("Import encountered an error", e);                                     // NOI18N
+                                setStatusEDT(
+                                    false,
+                                    NbBundle.getMessage(
+                                        ImportGeoCPMWizardPanelUpload.class,
+                                        "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.importError", // NOI18N
+                                        e));
+
+                                // FIXME: use thread pool that doesn't swallow errors
+                                if (e instanceof Error) {
+                                    throw (Error)e;
+                                }
                             } finally {
                                 changeSupport.fireChange();
                             }
