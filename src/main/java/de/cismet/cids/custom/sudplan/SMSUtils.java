@@ -73,7 +73,9 @@ public final class SMSUtils {
     public static final String TABLENAME_GEOCPM_CONFIGURATION = "geocpm_configuration"; // NOI18N
     public static final String TABLENAME_DELTA_CONFIGURATION = "delta_configuration";   // NOI18N
 
-    public static final String CISMAP_PLUGIN_NAME = "cismap";
+    public static final String CISMAP_PLUGIN_NAME = "cismap"; // NOI18N
+
+    public static final String DOMAIN_SUDPLAN_WUPP = "SUDPLAN-WUPP"; // NOI18N
 
     public static final String EPSG_WUPP = "EPSG:31466"; // NOI18N
 
@@ -559,8 +561,19 @@ public final class SMSUtils {
      * @return  DOCUMENT ME!
      */
     public static CidsBean fetchCidsBean(final int id, final String tablename) {
-        final String domain = SessionManager.getSession().getUser().getDomain();
+        return fetchCidsBean(id, tablename, SessionManager.getSession().getUser().getDomain());
+    }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   id         DOCUMENT ME!
+     * @param   tablename  DOCUMENT ME!
+     * @param   domain     DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static CidsBean fetchCidsBean(final int id, final String tablename, final String domain) {
         final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, tablename);
         try {
             final MetaObject mo = SessionManager.getProxy().getMetaObject(id, mc.getID(), domain);

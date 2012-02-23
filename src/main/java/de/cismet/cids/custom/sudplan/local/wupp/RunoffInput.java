@@ -128,7 +128,7 @@ public final class RunoffInput {
      * @return  DOCUMENT ME!
      */
     public CidsBean fetchRainevent() {
-        return SMSUtils.fetchCidsBean(raineventId, SMSUtils.TABLENAME_RAINEVENT);
+        return SMSUtils.fetchCidsBean(raineventId, SMSUtils.TABLENAME_RAINEVENT, SMSUtils.DOMAIN_SUDPLAN_WUPP);
     }
 
     /**
@@ -140,7 +140,10 @@ public final class RunoffInput {
         if (geocpmInputId < 0) {
             return null;
         } else {
-            return SMSUtils.fetchCidsBean(geocpmInputId, SMSUtils.TABLENAME_GEOCPM_CONFIGURATION);
+            return SMSUtils.fetchCidsBean(
+                    geocpmInputId,
+                    SMSUtils.TABLENAME_GEOCPM_CONFIGURATION,
+                    SMSUtils.DOMAIN_SUDPLAN_WUPP);
         }
     }
 
@@ -153,7 +156,10 @@ public final class RunoffInput {
         if (deltaInputId < 0) {
             return null;
         } else {
-            return SMSUtils.fetchCidsBean(deltaInputId, SMSUtils.TABLENAME_DELTA_CONFIGURATION);
+            return SMSUtils.fetchCidsBean(
+                    deltaInputId,
+                    SMSUtils.TABLENAME_DELTA_CONFIGURATION,
+                    SMSUtils.DOMAIN_SUDPLAN_WUPP);
         }
     }
 }
