@@ -112,7 +112,10 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
 
         MetaObject[] metaObjects;
         try {
-            metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
+            metaObjects = SessionManager.getProxy()
+                        .getMetaObjectByQuery(SessionManager.getSession().getUser(),
+                                sb.toString(),
+                                SMSUtils.DOMAIN_SUDPLAN_WUPP);
         } catch (final ConnectionException ex) {
             final String message = "cannot get input meta objects from database"; // NOI18N
             LOG.error(message, ex);
@@ -140,7 +143,10 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
         }
 
         try {
-            metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
+            metaObjects = SessionManager.getProxy()
+                        .getMetaObjectByQuery(SessionManager.getSession().getUser(),
+                                sb.toString(),
+                                SMSUtils.DOMAIN_SUDPLAN_WUPP);
         } catch (final ConnectionException ex) {
             final String message = "cannot get input meta objects from database"; // NOI18N
             LOG.error(message, ex);

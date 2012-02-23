@@ -44,6 +44,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.tostringconverter.sudplan.DeltaConfigurationToStringConverter;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -484,7 +485,9 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
                         + " where original_object = " + id;                                   // NOI18N
 
             final MetaObject[] deltaCfgObjects = SessionManager.getProxy()
-                        .getMetaObjectByQuery(SessionManager.getSession().getUser(), query);
+                        .getMetaObjectByQuery(SessionManager.getSession().getUser(),
+                            query,
+                            SMSUtils.DOMAIN_SUDPLAN_WUPP);
 
             final DefaultListModel model = new DefaultListModel();
             for (final MetaObject mo : deltaCfgObjects) {

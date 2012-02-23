@@ -91,9 +91,9 @@ public class RunGeoCPMVisualPanelRainevent extends javax.swing.JPanel {
      * @throws  WizardInitialisationException  DOCUMENT ME!
      */
     private void initRaineventsList() throws WizardInitialisationException {
-        // FIXME: user domain
-        final String domain = SessionManager.getSession().getUser().getDomain();
-        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SMSUtils.TABLENAME_RAINEVENT);
+        final MetaClass mc = ClassCacheMultiple.getMetaClass(
+                SMSUtils.DOMAIN_SUDPLAN_WUPP,
+                SMSUtils.TABLENAME_RAINEVENT);
 
         if (mc == null) {
             throw new WizardInitialisationException("cannot fetch timeseries metaclass"); // NOI18N
@@ -111,7 +111,10 @@ public class RunGeoCPMVisualPanelRainevent extends javax.swing.JPanel {
 
         final MetaObject[] metaObjects;
         try {
-            metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
+            metaObjects = SessionManager.getProxy()
+                        .getMetaObjectByQuery(SessionManager.getSession().getUser(),
+                                sb.toString(),
+                                SMSUtils.DOMAIN_SUDPLAN_WUPP);
         } catch (final ConnectionException ex) {
             final String message = "cannot get timeseries meta objects from database"; // NOI18N
             LOG.error(message, ex);
