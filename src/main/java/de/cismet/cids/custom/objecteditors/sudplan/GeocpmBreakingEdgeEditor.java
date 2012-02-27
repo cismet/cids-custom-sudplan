@@ -14,7 +14,6 @@ import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
 
-import org.jdesktop.beansbinding.Converter;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.decorator.SortOrder;
 import org.jdesktop.swingx.error.ErrorInfo;
@@ -26,6 +25,9 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import java.math.BigDecimal;
 
@@ -43,6 +45,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import de.cismet.cids.custom.objecteditors.sudplan.DeltaBreakingEdgeEditor.BEHeightConverter;
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.tostringconverter.sudplan.DeltaConfigurationToStringConverter;
@@ -78,27 +81,19 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
 
     private final transient DocumentListener cfgNameChangeL;
 
-    private final transient DocumentListener dbeChangedL;
+    private final transient PropertyChangeListener dbeChangedL;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JButton btnNew = new javax.swing.JButton();
+    private final transient de.cismet.cids.custom.objecteditors.sudplan.DeltaBreakingEdgeEditor
+        deltaBreakingEdgeEditor = new de.cismet.cids.custom.objecteditors.sudplan.DeltaBreakingEdgeEditor();
     private final transient de.cismet.cids.custom.objecteditors.sudplan.DeltaConfigurationEditor deltaCfgEditor =
         new de.cismet.cids.custom.objecteditors.sudplan.DeltaConfigurationEditor();
-    private final transient javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
     private final transient javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
-    private final transient javax.swing.JScrollPane jScrollPane2 = new javax.swing.JScrollPane();
     private final transient javax.swing.JToolBar jToolBar1 = new javax.swing.JToolBar();
-    private final transient javax.swing.JLabel lblCm1 = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblCm2 = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblDescription = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblHeading = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblHeading1 = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblHeading2 = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblName = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblOrigHeight = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblOrigHeightValue = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblType = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblTypeValue = new javax.swing.JLabel();
     private final transient org.jdesktop.swingx.JXList lstDeltaCfgs = new org.jdesktop.swingx.JXList();
     private final transient de.cismet.tools.gui.SemiRoundedPanel panHeadInfo =
         new de.cismet.tools.gui.SemiRoundedPanel();
@@ -109,11 +104,6 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
     private final transient de.cismet.tools.gui.RoundedPanel pnlBreakingEdge = new de.cismet.tools.gui.RoundedPanel();
     private final transient de.cismet.tools.gui.RoundedPanel pnlCfg = new de.cismet.tools.gui.RoundedPanel();
     private final transient de.cismet.tools.gui.RoundedPanel pnlCfgs = new de.cismet.tools.gui.RoundedPanel();
-    private final transient javax.swing.JSlider sldHeight = new javax.swing.JSlider();
-    private final transient javax.swing.JTextArea txaDescription = new javax.swing.JTextArea();
-    private final transient javax.swing.JTextField txtName = new javax.swing.JTextField();
-    private final transient javax.swing.JTextField txtNewHeight = new javax.swing.JTextField();
-    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -125,7 +115,7 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
         selL = new SelectionListener();
         newL = new NewDeltaCfgListener();
         cfgNameChangeL = new CfgNameChangeListener();
-        dbeChangedL = new DBEChangedListener();
+        dbeChangedL = new DBEPropertyChangedListener();
 
         initComponents();
 
@@ -152,10 +142,6 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
 
         btnNew.addActionListener(WeakListeners.create(ActionListener.class, newL, btnNew));
         deltaCfgEditor.addNameChangeListener(cfgNameChangeL);
-        txtNewHeight.getDocument().addDocumentListener(WeakListeners.document(dbeChangedL, txtNewHeight.getDocument()));
-        txtName.getDocument().addDocumentListener(WeakListeners.document(dbeChangedL, txtName.getDocument()));
-        txaDescription.getDocument()
-                .addDocumentListener(WeakListeners.document(dbeChangedL, txaDescription.getDocument()));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -168,7 +154,6 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
-        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
@@ -203,7 +188,7 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 10, 10);
         pnlCfgs.add(jScrollPane1, gridBagConstraints);
 
         jToolBar1.setFloatable(false);
@@ -221,7 +206,7 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 2, 10);
         pnlCfgs.add(jToolBar1, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -260,6 +245,7 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
         pnlCfg.add(deltaCfgEditor, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -286,172 +272,19 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipadx = 134;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.weightx = 1.0;
         pnlBreakingEdge.add(panHeadInfo2, gridBagConstraints);
-
-        lblName.setText(NbBundle.getMessage(GeocpmBreakingEdgeEditor.class, "GeocpmBreakingEdgeEditor.lblName.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlBreakingEdge.add(lblName, gridBagConstraints);
-
-        lblDescription.setText(NbBundle.getMessage(
-                GeocpmBreakingEdgeEditor.class,
-                "GeocpmBreakingEdgeEditor.lblDescription.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlBreakingEdge.add(lblDescription, gridBagConstraints);
-
-        lblType.setText(NbBundle.getMessage(GeocpmBreakingEdgeEditor.class, "GeocpmBreakingEdgeEditor.lblType.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlBreakingEdge.add(lblType, gridBagConstraints);
-
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.type}"),
-                lblTypeValue,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("<not set>");
-        binding.setSourceUnreadableValue("<unreadable>");
-        binding.setConverter(new BETypeConverter());
-        bindingGroup.addBinding(binding);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlBreakingEdge.add(lblTypeValue, gridBagConstraints);
-
-        lblOrigHeight.setText(NbBundle.getMessage(
-                GeocpmBreakingEdgeEditor.class,
-                "GeocpmBreakingEdgeEditor.lblOrigHeight.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlBreakingEdge.add(lblOrigHeight, gridBagConstraints);
-
-        lblOrigHeightValue.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        lblOrigHeightValue.setMaximumSize(new java.awt.Dimension(50, 16));
-        lblOrigHeightValue.setMinimumSize(new java.awt.Dimension(50, 16));
-        lblOrigHeightValue.setPreferredSize(new java.awt.Dimension(50, 16));
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.height}"),
-                lblOrigHeightValue,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("<not set>");
-        binding.setSourceUnreadableValue("<unreadable>");
-        binding.setConverter(new BEHeightConverter());
-        bindingGroup.addBinding(binding);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 3);
-        pnlBreakingEdge.add(lblOrigHeightValue, gridBagConstraints);
-
-        txaDescription.setColumns(20);
-        txaDescription.setRows(5);
-        jScrollPane2.setViewportView(txaDescription);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlBreakingEdge.add(jScrollPane2, gridBagConstraints);
-
-        txtName.setText(NbBundle.getMessage(GeocpmBreakingEdgeEditor.class, "GeocpmBreakingEdgeEditor.txtName.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlBreakingEdge.add(txtName, gridBagConstraints);
-
-        jLabel1.setText(NbBundle.getMessage(GeocpmBreakingEdgeEditor.class, "GeocpmBreakingEdgeEditor.jLabel1.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 5);
-        pnlBreakingEdge.add(jLabel1, gridBagConstraints);
-
-        txtNewHeight.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtNewHeight.setMaximumSize(new java.awt.Dimension(50, 28));
-        txtNewHeight.setMinimumSize(new java.awt.Dimension(50, 28));
-        txtNewHeight.setPreferredSize(new java.awt.Dimension(50, 28));
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                sldHeight,
-                org.jdesktop.beansbinding.ELProperty.create("${value}"),
-                txtNewHeight,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        bindingGroup.addBinding(binding);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 0);
-        pnlBreakingEdge.add(txtNewHeight, gridBagConstraints);
-
-        sldHeight.setMajorTickSpacing(20);
-        sldHeight.setMaximum(500);
-        sldHeight.setMinorTickSpacing(10);
-        sldHeight.setPaintTicks(true);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 1);
-        pnlBreakingEdge.add(sldHeight, gridBagConstraints);
-
-        lblCm1.setText(NbBundle.getMessage(GeocpmBreakingEdgeEditor.class, "GeocpmBreakingEdgeEditor.lblCm1.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        pnlBreakingEdge.add(lblCm1, gridBagConstraints);
-
-        lblCm2.setText(NbBundle.getMessage(GeocpmBreakingEdgeEditor.class, "GeocpmBreakingEdgeEditor.lblCm2.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        pnlBreakingEdge.add(lblCm2, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        pnlBreakingEdge.add(deltaBreakingEdgeEditor, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -459,15 +292,10 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(pnlBreakingEdge, gridBagConstraints);
-
-        bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
 
     @Override
     protected void init() {
-        bindingGroup.unbind();
-        bindingGroup.bind();
-
         try {
             final MetaClass mc = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", "delta_configuration");   // NOI18N
             if (mc == null) {
@@ -555,23 +383,21 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
      * @param  dbeBean  DOCUMENT ME!
      */
     private void setCurrentDeltaBreakingEdge(final CidsBean dbeBean) {
-        this.currentDeltaBEBean = dbeBean;
+        if (currentDeltaBEBean != null) {
+            currentDeltaBEBean.removePropertyChangeListener(dbeChangedL);
+        }
+
+        currentDeltaBEBean = dbeBean;
+
+        if (currentDeltaBEBean != null) {
+            currentDeltaBEBean.addPropertyChangeListener(dbeChangedL);
+        }
 
         final Runnable r = new Runnable() {
 
                 @Override
                 public void run() {
-                    if (dbeBean == null) {
-                        txtName.setText("<Bitte Konfigration auswählen>");
-                        txaDescription.setText("<Bitte Konfiguration auswählen>");
-                        txtNewHeight.setText("<0>");
-                    } else {
-                        final BigDecimal height = (BigDecimal)dbeBean.getProperty("height"); // NOI18N
-                        txtNewHeight.setText(((height == null) ? "0"
-                                                               : String.valueOf(heightConv.convertForward(height))));
-                        txtName.setText((String)dbeBean.getProperty("name"));                // NOI18N
-                        txaDescription.setText((String)dbeBean.getProperty("description"));  // NOI18N
-                    }
+                    deltaBreakingEdgeEditor.setCidsBean(dbeBean);
                 }
             };
 
@@ -597,8 +423,8 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
      */
     private void beforeDeltaCfgChange(final CidsBean deltaCfgBean) {
         if (currentDeltaBEBean != null) {
-            final String height = lblOrigHeightValue.getText();
-            final String newHeight = txtNewHeight.getText();
+            final String height = heightConv.convertForward((BigDecimal)cidsBean.getProperty("height"));
+            final String newHeight = heightConv.convertForward((BigDecimal)currentDeltaBEBean.getProperty("height"));
 
             if (height.equals(newHeight)) {
                 final Collection<CidsBean> dbes = (Collection)deltaCfgBean.getProperty("delta_breaking_edges"); // NOI18N
@@ -614,45 +440,13 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
      *
      * @version  $Revision$, $Date$
      */
-    private final class DBEChangedListener implements DocumentListener {
+    private final class DBEPropertyChangedListener implements PropertyChangeListener {
 
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public void insertUpdate(final DocumentEvent e) {
-            changedUpdate(e);
-        }
-
-        @Override
-        public void removeUpdate(final DocumentEvent e) {
-            changedUpdate(e);
-        }
-
-        @Override
-        public void changedUpdate(final DocumentEvent e) {
-            if (currentDeltaBEBean != null) {
-                // FIXME: rather expensive update impl, be more efficient in case of performance issues
-                try {
-                    // no binding right now, have to do it manually
-
-                    // it is intentional to use == instead of equals()
-                    if (txtNewHeight.getDocument() == e.getDocument()) {
-                        currentDeltaBEBean.setProperty("height", heightConv.convertReverse(txtNewHeight.getText())); // NOI18N
-                    } else if (txaDescription.getDocument() == e.getDocument()) {
-                        currentDeltaBEBean.setProperty("description", txaDescription.getText());                     // NOI18N
-                    } else if (txtName.getDocument() == e.getDocument()) {
-                        currentDeltaBEBean.setProperty("name", txtName.getText());                                   // NOI18N
-                    } else {
-                        LOG.warn("document listener was triggered, but no known component association: " + e);
-                    }
-                } catch (final Exception ex) {
-                    final String message = "cannot set new bean values";                                             // NOI18N
-                    LOG.warn(message, ex);
-                    throw new IllegalStateException(message, ex);
-                }
-
-                computeChangeStatus();
-            }
+        public void propertyChange(final PropertyChangeEvent evt) {
+            computeChangeStatus();
         }
     }
 
@@ -795,50 +589,6 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
      *
      * @version  $Revision$, $Date$
      */
-    public static final class BETypeConverter extends Converter<Integer, String> {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public String convertForward(final Integer value) {
-            if (value == 0) {
-                return "Gehwegbruchkante";
-            } else if (value == 1) {
-                return "Häuserbruchkante";
-            } else {
-                throw new IllegalStateException("unknown breaking edge type"); // NOI18N
-            }
-        }
-
-        @Override
-        public Integer convertReverse(final String value) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    public static final class BEHeightConverter extends Converter<BigDecimal, String> {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public String convertForward(final BigDecimal value) {
-            return String.valueOf(value.multiply(new BigDecimal(100)).intValue());
-        }
-
-        @Override
-        public BigDecimal convertReverse(final String value) {
-            if ((value == null) || value.isEmpty()) {
-                return new BigDecimal(0);
-            } else {
-                return new BigDecimal(value).divide(new BigDecimal(100));
-            }
-        }
-    }
 
     /**
      * DOCUMENT ME!

@@ -7,16 +7,38 @@
 ****************************************************/
 package de.cismet.cids.custom.objecteditors.sudplan;
 
+import com.vividsolutions.jts.geom.Geometry;
+
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
+
+import org.apache.log4j.Logger;
+
 import org.openide.util.NbBundle;
+
+import java.awt.EventQueue;
 
 import javax.swing.JOptionPane;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.SqlTimestampToStringConverter;
+import de.cismet.cids.custom.sudplan.local.wupp.RunoffOutputManagerUI;
 
 import de.cismet.cids.editors.DefaultCustomObjectEditor;
 import de.cismet.cids.editors.EditorClosedEvent;
 import de.cismet.cids.editors.EditorSaveListener;
+
+import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
+import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
 /**
  * DOCUMENT ME!
@@ -25,6 +47,15 @@ import de.cismet.cids.editors.EditorSaveListener;
  * @version  $Revision$, $Date$
  */
 public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implements EditorSaveListener {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final String TIN_URL =
+        "http://sudplanwp6.cismet.de/geoserver/wms?SERVICE=WMS&&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=sudplan:GeoCPM%20TIN&STYLES=geocpm_triangle_style";                   // NOI18N
+    public static final String BE_URL =
+        "http://sudplanwp6.cismet.de/geoserver/wms?SERVICE=WMS&&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=sudplan:GeoCPM%20Breaking%20Edges&STYLES=geocpm_breaking_edge_style"; // NOI18N
+
+    private static final transient Logger LOG = Logger.getLogger(GeocpmConfigurationEditor.class);
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient de.cismet.cids.editors.DefaultBindableReferenceCombo cboInvestigationArea =
@@ -43,6 +74,9 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
     private final transient javax.swing.JLabel lblCalcEnd = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblCalcEndValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblDescription = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblHeadingInfo = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblHeadingMap = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblHeadingMetadata = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblInvestigationArea = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblLastValues = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblMergeTriangles = new javax.swing.JLabel();
@@ -63,8 +97,20 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
     private final transient javax.swing.JLabel lblTimeStepRestriction = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblWriteEdge = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblWriteNode = new javax.swing.JLabel();
+    private final transient de.cismet.cismap.commons.gui.MappingComponent map =
+        new de.cismet.cismap.commons.gui.MappingComponent();
+    private final transient de.cismet.tools.gui.SemiRoundedPanel panHeadInfo =
+        new de.cismet.tools.gui.SemiRoundedPanel();
+    private final transient de.cismet.tools.gui.SemiRoundedPanel panHeadInfo1 =
+        new de.cismet.tools.gui.SemiRoundedPanel();
+    private final transient de.cismet.tools.gui.SemiRoundedPanel panHeadInfo2 =
+        new de.cismet.tools.gui.SemiRoundedPanel();
     private final transient javax.swing.JPanel pnlFiller = new javax.swing.JPanel();
-    private final transient javax.swing.JPanel pnlInfo = new javax.swing.JPanel();
+    private final transient de.cismet.tools.gui.RoundedPanel pnlInfo = new de.cismet.tools.gui.RoundedPanel();
+    private final transient javax.swing.JPanel pnlInfoContent = new javax.swing.JPanel();
+    private final transient de.cismet.tools.gui.RoundedPanel pnlMap = new de.cismet.tools.gui.RoundedPanel();
+    private final transient de.cismet.tools.gui.RoundedPanel pnlMetadata = new de.cismet.tools.gui.RoundedPanel();
+    private final transient javax.swing.JPanel pnlMetadataContent = new javax.swing.JPanel();
     private final transient javax.swing.JTextArea txaDescription = new javax.swing.JTextArea();
     private final transient javax.swing.JTextField txtName = new javax.swing.JTextField();
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
@@ -101,6 +147,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
             cidsBean);
         bindingGroup.unbind();
         bindingGroup.bind();
+
+        initMap();
     }
 
     @Override
@@ -121,14 +169,39 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        lblName.setText(NbBundle.getMessage(GeocpmConfigurationEditor.class, "GeocpmConfigurationEditor.lblName.text")); // NOI18N
+        pnlMetadata.setLayout(new java.awt.GridBagLayout());
+
+        panHeadInfo.setBackground(new java.awt.Color(51, 51, 51));
+        panHeadInfo.setMinimumSize(new java.awt.Dimension(109, 24));
+        panHeadInfo.setPreferredSize(new java.awt.Dimension(109, 24));
+        panHeadInfo.setLayout(new java.awt.FlowLayout());
+
+        lblHeadingMetadata.setForeground(new java.awt.Color(255, 255, 255));
+        lblHeadingMetadata.setText(org.openide.util.NbBundle.getMessage(
+                GeocpmConfigurationEditor.class,
+                "GeocpmConfigurationEditor.lblHeadingMetadata.text")); // NOI18N
+        panHeadInfo.add(lblHeadingMetadata);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.weightx = 1.0;
+        pnlMetadata.add(panHeadInfo, gridBagConstraints);
+
+        pnlMetadataContent.setOpaque(false);
+        pnlMetadataContent.setLayout(new java.awt.GridBagLayout());
+
+        lblName.setText(NbBundle.getMessage(GeocpmConfigurationEditor.class, "GeocpmConfigurationEditor.lblName.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 6, 5, 5);
-        add(lblName, gridBagConstraints);
+        pnlMetadataContent.add(lblName, gridBagConstraints);
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
@@ -140,29 +213,102 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 3);
-        add(txtName, gridBagConstraints);
+        pnlMetadataContent.add(txtName, gridBagConstraints);
 
         lblDescription.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
                 "GeocpmConfigurationEditor.lblDescription.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 6, 5, 5);
-        add(lblDescription, gridBagConstraints);
+        pnlMetadataContent.add(lblDescription, gridBagConstraints);
 
-        pnlInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(
-                NbBundle.getMessage(
-                    GeocpmConfigurationEditor.class,
-                    "GeocpmConfigurationEditor.pnlInfo.border.title"))); // NOI18N
-        pnlInfo.setOpaque(false);
+        txaDescription.setColumns(20);
+        txaDescription.setRows(5);
+        jScrollPane1.setViewportView(txaDescription);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weighty = 0.2;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlMetadataContent.add(jScrollPane1, gridBagConstraints);
+
+        lblInvestigationArea.setText(NbBundle.getMessage(
+                GeocpmConfigurationEditor.class,
+                "GeocpmConfigurationEditor.lblInvestigationArea.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.insets = new java.awt.Insets(5, 6, 5, 5);
+        pnlMetadataContent.add(lblInvestigationArea, gridBagConstraints);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.investigation_area}"),
+                cboInvestigationArea,
+                org.jdesktop.beansbinding.BeanProperty.create("selectedItem"));
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 3);
+        pnlMetadataContent.add(cboInvestigationArea, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(15, 15, 15, 15);
+        pnlMetadata.add(pnlMetadataContent, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(pnlMetadata, gridBagConstraints);
+
         pnlInfo.setLayout(new java.awt.GridBagLayout());
+
+        panHeadInfo1.setBackground(new java.awt.Color(51, 51, 51));
+        panHeadInfo1.setMinimumSize(new java.awt.Dimension(109, 24));
+        panHeadInfo1.setPreferredSize(new java.awt.Dimension(109, 24));
+        panHeadInfo1.setLayout(new java.awt.FlowLayout());
+
+        lblHeadingInfo.setForeground(new java.awt.Color(255, 255, 255));
+        lblHeadingInfo.setText(org.openide.util.NbBundle.getMessage(
+                GeocpmConfigurationEditor.class,
+                "GeocpmConfigurationEditor.lblHeadingInfo.text")); // NOI18N
+        panHeadInfo1.add(lblHeadingInfo);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.weightx = 1.0;
+        pnlInfo.add(panHeadInfo1, gridBagConstraints);
+
+        pnlInfoContent.setOpaque(false);
+        pnlInfoContent.setLayout(new java.awt.GridBagLayout());
 
         lblCalcBegin.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -172,7 +318,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblCalcBegin, gridBagConstraints);
+        pnlInfoContent.add(lblCalcBegin, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
@@ -187,9 +333,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblCalcBeginValue, gridBagConstraints);
+        pnlInfoContent.add(lblCalcBeginValue, gridBagConstraints);
 
         lblCalcEnd.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -200,7 +345,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblCalcEnd, gridBagConstraints);
+        pnlInfoContent.add(lblCalcEnd, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
@@ -217,9 +362,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblCalcEndValue, gridBagConstraints);
+        pnlInfoContent.add(lblCalcEndValue, gridBagConstraints);
 
         lblWriteNode.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -230,7 +374,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblWriteNode, gridBagConstraints);
+        pnlInfoContent.add(lblWriteNode, gridBagConstraints);
 
         lblWriteEdge.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -241,7 +385,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblWriteEdge, gridBagConstraints);
+        pnlInfoContent.add(lblWriteEdge, gridBagConstraints);
 
         chkWriteNode.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -263,9 +407,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(chkWriteNode, gridBagConstraints);
+        pnlInfoContent.add(chkWriteNode, gridBagConstraints);
 
         chkWriteEdge.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -287,9 +430,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(chkWriteEdge, gridBagConstraints);
+        pnlInfoContent.add(chkWriteEdge, gridBagConstraints);
 
         lblLastValues.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -300,7 +442,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblLastValues, gridBagConstraints);
+        pnlInfoContent.add(lblLastValues, gridBagConstraints);
 
         lblSaveMarked.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -311,7 +453,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblSaveMarked, gridBagConstraints);
+        pnlInfoContent.add(lblSaveMarked, gridBagConstraints);
 
         chkLastValues.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -333,9 +475,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(chkLastValues, gridBagConstraints);
+        pnlInfoContent.add(chkLastValues, gridBagConstraints);
 
         chkSaveMarked.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -357,9 +498,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(chkSaveMarked, gridBagConstraints);
+        pnlInfoContent.add(chkSaveMarked, gridBagConstraints);
 
         lblMergeTriangles.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -370,7 +510,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblMergeTriangles, gridBagConstraints);
+        pnlInfoContent.add(lblMergeTriangles, gridBagConstraints);
 
         chkMergeTriangles.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -392,9 +532,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(chkMergeTriangles, gridBagConstraints);
+        pnlInfoContent.add(chkMergeTriangles, gridBagConstraints);
 
         lblMinCalcTriangleSize.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -405,7 +544,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblMinCalcTriangleSize, gridBagConstraints);
+        pnlInfoContent.add(lblMinCalcTriangleSize, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
@@ -421,9 +560,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 7;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblMinCalcTriangleSizeValue, gridBagConstraints);
+        pnlInfoContent.add(lblMinCalcTriangleSizeValue, gridBagConstraints);
 
         lblTimeStepRestriction.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -434,7 +572,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblTimeStepRestriction, gridBagConstraints);
+        pnlInfoContent.add(lblTimeStepRestriction, gridBagConstraints);
 
         lblSaveVelocityCurves.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -445,7 +583,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblSaveVelocityCurves, gridBagConstraints);
+        pnlInfoContent.add(lblSaveVelocityCurves, gridBagConstraints);
 
         lblSaveFlowCurves.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -456,7 +594,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblSaveFlowCurves, gridBagConstraints);
+        pnlInfoContent.add(lblSaveFlowCurves, gridBagConstraints);
 
         chkTimeStepRestriction.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -478,9 +616,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 8;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(chkTimeStepRestriction, gridBagConstraints);
+        pnlInfoContent.add(chkTimeStepRestriction, gridBagConstraints);
 
         chkSaveVelocityCurves.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -502,9 +639,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 9;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(chkSaveVelocityCurves, gridBagConstraints);
+        pnlInfoContent.add(chkSaveVelocityCurves, gridBagConstraints);
 
         chkSaveFlowCurves.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -526,9 +662,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 10;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(chkSaveFlowCurves, gridBagConstraints);
+        pnlInfoContent.add(chkSaveFlowCurves, gridBagConstraints);
 
         lblResultSaveLimit.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -539,7 +674,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblResultSaveLimit, gridBagConstraints);
+        pnlInfoContent.add(lblResultSaveLimit, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
@@ -555,9 +690,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 11;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblResultSaveLimitValue, gridBagConstraints);
+        pnlInfoContent.add(lblResultSaveLimitValue, gridBagConstraints);
 
         lblNumberOfThreads.setText(NbBundle.getMessage(
                 GeocpmConfigurationEditor.class,
@@ -568,7 +702,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblNumberOfThreads, gridBagConstraints);
+        pnlInfoContent.add(lblNumberOfThreads, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
@@ -584,9 +718,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 12;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblNumberOfThreadsValue, gridBagConstraints);
+        pnlInfoContent.add(lblNumberOfThreadsValue, gridBagConstraints);
 
         lblQIn.setText(NbBundle.getMessage(GeocpmConfigurationEditor.class, "GeocpmConfigurationEditor.lblQIn.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -595,7 +728,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblQIn, gridBagConstraints);
+        pnlInfoContent.add(lblQIn, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
@@ -611,9 +744,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 13;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblQInValue, gridBagConstraints);
+        pnlInfoContent.add(lblQInValue, gridBagConstraints);
 
         lblQOut.setText(NbBundle.getMessage(GeocpmConfigurationEditor.class, "GeocpmConfigurationEditor.lblQOut.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -622,7 +754,7 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblQOut, gridBagConstraints);
+        pnlInfoContent.add(lblQOut, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
@@ -638,9 +770,8 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 14;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlInfo.add(lblQOutValue, gridBagConstraints);
+        pnlInfoContent.add(lblQOutValue, gridBagConstraints);
 
         pnlFiller.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -649,54 +780,60 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 1.0;
-        pnlInfo.add(pnlFiller, gridBagConstraints);
+        pnlInfoContent.add(pnlFiller, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 0);
-        add(pnlInfo, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(15, 15, 15, 15);
+        pnlInfo.add(pnlInfoContent, gridBagConstraints);
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.investigation_area}"),
-                cboInvestigationArea,
-                org.jdesktop.beansbinding.BeanProperty.create("selectedItem"));
-        bindingGroup.addBinding(binding);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 3);
-        add(cboInvestigationArea, gridBagConstraints);
-
-        lblInvestigationArea.setText(NbBundle.getMessage(
-                GeocpmConfigurationEditor.class,
-                "GeocpmConfigurationEditor.lblInvestigationArea.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.insets = new java.awt.Insets(5, 6, 5, 5);
-        add(lblInvestigationArea, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(pnlInfo, gridBagConstraints);
 
-        txaDescription.setColumns(20);
-        txaDescription.setRows(5);
-        jScrollPane1.setViewportView(txaDescription);
+        pnlMap.setLayout(new java.awt.GridBagLayout());
+
+        panHeadInfo2.setBackground(new java.awt.Color(51, 51, 51));
+        panHeadInfo2.setMinimumSize(new java.awt.Dimension(109, 24));
+        panHeadInfo2.setPreferredSize(new java.awt.Dimension(109, 24));
+        panHeadInfo2.setLayout(new java.awt.FlowLayout());
+
+        lblHeadingMap.setForeground(new java.awt.Color(255, 255, 255));
+        lblHeadingMap.setText(org.openide.util.NbBundle.getMessage(
+                GeocpmConfigurationEditor.class,
+                "GeocpmConfigurationEditor.lblHeadingMap.text")); // NOI18N
+        panHeadInfo2.add(lblHeadingMap);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.weightx = 1.0;
+        pnlMap.add(panHeadInfo2, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(15, 15, 15, 15);
+        pnlMap.add(map, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weighty = 0.2;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jScrollPane1, gridBagConstraints);
+        add(pnlMap, gridBagConstraints);
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
@@ -708,20 +845,154 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
 
     @Override
     public boolean prepareForSave() {
-        if (cidsBean.getProperty("investigation_area") == null) {                       // NOI18N
+        if (cidsBean.getProperty("investigation_area") == null) {                              // NOI18N
             JOptionPane.showMessageDialog(
                 this,
                 NbBundle.getMessage(
                     GeocpmConfigurationEditor.class,
-                    "GeocpmConfigEditor.prepareForSave().noInvestigationArea.message"), // NOI18N
+                    "GeocpmConfigurationEditor.prepareForSave().noInvestigationArea.message"), // NOI18N
                 NbBundle.getMessage(
                     GeocpmConfigurationEditor.class,
-                    "GeocpmConfigEditor.prepareForSave().noInvestigationArea.title"),   // NOI18N
+                    "GeocpmConfigurationEditor.prepareForSave().noInvestigationArea.title"),   // NOI18N
                 JOptionPane.INFORMATION_MESSAGE);
 
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void initMap() {
+        try {
+            final Geometry geom = (Geometry)cidsBean.getProperty("geom.geo_field"); // NOI18N
+            final Geometry geom31466 = CrsTransformer.transformToGivenCrs(geom.getEnvelope(), SMSUtils.EPSG_WUPP);
+
+            final XBoundingBox bbox = new XBoundingBox(geom31466, SMSUtils.EPSG_WUPP, true);
+            final ActiveLayerModel mappingModel = new ActiveLayerModel();
+            mappingModel.setSrs(new Crs(SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, true, true));
+            mappingModel.addHome(bbox);
+
+            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(RunoffOutputManagerUI.ORTHO_URL));
+            ortho.setName("Wuppertal Ortophoto"); // NOI18N
+
+            final SimpleWMS beLayer = new SimpleWMS(new SimpleWmsGetMapUrl(BE_URL));
+            beLayer.setName(NbBundle.getMessage(
+                    GeocpmConfigurationEditor.class,
+                    "GeocpmConfigurationEditor.initMap().beLayer.name")); // NOI18N
+
+            final RetrievalListener rl = new RetrievalListener() {
+
+                    private final transient String text = lblHeadingMap.getText();
+
+                    @Override
+                    public void retrievalStarted(final RetrievalEvent e) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    lblHeadingMap.setText(
+                                        text
+                                                + NbBundle.getMessage(
+                                                    GeocpmConfigurationEditor.class,
+                                                    "GeocpmConfigurationEditor.initMap().retrievalListener.retrievalStarted.loadingSuffix")); // NOI18N
+                                }
+                            });
+                    }
+
+                    @Override
+                    public void retrievalProgress(final RetrievalEvent e) {
+                        // noop
+                    }
+
+                    @Override
+                    public void retrievalComplete(final RetrievalEvent e) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    lblHeadingMap.setText(
+                                        text
+                                                + NbBundle.getMessage(
+                                                    GeocpmConfigurationEditor.class,
+                                                    "GeocpmConfigurationEditor.initMap().retrievalListener.retrievalStarted.finishedSuffix")); // NOI18N
+                                }
+                            });
+                    }
+
+                    @Override
+                    public void retrievalAborted(final RetrievalEvent e) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    lblHeadingMap.setText(
+                                        text
+                                                + NbBundle.getMessage(
+                                                    GeocpmConfigurationEditor.class,
+                                                    "GeocpmConfigurationEditor.initMap().retrievalListener.retrievalStarted.abortedSuffix")); // NOI18N
+                                }
+                            });
+                    }
+
+                    @Override
+                    public void retrievalError(final RetrievalEvent e) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    lblHeadingMap.setText(
+                                        text
+                                                + NbBundle.getMessage(
+                                                    GeocpmConfigurationEditor.class,
+                                                    "GeocpmConfigurationEditor.initMap().retrievalListener.retrievalStarted.errorSuffix"));
+                                }
+                            });
+                    }
+                };
+
+            beLayer.addRetrievalListener(rl);
+
+            mappingModel.addLayer(ortho);
+            mappingModel.addLayer(beLayer);
+
+            map.setMappingModel(mappingModel);
+            map.gotoInitialBoundingBox();
+
+            map.unlock();
+            map.setInteractionMode(MappingComponent.ZOOM);
+            map.addCustomInputListener("MUTE", new PBasicInputEventHandler() { // NOI18N
+
+                    @Override
+                    public void mouseClicked(final PInputEvent evt) {
+                        try {
+                            if (evt.getClickCount() > 1) {
+                                final SimpleWMS tin = new SimpleWMS(new SimpleWmsGetMapUrl(TIN_URL));
+                                final SimpleWMS be = new SimpleWMS(new SimpleWmsGetMapUrl(BE_URL));
+                                tin.setName(
+                                    NbBundle.getMessage(
+                                        GeocpmConfigurationEditor.class,
+                                        "GeocpmConfigurationEditor.initMap().inputListener.mouseClicked.tinLayer.name")); // NOI18N
+                                be.setName(
+                                    NbBundle.getMessage(
+                                        GeocpmConfigurationEditor.class,
+                                        "GeocpmConfigurationEditor.initMap().beLayer.name"));                             // NOI18N
+
+                                CismapBroker.getInstance().getMappingComponent().getMappingModel().addLayer(tin);
+                                CismapBroker.getInstance().getMappingComponent().getMappingModel().addLayer(be);
+                                SMSUtils.showMappingComponent();
+                                CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(bbox);
+                            }
+                        } catch (final Exception ex) {
+                            LOG.warn("cannot add layer to map", ex); // NOI18N
+                        }
+                    }
+                });
+            map.setInteractionMode("MUTE");                          // NOI18N
+        } catch (final Exception e) {
+            LOG.error("cannot initialise mapping component", e);     // NOI18N
+        }
     }
 }

@@ -7,14 +7,11 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
-import org.jdesktop.beansbinding.Converter;
-
 import org.openide.util.NbBundle;
 
-import de.cismet.cids.custom.objecteditors.sudplan.GeocpmBreakingEdgeEditor.BEHeightConverter;
-import de.cismet.cids.custom.objecteditors.sudplan.GeocpmBreakingEdgeEditor.BETypeConverter;
+import de.cismet.cids.custom.objecteditors.sudplan.DeltaBreakingEdgeEditor.BEHeightConverter;
+import de.cismet.cids.custom.objecteditors.sudplan.DeltaBreakingEdgeEditor.BETypeConverter;
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
-import de.cismet.cids.custom.tostringconverter.sudplan.GeocpmConfigurationToStringConverter;
 
 /**
  * DOCUMENT ME!
@@ -79,7 +76,7 @@ public class GeocpmBreakingEdgeRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
         add(lblIndex, gridBagConstraints);
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
@@ -107,7 +104,7 @@ public class GeocpmBreakingEdgeRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
         add(lblType, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
@@ -136,7 +133,7 @@ public class GeocpmBreakingEdgeRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
         add(lblHeight, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
@@ -165,7 +162,7 @@ public class GeocpmBreakingEdgeRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
         add(lblConfig, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
@@ -174,7 +171,7 @@ public class GeocpmBreakingEdgeRenderer extends AbstractCidsBeanRenderer {
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.geocpm_configuration_id.name}"),
                 hypConfig,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("GeoCPM Konfiguration " + cidsBean.getProperty("geocpm_configuration_id.id"));
+        binding.setSourceNullValue("<not set>");
         binding.setSourceUnreadableValue("<unreadable>");
         bindingGroup.addBinding(binding);
 

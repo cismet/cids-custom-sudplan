@@ -7,13 +7,10 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.wupp;
 
-import Sirius.navigator.connection.SessionManager;
-import Sirius.navigator.exception.ConnectionException;
 import Sirius.navigator.ui.ComponentRegistry;
 
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
-import Sirius.server.newuser.User;
 
 import org.apache.log4j.Logger;
 
@@ -319,19 +316,14 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
 
     @Override
     public boolean isEnabled() {
-        boolean isEnabled = false;
+        final boolean isEnabled = true;
 
-        if (getCidsBean() == null) {
-            LOG.warn("source == null, geocpm run action disabled");                                                    // NOI18N
-        } else {
-            final User user = SessionManager.getSession().getUser();
-            try {
-                isEnabled = SessionManager.getProxy().hasConfigAttr(user, "sudplan.local.wupp.runGeoCPM");             // NOI18N
-            } catch (final ConnectionException ex) {
-                final String message = "cannot check for config attr 'sudplan.local.wupp.runGeoCPM', action disabled"; // NOI18N
-                LOG.warn(message, ex);
-            }
-        }
+        // FIXME: for validation if (getCidsBean() == null) { LOG.warn("source == null, geocpm run action disabled");
+        // // NOI18N } else { final User user =
+        // SessionManager.getSession().getUser(); try { isEnabled = SessionManager.getProxy().hasConfigAttr(user,
+        // "sudplan.local.wupp.runGeoCPM");             // NOI18N } catch (final ConnectionException ex) { final String
+        // message = "cannot check for config attr 'sudplan.local.wupp.runGeoCPM', action disabled"; // NOI18N
+        // LOG.warn(message, ex); } }
 
         setEnabled(isEnabled);
 

@@ -103,6 +103,7 @@ public class DeltaConfigurationRenderer extends AbstractCidsBeanRenderer impleme
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(15, 15, 15, 15);
         pnlDelta.add(deltaConfigurationEditor, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -110,8 +111,7 @@ public class DeltaConfigurationRenderer extends AbstractCidsBeanRenderer impleme
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(pnlDelta, gridBagConstraints);
 
@@ -142,12 +142,14 @@ public class DeltaConfigurationRenderer extends AbstractCidsBeanRenderer impleme
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(15, 15, 15, 15);
         pnlBasis.add(geocpmConfigurationRenderer, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(pnlBasis, gridBagConstraints);

@@ -119,6 +119,7 @@ public class ManagerTitleComponent extends javax.swing.JPanel {
 
         lblTitle = new javax.swing.JLabel();
 
+        setMaximumSize(new java.awt.Dimension(500, 50));
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 

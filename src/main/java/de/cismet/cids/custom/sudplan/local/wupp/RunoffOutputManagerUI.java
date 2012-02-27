@@ -46,6 +46,8 @@ import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
 /**
  * DOCUMENT ME!
@@ -59,7 +61,7 @@ public class RunoffOutputManagerUI extends JPanel {
 
     private static final transient Logger LOG = Logger.getLogger(RunoffOutputManagerUI.class);
 
-    private static final String ORTHO_URL =
+    public static final String ORTHO_URL =
         "http://geoportal.wuppertal.de:8083/deegree/wms?&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:luftbild2010&STYLES=default"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
@@ -69,8 +71,8 @@ public class RunoffOutputManagerUI extends JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JEditorPane edpInfo;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JLabel lblHeading;
-    private javax.swing.JLabel lblHeading1;
+    private javax.swing.JLabel lblHeadingInfo;
+    private javax.swing.JLabel lblHeadingPreview;
     private de.cismet.cismap.commons.gui.MappingComponent map;
     private de.cismet.tools.gui.SemiRoundedPanel panHeadInfo;
     private de.cismet.tools.gui.SemiRoundedPanel panHeadInfo1;
@@ -158,7 +160,10 @@ public class RunoffOutputManagerUI extends JPanel {
 
         final MetaObject[] metaObjects;
         try {
-            metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
+            metaObjects = SessionManager.getProxy()
+                        .getMetaObjectByQuery(SessionManager.getSession().getUser(),
+                                sb.toString(),
+                                SMSUtils.DOMAIN_SUDPLAN_WUPP);
         } catch (final ConnectionException ex) {
             final String message = "cannot get timeseries meta objects from database"; // NOI18N
             LOG.error(message, ex);
@@ -206,13 +211,65 @@ public class RunoffOutputManagerUI extends JPanel {
             ortho.setName("Wuppertal Ortophoto"); // NOI18N
             mappingModel.addLayer(ortho);
 
-            final SimpleWMS rLayer = new SimpleWMS(new SimpleWmsGetMapUrl(
-                        sr.getWmsResults().toExternalForm()
-                                + "&format_options=layout:geocpm_result_overlay"));     // NOI18N
+            final SimpleWMS rLayer = new SimpleWMS(new SimpleWmsGetMapUrl(sr.getWmsResults().toExternalForm()));
             rLayer.setName(NbBundle.getMessage(
                     RunoffOutputManagerUI.class,
                     "RunoffOutputManagerUI.initMap(SimulationResult).resultLayer.name", // NOI18N
                     sr.getGeocpmInfo()));
+            rLayer.addRetrievalListener(new RetrievalListener() {
+
+                    private final String text = lblHeadingPreview.getText();
+
+                    @Override
+                    public void retrievalStarted(final RetrievalEvent e) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    lblHeadingPreview.setText(text + " ( Loading ... )");
+                                }
+                            });
+                    }
+
+                    @Override
+                    public void retrievalProgress(final RetrievalEvent e) {
+                        // noop
+                    }
+
+                    @Override
+                    public void retrievalComplete(final RetrievalEvent e) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    lblHeadingPreview.setText(text + " ( Double click preview to add to map )");
+                                }
+                            });
+                    }
+
+                    @Override
+                    public void retrievalAborted(final RetrievalEvent e) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    lblHeadingPreview.setText(text + " ( Retrieval Aborted )");
+                                }
+                            });
+                    }
+
+                    @Override
+                    public void retrievalError(final RetrievalEvent e) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    lblHeadingPreview.setText(text + " ( Retrieval Error )");
+                                }
+                            });
+                    }
+                });
+
             mappingModel.addLayer(rLayer);
 
             map.setMappingModel(mappingModel);
@@ -235,6 +292,7 @@ public class RunoffOutputManagerUI extends JPanel {
                                         sr.getGeocpmInfo()));
                                 CismapBroker.getInstance().getMappingComponent().getMappingModel().addLayer(layer);
                                 SMSUtils.showMappingComponent();
+                                CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(bbox);
                             }
                         } catch (final Exception ex) {
                             LOG.warn("cannot add layer to map", ex); // NOI18N
@@ -248,15 +306,6 @@ public class RunoffOutputManagerUI extends JPanel {
     }
 
     /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        final ObjectMapper m = new ObjectMapper();
-    }
-
-    /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
      * content of this method is always regenerated by the Form Editor.
      */
@@ -267,19 +316,21 @@ public class RunoffOutputManagerUI extends JPanel {
 
         pnlInfo = new de.cismet.tools.gui.RoundedPanel();
         panHeadInfo = new de.cismet.tools.gui.SemiRoundedPanel();
-        lblHeading = new javax.swing.JLabel();
+        lblHeadingInfo = new javax.swing.JLabel();
         pnlInfoContent = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         edpInfo = new javax.swing.JEditorPane();
         pnlResult = new de.cismet.tools.gui.RoundedPanel();
         panHeadInfo1 = new de.cismet.tools.gui.SemiRoundedPanel();
-        lblHeading1 = new javax.swing.JLabel();
+        lblHeadingPreview = new javax.swing.JLabel();
         pnlWMS = new javax.swing.JPanel();
         map = new de.cismet.cismap.commons.gui.MappingComponent();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
+        pnlInfo.setMinimumSize(new java.awt.Dimension(350, 350));
+        pnlInfo.setPreferredSize(new java.awt.Dimension(350, 350));
         pnlInfo.setLayout(new java.awt.GridBagLayout());
 
         panHeadInfo.setBackground(new java.awt.Color(51, 51, 51));
@@ -287,11 +338,11 @@ public class RunoffOutputManagerUI extends JPanel {
         panHeadInfo.setPreferredSize(new java.awt.Dimension(109, 24));
         panHeadInfo.setLayout(new java.awt.FlowLayout());
 
-        lblHeading.setForeground(new java.awt.Color(255, 255, 255));
-        lblHeading.setText(org.openide.util.NbBundle.getMessage(
+        lblHeadingInfo.setForeground(new java.awt.Color(255, 255, 255));
+        lblHeadingInfo.setText(org.openide.util.NbBundle.getMessage(
                 RunoffOutputManagerUI.class,
-                "RunoffOutputManagerUI.lblHeading.text")); // NOI18N
-        panHeadInfo.add(lblHeading);
+                "RunoffOutputManagerUI.lblHeadingInfo.text")); // NOI18N
+        panHeadInfo.add(lblHeadingInfo);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -305,17 +356,21 @@ public class RunoffOutputManagerUI extends JPanel {
         pnlInfoContent.setOpaque(false);
         pnlInfoContent.setLayout(new java.awt.GridBagLayout());
 
+        jScrollPane1.setMinimumSize(new java.awt.Dimension(554, 554));
+
         edpInfo.setEditable(false);
-        edpInfo.setPreferredSize(null);
+        edpInfo.setMinimumSize(new java.awt.Dimension(550, 550));
+        edpInfo.setPreferredSize(new java.awt.Dimension(550, 550));
         jScrollPane1.setViewportView(edpInfo);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 5;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(15, 15, 15, 15);
         pnlInfoContent.add(jScrollPane1, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -330,8 +385,6 @@ public class RunoffOutputManagerUI extends JPanel {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(pnlInfo, gridBagConstraints);
 
@@ -342,11 +395,11 @@ public class RunoffOutputManagerUI extends JPanel {
         panHeadInfo1.setPreferredSize(new java.awt.Dimension(109, 24));
         panHeadInfo1.setLayout(new java.awt.FlowLayout());
 
-        lblHeading1.setForeground(new java.awt.Color(255, 255, 255));
-        lblHeading1.setText(org.openide.util.NbBundle.getMessage(
+        lblHeadingPreview.setForeground(new java.awt.Color(255, 255, 255));
+        lblHeadingPreview.setText(org.openide.util.NbBundle.getMessage(
                 RunoffOutputManagerUI.class,
-                "RunoffOutputManagerUI.lblHeading1.text")); // NOI18N
-        panHeadInfo1.add(lblHeading1);
+                "RunoffOutputManagerUI.lblHeadingPreview.text")); // NOI18N
+        panHeadInfo1.add(lblHeadingPreview);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -370,14 +423,16 @@ public class RunoffOutputManagerUI extends JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(15, 15, 15, 15);
         pnlResult.add(pnlWMS, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 11, 5);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(pnlResult, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 }
