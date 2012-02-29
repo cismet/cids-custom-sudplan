@@ -24,13 +24,13 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.LineBorder;
+import org.jfree.chart.labels.StandardXYSeriesLabelGenerator;
 import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.time.TimeSeriesDataItem;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
@@ -498,6 +498,7 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         final NumberAxis axis = (NumberAxis)plot.getRangeAxis();
         axis.setAutoRangeIncludesZero(false);
         plot.setRenderer(renderer);
+
         return chart;
     }
 

@@ -197,7 +197,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     public TimeSeriesChartToolBar(final CustomChartPanel p, final TimeSeriesVisualisation tsVis) {
         super(NbBundle.getMessage(
                 TimeSeriesChartToolBar.class,
-                "TimeSeriesChartToolBar.name"));                    // NOI18N
+                "TimeSeriesChartToolBar.name")); // NOI18N
         chartPanel = p;
         this.tsVis = tsVis;
         setRollover(true);
@@ -206,9 +206,15 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         this.addButtons();
         final JMenuBar menubar = new JMenuBar();
         menubar.setBorderPainted(false);
-        operationsMenu = new JMenu(NbBundle.getMessage(
-                    TimeSeriesChartToolBar.class,
-                    "TimeSeriesChartToolBar.operationsMenu.text")); // NOI18N
+//        operationsMenu = new JMenu(NbBundle.getMessage(
+//                    TimeSeriesChartToolBar.class,
+//                    "TimeSeriesChartToolBar.operationsMenu.text")); // NOI18N
+        operationsMenu = new JMenu();
+        operationsMenu.setToolTipText(NbBundle.getMessage(
+                TimeSeriesChartToolBar.class,
+                "TimeSeriesChartToolBar.operationsMenu.text")); // NOI18N
+        operationsMenu.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/timeseries_op_16.png")));
         operationsMenu.setSize(operationsMenu.getWidth(), 30);
         operationsMenu.setMinimumSize(new Dimension(0, 30));
         menubar.add(operationsMenu);
@@ -251,9 +257,11 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         btnSelectAll.setToolTipText(NbBundle.getMessage(
                 TimeSeriesChartToolBar.class,
                 "TimeSeriesChartToolBar.btnSelectAll.toolTipText")); // NOI18N
-        btnSelectAll.setText(NbBundle.getMessage(
-                TimeSeriesChartToolBar.class,
-                "TimeSeriesChartToolBar.btnSelectAll.text"));        // NOI18N
+//        btnSelectAll.setText(NbBundle.getMessage(
+//                TimeSeriesChartToolBar.class,
+//                "TimeSeriesChartToolBar.btnSelectAll.text"));        // NOI18N
+        btnSelectAll.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/select_all_timeseries_16.png"))); // NOI18N
         return btnSelectAll;
     }
 
@@ -268,9 +276,11 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         btnDeselectAll.setToolTipText(NbBundle.getMessage(
                 TimeSeriesChartToolBar.class,
                 "TimeSeriesChartToolBar.btnDeselectAll.toolTipText")); // NOI18N
-        btnDeselectAll.setText(NbBundle.getMessage(
-                TimeSeriesChartToolBar.class,
-                "TimeSeriesChartToolBar.btnDeselectAll.text"));        // NOI18N
+//        btnDeselectAll.setText(NbBundle.getMessage(
+//                TimeSeriesChartToolBar.class,
+//                "TimeSeriesChartToolBar.btnDeselectAll.text"));        // NOI18N
+        btnDeselectAll.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/deselect_all_timeseries_16.png")));
         return btnDeselectAll;
     }
 
@@ -280,8 +290,8 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
      * @return  DOCUMENT ME!
      */
     private JButton createRemoveActionButton() {
-        removeAllSelectedTimeseries.setEnabled(false);
         btnRemove = new JButton(removeAllSelectedTimeseries);
+        btnRemove.setEnabled(true);
         btnRemove.setFocusPainted(false);
         btnRemove.setToolTipText(NbBundle.getMessage(
                 TimeSeriesChartToolBar.class,
@@ -336,12 +346,14 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     private JButton createRemoveAllFromMapButton() {
         btnMapRemoveAll = new JButton(removeAllFromMap);
         btnMapRemoveAll.setFocusPainted(false);
-        btnMapRemoveAll.setText(NbBundle.getMessage(
-                TimeSeriesChartToolBar.class,
-                "TimeSeriesChartToolBar.btnMapRemoveAll.text"));        // NOI18N
+//        btnMapRemoveAll.setText(NbBundle.getMessage(
+//                TimeSeriesChartToolBar.class,
+//                "TimeSeriesChartToolBar.btnMapRemoveAll.text"));        // NOI18N
         btnMapRemoveAll.setToolTipText(NbBundle.getMessage(
                 TimeSeriesChartToolBar.class,
                 "TimeSeriesChartToolBar.btnMapRemoveAll.toolTipText")); // NOI18N
+        btnMapRemoveAll.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/remove_timeseries_from_map_16.png")));
         btnMapRemoveAll.setSize(16, 16);
         return btnMapRemoveAll;
     }
@@ -375,13 +387,13 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         if (evt.getSelectedTs().size() >= 1) {
             final TimeSeriesVisualisation tsVis = (TimeSeriesVisualisation)evt.getSource();
             if (evt.getSelectedTs().size() == tsVis.getTimeSeriesCollection().size()) {
-                removeAllSelectedTimeseries.setEnabled(false);
+                btnRemove.setEnabled(false);
                 return;
             } else if (tsVis.getTimeSeriesCollection().size() > 1) {
-                removeAllSelectedTimeseries.setEnabled(true);
+                btnRemove.setEnabled(true);
                 return;
             }
         }
-        removeAllSelectedTimeseries.setEnabled(false);
+        btnRemove.setEnabled(false);
     }
 }

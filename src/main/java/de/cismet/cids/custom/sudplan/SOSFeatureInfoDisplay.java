@@ -30,9 +30,11 @@ import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 import org.openide.util.lookup.ServiceProvider;
 
+import java.awt.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.color.ColorSpace;
@@ -50,6 +52,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 
+import java.util.*;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -57,6 +60,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -65,11 +69,13 @@ import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
 
+import javax.swing.*;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
+import javax.swing.plaf.basic.BasicButtonUI;
 
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSignature;
@@ -86,6 +92,7 @@ import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.SignaturedFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.featureinfowidget.AbstractFeatureInfoDisplay;
+import de.cismet.cismap.commons.gui.featureinfowidget.AggregateableFeatureInfoDisplay;
 import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoDisplay;
 import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoDisplayKey;
 import de.cismet.cismap.commons.gui.featureinfowidget.InitialisationException;
@@ -107,7 +114,8 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 // TODO: use timeserieschartpanel
 @ServiceProvider(service = FeatureInfoDisplay.class)
 public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWMSServiceLayerGroup>
-        implements MultipleFeatureInfoRequestsDisplay {
+        implements MultipleFeatureInfoRequestsDisplay,
+            AggregateableFeatureInfoDisplay {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -121,9 +129,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     //~ Instance fields --------------------------------------------------------
 
     // NOI18N
-
     // NOI18N
-
     // NOI18N
     private transient String scenario;
     private transient String obsProp;
@@ -144,26 +150,25 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private final transient TimeSeriesVisualisation tsVis;
     private final transient TimeSeriesListChangedListener tsListChangedL;
     private final transient TimeSeriesSelectionListener tsSelectionL;
+    private List<AggregateableFeatureInfoDisplay> aggregateableDisplays;
     private JToolBar toolbar;
     private int overlayWidth = 0;
     private int overlayHeight = 0;
     private boolean displayVisible = false;
-
+    private JTabbedPane tabPane;
     private transient Coordinate currentCoordinate;
     private transient Resolution fallBackResolution;
-
     private final transient ActionListener resL;
     private final transient ActionListener holdL;
-
+    private final transient ActionListener aggrL;
     /**
      * Used by {@link TimeSeriesDisplayer} for busy indication. Note that Serialization should not be necessary as only
      * one {@link TimeSeriesDisplayer} instance can access this attribute simultaneously.
      */
     private final LockableUI lockableUI;
-
     private transient Resolution currentItem;
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private final transient javax.swing.JButton btnAggregateTimeSeriesVisualisations = new javax.swing.JButton();
     private final transient javax.swing.JComboBox cboResolution =
         new de.cismet.cids.custom.sudplan.LocalisedEnumComboBox(Resolution.class, available);
     private final transient javax.swing.JPanel contentPanel = new javax.swing.JPanel();
@@ -171,12 +176,15 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private final transient javax.swing.JLabel lblFiller = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblFiller1 = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblFiller3 = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblFiller4 = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblResolution = new javax.swing.JLabel();
+    private final transient javax.swing.JPanel pnlAggregateButton = new javax.swing.JPanel();
     private final transient javax.swing.JPanel pnlChart = new javax.swing.JPanel();
     private final transient javax.swing.JPanel pnlControlElements = new javax.swing.JPanel();
     private final transient javax.swing.JPanel pnlHoldButton = new javax.swing.JPanel();
     private final transient javax.swing.JPanel pnlResolution = new javax.swing.JPanel();
     private final transient javax.swing.JPanel pnlToolbar = new javax.swing.JPanel();
+    private final transient javax.swing.JToolBar toolBarModelOverview = new javax.swing.JToolBar();
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -196,7 +204,9 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         holdListeners = new HashSet<HoldListener>();
         tsListChangedL = new TimeServiesListChangedListenerImpl();
         resL = new ResolutionChangedListener();
+        aggrL = new AggregateButtonActionListener();
         holdL = new HoldChangedListener();
+
         currentItem = Resolution.DECADE;
 
         initComponents();
@@ -263,6 +273,10 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         cboResolution.addActionListener(WeakListeners.create(ActionListener.class, resL, cboResolution));
         holdCheckBox.addActionListener(WeakListeners.create(ActionListener.class, holdL, holdCheckBox));
+        btnAggregateTimeSeriesVisualisations.addActionListener(WeakListeners.create(
+                ActionListener.class,
+                aggrL,
+                btnAggregateTimeSeriesVisualisations));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -303,6 +317,43 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         pnlControlElements.setLayout(new java.awt.GridBagLayout());
 
+        pnlAggregateButton.setLayout(new java.awt.GridBagLayout());
+
+        toolBarModelOverview.setBorder(null);
+        toolBarModelOverview.setFloatable(false);
+        toolBarModelOverview.setRollover(true);
+
+        btnAggregateTimeSeriesVisualisations.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/chart_line_link.png"))); // NOI18N
+        btnAggregateTimeSeriesVisualisations.setText(org.openide.util.NbBundle.getMessage(
+                SOSFeatureInfoDisplay.class,
+                "SOSFeatureInfoDisplay.btnAggregateTimeSeriesVisualisations.text_1"));          // NOI18N
+        btnAggregateTimeSeriesVisualisations.setToolTipText(org.openide.util.NbBundle.getMessage(
+                SOSFeatureInfoDisplay.class,
+                "SOSFeatureInfoDisplay.btnAggregateTimeSeriesVisualisations.toolTipText"));     // NOI18N
+        btnAggregateTimeSeriesVisualisations.setActionCommand(org.openide.util.NbBundle.getMessage(
+                SOSFeatureInfoDisplay.class,
+                "SOSFeatureInfoDisplay.btnAggregateTimeSeriesVisualisations.actionCommand"));   // NOI18N
+        btnAggregateTimeSeriesVisualisations.setEnabled(false);
+        btnAggregateTimeSeriesVisualisations.setFocusPainted(false);
+        btnAggregateTimeSeriesVisualisations.setFocusable(false);
+        btnAggregateTimeSeriesVisualisations.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnAggregateTimeSeriesVisualisations.setPreferredSize(new java.awt.Dimension(24, 24));
+        btnAggregateTimeSeriesVisualisations.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBarModelOverview.add(btnAggregateTimeSeriesVisualisations);
+
+        pnlAggregateButton.add(toolBarModelOverview, new java.awt.GridBagConstraints());
+
+        pnlControlElements.add(pnlAggregateButton, new java.awt.GridBagConstraints());
+
+        lblFiller3.setText(org.openide.util.NbBundle.getMessage(
+                SOSFeatureInfoDisplay.class,
+                "SOSFeatureInfoDisplay.lblFiller3.text")); // NOI18N
+        lblFiller3.setMaximumSize(new java.awt.Dimension(10, 0));
+        lblFiller3.setMinimumSize(new java.awt.Dimension(10, 0));
+        lblFiller3.setPreferredSize(new java.awt.Dimension(10, 0));
+        pnlControlElements.add(lblFiller3, new java.awt.GridBagConstraints());
+
         pnlHoldButton.setLayout(new java.awt.GridBagLayout());
 
         holdCheckBox.setText(org.openide.util.NbBundle.getMessage(
@@ -315,13 +366,13 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
 
         pnlControlElements.add(pnlHoldButton, new java.awt.GridBagConstraints());
 
-        lblFiller3.setText(org.openide.util.NbBundle.getMessage(
+        lblFiller4.setText(org.openide.util.NbBundle.getMessage(
                 SOSFeatureInfoDisplay.class,
-                "SOSFeatureInfoDisplay.lblFiller3.text")); // NOI18N
-        lblFiller3.setMaximumSize(new java.awt.Dimension(10, 0));
-        lblFiller3.setMinimumSize(new java.awt.Dimension(10, 0));
-        lblFiller3.setPreferredSize(new java.awt.Dimension(10, 0));
-        pnlControlElements.add(lblFiller3, new java.awt.GridBagConstraints());
+                "SOSFeatureInfoDisplay.lblFiller4.text")); // NOI18N
+        lblFiller4.setMaximumSize(new java.awt.Dimension(10, 0));
+        lblFiller4.setMinimumSize(new java.awt.Dimension(10, 0));
+        lblFiller4.setPreferredSize(new java.awt.Dimension(10, 0));
+        pnlControlElements.add(lblFiller4, new java.awt.GridBagConstraints());
 
         pnlResolution.setLayout(new java.awt.GridBagLayout());
 
@@ -381,6 +432,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     @Override
     public void init(final SlidableWMSServiceLayerGroup layer, final JTabbedPane parentTabbedPane)
             throws InitialisationException {
+        tabPane = parentTabbedPane;
         parseKeywords(layer.getLayerInformation().getKeywords());
 
         initialised = true;
@@ -547,6 +599,15 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     */
+    public TimeSeriesVisualisation getTsVis() {
+        return tsVis;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   pointGeom  DOCUMENT ME!
      * @param   bi         DOCUMENT ME!
      *
@@ -558,6 +619,24 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             feature.setOverlayIcon(bi);
         }
         return feature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  b  DOCUMENT ME!
+     */
+    public void setHoldFlag(final boolean b) {
+        holdCheckBox.setSelected(b);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  b  DOCUMENT ME!
+     */
+    public void enableHoldFlag(final boolean b) {
+        holdCheckBox.setEnabled(b);
     }
 
     @Override
@@ -646,6 +725,73 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         return displayVisible;
     }
 
+    @Override
+    public String getAggregateTypeID() {
+        return obsProp;
+    }
+
+    @Override
+    public void setAggregatableDisplayList(final List<AggregateableFeatureInfoDisplay> list) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("set aggregationDisplay list");
+        }
+        aggregateableDisplays = list;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  aFlag  DOCUMENT ME!
+     */
+    private void setAggregateButtonForAllDisplaysEnabled(final boolean aFlag) {
+        final Iterator<AggregateableFeatureInfoDisplay> it;
+
+        synchronized (aggregateableDisplays) {
+            it = aggregateableDisplays.iterator();
+        }
+
+        while (it.hasNext()) {
+            final AggregateableFeatureInfoDisplay d = it.next();
+            if (d instanceof SOSFeatureInfoDisplay) {
+                final SOSFeatureInfoDisplay sosDisplay = (SOSFeatureInfoDisplay)d;
+                sosDisplay.setAggregateButtonEnabled(aFlag);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  aFlag  DOCUMENT ME!
+     */
+    public void setAggregateButtonEnabled(final boolean aFlag) {
+        btnAggregateTimeSeriesVisualisations.setEnabled(aFlag);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean checkAggregateDisplaysTimeSeriesCount() {
+        final Iterator<AggregateableFeatureInfoDisplay> it;
+        synchronized (aggregateableDisplays) {
+            it = aggregateableDisplays.iterator();
+        }
+        while (it.hasNext()) {
+            final AggregateableFeatureInfoDisplay d = it.next();
+
+            if (d instanceof SOSFeatureInfoDisplay) {
+                final SOSFeatureInfoDisplay sosDisplay = (SOSFeatureInfoDisplay)d;
+                final int tsCount = sosDisplay.getTsVis().getTimeSeriesCollection().size();
+                if (tsCount > 1) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -720,6 +866,70 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
      *
      * @version  $Revision$, $Date$
      */
+    private final class AggregateButtonActionListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("action listener aggregate variables button");
+            }
+
+//            holdCheckBox.setSelected(false);
+//            holdCheckBox.setEnabled(false);
+            final TimeSeriesVisualisation methodOverviewVis = TimeSeriesVisualisationFactory.getInstance()
+                        .createVisualisation(VisualisationType.SIMPLE);
+            final Iterator<AggregateableFeatureInfoDisplay> it;
+
+            synchronized (aggregateableDisplays) {
+                it = aggregateableDisplays.iterator();
+            }
+            while (it.hasNext()) {
+                final AggregateableFeatureInfoDisplay d = it.next();
+                if (d instanceof SOSFeatureInfoDisplay) {
+                    final SOSFeatureInfoDisplay sosDisplay = (SOSFeatureInfoDisplay)d;
+//                    if (SOSFeatureInfoDisplay.this.equals(sosDisplay)) {
+//                        continue;
+//                    }
+//                    sosDisplay.setHoldFlag(false);
+//                    sosDisplay.enableHoldFlag(false);
+                    final Collection<TimeSeries> companionTimeSeries = sosDisplay.getTsVis().getTimeSeriesCollection();
+                    for (final TimeSeries ts : companionTimeSeries) {
+                        methodOverviewVis.addTimeSeries(ts);
+                    }
+                }
+            }
+            final String[] var = obsProp.split(":");
+//            tabPane.add("Method Overview - " + var[var.length - 1], methodOverviewVis.getVisualisationUI());
+            final String tabTitle = NbBundle.getMessage(
+                    SOSFeatureInfoDisplay.class,
+                    "SOSFeatureInfoDisplay.modelComparisonTabTitle") + " - " + var[var.length - 1]; // NOI18N
+            final JPanel p = new JPanel();
+            p.add(new JButton(tabTitle));
+            final int tabIndex = tabPane.indexOfTab(tabTitle);
+            final SOSModelComparisonFeatureInfoDisplay tabComponent = new SOSModelComparisonFeatureInfoDisplay(
+                    methodOverviewVis,
+                    tabPane);
+            if (tabIndex == -1) {
+                tabPane.add(tabTitle,
+                    tabComponent);
+//                tabPane.setTabComponentAt(tabPane.indexOfTab(tabTitle),
+//                    new CustomTabComponentRenderer(tabTitle, tabPane));
+                tabPane.setTabComponentAt(tabPane.indexOfTab(tabTitle),
+                    new JLabel(tabTitle));
+            } else {
+                tabPane.setComponentAt(tabIndex, tabComponent);
+            }
+            tabPane.setSelectedIndex(tabPane.indexOfTab(tabTitle));
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
     private final class ResolutionAvailable implements Available<Resolution> {
 
         //~ Methods ------------------------------------------------------------
@@ -776,6 +986,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         @Override
         public void timeSeriesListChanged(final TimeSeriesListChangedEvent evt) {
             if (evt.getID() == TimeSeriesListChangedEvent.TIME_SERIES_REMOVED) {
+                timeseriesCount--;
                 final TimeSeries ts = (TimeSeries)evt.getSource();
                 boolean holdFeaturesChanged = false;
                 // TODO prevent concurrent modification
@@ -798,6 +1009,14 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                 if (holdFeaturesChanged) {
                     holdFeatures.remove(featureToRemove);
                     fireHoldFeatureChanged();
+                }
+
+                if (timeseriesCount == 1) {
+                    if (checkAggregateDisplaysTimeSeriesCount()) {
+                        setAggregateButtonForAllDisplaysEnabled(true);
+                    }
+                } else {
+                    setAggregateButtonForAllDisplaysEnabled(false);
                 }
             }
         }
@@ -968,6 +1187,16 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                     pnlToolbar.add(toolbar, BorderLayout.CENTER);
                     pnlToolbar.invalidate();
                     pnlToolbar.revalidate();
+                }
+
+                if (timeseriesCount == 1) {
+                    if (checkAggregateDisplaysTimeSeriesCount()) {
+                        setAggregateButtonForAllDisplaysEnabled(true);
+                    }
+//                    btnAggregateTimeSeriesVisualisations.setEnabled(true);
+                } else {
+                    setAggregateButtonForAllDisplaysEnabled(false);
+//                    btnAggregateTimeSeriesVisualisations.setEnabled(false);
                 }
 
                 Container parent = SOSFeatureInfoDisplay.this;

@@ -7,8 +7,13 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl;
 
+import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
+
+import org.apache.log4j.Logger;
+
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.entity.EntityCollection;
+import org.jfree.chart.labels.StandardXYSeriesLabelGenerator;
 import org.jfree.chart.plot.CrosshairState;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -39,6 +44,7 @@ public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
     private static final BasicStroke SELECTION_STROKE = new BasicStroke(2f);
     private static final BasicStroke SELECTION_OUTLINE_STROKE = new BasicStroke(5f);
     private static final Paint SELECTION_OUTLINE_PAINT = Color.BLUE;
+    private static final transient Logger LOG = Logger.getLogger(SelectionXYLineRenderer.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -64,6 +70,7 @@ public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
     public SelectionXYLineRenderer(final boolean lines, final boolean shapes, final boolean selected) {
         super(lines, shapes);
         this.selected = selected;
+        this.setLegendItemLabelGenerator(new ModelLegenItemLabelGenereator());
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -199,6 +206,33 @@ public class SelectionXYLineRenderer extends XYLineAndShapeRenderer {
             g2.setPaint(SELECTION_OUTLINE_PAINT);
             g2.draw(shape);
             g2.setComposite(originComposite);
+        }
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    protected final class ModelLegenItemLabelGenereator extends StandardXYSeriesLabelGenerator {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public String generateLabel(final XYDataset dataset, final int series) {
+            if (dataset instanceof TimeSeriesDatasetAdapter) {
+                final TimeSeriesDatasetAdapter tsc = (TimeSeriesDatasetAdapter)dataset;
+                final TimeSeries timeseries = tsc.getOriginTimeSeries();
+                final String[] tsDesription = ((String)timeseries.getTSProperty("ts:description")).split("-");
+                final String model = tsDesription[0];
+
+                if ((model != null) && !(model.equals(""))) {
+                    return model;
+                }
+            }
+            return super.generateLabel(dataset, series);
         }
     }
 }

@@ -22,7 +22,9 @@ import java.awt.event.ActionEvent;
 import java.util.HashMap;
 
 import javax.swing.AbstractAction;
+import javax.swing.JButton;
 
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
 
 /**
@@ -99,6 +101,7 @@ public class RemoveTimeSeriesAction extends AbstractAction {
             for (final TimeSeriesDatasetAdapter tsc : tsMap.values()) {
                 removeTimeSeries(tsc);
             }
+            ((JButton)e.getSource()).setEnabled(false);
         } else {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("To many Dataset to remove, removal would cause in an empty chart. Aborting"); // NOI18N
