@@ -10,6 +10,7 @@ package de.cismet.cids.custom.sudplan;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 import org.apache.log4j.Logger;
 
@@ -18,17 +19,16 @@ import org.jfree.util.Log;
 import org.openide.util.WeakListeners;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Properties;
-
-import javax.imageio.ImageIO;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -39,11 +39,13 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisa
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionEvent;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionListener;
 
-import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.SignaturedFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import de.cismet.cismap.commons.gui.featureinfowidget.MultipleFeatureInfoRequestsDisplay;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldFeatureChangeEvent;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
@@ -52,7 +54,8 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  * @author   dmeiers
  * @version  $Revision$, $Date$
  */
-public class SOSModelComparisonFeatureInfoDisplay extends javax.swing.JPanel {
+public class SOSModelComparisonFeatureInfoDisplay extends javax.swing.JPanel
+        implements MultipleFeatureInfoRequestsDisplay {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -62,6 +65,9 @@ public class SOSModelComparisonFeatureInfoDisplay extends javax.swing.JPanel {
     private TimeSeriesSelectionListener tsSelectionL;
     private JTabbedPane tbPane;
     private final transient Logger LOG = Logger.getLogger(SOSModelComparisonFeatureInfoDisplay.class);
+    private boolean displayVisible;
+    private ArrayList<HoldListener> holdListeners = new ArrayList<HoldListener>();
+    private ArrayList<SignaturedFeature> holdFeatures = new ArrayList<SignaturedFeature>();
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClose;
     private javax.swing.JToolBar closeToolbar;
@@ -130,6 +136,18 @@ public class SOSModelComparisonFeatureInfoDisplay extends javax.swing.JPanel {
         initComponents();
         pnlChart.add(new JScrollPane(tsVis.getVisualisationUI()), BorderLayout.CENTER);
         pnlChartToolbar.add(tsVis.getToolbar(), BorderLayout.CENTER);
+
+        final Iterator<TimeSeries> it = tsVis.getTimeSeriesCollection().iterator();
+
+        while (it.hasNext()) {
+            final TimeSeries ts = it.next();
+            final Point p = (Point)ts.getTSProperty(TimeSeries.GEOMETRY);
+            final TimeSeriesSignature tss = tsVis.getLookup(TimeSeriesSignature.class);
+            if (tss != null) {
+                final BufferedImage bi = tss.getTimeSeriesSignature(ts, overlayWidth, overlayHeight);
+                holdFeatures.add(createFeatureSignature(p, bi));
+            }
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -260,6 +278,81 @@ public class SOSModelComparisonFeatureInfoDisplay extends javax.swing.JPanel {
         final TimeSeriesFeature feature = new TimeSeriesFeature(g, bi);
 
         return feature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   pointGeom  DOCUMENT ME!
+     * @param   bi         DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private SignaturedFeature createFeatureSignature(final Geometry pointGeom, final BufferedImage bi) {
+        final SignaturedFeature feature = new SignaturedFeature(pointGeom);
+        if (bi != null) {
+            feature.setOverlayIcon(bi);
+        }
+        return feature;
+    }
+
+    @Override
+    public boolean isOnHold() {
+        return true;
+    }
+
+    @Override
+    public Collection<SignaturedFeature> getHoldFeatures() {
+        return holdFeatures;
+    }
+
+    @Override
+    public void addHoldListener(final HoldListener o) {
+        holdListeners.add(o);
+    }
+
+    @Override
+    public void removeHoldListener(final HoldListener o) {
+        holdListeners.remove(o);
+    }
+
+    @Override
+    public void setDisplayVisble(final boolean aFlag) {
+        displayVisible = aFlag;
+        if (displayVisible) {
+            fireHoldFeatureChanged();
+        }
+    }
+
+    @Override
+    public boolean isDisplayVisible() {
+        return displayVisible;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void fireHoldFeatureChanged() {
+        if (isDisplayVisible()) {
+            final Iterator<HoldListener> it;
+
+            synchronized (holdListeners) {
+                it = holdListeners.iterator();
+            }
+
+            final HoldFeatureChangeEvent event = new HoldFeatureChangeEvent(holdFeatures, this);
+
+            while (it.hasNext()) {
+                final HoldListener listener = it.next();
+                EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            listener.holdFeaturesChanged(event);
+                        }
+                    });
+            }
+        }
     }
 
     //~ Inner Classes ----------------------------------------------------------

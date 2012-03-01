@@ -736,6 +736,12 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             LOG.debug("set aggregationDisplay list");
         }
         aggregateableDisplays = list;
+
+        if (checkAggregateDisplaysTimeSeriesCount()) {
+            setAggregateButtonForAllDisplaysEnabled(true);
+        } else {
+            setAggregateButtonForAllDisplaysEnabled(false);
+        }
     }
 
     /**
@@ -784,7 +790,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
             if (d instanceof SOSFeatureInfoDisplay) {
                 final SOSFeatureInfoDisplay sosDisplay = (SOSFeatureInfoDisplay)d;
                 final int tsCount = sosDisplay.getTsVis().getTimeSeriesCollection().size();
-                if (tsCount > 1) {
+                if (tsCount != 1) {
                     return false;
                 }
             }
