@@ -1011,7 +1011,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                     fireHoldFeatureChanged();
                 }
 
-                if (timeseriesCount == 1) {
+                if (tsVis.getTimeSeriesCollection().size() == 1) {
                     if (checkAggregateDisplaysTimeSeriesCount()) {
                         setAggregateButtonForAllDisplaysEnabled(true);
                     }
@@ -1062,7 +1062,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         protected TimeSeries doInBackground() throws Exception {
             // lock panel and indicate work in progress
             lockableUI.setLocked(true);
-
+            setAggregateButtonForAllDisplaysEnabled(false);
             // ------------------------------------------------------
 
             if (this.resolution != null) {
@@ -1189,7 +1189,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
                     pnlToolbar.revalidate();
                 }
 
-                if (timeseriesCount == 1) {
+                if (tsVis.getTimeSeriesCollection().size() == 1) {
                     if (checkAggregateDisplaysTimeSeriesCount()) {
                         setAggregateButtonForAllDisplaysEnabled(true);
                     }
