@@ -56,7 +56,7 @@ public class TimeSeriesExportVisualPanelFile extends javax.swing.JPanel {
 
         setName(NbBundle.getMessage(
                 TimeSeriesExportVisualPanelFile.class,
-                "TimeSeriesExportVisualPanelFile.this.name"));
+                "TimeSeriesExportVisualPanelFile.this.name")); // NOI18N
 
         txtExportFile.getDocument().addDocumentListener(WeakListeners.document(docL, txtExportFile.getDocument()));
         btnChooseFile.addActionListener(WeakListeners.create(ActionListener.class, chooseL, btnChooseFile));

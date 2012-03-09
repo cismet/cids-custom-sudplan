@@ -74,7 +74,7 @@ public class TimeSeriesExportWizardPanelChooseConverter extends AbstractWizardPa
                 WizardDescriptor.PROP_INFO_MESSAGE,
                 NbBundle.getMessage(
                     TimeSeriesExportWizardPanelChooseConverter.class,
-                    "TimeSeriesExportWizardPanelChooseConverter.isValid().chooseConverter"));
+                    "TimeSeriesExportWizardPanelChooseConverter.isValid().chooseConverter")); // NOI18N
 
             return false;
         } else {

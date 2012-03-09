@@ -78,7 +78,7 @@ public final class TimeSeriesExportWizardPanelFile extends AbstractWizardPanel {
                 WizardDescriptor.PROP_INFO_MESSAGE,
                 NbBundle.getMessage(
                     TimeSeriesExportWizardPanelFile.class,
-                    "TimeSeriesExportWizardPanelFile.isValid().chooseFile"));
+                    "TimeSeriesExportWizardPanelFile.isValid().chooseFile")); // NOI18N
 
             return false;
         } else {
@@ -97,7 +97,7 @@ public final class TimeSeriesExportWizardPanelFile extends AbstractWizardPanel {
                             WizardDescriptor.PROP_WARNING_MESSAGE,
                             NbBundle.getMessage(
                                 TimeSeriesExportWizardPanelFile.class,
-                                "TimeSeriesExportWizardPanelFile.isValid().notWritable"));
+                                "TimeSeriesExportWizardPanelFile.isValid().notWritable")); // NOI18N
 
                         return false;
                     }
@@ -106,7 +106,7 @@ public final class TimeSeriesExportWizardPanelFile extends AbstractWizardPanel {
                         WizardDescriptor.PROP_INFO_MESSAGE,
                         NbBundle.getMessage(
                             TimeSeriesExportWizardPanelFile.class,
-                            "TimeSeriesExportWizardPanelFile.isValid().chooseFile"));
+                            "TimeSeriesExportWizardPanelFile.isValid().chooseFile")); // NOI18N
 
                     return false;
                 }

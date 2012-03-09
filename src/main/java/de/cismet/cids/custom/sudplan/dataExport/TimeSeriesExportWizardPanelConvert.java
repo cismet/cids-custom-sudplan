@@ -66,7 +66,7 @@ public final class TimeSeriesExportWizardPanelConvert extends AbstractWizardPane
     protected Component createComponent() {
         return new StatusPanel(NbBundle.getMessage(
                     TimeSeriesExportWizardPanelConvert.class,
-                    "TimeSeriesExportWizardPanelConvert.createComponent().statusPanel.name"));
+                    "TimeSeriesExportWizardPanelConvert.createComponent().statusPanel.name")); // NOI18N
     }
 
     @Override
@@ -94,7 +94,7 @@ public final class TimeSeriesExportWizardPanelConvert extends AbstractWizardPane
                                         true,
                                         NbBundle.getMessage(
                                             TimeSeriesExportWizardPanelConvert.class,
-                                            "TimeSeriesExportWizardPanelConvert.read(WizardDescriptor).exportTask.status.receivingData"));
+                                            "TimeSeriesExportWizardPanelConvert.read(WizardDescriptor).exportTask.status.receivingData")); // NOI18N
                                     toConvert = TimeseriesRetriever.getInstance().retrieve(trc).get();
                                 } else {
                                     toConvert = timeSeries;
@@ -104,7 +104,7 @@ public final class TimeSeriesExportWizardPanelConvert extends AbstractWizardPane
                                     true,
                                     NbBundle.getMessage(
                                         TimeSeriesExportWizardPanelConvert.class,
-                                        "TimeSeriesExportWizardPanelConvert.read(WizardDescriptor).exportTask.status.exporting"));
+                                        "TimeSeriesExportWizardPanelConvert.read(WizardDescriptor).exportTask.status.exporting")); // NOI18N
 
                                 final InputStream is = timeseriesConverter.convertBackward(toConvert);
                                 final FileOutputStream fos = new FileOutputStream(exportFile);
@@ -122,18 +122,18 @@ public final class TimeSeriesExportWizardPanelConvert extends AbstractWizardPane
                                     false,
                                     NbBundle.getMessage(
                                         TimeSeriesExportWizardPanelConvert.class,
-                                        "TimeSeriesExportWizardPanelConvert.read(WizardDescriptor).exportTask.status.exportSuccessful"));
+                                        "TimeSeriesExportWizardPanelConvert.read(WizardDescriptor).exportTask.status.exportSuccessful")); // NOI18N
 
                                 synchronized (lock) {
                                     TimeSeriesExportWizardPanelConvert.this.exportTask = null;
                                 }
                             } catch (final Throwable ex) {
-                                LOG.error("cannot export timeseries", ex); // NOI18N
+                                LOG.error("cannot export timeseries", ex);                                                            // NOI18N
                                 setStatusEDT(
                                     false,
                                     NbBundle.getMessage(
                                         TimeSeriesExportWizardPanelConvert.class,
-                                        "TimeSeriesExportWizardPanelConvert.read(WizardDescriptor).exportTask.status.exportingError",
+                                        "TimeSeriesExportWizardPanelConvert.read(WizardDescriptor).exportTask.status.exportingError", // NOI18N
                                         ex.getMessage()));
 
                                 if (ex instanceof Error) {

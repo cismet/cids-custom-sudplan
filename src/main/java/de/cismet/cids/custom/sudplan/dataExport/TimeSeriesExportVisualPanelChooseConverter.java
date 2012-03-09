@@ -61,7 +61,7 @@ public class TimeSeriesExportVisualPanelChooseConverter extends javax.swing.JPan
 
         this.setName(NbBundle.getMessage(
                 TimeSeriesExportVisualPanelChooseConverter.class,
-                "TimeSeriesExportVisualPanelChooseConverter.this.name"));
+                "TimeSeriesExportVisualPanelChooseConverter.this.name")); // NOI18N
         this.model = model;
 
         cboConverterChooser.addItemListener(WeakListeners.create(ItemListener.class, chooseL, cboConverterChooser));
