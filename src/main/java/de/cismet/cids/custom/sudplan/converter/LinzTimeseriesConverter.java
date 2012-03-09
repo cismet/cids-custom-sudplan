@@ -17,14 +17,18 @@ import org.apache.log4j.Logger;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import java.math.RoundingMode;
 
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
 
 import de.cismet.cids.custom.sudplan.Unit;
@@ -43,8 +47,17 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter {
 
     private static final transient Logger LOG = Logger.getLogger(LinzTimeseriesConverter.class);
 
-    private static final DateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // NOI18N
-    private static final NumberFormat NUMBERFORMAT = NumberFormat.getInstance(Locale.US);
+    private static final DateFormat DATEFORMAT;
+    private static final NumberFormat NUMBERFORMAT;
+
+    static {
+        NUMBERFORMAT = NumberFormat.getInstance(Locale.US);
+        NUMBERFORMAT.setMaximumFractionDigits(3);
+        NUMBERFORMAT.setMinimumFractionDigits(3);
+        NUMBERFORMAT.setRoundingMode(RoundingMode.HALF_UP);
+
+        DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // NOI18N
+    }
 
     //~ Methods ----------------------------------------------------------------
 
@@ -59,7 +72,7 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter {
      */
     @Override
     public TimeSeries convertForward(final InputStream from) throws ConversionException {
-        BufferedReader br = null;
+        final BufferedReader br;
         try {
             br = new BufferedReader(new InputStreamReader(from));
 
@@ -120,12 +133,53 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter {
      *
      * @return  DOCUMENT ME!
      *
-     * @throws  ConversionException            DOCUMENT ME!
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
+     * @throws  ConversionException  DOCUMENT ME!
      */
     @Override
     public InputStream convertBackward(final TimeSeries to) throws ConversionException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            final Object valueKeyObject = to.getTSProperty(TimeSeries.VALUE_KEYS);
+            final String valueKey;
+            if (valueKeyObject instanceof String) {
+                valueKey = (String)valueKeyObject;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("found valuekey: " + valueKey);                   // NOI18N
+                }
+            } else if (valueKeyObject instanceof String[]) {
+                final String[] valueKeys = (String[])valueKeyObject;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("found multiple valuekeys: " + valueKeys.length); // NOI18N
+                }
+
+                if (valueKeys.length == 1) {
+                    valueKey = valueKeys[0];
+                } else {
+                    throw new IllegalStateException("found too many valuekeys");              // NOI18N
+                }
+            } else {
+                throw new IllegalStateException("unknown value key type: " + valueKeyObject); // NOI18N
+            }
+
+            final StringBuilder sb = new StringBuilder();
+            final String lineSep = System.getProperty("line.separator"); // NOI18N
+
+            final Iterator<TimeStamp> it = to.getTimeStamps().iterator();
+            while (it.hasNext()) {
+                final TimeStamp stamp = it.next();
+                final Float value = (Float)to.getValue(stamp, valueKey);
+
+                sb.append(DATEFORMAT.format(stamp.asDate()));
+                sb.append("   "); // NOI18N
+                sb.append(NUMBERFORMAT.format(value));
+                sb.append(lineSep);
+            }
+
+            return new ByteArrayInputStream(sb.toString().getBytes());
+        } catch (final Exception e) {
+            final String message = "cannot convert timeseries data"; // NOI18N
+            LOG.error(message, e);
+            throw new ConversionException(message, e);
+        }
     }
 
     @Override
