@@ -68,7 +68,9 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
      * Creates a new RainfallDownscalingWizardAction object.
      */
     public RainfallDownscalingWizardAction() {
-        super("Perform rainfall downscaling");
+        super(NbBundle.getMessage(
+                RainfallDownscalingWizardAction.class,
+                "RainfallDownscalingWizardAction.constructor().action.name"));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -237,7 +239,10 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
         final String user = SessionManager.getSession().getUser().getName();
 
         final String wizName = (String)wizard.getProperty(PROP_NAME);
-        final String name = "Rainfall downscaling input (" + wizName + ")";
+        final String name = NbBundle.getMessage(
+                RainfallDownscalingWizardAction.class,
+                "RainfallDownscalingWizardAction.createModelInput(WizardDescriptor,MetaObject).input.name", // NOI18N
+                wizName);
 
         final String rainfallObjectName = (String)mo.getBean().getProperty("name"); // NOI18N
         final Integer rainfallObjectId = mo.getId();

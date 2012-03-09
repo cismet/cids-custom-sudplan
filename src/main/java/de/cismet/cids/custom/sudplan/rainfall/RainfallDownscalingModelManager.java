@@ -22,6 +22,8 @@ import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import org.openide.util.NbBundle;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,9 +66,9 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
     private static final transient Logger LOG = Logger.getLogger(RainfallDownscalingModelManager.class);
 
-    public static final String PARAM_CLIMATE_SCENARIO = "climate_scenario";
-    public static final String PARAM_SOURCE_RAIN = "source_rain";
-    public static final String PARAM_CENTER_TIME = "center_time";
+    public static final String PARAM_CLIMATE_SCENARIO = "climate_scenario"; // NOI18N
+    public static final String PARAM_SOURCE_RAIN = "source_rain";           // NOI18N
+    public static final String PARAM_CENTER_TIME = "center_time";           // NOI18N
 
     public static final String RF_SOS_LOOKUP = "rainfall_sos_lookup";                   // NOI18N
     public static final String RF_SPS_LOOKUP = "rainfall_sps_lookup";                   // NOI18N
@@ -131,7 +133,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
                 dsBean.setProperty("uri", sw.toString());               // NOI18N
                 dsBean.setProperty("geom", rfBean.getProperty("geom")); // NOI18N
-                dsBean.setProperty("year", input.getTargetYear());
+                dsBean.setProperty("year", input.getTargetYear());      // NOI18N
             }
 
             dsBean.setProperty("name", rfObjName + " downscaled (taskid=" + watchable.getRunId() + ")"); // NOI18N
@@ -148,20 +150,29 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
         final RainfallDownscalingOutput output = new RainfallDownscalingOutput();
         try {
-            output.setModelInputId((Integer)cidsBean.getProperty("modelinput.id")); // NOI18N
-            output.setModelRunId((Integer)cidsBean.getProperty("id"));              // NOI18N
+            output.setModelInputId((Integer)cidsBean.getProperty("modelinput.id"));           // NOI18N
+            output.setModelRunId((Integer)cidsBean.getProperty("id"));                        // NOI18N
             output.setRfObjInputId(input.getRainfallObjectId());
-            output.setRfObjInputName("Historical");
-            output.setRfObjResultId((Integer)dsBean.getProperty("id"));             // NOI18N
-            output.setRfObjResultName("Downscaled");
+            output.setRfObjInputName(NbBundle.getMessage(
+                    RainfallDownscalingModelManager.class,
+                    "RainfallDownscalingModelManager.createOutputBean().output.inputName"));  // NOI18N
+            output.setRfObjResultId((Integer)dsBean.getProperty("id"));                       // NOI18N
+            output.setRfObjResultName(NbBundle.getMessage(
+                    RainfallDownscalingModelManager.class,
+                    "RainfallDownscalingModelManager.createOutputBean().output.resultName")); // NOI18N
             output.setRfObjTableName(input.getRainfallObjectTableName());
         } catch (final Exception e) {
-            final String message = "cannot create model output";                    // NOI18N
+            final String message = "cannot create model output";                              // NOI18N
             LOG.error(message, e);
             throw new IOException(message, e);
         }
 
-        return SMSUtils.createModelOutput("Downscaling results of " + watchable.getRunId(), output, Model.RF_DS);
+        return SMSUtils.createModelOutput(NbBundle.getMessage(
+                    RainfallDownscalingModelManager.class,
+                    "RainfallDownscalingModelManager.createOutputBean().output.name", // NOI18N
+                    watchable.getRunId()),
+                output,
+                Model.RF_DS);
     }
 
     /**
@@ -406,7 +417,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
             try {
                 bis.close();
             } catch (final IOException e) {
-                LOG.warn("cannot close input stream", e);
+                LOG.warn("cannot close input stream", e); // NOI18N
             }
         }
     }

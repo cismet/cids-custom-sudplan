@@ -7,14 +7,19 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.rainfall;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
+
+import java.awt.EventQueue;
 
 import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 /**
  * DOCUMENT ME!
@@ -28,6 +33,8 @@ public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.J
 
     private final transient RainfallDownscalingWizardPanelScenarios model;
     private final transient ListSelectionListener listL;
+
+    private transient LoadingIndicator li;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
@@ -71,28 +78,48 @@ public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.J
 
     /**
      * DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
      */
     void init() {
+        if (li != null) {
+            li.stopIt();
+            try {
+                li.join();
+            } catch (final InterruptedException ex) {
+                throw new IllegalStateException("cannot wait for the loading indicator to join", ex); // NOI18N
+            }
+
+            li = null;
+        }
+
         final String[] scenarios = model.getScenarios();
-
-        assert scenarios != null : "illegal state, scenarios cannot be null"; // NOI18N
-
         final DefaultListModel listModel = (DefaultListModel)lstScenarios.getModel();
         listModel.clear();
-        Arrays.sort(scenarios);
-        for (final String scenario : scenarios) {
-            listModel.addElement(scenario);
-        }
 
-        if (model.getScenario() != null) {
-            lstScenarios.setSelectedValue(model.getScenario(), true);
-        }
-        // FIXME: atr preselect hack
-        else {
-            lstScenarios.setSelectedIndex(0);
-        }
+        if ((scenarios == null) || (scenarios.length == 0)) {
+            listModel.addElement("Loading from SPS ...");
+            lstScenarios.setEnabled(false);
 
-        model.fireChangeEvent();
+            li = new LoadingIndicator();
+            SudplanConcurrency.getSudplanGeneralPurposePool().execute(li);
+        } else {
+            lstScenarios.setEnabled(true);
+            Arrays.sort(scenarios);
+            for (final String scenario : scenarios) {
+                listModel.addElement(scenario);
+            }
+
+            if (model.getScenario() != null) {
+                lstScenarios.setSelectedValue(model.getScenario(), true);
+            }
+            // FIXME: atr preselect hack
+            else {
+                lstScenarios.setSelectedIndex(0);
+            }
+
+            model.fireChangeEvent();
+        }
     }
 
     /**
@@ -166,6 +193,58 @@ public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.J
     }                                                                            // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class LoadingIndicator extends Thread {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private transient boolean run = true;
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * warning be sure not to call this from the runner thread or it will cause a deadlock.
+         */
+        void stopIt() {
+            run = false;
+        }
+
+        @Override
+        public void run() {
+            long count = 0;
+            while (run) {
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException ex) {
+                    // skip
+                }
+
+                final StringBuilder sb = new StringBuilder("Loading from SPS ");
+                for (int i = 0; i < (count % 4); ++i) {
+                    sb.append('.');
+                }
+
+                EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            if (run) {
+                                final DefaultListModel listModel = (DefaultListModel)lstScenarios.getModel();
+                                listModel.removeElementAt(0);
+                                listModel.addElement(sb.toString());
+                            }
+                        }
+                    });
+
+                count++;
+            }
+        }
+    }
 
     /**
      * DOCUMENT ME!

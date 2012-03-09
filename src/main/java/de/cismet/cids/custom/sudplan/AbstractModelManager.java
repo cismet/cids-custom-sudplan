@@ -13,6 +13,8 @@ import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
+
 import java.awt.EventQueue;
 
 import java.io.IOException;
@@ -264,10 +266,14 @@ public abstract class AbstractModelManager implements ModelManager {
                     }
 
                     JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
-                        "Run '"
-                                + cidsBean.getProperty("name")
+                        NbBundle.getMessage(
+                                    AbstractModelManager.class,
+                                    "AbstractModelManager.fireBroken().brokenDialog.message") // NOI18N
+                                + cidsBean.getProperty("name")                                // NOI18N
                                 + "' is broken!",
-                        "Run broken",
+                        NbBundle.getMessage(
+                            AbstractModelManager.class,
+                            "AbstractModelManager.fireBroken().brokenDialog.title"),          // NOI18N
                         JOptionPane.WARNING_MESSAGE);
 
                     progressSupport.fireEvent(new ProgressEvent(AbstractModelManager.this, ProgressEvent.State.BROKEN));
@@ -344,10 +350,13 @@ public abstract class AbstractModelManager implements ModelManager {
 
                         final int answer = JOptionPane.showConfirmDialog(
                                 reg.getMainWindow(),
-                                "Run '"
-                                        + cidsBean.getProperty("name")
-                                        + "' is completely finished. Do you want to view the results?",
-                                "Run finished",
+                                NbBundle.getMessage(
+                                    AbstractModelManager.class,
+                                    "AbstractModelManager.fireFinished().finishedDialog.message", // NOI18N
+                                    cidsBean.getProperty("name")), // NOI18N
+                                NbBundle.getMessage(
+                                    AbstractModelManager.class,
+                                    "AbstractModelManager.fireFinished().finishedDialog.title"), // NOI18N
                                 JOptionPane.YES_NO_OPTION,
                                 JOptionPane.QUESTION_MESSAGE);
 

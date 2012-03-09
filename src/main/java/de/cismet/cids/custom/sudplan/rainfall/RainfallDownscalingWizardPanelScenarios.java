@@ -21,6 +21,7 @@ import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
 import java.awt.Component;
+import java.awt.EventQueue;
 
 import java.util.List;
 import java.util.Properties;
@@ -28,6 +29,7 @@ import java.util.Properties;
 import javax.swing.event.ChangeListener;
 
 import de.cismet.cids.custom.sudplan.DataHandlerCache;
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 /**
  * DOCUMENT ME!
@@ -82,27 +84,45 @@ public final class RainfallDownscalingWizardPanelScenarios implements WizardDesc
         spsError = null;
         scenario = (String)wizard.getProperty(RainfallDownscalingWizardAction.PROP_SCENARIO);
         scenarios = new String[] {};
-        try {
-            final DataHandler dh = DataHandlerCache.getInstance()
-                        .getSPSDataHandler(
-                            RainfallDownscalingModelManager.RF_SPS_LOOKUP,
-                            RainfallDownscalingModelManager.RF_SPS_URL);
-            final Properties filter = new Properties();
-            filter.put(TimeSeries.PROCEDURE, RainfallDownscalingModelManager.RF_TS_DS_PROCEDURE);
-            final Datapoint dp = dh.createDatapoint(filter, null, DataHandler.Access.READ);
-            final InputDescriptor id = (InputDescriptor)dp.getProperties().get("jaxb_desc:climate_scenario"); // NOI18N
-            final List<String> scenarioList = id.getDefinition()
-                        .getCommonData()
-                        .getCategory()
-                        .getConstraint()
-                        .getAllowedTokens()
-                        .getValueList()
-                        .get(0)
-                        .getValue();
-            scenarios = scenarioList.toArray(new String[scenarioList.size()]);
-        } catch (final Exception ex) {
-            spsError = ex;
-        }
+
+        SudplanConcurrency.getSudplanGeneralPurposePool().execute(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        final DataHandler dh = DataHandlerCache.getInstance()
+                                    .getSPSDataHandler(
+                                        RainfallDownscalingModelManager.RF_SPS_LOOKUP,
+                                        RainfallDownscalingModelManager.RF_SPS_URL);
+                        final Properties filter = new Properties();
+                        filter.put(TimeSeries.PROCEDURE, RainfallDownscalingModelManager.RF_TS_DS_PROCEDURE);
+                        final Datapoint dp = dh.createDatapoint(filter, null, DataHandler.Access.READ);
+                        final InputDescriptor id = (InputDescriptor)dp.getProperties()
+                                    .get("jaxb_desc:climate_scenario"); // NOI18N
+                        final List<String> scenarioList = id.getDefinition()
+                                    .getCommonData()
+                                    .getCategory()
+                                    .getConstraint()
+                                    .getAllowedTokens()
+                                    .getValueList()
+                                    .get(0)
+                                    .getValue();
+                        scenarios = scenarioList.toArray(new String[scenarioList.size()]);
+                    } catch (final Exception ex) {
+                        spsError = ex;
+                    } finally {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    component.init();
+
+                                    fireChangeEvent();
+                                }
+                            });
+                    }
+                }
+            });
 
         component.init();
     }

@@ -13,6 +13,8 @@ import Sirius.navigator.ui.ComponentRegistry;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
+
 import java.io.IOException;
 
 import java.util.Observable;
@@ -111,10 +113,13 @@ public abstract class AbstractAsyncModelManager extends AbstractModelManager imp
     private void downloadResults(final AbstractModelRunWatchable amrw) {
         try {
             final int answer = JOptionPane.showConfirmDialog(ComponentRegistry.getRegistry().getMainWindow(),
-                    "Run '"
-                            + amrw.getCidsBean().getProperty("name")
-                            + "' is finished. Do you want to download the results?",
-                    "Run finished",
+                    NbBundle.getMessage(
+                        AbstractAsyncModelManager.class,
+                        "AbstractAsyncModelManager.downloadResults(AbstractModelRunWatchable).doDownloadDialog.message", // NOI18N
+                        amrw.getCidsBean().getProperty("name")), // NOI18N
+                    NbBundle.getMessage(
+                        AbstractAsyncModelManager.class,
+                        "AbstractAsyncModelManager.downloadResults(AbstractModelRunWatchable).doDownloadDialog.title"), // NOI18N
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE);
 
@@ -127,8 +132,8 @@ public abstract class AbstractAsyncModelManager extends AbstractModelManager imp
             ExceptionManager.getManager()
                     .showExceptionDialog(
                         ExceptionManager.WARNING,
-                        "RUN notification issue",
-                        "Could not fetch RUN cidsbean that just now finished execution!",
+                        "RUN notification issue",                                 // NOI18N
+                        "Could not fetch RUN cidsbean that just now finished execution!", // NOI18N
                         ex);
         }
     }

@@ -30,11 +30,9 @@ import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 import org.openide.util.lookup.ServiceProvider;
 
-import java.awt.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.color.ColorSpace;
@@ -52,7 +50,6 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 
-import java.util.*;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -75,8 +72,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
-import javax.swing.plaf.basic.BasicButtonUI;
 
+import de.cismet.cids.custom.sudplan.dataExport.TimeSeriesExportWizardAction;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSignature;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
@@ -113,7 +110,7 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
  */
 // TODO: use timeserieschartpanel
 @ServiceProvider(service = FeatureInfoDisplay.class)
-public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWMSServiceLayerGroup>
+public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWMSServiceLayerGroup>
         implements MultipleFeatureInfoRequestsDisplay,
             AggregateableFeatureInfoDisplay {
 
@@ -169,6 +166,7 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
     private transient Resolution currentItem;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JButton btnAggregateTimeSeriesVisualisations = new javax.swing.JButton();
+    private final transient javax.swing.JButton btnExport = new javax.swing.JButton();
     private final transient javax.swing.JComboBox cboResolution =
         new de.cismet.cids.custom.sudplan.LocalisedEnumComboBox(Resolution.class, available);
     private final transient javax.swing.JPanel contentPanel = new javax.swing.JPanel();
@@ -322,6 +320,13 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         toolBarModelOverview.setBorder(null);
         toolBarModelOverview.setFloatable(false);
         toolBarModelOverview.setRollover(true);
+
+        btnExport.setAction(new TimeSeriesExportWizardAction());
+        btnExport.setText(NbBundle.getMessage(SOSFeatureInfoDisplay.class, "SOSFeatureInfoDisplay.btnExport.text")); // NOI18N
+        btnExport.setFocusable(false);
+        btnExport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnExport.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBarModelOverview.add(btnExport);
 
         btnAggregateTimeSeriesVisualisations.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cids/custom/sudplan/chart_line_link.png"))); // NOI18N
@@ -962,6 +967,15 @@ public class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<SlidableWM
         @Override
         public void selectionChanged(final TimeSeriesSelectionEvent evt) {
             final Collection<TimeSeries> selectedTS = evt.getSelectedTs();
+
+            if (selectedTS.size() == 1) {
+                ((TimeSeriesExportWizardAction)btnExport.getAction()).setTimeSeries(selectedTS.iterator().next());
+                btnExport.setEnabled(true);
+            } else {
+                ((TimeSeriesExportWizardAction)btnExport.getAction()).setTimeSeries(null);
+                btnExport.setEnabled(false);
+            }
+
             final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
             mc.getRubberBandLayer().removeAllChildren();
             mc.getTmpFeatureLayer().removeAllChildren();

@@ -8,8 +8,6 @@
 package de.cismet.cids.custom.sudplan;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
-import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
-import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
 import org.apache.log4j.Logger;
 
@@ -166,15 +164,15 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param   config             DOCUMENT ME!
-     * @param   cacheImmedialtely  DOCUMENT ME!
-     * @param   refreshable        DOCUMENT ME!
-     * @param   converter          DOCUMENT ME!
+     * @param   config            DOCUMENT ME!
+     * @param   cacheImmediately  DOCUMENT ME!
+     * @param   refreshable       DOCUMENT ME!
+     * @param   converter         DOCUMENT ME!
      *
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final TimeseriesRetrieverConfig config,
-            final boolean cacheImmedialtely,
+            final boolean cacheImmediately,
             final Refreshable refreshable,
             final TimeseriesConverter converter) {
         if (config == null) {
@@ -182,7 +180,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
         }
 
         this.refreshable = refreshable;
-        cached = cacheImmedialtely;
+        cached = cacheImmediately;
         this.configs = new HashMap<TimeseriesRetrieverConfig, TimeseriesConverter>();
         this.configs.put(config, converter);
         displayer = new TimeseriesDisplayer();
@@ -399,36 +397,6 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                 LOG.error(message, e);
                 add(new JLabel("ERROR"), BorderLayout.CENTER); // NOI18N
             }
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param   ts  DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        private TimeSeries copyTimeSeries(final TimeSeries ts) {
-            final TimeSeries result = new TimeSeriesImpl();
-            String valueKey = null;
-            // copy properties
-            for (final String key : ts.getTSKeys()) {
-                result.setTSProperty(key, ts.getTSProperty(key));
-                if (key.equals(TimeSeries.VALUE_KEYS)) {
-                    if (ts.getTSProperty(key) instanceof String) {
-                        valueKey = (String)ts.getTSProperty(key);
-                    } else {
-                        valueKey = ((String[])ts.getTSProperty(key))[0];
-                    }
-                }
-            }
-            final TimeStamp[] clonedStamps = ts.getTimeStampsArray().clone();
-
-            // copy values
-            for (final TimeStamp t : clonedStamps) {
-                result.setValue(t, valueKey, ts.getValue(t, valueKey));
-            }
-            return result;
         }
     }
 }

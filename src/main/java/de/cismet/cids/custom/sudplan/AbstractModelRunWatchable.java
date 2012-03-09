@@ -67,7 +67,7 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
 
         assert mc != null : "bean without meta class"; // NOI18N
 
-        if (!mc.getName().equalsIgnoreCase("run")) {
+        if (!mc.getName().equalsIgnoreCase("run")) {                                                      // NOI18N
             throw new IllegalArgumentException("this class can only be used with cidsBeans of type RUN"); // NOI18N
         }
 
@@ -92,7 +92,7 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
                 "neither metaclassId nor metaobjectId must be < 1: [metaclassId=" // NOI18N
                         + metaclassId
                         + " || metaobjectId="
-                        + metaobjectId
+                        + metaobjectId                                            // NOI18N
                         + "]");                                                   // NOI18N
         }
 
@@ -101,7 +101,7 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
 
         assert mc != null : "bean without meta class"; // NOI18N
 
-        if (!mc.getName().equalsIgnoreCase("run")) {
+        if (!mc.getName().equalsIgnoreCase("run")) {                                                      // NOI18N
             throw new IllegalArgumentException("this class can only be used with cidsBeans of type RUN"); // NOI18N
         }
 

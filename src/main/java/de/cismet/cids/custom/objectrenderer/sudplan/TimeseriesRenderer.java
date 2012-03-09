@@ -12,6 +12,7 @@ import Sirius.navigator.ui.ComponentRegistry;
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
 
 import java.awt.BorderLayout;
 
@@ -28,6 +29,9 @@ import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
+import de.cismet.cids.custom.sudplan.dataExport.TimeSeriesExportWizardAction;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesListChangedListener;
 
 /**
  * DOCUMENT ME!
@@ -46,6 +50,7 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
     private transient TimeseriesChartPanel panel;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnExport;
     private javax.swing.JButton btnOriginalTS;
     private javax.swing.JCheckBox chkforecast;
     private javax.swing.JPanel pnlFiller;
@@ -134,8 +139,15 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         try {
             final String uri = (String)cidsBean.getProperty("uri"); // NOI18N
             final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
+
+            final TimeSeriesExportWizardAction action = (TimeSeriesExportWizardAction)btnExport.getAction();
+            action.setTimeseriesRetrieverConfig(config);
+            btnExport.setEnabled(true);
+
             this.setTimeSeriesPanel(TimeSeriesRendererUtil.getPreviewResolution(config));
         } catch (final MalformedURLException ex) {
+            btnExport.setEnabled(false);
+
             final String message = "cidsbean contains invalid uri"; // NOI18N
             LOG.error(message, ex);
             throw new IllegalStateException(message, ex);
@@ -163,6 +175,7 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         chkforecast = new javax.swing.JCheckBox();
         btnOriginalTS = new javax.swing.JButton();
         pnlFiller = new javax.swing.JPanel();
+        btnExport = new javax.swing.JButton();
 
         setOpaque(false);
         setLayout(new java.awt.BorderLayout());
@@ -182,7 +195,7 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
@@ -199,7 +212,10 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
                     btnOriginalTSActionPerformed(evt);
                 }
             });
-        pnlNorth.add(btnOriginalTS, new java.awt.GridBagConstraints());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        pnlNorth.add(btnOriginalTS, gridBagConstraints);
 
         pnlFiller.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -208,6 +224,13 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         pnlNorth.add(pnlFiller, gridBagConstraints);
+
+        btnExport.setAction(new TimeSeriesExportWizardAction());
+        btnExport.setText(NbBundle.getMessage(TimeseriesRenderer.class, "TimeseriesRenderer.btnExport.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        pnlNorth.add(btnExport, gridBagConstraints);
 
         add(pnlNorth, java.awt.BorderLayout.PAGE_START);
 
