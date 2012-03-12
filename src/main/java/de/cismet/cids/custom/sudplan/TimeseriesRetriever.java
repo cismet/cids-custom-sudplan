@@ -256,7 +256,18 @@ public final class TimeseriesRetriever {
                     TimeSeriesRemoteHelper.CREDS);
 
             String location = config.getLocation().toExternalForm();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("GET location1: " + location);
+            }
+
             location += '/' + config.getOffering();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("GET location2: " + location);
+            }
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("GET location3: " + location);
+            }
 
             final GetMethod get = new GetMethod(location);
             BufferedInputStream bis = null;

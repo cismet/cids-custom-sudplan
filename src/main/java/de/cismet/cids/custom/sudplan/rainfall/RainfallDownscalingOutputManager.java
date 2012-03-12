@@ -63,7 +63,9 @@ public final class RainfallDownscalingOutputManager implements Manager {
     public RainfallDownscalingOutput getUR() throws IOException {
         final String json = (String)modelOutputBean.getProperty("ur"); // NOI18N
         final ObjectMapper mapper = new ObjectMapper();
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("UR JSON: " + json);
+        }
         return mapper.readValue(json, RainfallDownscalingOutput.class);
     }
 
