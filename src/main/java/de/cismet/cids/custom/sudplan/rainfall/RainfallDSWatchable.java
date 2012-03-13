@@ -190,7 +190,7 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
 
                 // assume idf crap
                 if (results.length == 2) {
-                    final String dsOrig = results[1].substring(results[1].indexOf("idf"), results[1].length() - 1); // NOI18N
+                    final String dsOrig = results[1].substring(results[1].indexOf("idf:idf"), results[1].length() - 1); // NOI18N
 
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("processing idf ds results"); // NOI18N
