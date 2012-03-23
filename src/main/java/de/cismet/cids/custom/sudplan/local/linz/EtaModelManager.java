@@ -267,14 +267,7 @@ public class EtaModelManager extends AbstractAsyncModelManager {
 
     @Override
     protected String getReloadId() {
-        try {
-            final SwmmInput swmmInput = (SwmmInput)getUR();
-            return "project_id" + swmmInput.getSwmmProject() + "_scenarios"; // NOI18N
-        } catch (final Exception e) {
-            LOG.warn("cannot fetch reload id", e);                           // NOI18N
-
-            return null;
-        }
+        return "local.linz.*";
     }
 
     @Override
