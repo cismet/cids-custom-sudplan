@@ -42,6 +42,7 @@ import java.util.concurrent.Future;
 
 import de.cismet.cids.custom.sudplan.*;
 import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
+import de.cismet.cids.custom.sudplan.server.trigger.SwmmResultGeoserverUpdater;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -68,7 +69,6 @@ public class EtaModelManager extends AbstractAsyncModelManager {
 
     private final String modelSosEndpoint = "http://sudplan.ait.ac.at:8081/";
     private SudplanSPSHelper.Task spsTask;
-    private final SwmmResultGeoserverUpdater swmmResultGeoserverUpdater = new SwmmResultGeoserverUpdater();
 
     //~ Methods ----------------------------------------------------------------
 
@@ -140,9 +140,6 @@ public class EtaModelManager extends AbstractAsyncModelManager {
                     SMSUtils.Model.LINZ_ETA);
 
             this.updateCSOs(swmmOutput, etaOutput);
-
-            this.swmmResultGeoserverUpdater.importToGeoServer(swmmOutput.getSwmmRun(), swmmOutput.getSwmmRunName());
-
             return etaModelOutput.persist();
         } catch (final Exception e) {
             final String message = "cannot get results for SPS SWMM run: " + spsRunId; // NOI18N
@@ -215,7 +212,6 @@ public class EtaModelManager extends AbstractAsyncModelManager {
 
                     final Collection<CidsBean> swmmResults = (Collection)csoBean.getProperty("swmm_results"); // NOI18N
                     swmmResults.add(swmmResultBean);
-
                     csoBean.persist();
                 } catch (Exception ex) {
                     final String message = "could not update  CSO '" + csoOverflow.getName() + "': " + ex.getMessage();

@@ -20,7 +20,11 @@ import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
 
+import org.openide.awt.Mnemonics;
 import org.openide.util.NbBundle;
+
+import java.awt.CardLayout;
+import java.awt.EventQueue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +32,7 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.table.AbstractTableModel;
 
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.local.linz.EtaConfiguration;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
 
@@ -48,13 +53,17 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
 
     private final boolean csoConfigEnabled = false;
     private final transient EtaWizardPanelEtaConfiguration model;
-    private transient EtaConfigurationTableModel etaConfigurationTableModel;
     private transient int lastSwmmProjectId = -1;
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // End of variables declaration
+    private CsoUpdater csoUpdater;
+    // Variables declaration - do not modify
+    private javax.swing.JPanel cardPanel;
     private javax.swing.JPanel etaConfigurationPanel;
     private javax.swing.JScrollPane jScrollPaneEtaConfiguration;
+    private javax.swing.JProgressBar progressBar;
+    private javax.swing.JLabel progressLabel;
+    private javax.swing.JPanel progressPanel;
     private javax.swing.JTable tblEtaConfiguration;
-    // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
 
@@ -91,16 +100,45 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("project id changed, loading CSO list");
                 }
+
+                Mnemonics.setLocalizedText(
+                    progressLabel,
+                    NbBundle.getMessage(
+                        SwmmWizardPanelTimeseriesUI.class,
+                        "EtaWizardPanelEtaConfigurationUI.progressLabel.text")); // NOI18N
+                progressBar.setIndeterminate(true);
+                ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
                 this.lastSwmmProjectId = this.model.getSwmmProjectId();
-                this.initCSOs(model.getSwmmProjectId());
-                this.tblEtaConfiguration.setModel(this.etaConfigurationTableModel);
+
+                if ((csoUpdater != null) && csoUpdater.isRunning()) {
+                    LOG.warn("another cso update thread is running, stopping thred");
+                    csoUpdater.stopIt();
+                }
+
+                csoUpdater = new CsoUpdater();
+                SudplanConcurrency.getSudplanGeneralPurposePool().execute(csoUpdater);
             } else {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("project id did not change, using cached CSO List");
                 }
+
+                if ((csoUpdater != null) && csoUpdater.isRunning()) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.warn("cso update thread is still running, waiting for thred to finish");
+                    }
+                } else {
+                    ((CardLayout)cardPanel.getLayout()).show(cardPanel, "csos");
+                }
             }
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
+            progressBar.setIndeterminate(false);
+            org.openide.awt.Mnemonics.setLocalizedText(
+                progressLabel,
+                org.openide.util.NbBundle.getMessage(
+                    SwmmWizardPanelTimeseriesUI.class,
+                    "EtaWizardPanelEtaConfiguration.progressLabel.error")); // NOI18N
+            ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
         }
     }
 
@@ -109,9 +147,11 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
      *
      * @param   swmmProjectId  DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     *
      * @throws  WizardInitialisationException  DOCUMENT ME!
      */
-    private void initCSOs(final int swmmProjectId) throws WizardInitialisationException {
+    private EtaConfigurationTableModel initCSOs(final int swmmProjectId) throws WizardInitialisationException {
         final String domain = SessionManager.getSession().getUser().getDomain();
         final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SwmmPlusEtaWizardAction.TABLENAME_CSOS);
 
@@ -135,11 +175,11 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
         final MetaObject[] metaObjects;
         try {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("executinh SQL statement: \n" + sb);
+                LOG.debug("executing SQL statement: \n" + sb);
             }
             metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
         } catch (final ConnectionException ex) {
-            final String message = "cannot get time series  meta objects from database"; // NOI18N
+            final String message = "cannot get CSO meta objects from database"; // NOI18N
             LOG.error(message, ex);
             throw new WizardInitialisationException(message, ex);
         }
@@ -170,7 +210,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
         }
 
         this.model.setEtaConfigurations(etaConfigurations);
-        this.etaConfigurationTableModel = new EtaConfigurationTableModel(etaConfigurations);
+        return new EtaConfigurationTableModel(etaConfigurations);
 
 //        {
 //            LOG.warn("eta configuration disabled, creating fixed configurations available at server side");
@@ -186,14 +226,26 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+
         etaConfigurationPanel = new javax.swing.JPanel();
+        cardPanel = new javax.swing.JPanel();
         jScrollPaneEtaConfiguration = new javax.swing.JScrollPane();
         tblEtaConfiguration = new javax.swing.JTable();
+        progressPanel = new javax.swing.JPanel();
+        progressBar = new javax.swing.JProgressBar();
+        progressLabel = new javax.swing.JLabel();
+
+        setPreferredSize(null);
+        setLayout(new java.awt.GridBagLayout());
 
         etaConfigurationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
                     EtaWizardPanelEtaConfigurationUI.class,
                     "EtaWizardPanelEtaConfigurationUI.etaConfigurationPanel.border.title"))); // NOI18N
+        etaConfigurationPanel.setLayout(new java.awt.GridBagLayout());
+
+        cardPanel.setLayout(new java.awt.CardLayout());
 
         tblEtaConfiguration.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
@@ -201,41 +253,46 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
         tblEtaConfiguration.setEnabled(false);
         jScrollPaneEtaConfiguration.setViewportView(tblEtaConfiguration);
 
-        final javax.swing.GroupLayout etaConfigurationPanelLayout = new javax.swing.GroupLayout(etaConfigurationPanel);
-        etaConfigurationPanel.setLayout(etaConfigurationPanelLayout);
-        etaConfigurationPanelLayout.setHorizontalGroup(
-            etaConfigurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                etaConfigurationPanelLayout.createSequentialGroup().addContainerGap().addComponent(
-                    jScrollPaneEtaConfiguration,
-                    javax.swing.GroupLayout.PREFERRED_SIZE,
-                    452,
-                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE)));
-        etaConfigurationPanelLayout.setVerticalGroup(
-            etaConfigurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                etaConfigurationPanelLayout.createSequentialGroup().addComponent(
-                    jScrollPaneEtaConfiguration,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    254,
-                    Short.MAX_VALUE).addContainerGap()));
+        cardPanel.add(jScrollPaneEtaConfiguration, "csos");
 
-        final javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addComponent(
-                    etaConfigurationPanel,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE).addContainerGap()));
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addComponent(
-                    etaConfigurationPanel,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE).addContainerGap()));
+        progressPanel.setLayout(new java.awt.GridBagLayout());
+
+        progressBar.setIndeterminate(true);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 25, 5, 25);
+        progressPanel.add(progressBar, gridBagConstraints);
+
+        org.openide.awt.Mnemonics.setLocalizedText(
+            progressLabel,
+            org.openide.util.NbBundle.getMessage(
+                EtaWizardPanelEtaConfigurationUI.class,
+                "EtaWizardPanelEtaConfigurationUI.progressLabel.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        progressPanel.add(progressLabel, gridBagConstraints);
+
+        cardPanel.add(progressPanel, "progress");
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 10, 10);
+        etaConfigurationPanel.add(cardPanel, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        add(etaConfigurationPanel, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
     /**
@@ -610,6 +667,82 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
         @Override
         public boolean isCellEditable(final int row, final int col) {
             return (col == 1) || (col == 2);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class CsoUpdater implements Runnable {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private transient boolean run = true;
+        private EtaConfigurationTableModel etaConfigurationTableModel;
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         */
+        public void stopIt() {
+            run = false;
+            LOG.warn("TimeseriesUpdater stopped");
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public boolean isRunning() {
+            return run;
+        }
+
+        @Override
+        public void run() {
+            if (run) {
+                try {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("TimeseriesUpdater: loading results");
+                    }
+                    etaConfigurationTableModel = initCSOs(model.getSwmmProjectId());
+                } catch (Throwable t) {
+                    LOG.error("TimeseriesUpdater: could not retrieve timeseries: " + t.getMessage(), t);
+                    run = false;
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                progressBar.setIndeterminate(false);
+                                org.openide.awt.Mnemonics.setLocalizedText(
+                                    progressLabel,
+                                    org.openide.util.NbBundle.getMessage(
+                                        SwmmWizardPanelTimeseriesUI.class,
+                                        "EtaWizardPanelEtaConfigurationUI.progressLabel.error")); // NOI18N
+                            }
+                        });
+                }
+
+                if (run) {
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("TimeseriesUpdater: updating loaded results");
+                                }
+                                tblEtaConfiguration.setModel(etaConfigurationTableModel);
+                                ((CardLayout)cardPanel.getLayout()).show(cardPanel, "csos");
+                                run = false;
+                            }
+                        });
+                } else {
+                    LOG.warn("TimeseriesUpdater stopped, ignoring retrieved results");
+                }
+            }
         }
     }
 }

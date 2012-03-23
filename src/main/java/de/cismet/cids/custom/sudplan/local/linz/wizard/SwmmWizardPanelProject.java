@@ -107,9 +107,6 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
 
     @Override
     public boolean isValid() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("isValid called");
-        }
         boolean valid = true;
 
         if (this.swmmInput.getSwmmProject() == -1) {

@@ -15,10 +15,6 @@ package de.cismet.cids.custom.sudplan.local.linz;
 import Sirius.navigator.resource.PropertyManager;
 import Sirius.navigator.ui.ComponentRegistry;
 
-import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
-import it.geosolutions.geoserver.rest.encoder.GSLayerEncoder;
-import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
-
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
@@ -28,32 +24,20 @@ import org.openide.util.NbBundle;
 import java.awt.Color;
 import java.awt.Component;
 
-import java.io.IOException;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 
 import de.cismet.cids.client.tools.DevelopmentTools;
 
-import de.cismet.cids.custom.objectrenderer.sudplan.LinzCsoRenderer;
-import de.cismet.cids.custom.sudplan.geoserver.AttributesAwareGSFeatureTypeEncoder;
-import de.cismet.cids.custom.sudplan.geoserver.GSAttributeEncoder;
+import de.cismet.cids.custom.sudplan.server.trigger.SwmmResultGeoserverUpdater;
 
 import de.cismet.cids.dynamics.CidsBean;
 
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
@@ -68,6 +52,8 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 public class SwmmOutputManagerUI extends javax.swing.JPanel {
 
     //~ Static fields/initializers ---------------------------------------------
+
+    public static final String GEOSERVER_HOST_PROPERTY = "sudplan.geoserver-host";
 
     private static final XBoundingBox LINZ_BB = new XBoundingBox(13.979, 48.102, 14.521, 48.473, "EPSG:4326", false);
     // public static final String GEOSERVER_HOST = "http://schlob-pc:9987";
@@ -101,16 +87,14 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
     public SwmmOutputManagerUI(final SwmmOutputManager outputManager) {
         // TODO: Better Visualisation (Charts?), Links to CSOs
 
-        if (
-            PropertyManager.getManager().getProperties().getProperty(SwmmResultGeoserverUpdater.GEOSERVER_HOST_PROPERTY)
+        if (PropertyManager.getManager().getProperties().getProperty(GEOSERVER_HOST_PROPERTY)
                     != null) {
-            this.geoserverHost = PropertyManager.getManager().getProperties()
-                        .getProperty(SwmmResultGeoserverUpdater.GEOSERVER_HOST_PROPERTY);
+            this.geoserverHost = PropertyManager.getManager().getProperties().getProperty(GEOSERVER_HOST_PROPERTY);
             if (LOG.isDebugEnabled()) {
-                LOG.debug("GEOSERVER_HOST set to '" + geoserverHost + "'");
+                LOG.debug("sudplan.geoserver-host set to '" + geoserverHost + "'");
             }
         } else {
-            LOG.warn("GEOSERVER_HOST property not set, setting to default 'http://sudplan.cismet.de/'");
+            LOG.warn("sudplan.geoserver-host property not set, setting to default 'http://sudplan.cismet.de/'");
             geoserverHost = "http://sudplan.cismet.de/";
         }
 

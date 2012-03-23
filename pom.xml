@@ -318,9 +318,9 @@
                     <systemPath>${java.home}/../lib/tools.jar</systemPath>
                 </dependency>
             </dependencies>
-<!--            <properties> 
+            <properties> 
                 <maven.test.skip>true</maven.test.skip>
-            </properties>-->
+            </properties>
         </profile>
     </profiles>
 </project>
