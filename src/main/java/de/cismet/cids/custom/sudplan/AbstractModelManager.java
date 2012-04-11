@@ -267,13 +267,12 @@ public abstract class AbstractModelManager implements ModelManager {
 
                     JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
                         NbBundle.getMessage(
-                                    AbstractModelManager.class,
-                                    "AbstractModelManager.fireBroken().brokenDialog.message") // NOI18N
-                                + cidsBean.getProperty("name")                                // NOI18N
-                                + "' is broken!",
+                            AbstractModelManager.class,
+                            "AbstractModelManager.fireBroken().brokenDialog.message", // NOI18N
+                            cidsBean.getProperty("name")), // NOI18N
                         NbBundle.getMessage(
                             AbstractModelManager.class,
-                            "AbstractModelManager.fireBroken().brokenDialog.title"),          // NOI18N
+                            "AbstractModelManager.fireBroken().brokenDialog.title"), // NOI18N
                         JOptionPane.WARNING_MESSAGE);
 
                     progressSupport.fireEvent(new ProgressEvent(AbstractModelManager.this, ProgressEvent.State.BROKEN));

@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork;
 
+import Sirius.navigator.ui.ComponentRegistry;
+
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
 import org.openide.util.Exceptions;
@@ -143,7 +145,7 @@ public abstract class AbstractTimeSeriesOperation extends AbstractAction impleme
         if (e.getSource() instanceof JButton) {
             btn = (JButton)e.getSource();
         }
-        final Frame f = JOptionPane.getFrameForComponent(btn);
+        final Frame f = ComponentRegistry.getRegistry().getMainWindow();
         final DefaultParamOrderUI dialog = new DefaultParamOrderUI(f, true, paramCount, tsList, this, tsVis);
         dialog.setLocationRelativeTo(f);
         dialog.pack();

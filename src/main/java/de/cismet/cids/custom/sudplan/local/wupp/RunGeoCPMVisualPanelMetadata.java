@@ -66,31 +66,32 @@ public final class RunGeoCPMVisualPanelMetadata extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     void init() {
-        if (model.getName() == null) {
-            txtName.setText(NbBundle.getMessage(
-                    RunGeoCPMVisualPanelMetadata.class,
-                    "RunGeoCPMVisualPanelMetadata.txtName.text")); // NOI18N
-        } else {
-            txtName.setText(model.getName());
-        }
-
-        txtName.setSelectionStart(0);
-        txtName.setSelectionEnd(txtName.getText().length());
-
-        // FIXME: ATR hack to pre-populate the meta information
-        if (model.getDescription() == null) {
-            txaDescription.setText("This is a GeoCPM demo run.");
-        } else {
-            txaDescription.setText(model.getDescription());
-        }
-
-        EventQueue.invokeLater(new Runnable() {
+        final Runnable r = new Runnable() {
 
                 @Override
                 public void run() {
+                    if (model.getName() == null) {
+                        txtName.setText(NbBundle.getMessage(
+                                RunGeoCPMVisualPanelMetadata.class,
+                                "RunGeoCPMVisualPanelMetadata.txtName.text")); // NOI18N
+                    } else {
+                        txtName.setText(model.getName());
+                    }
+
+                    txtName.setSelectionStart(0);
+                    txtName.setSelectionEnd(txtName.getText().length());
+
+                    txaDescription.setText(model.getDescription());
+
                     txtName.requestFocus();
                 }
-            });
+            };
+
+        if (EventQueue.isDispatchThread()) {
+            r.run();
+        } else {
+            EventQueue.invokeLater(r);
+        }
     }
 
     /**

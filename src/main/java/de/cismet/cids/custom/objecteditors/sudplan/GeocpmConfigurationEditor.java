@@ -232,6 +232,15 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
 
         txaDescription.setColumns(20);
         txaDescription.setRows(5);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
+                txaDescription,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
         jScrollPane1.setViewportView(txaDescription);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -326,8 +335,6 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.calc_begin}"),
                 lblCalcBeginValue,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("<not set>");
-        binding.setSourceUnreadableValue("<unreadable>");
         binding.setConverter(new SqlTimestampToStringConverter());
         bindingGroup.addBinding(binding);
 
@@ -353,8 +360,6 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.calc_end}"),
                 lblCalcEndValue,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("<not set>");
-        binding.setSourceUnreadableValue("<unreadable>");
         binding.setConverter(new SqlTimestampToStringConverter());
         bindingGroup.addBinding(binding);
 
@@ -394,13 +399,11 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         chkWriteNode.setEnabled(false);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.write_node}"),
                 chkWriteNode,
                 org.jdesktop.beansbinding.BeanProperty.create("selected"));
-        binding.setSourceNullValue(false);
-        binding.setSourceUnreadableValue(false);
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -422,8 +425,6 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.write_edge}"),
                 chkWriteEdge,
                 org.jdesktop.beansbinding.BeanProperty.create("selected"));
-        binding.setSourceNullValue(false);
-        binding.setSourceUnreadableValue(false);
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -467,8 +468,6 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.last_values}"),
                 chkLastValues,
                 org.jdesktop.beansbinding.BeanProperty.create("selected"));
-        binding.setSourceNullValue(false);
-        binding.setSourceUnreadableValue(false);
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -490,8 +489,6 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.save_marked}"),
                 chkSaveMarked,
                 org.jdesktop.beansbinding.BeanProperty.create("selected"));
-        binding.setSourceNullValue(false);
-        binding.setSourceUnreadableValue(false);
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -524,8 +521,6 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.merge_triangles}"),
                 chkMergeTriangles,
                 org.jdesktop.beansbinding.BeanProperty.create("selected"));
-        binding.setSourceNullValue(false);
-        binding.setSourceUnreadableValue(false);
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -552,8 +547,6 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.min_calc_triangle_size}"),
                 lblMinCalcTriangleSizeValue,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("<not set>");
-        binding.setSourceUnreadableValue("<unreadable>");
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -608,8 +601,6 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.time_step_restriction}"),
                 chkTimeStepRestriction,
                 org.jdesktop.beansbinding.BeanProperty.create("selected"));
-        binding.setSourceNullValue(false);
-        binding.setSourceUnreadableValue(false);
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -631,8 +622,6 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.save_velocity_curves}"),
                 chkSaveVelocityCurves,
                 org.jdesktop.beansbinding.BeanProperty.create("selected"));
-        binding.setSourceNullValue(false);
-        binding.setSourceUnreadableValue(false);
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -654,8 +643,6 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.save_flow_curves}"),
                 chkSaveFlowCurves,
                 org.jdesktop.beansbinding.BeanProperty.create("selected"));
-        binding.setSourceNullValue(false);
-        binding.setSourceUnreadableValue(false);
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -682,8 +669,6 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.result_save_limit}"),
                 lblResultSaveLimitValue,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("<not set>");
-        binding.setSourceUnreadableValue("<unreadable>");
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -710,8 +695,6 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.number_of_threads}"),
                 lblNumberOfThreadsValue,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("<not set>");
-        binding.setSourceUnreadableValue("<unreadable>");
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -733,11 +716,9 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
                 this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.q_in}"),
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.q_out}"),
                 lblQInValue,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("<not set>");
-        binding.setSourceUnreadableValue("<unreadable>");
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -759,11 +740,9 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
                 this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.q_out}"),
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.q_in}"),
                 lblQOutValue,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("<not set>");
-        binding.setSourceUnreadableValue("<unreadable>");
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();

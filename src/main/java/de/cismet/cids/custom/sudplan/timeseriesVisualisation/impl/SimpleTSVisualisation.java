@@ -193,7 +193,7 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
                 chartPanel.addChartMouseListener(listener);
             }
             // set the default behaviour configuration
-            chartPanel.setEnableContextMenu(contextMenuEnabled);
+            chartPanel.setEnableContextMenu(false);
             chartPanel.setDomainZoomable(isZoomEnabled());
             chartPanel.setRangeZoomable(isZoomEnabled());
             legend = new LegendTitle(chartPanel.getChart().getPlot());
@@ -331,6 +331,10 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
         fireTimeSeriesChanged(new TimeSeriesListChangedEvent(
                 this,
                 TimeSeriesListChangedEvent.TIME_SERIES_CLEARED));
+        // FIXME: is this the correct place? and why does the listener contain a selection list etc?
+        if (listener != null) {
+            listener.clearSelection();
+        }
     }
 
     @Override

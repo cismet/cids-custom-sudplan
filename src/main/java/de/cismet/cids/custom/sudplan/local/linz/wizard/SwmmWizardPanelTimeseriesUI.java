@@ -111,8 +111,8 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
                         LOG.debug("timeseries update thread is still running");
                     }
                 } else {
-                    ((TimeseriesTableModel)this.tblTimeseries.getModel()).
-                        setSelectedTimeseries(model.getTimeseriesIds());
+                    ((TimeseriesTableModel)this.tblTimeseries.getModel()).setSelectedTimeseries(
+                        model.getTimeseriesIds());
                     ((CardLayout)cardPanel.getLayout()).show(cardPanel, "timeseries");
                 }
                 return;

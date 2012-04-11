@@ -128,6 +128,8 @@ public class ImportGeoCPMVisualPanelCFGSelect extends javax.swing.JPanel {
         txtGeoCPMConfig.setText(NbBundle.getMessage(
                 ImportGeoCPMVisualPanelCFGSelect.class,
                 "ImportGeoCPMVisualPanelCFGSelect.txtGeoCPMConfig.text")); // NOI18N
+        txtGeoCPMConfig.setMinimumSize(new java.awt.Dimension(150, 28));
+        txtGeoCPMConfig.setPreferredSize(new java.awt.Dimension(150, 28));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -162,6 +164,8 @@ public class ImportGeoCPMVisualPanelCFGSelect extends javax.swing.JPanel {
         txtDynaConfig.setText(NbBundle.getMessage(
                 ImportGeoCPMVisualPanelCFGSelect.class,
                 "ImportGeoCPMVisualPanelCFGSelect.txtDynaConfig.text")); // NOI18N
+        txtDynaConfig.setMinimumSize(new java.awt.Dimension(150, 28));
+        txtDynaConfig.setPreferredSize(new java.awt.Dimension(150, 28));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
