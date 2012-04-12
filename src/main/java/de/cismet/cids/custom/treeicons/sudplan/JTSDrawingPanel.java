@@ -14,15 +14,12 @@ import com.vividsolutions.jts.io.WKTReader;
 
 import org.geotools.geometry.jts.Geometries;
 import org.geotools.geometry.jts.LiteShape;
+import org.geotools.geometry.jts.LiteShape2;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.GradientPaint;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,25 +61,29 @@ public class JTSDrawingPanel extends JPanel {
         if (!geometries.isEmpty()) {
             setTransform();
 
-            final Graphics2D g2d = (Graphics2D)g;
+            final Graphics2D g2 = (Graphics2D)g;
             final Paint polyPaint = new GradientPaint(0, 0, Color.CYAN, 100,
                     100, Color.MAGENTA, true);
             final Paint defaultPaint = Color.getHSBColor(223f / 360f, 0.45f, 0.76f);
 
             for (final Geometry geom : geometries) {
                 final LiteShape shape = new LiteShape(geom, geomToScreen, false);
-//                final Rectangle shape = new Rectangle(10,10,100, 100);
+                g2.setColor(Color.WHITE);
+                g2.fillRect(0, 0, this.getWidth(), this.getHeight());
 
-//                final BasicStroke bs = new BasicStroke(2f);
+//                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                final Composite origComp = g2.getComposite();
+                final AlphaComposite comp = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f);
+                g2.setPaint(new Color(153, 153, 254));
+//                g2.setComposite(comp);
+                g2.fill(shape);
+//                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+                g2.setPaint(Color.BLACK);
+//                g2.setComposite(origComp);
+//                g2.fillRect(0, 0,biShape.getWidth(), biShape.getHeight());
+                g2.draw(shape);
 
-                g2d.setPaint(defaultPaint);
-                g2d.fill(shape);
-                g2d.setPaint(Color.BLACK);
-//                g2d.setStroke(bs);
-//                g2d.draw(shape);
-
-//                g2d.setPaint(defaultPaint);
-//                g2d.draw(shape);
+//                g2.drawRect(MARGIN, MARGIN, 16, 16);
             }
         }
     }

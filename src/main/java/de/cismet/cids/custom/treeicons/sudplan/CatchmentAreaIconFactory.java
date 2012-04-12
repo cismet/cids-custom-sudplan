@@ -78,11 +78,6 @@ public final class CatchmentAreaIconFactory implements CidsTreeObjectIconFactory
             final CidsBean bean = otn.getMetaObject().getBean();
             final Geometry geom = (Geometry)bean.getProperty("area.geo_field"); // CrsTransformer.transformToGivenCrs(,SMSUtils.EPSG_WUPP);
 
-            final BufferedImage bi = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-            final Graphics2D g2d = (Graphics2D)bi.getGraphics();
-
-            final Paint paint = Color.BLUE;
-
             final Envelope env = geom.getEnvelopeInternal();
             final double scale = Math.min(16 / env.getWidth(), 16 / env.getHeight());
             final double xoff = 0 - (scale * env.getMinX());
@@ -91,8 +86,25 @@ public final class CatchmentAreaIconFactory implements CidsTreeObjectIconFactory
 
             final LiteShape shape = new LiteShape(geom, at, false);
 
-            g2d.setPaint(paint);
-            g2d.fill(shape);
+            final int dw = (int)Math.ceil(geom.getEnvelopeInternal().getWidth() * scale);
+            final int dh = (int)Math.ceil(geom.getEnvelopeInternal().getHeight() * scale);
+
+            final BufferedImage biShape = new BufferedImage(dw, dh, BufferedImage.TYPE_INT_ARGB);
+            final Graphics2D g2dShape = (Graphics2D)biShape.getGraphics();
+
+            final Paint paint = new Color(153, 153, 255);
+            g2dShape.setPaint(paint);
+            g2dShape.fill(shape);
+
+            g2dShape.setPaint(Color.BLACK);
+            g2dShape.draw(shape);
+
+            final BufferedImage bi = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+
+            final Graphics2D g2d = (Graphics2D)bi.getGraphics();
+            final int x = (bi.getWidth() - biShape.getWidth()) / 2;
+            final int y = (bi.getHeight() - biShape.getHeight()) / 2;
+            g2d.drawImage(biShape, x, y, null);
 
             return new ImageIcon(bi);
         } catch (final Exception e) {
