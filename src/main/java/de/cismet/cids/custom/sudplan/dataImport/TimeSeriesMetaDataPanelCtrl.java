@@ -85,7 +85,7 @@ public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
             this.comp.init();
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Leaving read(WizardDescriptor)"); // NOI18N
+            LOG.debug("Leaving read(WizardDescrsudplaniptor)"); // NOI18N
         }
     }
 

@@ -133,7 +133,9 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
         final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SwmmPlusEtaWizardAction.TABLENAME_SWMM_PROJECT);
 
         if (mc == null) {
-            throw new WizardInitialisationException("cannot fetch swmm project metaclass"); // NOI18N
+            throw new WizardInitialisationException("cannot fetch swmm project metaclass '"
+                        + SwmmPlusEtaWizardAction.TABLENAME_SWMM_PROJECT + "' for domain '"
+                        + domain + "'"); // NOI18N
         }
 
         final StringBuilder sb = new StringBuilder();

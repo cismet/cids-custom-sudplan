@@ -315,8 +315,8 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
         final String description = (String)wizard.getProperty(PROP_DESCRIPTION);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("creating new swmm modelrun: " // NOI18N
-                        + "name=" + runName    // NOI18N
+            LOG.debug("creating new ETA modelrun: " // NOI18N
+                        + "name=" + runName   // NOI18N
                         + " || description=" + description // NOI18N
                         + " || cidsbean=" + inputBean); // NOI18N
         }
