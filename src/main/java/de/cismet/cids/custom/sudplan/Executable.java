@@ -9,6 +9,8 @@ package de.cismet.cids.custom.sudplan;
 
 import java.io.IOException;
 
+import de.cismet.cids.dynamics.CidsBean;
+
 /**
  * DOCUMENT ME!
  *
@@ -39,4 +41,14 @@ public interface Executable {
      * @param  progressL  DOCUMENT ME!
      */
     void removeProgressListener(final ProgressListener progressL);
+
+    /**
+     * Returns the run info objexct of the executable which contains default and custom properties of the execution
+     * status (e.g. error messages)
+     *
+     * @param   <T>  type of the run info object
+     *
+     * @return  the deserialized run info object or null
+     */
+    <T extends RunInfo> T getRunInfo();
 }

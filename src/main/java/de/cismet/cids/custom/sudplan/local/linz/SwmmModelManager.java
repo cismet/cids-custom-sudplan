@@ -251,6 +251,11 @@ public class SwmmModelManager extends AbstractModelManager {
         }
     }
 
+    @Override
+    public SwmmRunInfo getRunInfo() {
+        return SMSUtils.getRunInfo(cidsBean, SwmmRunInfo.class);
+    }
+
 //    @Override
 //    public AbstractModelRunWatchable createWatchable() throws IOException {
 //        return new SwmmWatchable(this.cidsBean);

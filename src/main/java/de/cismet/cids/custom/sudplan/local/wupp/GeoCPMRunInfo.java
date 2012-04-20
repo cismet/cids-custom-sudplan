@@ -7,13 +7,15 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.wupp;
 
+import de.cismet.cids.custom.sudplan.DefaultRunInfo;
+
 /**
  * DOCUMENT ME!
  *
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class GeoCPMRunInfo {
+public final class GeoCPMRunInfo extends DefaultRunInfo {
 
     //~ Instance fields --------------------------------------------------------
 

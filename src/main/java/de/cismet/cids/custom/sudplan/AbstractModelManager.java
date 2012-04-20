@@ -13,11 +13,14 @@ import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import org.openide.util.NbBundle;
 
 import java.awt.EventQueue;
 
 import java.io.IOException;
+import java.io.StringWriter;
 
 import java.sql.Timestamp;
 
@@ -246,9 +249,11 @@ public abstract class AbstractModelManager implements ModelManager {
     /**
      * DOCUMENT ME!
      *
+     * @param   message  DOCUMENT ME!
+     *
      * @throws  IllegalStateException  DOCUMENT ME!
      */
-    protected void fireBroken() {
+    protected void fireBroken(final String message) {
         final Runnable fireBroken = new Runnable() {
 
                 @Override
@@ -262,24 +267,62 @@ public abstract class AbstractModelManager implements ModelManager {
                     }
 
                     if (isFinished()) {
+                        LOG.warn("will not fire broken when run is finished");
                         return;
                     }
 
-                    JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
-                        NbBundle.getMessage(
+                    final StringBuilder errorMessage = new StringBuilder();
+                    errorMessage.append("<html><b>");
+                    errorMessage.append(NbBundle.getMessage(
                             AbstractModelManager.class,
                             "AbstractModelManager.fireBroken().brokenDialog.message", // NOI18N
-                            cidsBean.getProperty("name")), // NOI18N
+                            cidsBean.getProperty("name"))); // NOI18N)
+                    errorMessage.append("</b><br/>");
+                    errorMessage.append("<p>").append(message).append("</p></html>");
+
+                    JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
+                        errorMessage.toString(),
                         NbBundle.getMessage(
                             AbstractModelManager.class,
                             "AbstractModelManager.fireBroken().brokenDialog.title"), // NOI18N
                         JOptionPane.WARNING_MESSAGE);
 
+                    RunInfo runInfo = getRunInfo();
+                    if (runInfo == null) {
+                        runInfo = new DefaultRunInfo(true, message);
+                        try {
+                            final StringWriter writer = new StringWriter();
+                            final ObjectMapper mapper = new ObjectMapper();
+                            mapper.writeValue(writer, runInfo);
+                            cidsBean.setProperty("runinfo", writer.toString());
+                        } catch (Throwable t) {
+                            LOG.error("could not set run info: " + t.getMessage(), t);
+                        }
+                    }
+
+                    runInfo.setBroken(true);
+                    runInfo.setBrokenMessage(message);
+
                     progressSupport.fireEvent(new ProgressEvent(AbstractModelManager.this, ProgressEvent.State.BROKEN));
+
+                    try {
+                        cidsBean = cidsBean.persist();
+                    } catch (Throwable t) {
+                        LOG.error("could not persists cids bean: " + t.getMessage(), t);
+                    }
                 }
             };
 
         progressDispatcher.submit(fireBroken);
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    protected void fireBroken() {
+        this.fireBroken(NbBundle.getMessage(
+                AbstractModelManager.class,
+                "AbstractModelManager.fireBroken().brokenDialog.message.unknownerror"));
     }
 
     /**
@@ -415,5 +458,30 @@ public abstract class AbstractModelManager implements ModelManager {
         final Timestamp ts = (Timestamp)cidsBean.getProperty("finished"); // NOI18N
 
         return ts != null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected boolean isCanceled() {
+        final RunInfo runInfo = this.getRunInfo();
+        return (runInfo != null) ? runInfo.isCanceled() : false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected boolean isBroken() {
+        final RunInfo runInfo = this.getRunInfo();
+        return (runInfo != null) ? runInfo.isBroken() : false;
+    }
+
+    @Override
+    public RunInfo getRunInfo() {
+        return SMSUtils.getRunInfo(cidsBean, RunInfo.class);
     }
 }

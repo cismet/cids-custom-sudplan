@@ -62,7 +62,6 @@ public final class SMSUtils {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(SMSUtils.class);
-
     public static final String TABLENAME_TIMESERIES = "TIMESERIES";                     // NOI18N
     public static final String TABLENAME_RAINEVENT = "RAINEVENT";                       // NOI18N
     public static final String TABLENAME_MODELINPUT = "MODELINPUT";                     // NOI18N
@@ -72,12 +71,9 @@ public final class SMSUtils {
     public static final String TABLENAME_IDFCURVE = "IDF_CURVE";                        // NOI18N
     public static final String TABLENAME_GEOCPM_CONFIGURATION = "geocpm_configuration"; // NOI18N
     public static final String TABLENAME_DELTA_CONFIGURATION = "delta_configuration";   // NOI18N
-
-    public static final String CISMAP_PLUGIN_NAME = "cismap"; // NOI18N
-
-    public static final String DOMAIN_SUDPLAN_WUPP = "SUDPLAN-WUPP"; // NOI18N
-
-    public static final String EPSG_WUPP = "EPSG:31466"; // NOI18N
+    public static final String CISMAP_PLUGIN_NAME = "cismap";                           // NOI18N
+    public static final String DOMAIN_SUDPLAN_WUPP = "SUDPLAN-WUPP";                    // NOI18N
+    public static final String EPSG_WUPP = "EPSG:31466";                                // NOI18N
 
     //~ Enums ------------------------------------------------------------------
 
@@ -578,7 +574,12 @@ public final class SMSUtils {
         try {
             final MetaObject mo = SessionManager.getProxy().getMetaObject(id, mc.getID(), domain);
 
-            return mo.getBean();
+            if (mo != null) {
+                return mo.getBean();
+            } else {
+                LOG.warn("could not find meta object #" + id + " in table " + tablename + " @" + domain);
+                return null;
+            }
         } catch (final ConnectionException ex) {
             LOG.warn("cannot get timeseries bean from server", ex); // NOI18N
             return null;
@@ -755,5 +756,31 @@ public final class SMSUtils {
         llUr[1] = ur;
 
         return llUr;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   <T>           DOCUMENT ME!
+     * @param   runBean       DOCUMENT ME!
+     * @param   runInfoclass  DOCUMENT ME!
+     *
+     * @return  default run info of the run
+     */
+    public static <T extends RunInfo> T getRunInfo(final CidsBean runBean, final Class<T> runInfoclass) {
+        if ((runBean != null) && (runBean.getProperty("runinfo") != null)) {
+            final ObjectMapper mapper = new ObjectMapper();
+            final String runInfoString = (String)runBean.getProperty("runinfo");
+
+            try {
+                final T runInfo = mapper.readValue(runInfoString, runInfoclass);
+                return runInfo;
+            } catch (final Exception ex) {
+                final String message = "cannot read default run info from run: " + runBean; // NOI18N
+                LOG.error(message, ex);
+            }
+        }
+
+        return null;
     }
 }

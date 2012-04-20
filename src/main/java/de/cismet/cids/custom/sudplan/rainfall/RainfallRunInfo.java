@@ -7,13 +7,15 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.rainfall;
 
+import de.cismet.cids.custom.sudplan.DefaultRunInfo;
+
 /**
  * DOCUMENT ME!
  *
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class RainfallRunInfo {
+public final class RainfallRunInfo extends DefaultRunInfo {
 
     //~ Instance fields --------------------------------------------------------
 

@@ -25,13 +25,7 @@ import java.util.GregorianCalendar;
 
 import javax.swing.JComponent;
 
-import de.cismet.cids.custom.sudplan.Executable;
-import de.cismet.cids.custom.sudplan.Manager;
-import de.cismet.cids.custom.sudplan.ProgressEvent;
-import de.cismet.cids.custom.sudplan.ProgressListener;
-import de.cismet.cids.custom.sudplan.ProgressSupport;
-import de.cismet.cids.custom.sudplan.RunHelper;
-import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.*;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -323,5 +317,11 @@ public class MultiplyModelManager implements Manager, Executable {
     @Override
     public Feature getFeature() throws IOException {
         return null;
+    }
+
+    @Override
+    public RunInfo getRunInfo() {
+        // throw new UnsupportedOperationException("Not supported yet.");
+        return new DefaultRunInfo();
     }
 }

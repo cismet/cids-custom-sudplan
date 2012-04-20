@@ -36,17 +36,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Future;
 
-import de.cismet.cids.custom.sudplan.AbstractAsyncModelManager;
-import de.cismet.cids.custom.sudplan.DataHandlerCache;
-import de.cismet.cids.custom.sudplan.DataHandlerCacheException;
-import de.cismet.cids.custom.sudplan.IDFCurve;
-import de.cismet.cids.custom.sudplan.Manager;
-import de.cismet.cids.custom.sudplan.ManagerType;
-import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.*;
 import de.cismet.cids.custom.sudplan.SMSUtils.Model;
-import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
-import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
-import de.cismet.cids.custom.sudplan.Variable;
 import de.cismet.cids.custom.sudplan.converter.TimeSeriesSerializer;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -65,11 +56,9 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(RainfallDownscalingModelManager.class);
-
-    public static final String PARAM_CLIMATE_SCENARIO = "climate_scenario"; // NOI18N
-    public static final String PARAM_SOURCE_RAIN = "source_rain";           // NOI18N
-    public static final String PARAM_CENTER_TIME = "center_time";           // NOI18N
-
+    public static final String PARAM_CLIMATE_SCENARIO = "climate_scenario";             // NOI18N
+    public static final String PARAM_SOURCE_RAIN = "source_rain";                       // NOI18N
+    public static final String PARAM_CENTER_TIME = "center_time";                       // NOI18N
     public static final String RF_SOS_LOOKUP = "rainfall_sos_lookup";                   // NOI18N
     public static final String RF_SPS_LOOKUP = "rainfall_sps_lookup";                   // NOI18N
     public static final String RF_SOS_URL = "http://sudplan.ait.ac.at:8084/";           // NOI18N
@@ -143,8 +132,9 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
             dsBean = dsBean.persist();
         } catch (final Exception ex) {
-            final String message = "cannot create downscaled bean"; // NOI18N
+            final String message = "Cannot create downscaled bean"; // NOI18N
             LOG.error(message, ex);
+            this.fireBroken(message);
             throw new IOException(message, ex);
         }
 
@@ -164,6 +154,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
         } catch (final Exception e) {
             final String message = "cannot create model output";                              // NOI18N
             LOG.error(message, e);
+            this.fireBroken(message);
             throw new IOException(message, e);
         }
 
@@ -195,6 +186,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
         } catch (final DataHandlerCacheException ex) {
             final String message = "cannot fetch datahandler"; // NOI18N
             LOG.error(message, ex);
+            this.fireBroken(message);
             throw new IOException(message, ex);
         }
 
@@ -293,13 +285,21 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
         final RainfallDownscalingInput rfInput = inputFromRun(cidsBean);
         final CidsBean tsBean = rfInput.fetchRainfallObject();
 
-        assert tsBean != null : "timeseries is null"; // NOI18N
+        if (tsBean == null) {
+            final String message = "Cannot read timeseries, timeseries bean is null";
+            LOG.error(message);
+            this.fireBroken(message);
+            throw new IOException(message);
+        }
 
-        final String tsUri = (String)tsBean.getProperty("uri");                 // NOI18N
+        assert tsBean != null : "Timeseries is null"; // NOI18N
+
+        final String tsUri = (String)tsBean.getProperty("uri");                    // NOI18N
         final TimeseriesRetrieverConfig config;
         if (tsUri == null) {
-            final String message = "cannot read timeseries from uri, uri null"; // NOI18N
-            LOG.error(message);                                                 // NOI18N
+            final String message = "Cannot read timeseries from uri, uri is null"; // NOI18N
+            LOG.error(message);                                                    // NOI18N
+            this.fireBroken(message);
             throw new IOException(message);
         } else {
             config = TimeseriesRetrieverConfig.fromUrl(tsUri);
@@ -313,6 +313,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
         } catch (final DataHandlerCacheException ex) {
             final String message = "cannot fetch datahandler"; // NOI18N
             LOG.error(message, ex);
+            this.fireBroken(message);
             throw new IOException(message, ex);
         }
 
@@ -345,12 +346,15 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
                 }
             }
 
-            ts.setTSProperty(PropertyNames.SPATIAL_RESOLUTION, new Integer[] { 1, 1 });
+            ts.setTSProperty(
+                PropertyNames.SPATIAL_RESOLUTION,
+                new Integer[] { 1, 1 });
             ts.setTSProperty(PropertyNames.TEMPORAL_RESOLUTION, "NONE");            // NOI18N
             ts.setTSProperty(PropertyNames.COORDINATE_SYSTEM, "EPSG:4326");         // NOI18N
         } catch (final Exception ex) {
             final String message = "cannot fetch timeseries for config: " + config; // NOI18N
             LOG.error(message, ex);
+            this.fireBroken(message);
             throw new IOException(message, ex);
         }
 
@@ -481,6 +485,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
         } catch (final Exception ex) {
             final String message = "cannot store runinfo: " + runId; // NOI18N
             LOG.error(message, ex);
+            this.fireBroken(message);
             throw new IOException(message, ex);
         }
     }
@@ -491,30 +496,43 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
             throw new IllegalStateException("cidsBean not set"); // NOI18N
         }
 
-        final ObjectMapper mapper = new ObjectMapper();
-        final String info = (String)cidsBean.getProperty("runinfo"); // NOI18N
+        final RainfallRunInfo runInfo = this.getRunInfo();
 
-        try {
-            final RainfallRunInfo runInfo = mapper.readValue(info, RainfallRunInfo.class);
+        if (runInfo == null) {
+            throw new IllegalStateException("run info not set"); // NOI18N
+        }
 
-            if (runningTask == null) {
-                final DataHandler dh = DataHandlerCache.getInstance()
-                            .getSPSDataHandler(
-                                runInfo.getHandlerLookup(),
-                                runInfo.getHandlerUrl());
-                return new RainfallDSWatchable(cidsBean, dh, runInfo.getTaskId());
-            } else {
-                return new RainfallDSWatchable(cidsBean, runInfo.getTaskId(), runningTask);
+        if (runInfo.isCanceled() || runInfo.isBroken()) {
+            final String message = "run '" + cidsBean + "' is canceled or broken, ignoring run";
+            LOG.warn(message);
+            throw new IllegalStateException(message);                               // NOI18N
+        } else {
+            try {
+                if (runningTask == null) {
+                    final DataHandler dh = DataHandlerCache.getInstance()
+                                .getSPSDataHandler(
+                                    runInfo.getHandlerLookup(),
+                                    runInfo.getHandlerUrl());
+                    return new RainfallDSWatchable(cidsBean, dh, runInfo.getTaskId());
+                } else {
+                    return new RainfallDSWatchable(cidsBean, runInfo.getTaskId(), runningTask);
+                }
+            } catch (final Exception ex) {
+                final String message = "cannot read runInfo from run: " + cidsBean; // NOI18N
+                LOG.error(message, ex);
+                this.fireBroken(message);
+                throw new IOException(message, ex);
             }
-        } catch (final Exception ex) {
-            final String message = "cannot read runInfo from run: " + cidsBean; // NOI18N
-            LOG.error(message, ex);
-            throw new IOException(message, ex);
         }
     }
 
     @Override
     protected boolean needsDownload() {
         return true;
+    }
+
+    @Override
+    public RainfallRunInfo getRunInfo() {
+        return SMSUtils.<RainfallRunInfo>getRunInfo(cidsBean, RainfallRunInfo.class);
     }
 }

@@ -42,6 +42,7 @@ import java.util.concurrent.Future;
 
 import de.cismet.cids.custom.sudplan.*;
 import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
+import de.cismet.cids.custom.sudplan.rainfall.RainfallRunInfo;
 import de.cismet.cids.custom.sudplan.server.trigger.SwmmResultGeoserverUpdater;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -85,11 +86,14 @@ public class EtaModelManager extends AbstractAsyncModelManager {
         final SwmmWatchable watch = (SwmmWatchable)this.getWatchable();
         final String spsRunId = watch.getSwmmRunInfo().getRunId();
 
-        // we need the ta ioput to sync ids and the set the swmm output
+        // we need the ta input to sync ids and the set the swmm output
         try {
             final EtaInput etaInput = (EtaInput)this.getUR();
             if (etaInput.getSwmmRun() == -1) {
-                throw new IOException("ETA run without SWMM run");
+                final String message = "ETA run without SWMM run";
+                LOG.error(message);
+                this.fireBroken(message);
+                throw new IOException(message);
             }
 
             LOG.info("creating output beans for ETA RUN '" + cidsBean + "' ("
@@ -144,6 +148,7 @@ public class EtaModelManager extends AbstractAsyncModelManager {
         } catch (final Exception e) {
             final String message = "cannot get results for SPS SWMM run: " + spsRunId; // NOI18N
             LOG.error(message, e);
+            this.fireBroken(message);
             throw new IOException(message, e);
         }
     }
@@ -181,6 +186,7 @@ public class EtaModelManager extends AbstractAsyncModelManager {
         } catch (Throwable t) {
             final String message = "could not save eta result '" + etaOutput.getEtaRunName() + "': " + t.getMessage();
             LOG.error(message, t);
+            this.fireBroken(message);
             throw new IOException(message, t);
         }
 
@@ -216,6 +222,7 @@ public class EtaModelManager extends AbstractAsyncModelManager {
                 } catch (Exception ex) {
                     final String message = "could not update  CSO '" + csoOverflow.getName() + "': " + ex.getMessage();
                     LOG.error(message, ex);
+                    this.fireBroken(message);
                     throw new IOException(message, ex);
                 }
             } else {
@@ -272,8 +279,22 @@ public class EtaModelManager extends AbstractAsyncModelManager {
 
     @Override
     public AbstractModelRunWatchable createWatchable() throws IOException {
-        // FIXME: - spsTask instance
-        return new SwmmWatchable(this.cidsBean);
+        if (cidsBean == null) {
+            throw new IllegalStateException("cidsBean not set"); // NOI18N
+        }
+
+        final SwmmRunInfo runInfo = this.getRunInfo();
+        if (runInfo == null) {
+            throw new IllegalStateException("run info not set"); // NOI18N
+        }
+
+        if (runInfo.isCanceled() || runInfo.isBroken()) {
+            final String message = "run '" + cidsBean + "' is canceled  or broken, ignoring run";
+            LOG.warn(message);
+            throw new IllegalStateException(message); // NOI18N
+        }
+
+        return new EtaWatchable(this.cidsBean);
     }
 
     @Override
@@ -286,7 +307,10 @@ public class EtaModelManager extends AbstractAsyncModelManager {
         final EtaInput etaInput = (EtaInput)this.getUR();
 
         if (etaInput.getSwmmRun() == -1) {
-            throw new IOException("ETA run without SWMM run");
+            final String message = "ETA run without SWMM run";
+            LOG.error(message);
+            this.fireBroken(message);
+            throw new IOException(message);
         }
 
         CidsBean swmmRun = SMSUtils.fetchCidsBean(etaInput.getSwmmRun(), SMSUtils.TABLENAME_MODELRUN);
@@ -325,14 +349,16 @@ public class EtaModelManager extends AbstractAsyncModelManager {
                     LOG.debug("finished downloading timeseries from WEBDAV");
                 }
             } catch (Throwable t) {
-                final String message = "could not download rain timeseries from '"
-                            + config + "': " + t.getMessage();
+                final String message = "Could not download rain timeseries from '"
+                            + config.getProtocol() + "'";
                 LOG.error(message, t);
+                this.fireBroken(message);
                 throw new IOException(message, t);
             }
         } else {
-            final String message = "unsupported timeseries protocol: '" + config.getProtocol() + "'";
+            final String message = "Unsupported timeseries protocol: '" + config.getProtocol() + "'";
             LOG.error(message);
+            this.fireBroken(message);
             throw new IOException(message);
         }
 
@@ -439,6 +465,7 @@ public class EtaModelManager extends AbstractAsyncModelManager {
             spsTask.setParameter("end", isoDf.format(swmmInput.getEndDate()));
         } catch (Throwable t) {
             LOG.error(t.getMessage());
+            this.fireBroken(t.getMessage());
             throw new IOException(t.getMessage(), t);
         }
 
@@ -478,9 +505,15 @@ public class EtaModelManager extends AbstractAsyncModelManager {
                             + cidsBean.getMetaObject().getName() + "' saved");
             }
         } catch (final Exception ex) {
-            final String message = "cannot store runinfo: " + swmmRunInfo.getRunId(); // NOI18N
+            final String message = "Cannot store runinfo: " + swmmRunInfo.getRunId(); // NOI18N
             LOG.error(message, ex);
+            this.fireBroken(message);
             throw new IOException(message, ex);
         }
+    }
+
+    @Override
+    public EtaRunInfo getRunInfo() {
+        return SMSUtils.<EtaRunInfo>getRunInfo(cidsBean, EtaRunInfo.class);
     }
 }

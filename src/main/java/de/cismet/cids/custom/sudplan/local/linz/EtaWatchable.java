@@ -25,9 +25,8 @@ public class EtaWatchable extends SwmmWatchable {
      * Creates a new EtaWatchable object.
      *
      * @param  cidsBean  DOCUMENT ME!
-     * @param  spsTask   DOCUMENT ME!
      */
-    public EtaWatchable(final CidsBean cidsBean, final SudplanSPSHelper.Task spsTask) {
+    public EtaWatchable(final CidsBean cidsBean) {
         super(cidsBean);
     }
 }

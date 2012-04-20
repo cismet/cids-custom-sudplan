@@ -32,7 +32,6 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
 
     private final transient ModelManager model;
     private final transient ActionListener runL;
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnRun;
@@ -86,6 +85,9 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     private void performInit() {
+        // FIXME: implement cancel
+        btnCancel.setEnabled(false);
+
         if (isStarted()) {
             btnRun.setEnabled(false);
             if (isFinished()) {
@@ -101,7 +103,7 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
                 lblStatus.setText(NbBundle.getMessage(
                         DefaultModelManagerUI.class,
                         "DefaultModelManagerUI.lblStatus.text.running"));  // NOI18N
-                btnCancel.setEnabled(true);
+                // btnCancel.setEnabled(true);
                 jpbStatus.setMaximum(0);
                 jpbStatus.setValue(0);
                 jpbStatus.setIndeterminate(true);
@@ -109,6 +111,7 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
             }
         } else {
             btnRun.addActionListener(WeakListeners.create(ActionListener.class, runL, btnRun));
+            btnCancel.addActionListener(WeakListeners.create(ActionListener.class, runL, btnCancel));
 
             lblStatus.setText(NbBundle.getMessage(
                     DefaultModelManagerUI.class,
@@ -119,6 +122,40 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
             jpbStatus.setValue(0);
             jpbStatus.setIndeterminate(false);
             jpbStatus.setStringPainted(true);
+        }
+
+        final RunInfo runInfo = model.getRunInfo();
+        if (runInfo != null) {
+            if (runInfo.isBroken() || runInfo.isCanceled()) {
+                btnRun.setEnabled(false);
+                btnCancel.setEnabled(false);
+                jpbStatus.setMaximum(1);
+                jpbStatus.setValue(0);
+                jpbStatus.setIndeterminate(false);
+                jpbStatus.setStringPainted(true);
+
+                if (runInfo.isBroken()) {
+                    if ((runInfo.getBrokenMessage() != null) && !runInfo.getBrokenMessage().isEmpty()) {
+                        lblStatus.setText("<html><p>"
+                                    + runInfo.getBrokenMessage() + "</p></html>");
+                    } else {
+                        lblStatus.setText(NbBundle.getMessage(
+                                DefaultModelManagerUI.class,
+                                "DefaultModelManagerUI.lblStatus.text.broken"));   // NOI18N
+                    }
+                } else if (runInfo.isCanceled()) {
+                    if ((runInfo.getCanceledMessage() != null) && !runInfo.getCanceledMessage().isEmpty()) {
+                        lblStatus.setText("<html><p>"
+                                    + runInfo.getCanceledMessage() + "</p></html>");
+                    } else {
+                        lblStatus.setText(NbBundle.getMessage(
+                                DefaultModelManagerUI.class,
+                                "DefaultModelManagerUI.lblStatus.text.canceled")); // NOI18N
+                    }
+                }
+            }
+        } else {
+            LOG.warn("run info is not set, cannot determine actual status of model run");
         }
     }
 
@@ -171,23 +208,25 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.ipadx = 419;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 10);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 10);
         add(jpbStatus, gridBagConstraints);
 
         lblExecStatus.setText(NbBundle.getMessage(
                 DefaultModelManagerUI.class,
                 "DefaultModelManagerUI.lblExecStatus.text")); // NOI18N
+        lblExecStatus.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 10);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 10);
         add(lblExecStatus, gridBagConstraints);
 
         btnRun.setText(NbBundle.getMessage(DefaultModelManagerUI.class, "DefaultModelManagerUI.btnRun.text")); // NOI18N
-        btnRun.setMaximumSize(new java.awt.Dimension(86, 29));
-        btnRun.setMinimumSize(new java.awt.Dimension(86, 29));
+        btnRun.setMargin(null);
+        btnRun.setMaximumSize(null);
+        btnRun.setMinimumSize(null);
         btnRun.setPreferredSize(new java.awt.Dimension(86, 29));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
@@ -197,6 +236,9 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
         add(btnRun, gridBagConstraints);
 
         btnCancel.setText(NbBundle.getMessage(DefaultModelManagerUI.class, "DefaultModelManagerUI.btnCancel.text")); // NOI18N
+        btnCancel.setMargin(null);
+        btnCancel.setMaximumSize(null);
+        btnCancel.setMinimumSize(null);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
@@ -205,12 +247,15 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
         add(btnCancel, gridBagConstraints);
 
         lblStatus.setText(NbBundle.getMessage(DefaultModelManagerUI.class, "DefaultModelManagerUI.lblStatus.text")); // NOI18N
+        lblStatus.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 5);
         add(lblStatus, gridBagConstraints);
 
@@ -273,14 +318,19 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
          */
         private void handleProgress(final ProgressEvent event) {
             if (ProgressEvent.State.STARTED.equals(event.getState())) {
+                btnCancel.setEnabled(false);
+                jpbStatus.setMaximum(1);
+                jpbStatus.setValue(1);
+                jpbStatus.setIndeterminate(false);
+                jpbStatus.setStringPainted(true);
                 lblStatus.setText(NbBundle.getMessage(
                         DefaultModelManagerUI.class,
-                        "DefaultModelManagerUI.lblStatus.text.started"));  // NOI18N
+                        "DefaultModelManagerUI.lblStatus.text.started"));      // NOI18N
                 jpbStatus.setIndeterminate(true);
             } else if (ProgressEvent.State.PROGRESSING.equals(event.getState())) {
                 lblStatus.setText(NbBundle.getMessage(
                         DefaultModelManagerUI.class,
-                        "DefaultModelManagerUI.lblStatus.text.running"));  // NOI18N
+                        "DefaultModelManagerUI.lblStatus.text.running"));      // NOI18N
                 if (event.getMaxSteps() < 1) {
                     jpbStatus.setIndeterminate(true);
                 } else {
@@ -290,10 +340,52 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
                     jpbStatus.setStringPainted(true);
                 }
             } else if (ProgressEvent.State.FINISHED.equals(event.getState())) {
+                jpbStatus.setMaximum(0);
+                jpbStatus.setValue(0);
+                jpbStatus.setIndeterminate(true);
+                jpbStatus.setStringPainted(false);
                 lblStatus.setText(NbBundle.getMessage(
                         DefaultModelManagerUI.class,
-                        "DefaultModelManagerUI.lblStatus.text.finished")); // NOI18N
+                        "DefaultModelManagerUI.lblStatus.text.finished"));     // NOI18N
                 model.removeProgressListener(this);
+            } else if (ProgressEvent.State.BROKEN.equals(event.getState())) {
+                btnRun.setEnabled(false);
+                btnCancel.setEnabled(false);
+                jpbStatus.setMaximum(1);
+                jpbStatus.setValue(0);
+                jpbStatus.setIndeterminate(false);
+                jpbStatus.setStringPainted(true);
+                final RunInfo runInfo = model.getRunInfo();
+                if ((runInfo != null) && (runInfo.getBrokenMessage() != null)
+                            && !runInfo.getBrokenMessage().isEmpty()) {
+                    lblStatus.setText("<html><p>"
+                                + runInfo.getBrokenMessage() + "</p></html>");
+                } else {
+                    lblStatus.setText(NbBundle.getMessage(
+                            DefaultModelManagerUI.class,
+                            "DefaultModelManagerUI.lblStatus.text.broken"));   // NOI18N
+                }
+                model.removeProgressListener(this);
+            } else if (ProgressEvent.State.CANCELED.equals(event.getState())) {
+                btnRun.setEnabled(false);
+                btnCancel.setEnabled(false);
+                jpbStatus.setMaximum(1);
+                jpbStatus.setValue(0);
+                jpbStatus.setIndeterminate(false);
+                jpbStatus.setStringPainted(true);
+                final RunInfo runInfo = model.getRunInfo();
+                if ((runInfo != null) && (runInfo.getCanceledMessage() != null)
+                            && !runInfo.getCanceledMessage().isEmpty()) {
+                    lblStatus.setText("<html><p>"
+                                + runInfo.getCanceledMessage() + "</p></html>");
+                } else {
+                    lblStatus.setText(NbBundle.getMessage(
+                            DefaultModelManagerUI.class,
+                            "DefaultModelManagerUI.lblStatus.text.canceled")); // NOI18N
+                }
+                model.removeProgressListener(this);
+            } else {
+                LOG.warn("unknown progress state: " + event.getState());
             }
         }
     }

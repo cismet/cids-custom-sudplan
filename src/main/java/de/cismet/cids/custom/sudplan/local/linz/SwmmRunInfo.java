@@ -7,13 +7,15 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import de.cismet.cids.custom.sudplan.DefaultRunInfo;
+
 /**
  * DOCUMENT ME!
  *
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public class SwmmRunInfo {
+public class SwmmRunInfo extends DefaultRunInfo {
 
     //~ Instance fields --------------------------------------------------------
 

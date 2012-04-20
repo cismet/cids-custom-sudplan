@@ -16,6 +16,7 @@ import java.io.StringWriter;
 
 import de.cismet.cids.custom.sudplan.AbstractAsyncModelManager;
 import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
+import de.cismet.cids.custom.sudplan.RunInfo;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.geocpmrest.GeoCPMRestClient;
 import de.cismet.cids.custom.sudplan.geocpmrest.io.GeoCPMInput;
@@ -139,5 +140,10 @@ public final class RunoffModelManager extends AbstractAsyncModelManager {
 
             return null;
         }
+    }
+
+    @Override
+    public GeoCPMRunInfo getRunInfo() {
+        return SMSUtils.getRunInfo(cidsBean, GeoCPMRunInfo.class);
     }
 }
