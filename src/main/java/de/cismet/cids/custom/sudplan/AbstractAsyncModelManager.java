@@ -52,7 +52,9 @@ public abstract class AbstractAsyncModelManager extends AbstractModelManager imp
         if (event == null) {
             throw new IllegalArgumentException("progressevent must not be null"); // NOI18N
         }
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("progress: " + event);
+        }
         if (event.getSource() instanceof AbstractModelRunWatchable) {
             final AbstractModelRunWatchable amrw = (AbstractModelRunWatchable)event.getSource();
 
@@ -64,9 +66,13 @@ public abstract class AbstractAsyncModelManager extends AbstractModelManager imp
                     fireFinised();
                 }
             } else if (ProgressEvent.State.BROKEN.equals(event.getState())) {
-                fireBroken();
+                if (event.getMessage() != null) {
+                    fireBroken(event.getMessage());
+                } else {
+                    fireBroken();
+                }
             } else if (ProgressEvent.State.PROGRESSING.equals(event.getState())) {
-                fireProgressed(0, 0);
+                fireProgressed(event.getStep(), event.getMaxSteps(), event.getMessage());
             }
         } else {
             LOG.warn("cannot process event, event source not of type AbstractModelRunWatch: " + event); // NOI18N
@@ -187,7 +193,6 @@ public abstract class AbstractAsyncModelManager extends AbstractModelManager imp
                             final AbstractAsyncModelManager aamm = (AbstractAsyncModelManager)m;
                             aamm.setCidsBean(runBean);
                             aamm.watchable = amrw;
-
                             if (Download.State.COMPLETED_WITH_ERROR.equals(arg)) {
                                 aamm.fireBroken();
                             } else {

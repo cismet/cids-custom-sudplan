@@ -52,7 +52,6 @@ public abstract class AbstractModelManager implements ModelManager {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(AbstractModelManager.class);
-
     // NOTE: maybe we need a per-cidsbean dispatch thread, but this should do
     private static final ExecutorService progressDispatcher;
 
@@ -64,9 +63,7 @@ public abstract class AbstractModelManager implements ModelManager {
     //~ Instance fields --------------------------------------------------------
 
     protected transient CidsBean cidsBean;
-
     private final transient ProgressSupport progressSupport;
-
     private transient volatile JComponent ui;
 
     //~ Constructors -----------------------------------------------------------
@@ -169,6 +166,9 @@ public abstract class AbstractModelManager implements ModelManager {
 
     @Override
     public void removeProgressListener(final ProgressListener progressL) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("removeProgressListener: " + progressL);
+        }
         progressSupport.removeProgressListener(progressL);
     }
 
@@ -187,6 +187,7 @@ public abstract class AbstractModelManager implements ModelManager {
                     }
 
                     if (isStarted()) {
+                        LOG.warn("cannot start when already started"); // NOI18N
                         return;
                     }
 
@@ -213,12 +214,23 @@ public abstract class AbstractModelManager implements ModelManager {
     /**
      * DOCUMENT ME!
      *
+     * @param  step      percent DOCUMENT ME!
+     * @param  maxSteps  DOCUMENT ME!
+     */
+    protected void fireProgressed(final int step, final int maxSteps) {
+        this.fireProgressed(step, maxSteps, null);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   step      percent DOCUMENT ME!
      * @param   maxSteps  DOCUMENT ME!
+     * @param   message   DOCUMENT ME!
      *
      * @throws  IllegalStateException  DOCUMENT ME!
      */
-    protected void fireProgressed(final int step, final int maxSteps) {
+    protected void fireProgressed(final int step, final int maxSteps, final String message) {
         final Runnable fireProgressed = new Runnable() {
 
                 @Override
@@ -228,10 +240,11 @@ public abstract class AbstractModelManager implements ModelManager {
                     }
 
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("fireProgressed: " + AbstractModelManager.this); // NOI18N
+                        LOG.debug("fireProgressed: " + message); // NOI18N
                     }
 
                     if (isFinished()) {
+                        LOG.warn("cannot progress when already finished"); // NOI18N
                         return;
                     }
 
@@ -239,7 +252,8 @@ public abstract class AbstractModelManager implements ModelManager {
                             AbstractModelManager.this,
                             ProgressEvent.State.PROGRESSING,
                             step,
-                            maxSteps));
+                            maxSteps,
+                            message));
                 }
             };
 
@@ -249,21 +263,15 @@ public abstract class AbstractModelManager implements ModelManager {
     /**
      * DOCUMENT ME!
      *
-     * @param   message  DOCUMENT ME!
-     *
-     * @throws  IllegalStateException  DOCUMENT ME!
+     * @param  message  DOCUMENT ME!
      */
     protected void fireBroken(final String message) {
         final Runnable fireBroken = new Runnable() {
 
                 @Override
                 public void run() {
-                    if (!isStarted()) {
-                        throw new IllegalStateException("cannot be broken when not started yet"); // NOI18N
-                    }
-
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("fireBroken: " + AbstractModelManager.this); // NOI18N
+                        LOG.debug("fireBroken: " + message); // NOI18N
                     }
 
                     if (isFinished()) {
@@ -290,26 +298,50 @@ public abstract class AbstractModelManager implements ModelManager {
                     RunInfo runInfo = getRunInfo();
                     if (runInfo == null) {
                         runInfo = new DefaultRunInfo(true, message);
-                        try {
-                            final StringWriter writer = new StringWriter();
-                            final ObjectMapper mapper = new ObjectMapper();
-                            mapper.writeValue(writer, runInfo);
-                            cidsBean.setProperty("runinfo", writer.toString());
-                        } catch (Throwable t) {
-                            LOG.error("could not set run info: " + t.getMessage(), t);
-                        }
+                    } else {
+                        runInfo.setBroken(true);
+                        runInfo.setBrokenMessage(message);
                     }
 
-                    runInfo.setBroken(true);
-                    runInfo.setBrokenMessage(message);
-
-                    progressSupport.fireEvent(new ProgressEvent(AbstractModelManager.this, ProgressEvent.State.BROKEN));
+                    try {
+                        final StringWriter writer = new StringWriter();
+                        final ObjectMapper mapper = new ObjectMapper();
+                        mapper.writeValue(writer, runInfo);
+                        cidsBean.setProperty("runinfo", writer.toString());
+                    } catch (Throwable t) {
+                        LOG.error("could not set run info: " + t.getMessage(), t);
+                    }
 
                     try {
                         cidsBean = cidsBean.persist();
                     } catch (Throwable t) {
                         LOG.error("could not persists cids bean: " + t.getMessage(), t);
                     }
+
+                    final ComponentRegistry reg = ComponentRegistry.getRegistry();
+                    final CidsBeanRenderer currentRenderer = reg.getDescriptionPane().currentRenderer();
+                    if (currentRenderer == null) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("current renderer is null, won't reflect bean changes to ui"); // NOI18N
+                        }
+                    } else {
+                        final CidsBean currentBean = currentRenderer.getCidsBean();
+                        if ((cidsBean.getMetaObject().getClassID() == currentBean.getMetaObject().getClassID())
+                                    && (cidsBean.getMetaObject().getID() == currentBean.getMetaObject().getID())) {
+                            EventQueue.invokeLater(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        currentRenderer.setCidsBean(cidsBean);
+                                    }
+                                });
+                        }
+                    }
+
+                    progressSupport.fireEvent(new ProgressEvent(
+                            AbstractModelManager.this,
+                            ProgressEvent.State.BROKEN,
+                            message));
                 }
             };
 

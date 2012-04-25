@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,6 +43,7 @@ import java.util.concurrent.Future;
 
 import de.cismet.cids.custom.sudplan.*;
 import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
+import de.cismet.cids.custom.sudplan.rainfall.RainfallDownscalingModelManager;
 import de.cismet.cids.custom.sudplan.rainfall.RainfallRunInfo;
 import de.cismet.cids.custom.sudplan.server.trigger.SwmmResultGeoserverUpdater;
 
@@ -65,6 +67,7 @@ public class EtaModelManager extends AbstractAsyncModelManager {
     public static final String TABLENAME_CSOS = SwmmPlusEtaWizardAction.TABLENAME_CSOS;
     public static final String TABLENAME_LINZ_SWMM_RESULT = "linz_swmm_result";
     public static final String TABLENAME_LINZ_ETA_RESULT = "linz_eta_result";
+    public static final int MAX_STEPS = 5;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -304,6 +307,16 @@ public class EtaModelManager extends AbstractAsyncModelManager {
 
     @Override
     protected void prepareExecution() throws IOException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("executing SWMM+ETA"); // NOI18N
+        }
+
+        fireProgressed(
+            0,
+            MAX_STEPS,
+            NbBundle.getMessage(EtaModelManager.class,
+                "EtaModelManager.prepareExecution().progress.prepare"));
+
         final EtaInput etaInput = (EtaInput)this.getUR();
 
         if (etaInput.getSwmmRun() == -1) {
@@ -330,6 +343,13 @@ public class EtaModelManager extends AbstractAsyncModelManager {
         TimeSeries rainTS;
         if (config.getProtocol().equals(TimeseriesRetrieverConfig.PROTOCOL_TSTB)) {
             LOG.info("downloading timeseries from SOS: " + config);
+
+            fireProgressed(
+                1,
+                MAX_STEPS,
+                NbBundle.getMessage(EtaModelManager.class,
+                    "EtaModelManager.prepareExecution().progress.download.sos"));
+
             final SudplanSOSHelper sensorSOSHelper = new SudplanSOSHelper(config.getLocation().toString());
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Download timeseries data for offering '" + config.getOffering()
@@ -342,6 +362,14 @@ public class EtaModelManager extends AbstractAsyncModelManager {
             }
         } else if (config.getProtocol().equals(TimeseriesRetrieverConfig.PROTOCOL_DAV)) {
             LOG.info("downloading timeseries from WEBDAV: " + config);
+
+            fireProgressed(
+                1,
+                MAX_STEPS,
+                NbBundle.getMessage(
+                    EtaModelManager.class,
+                    "EtaModelManager.prepareExecution().progress.download.webdav"));
+
             try {
                 final Future<TimeSeries> rainTsFuture = TimeseriesRetriever.getInstance().retrieve(config);
                 rainTS = rainTsFuture.get();
@@ -365,6 +393,13 @@ public class EtaModelManager extends AbstractAsyncModelManager {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Upload rain timeseries as model input to " + modelSosEndpoint);
         }
+
+        fireProgressed(
+            2,
+            MAX_STEPS,
+            NbBundle.getMessage(EtaModelManager.class,
+                "EtaModelManager.prepareExecution().progress.upload"));
+
         final SudplanSOSHelper modelSOSHelper = new SudplanSOSHelper(modelSosEndpoint);
         // Creating a new timeseries datapoint on the SOS-T is a 2 step process:
         // 1. createDatapoint (needs SensorML)
@@ -456,6 +491,13 @@ public class EtaModelManager extends AbstractAsyncModelManager {
             LOG.debug("connecting to model SPS " + swmmRunInfo.getSpsUrl() + " and executing model "
                         + swmmRunInfo.getModelName());
         }
+
+        fireProgressed(
+            3,
+            MAX_STEPS,
+            NbBundle.getMessage(EtaModelManager.class,
+                "EtaModelManager.prepareExecution().progress.dispatch"));
+
         final SudplanSPSHelper modelSPSHelper = new SudplanSPSHelper(swmmRunInfo.getSpsUrl());
         final DateFormat isoDf = new ISO8601DateFormat();
         this.spsTask = modelSPSHelper.createTask(swmmRunInfo.getModelName());
@@ -484,6 +526,12 @@ public class EtaModelManager extends AbstractAsyncModelManager {
             LOG.debug("model run started with task id" + swmmRunInfo.getRunId());
         }
 
+        fireProgressed(
+            4,
+            MAX_STEPS,
+            NbBundle.getMessage(EtaModelManager.class,
+                "EtaModelManager.prepareExecution().progress.save"));
+
         try {
             final ObjectMapper mapper = new ObjectMapper();
             StringWriter writer = new StringWriter();
@@ -510,6 +558,15 @@ public class EtaModelManager extends AbstractAsyncModelManager {
             this.fireBroken(message);
             throw new IOException(message, ex);
         }
+
+        // now set to indeterminate
+        fireProgressed(
+            -1,
+            -1,
+            NbBundle.getMessage(
+                EtaModelManager.class,
+                "EtaModelManager.prepareExecution().progress.running",
+                etaRunInfo.getRunId()));
     }
 
     @Override

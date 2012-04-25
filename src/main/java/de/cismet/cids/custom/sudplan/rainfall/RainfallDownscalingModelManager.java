@@ -65,6 +65,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
     public static final String RF_SPS_URL = "http://sudplan.ait.ac.at:8085/";           // NOI18N
     public static final String RF_TS_DS_PROCEDURE = "Rain_Timeseries_Downscaling";      // NOI18N
     public static final String RF_IDF_DS_PROCEDURE = "IDF_Rain_Timeseries_Downscaling"; // NOI18N
+    public static final int MAX_STEPS = 5;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -459,11 +460,22 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
             LOG.debug("executing rainfall downscaling"); // NOI18N
         }
 
-        fireProgressed(-1, -1);
+        fireProgressed(
+            0,
+            MAX_STEPS,
+            NbBundle.getMessage(
+                RainfallDownscalingModelManager.class,
+                "RainfallDownscalingModelManager.prepareExecution().progress.prepare"));
 
         final RainfallDownscalingInput input = inputFromRun(cidsBean);
         final Map.Entry<DataHandler, Properties> spsInput;
 
+        fireProgressed(
+            1,
+            MAX_STEPS,
+            NbBundle.getMessage(
+                RainfallDownscalingModelManager.class,
+                "RainfallDownscalingModelManager.prepareExecution().progress.upload"));
         // upload is only needed in case of timeseries downscaling
         if (SMSUtils.TABLENAME_TIMESERIES.equals(input.getRainfallObjectTableName())) {
             spsInput = uploadTimeseries();
@@ -471,8 +483,20 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
             spsInput = null;
         }
 
+        fireProgressed(
+            2,
+            MAX_STEPS,
+            NbBundle.getMessage(
+                RainfallDownscalingModelManager.class,
+                "RainfallDownscalingModelManager.prepareExecution().progress.dispatch"));
         final String runId = dispatchDownscaling(spsInput);
 
+        fireProgressed(
+            3,
+            MAX_STEPS,
+            NbBundle.getMessage(
+                RainfallDownscalingModelManager.class,
+                "RainfallDownscalingModelManager.prepareExecution().progress.save"));
         final RainfallRunInfo runInfo = new RainfallRunInfo(runId, RF_SPS_LOOKUP, RF_SPS_URL);
         try {
             final ObjectMapper mapper = new ObjectMapper();
@@ -488,6 +512,14 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
             this.fireBroken(message);
             throw new IOException(message, ex);
         }
+        // now set to indeterminate
+        fireProgressed(
+            -1,
+            -1,
+            NbBundle.getMessage(
+                RainfallDownscalingModelManager.class,
+                "RainfallDownscalingModelManager.prepareExecution().progress.running",
+                runInfo.getTaskId()));
     }
 
     @Override
@@ -518,7 +550,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
                     return new RainfallDSWatchable(cidsBean, runInfo.getTaskId(), runningTask);
                 }
             } catch (final Exception ex) {
-                final String message = "cannot read runInfo from run: " + cidsBean; // NOI18N
+                final String message = "Cannot read runInfo from run: " + cidsBean; // NOI18N
                 LOG.error(message, ex);
                 this.fireBroken(message);
                 throw new IOException(message, ex);

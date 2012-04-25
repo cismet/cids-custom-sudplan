@@ -37,6 +37,8 @@ public final class ProgressEvent extends EventObject {
     private final transient int step;
     private final transient int maxSteps;
 
+    private final transient String message;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -54,15 +56,44 @@ public final class ProgressEvent extends EventObject {
      *
      * @param  eventObject  DOCUMENT ME!
      * @param  state        DOCUMENT ME!
+     * @param  message      DOCUMENT ME!
+     */
+    public ProgressEvent(final Object eventObject, final State state, final String message) {
+        this(eventObject, state, 0, 0, message);
+    }
+
+    /**
+     * Creates a new ProgressEvent object.
+     *
+     * @param  eventObject  DOCUMENT ME!
+     * @param  state        DOCUMENT ME!
      * @param  step         the current step or 0 if it is indeterminate
      * @param  maxSteps     the current maxsteps of 0 if it is indeterminate
      */
     public ProgressEvent(final Object eventObject, final State state, final int step, final int maxSteps) {
+        this(eventObject, state, step, maxSteps, null);
+    }
+
+    /**
+     * Creates a new ProgressEvent object.
+     *
+     * @param  eventObject  DOCUMENT ME!
+     * @param  state        DOCUMENT ME!
+     * @param  step         the current step or 0 if it is indeterminate
+     * @param  maxSteps     the current maxsteps of 0 if it is indeterminate
+     * @param  message      DOCUMENT ME!
+     */
+    public ProgressEvent(final Object eventObject,
+            final State state,
+            final int step,
+            final int maxSteps,
+            final String message) {
         super(eventObject);
 
         this.state = state;
         this.step = step;
         this.maxSteps = maxSteps;
+        this.message = message;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -119,5 +150,19 @@ public final class ProgressEvent extends EventObject {
      */
     public int getMaxSteps() {
         return maxSteps;
+    }
+
+    /**
+     * Get the value of message.
+     *
+     * @return  the value of message
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String toString() {
+        return this.getState() + ": " + this.getMessage();
     }
 }

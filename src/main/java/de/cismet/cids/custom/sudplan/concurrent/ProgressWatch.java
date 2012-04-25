@@ -168,7 +168,8 @@ public final class ProgressWatch {
                         watchable,
                         status.getState(),
                         status.getStep(),
-                        status.getMaxSteps());
+                        status.getMaxSteps(),
+                        status.getMessage());
 
                 watchable.getStatusCallback().progress(progress);
 
@@ -192,7 +193,7 @@ public final class ProgressWatch {
             } catch (final IOException e) {
                 retryCount++;
                 if (retryCount > MAX_RETRIES) {
-                    LOG.warn("error in status poll: " + watchable, e); // NOI18N
+                    LOG.error("error in status poll: " + watchable, e); // NOI18N
 
                     final ProgressEvent progress = new ProgressEvent(watchable, State.BROKEN);
 

@@ -130,7 +130,11 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                     if ((error != null) && !error.isEmpty()) {
                         LOG.error("errors found for rf ds run: " + runId + " | errors: " + Arrays.toString(errors)); // NOI18N
 
-                        return new ProgressEvent(this, ProgressEvent.State.BROKEN);
+                        return new ProgressEvent(
+                                this,
+                                ProgressEvent.State.BROKEN,
+                                "errors found for rf ds run: "
+                                        + runId);
                     }
                 }
             }
@@ -143,12 +147,20 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                 final String state = (String)value;
 
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("state of task: " + runId + " = " + state); // NOI18N
+                    LOG.debug("state of ds task: " + runId + " = " + state); // NOI18N
                 }
 
                 // FIXME: mapping not started yet to running
                 if (SPS_TASK_STATE_NOT_STARTED_YET.equals(state) || SPS_TASK_STATE_RUNNING.equals(state)) {
-                    return new ProgressEvent(this, ProgressEvent.State.PROGRESSING);
+                    return new ProgressEvent(
+                            this,
+                            ProgressEvent.State.PROGRESSING,
+                            -1,
+                            -1,
+                            "state of ds task: "
+                                    + runId
+                                    + " = "
+                                    + state);
                 } else if (SPS_TASK_STATE_FINISHED.equals(state)) {
                     return new ProgressEvent(this, ProgressEvent.State.FINISHED);
                 } else {
