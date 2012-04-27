@@ -96,7 +96,7 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
                         "DefaultModelManagerUI.lblStatus.text.finished")); // NOI18N
                 btnCancel.setEnabled(false);
                 jpbStatus.setMaximum(1);
-                jpbStatus.setValue(0);
+                jpbStatus.setValue(1);
                 jpbStatus.setIndeterminate(false);
                 jpbStatus.setStringPainted(true);
             } else {
