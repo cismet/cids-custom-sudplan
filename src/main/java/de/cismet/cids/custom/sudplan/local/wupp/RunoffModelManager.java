@@ -14,12 +14,13 @@ import org.codehaus.jackson.map.ObjectMapper;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import java.util.ArrayList;
+
 import de.cismet.cids.custom.sudplan.AbstractAsyncModelManager;
 import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
-import de.cismet.cids.custom.sudplan.RunInfo;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.geocpmrest.GeoCPMRestClient;
-import de.cismet.cids.custom.sudplan.geocpmrest.io.GeoCPMInput;
+import de.cismet.cids.custom.sudplan.geocpmrest.io.*;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -35,8 +36,10 @@ public final class RunoffModelManager extends AbstractAsyncModelManager {
 
     private static final transient Logger LOG = Logger.getLogger(RunoffModelManager.class);
 
-//    public static final String CLIENT_URL = "http://192.168.100.12:9986/GeoCPM"; // NOI18N
-    public static final String CLIENT_URL = "http://localhost:9988/GeoCPM"; // NOI18N
+    public static final String CLIENT_URL = "http://192.168.100.12:9988/GeoCPM.json"; // NOI18N public static final
+                                                                                      // String CLIENT_URL =
+                                                                                      // "http://localhost:9988/GeoCPM.json";
+                                                                                      //// NOI18N
 
     //~ Methods ----------------------------------------------------------------
 
@@ -48,17 +51,33 @@ public final class RunoffModelManager extends AbstractAsyncModelManager {
 
         final RunoffInput io = (RunoffInput)getUR();
         final CidsBean geocpmBean = io.fetchGeocpmInput();
-        final CidsBean rainevent = io.fetchRainevent();
-        final GeoCPMInput input = new GeoCPMInput();
+        final CidsBean rainEventBean = io.fetchRainevent();
 
-        input.configName = (String)geocpmBean.getProperty("filename"); // NOI18N
-        input.rainevent = (String)rainevent.getProperty("data");       // NOI18N
+        // --- prepare rain event
+        final Integer interval = (Integer)rainEventBean.getProperty("interval");
+        final String rainEventData = (String)rainEventBean.getProperty("data");
 
-        final GeoCPMRestClient client = new GeoCPMRestClient(CLIENT_URL);
-        final String runId = null; // client.runGeoCPM(input);
+        final String[] valueFragments = rainEventData.split(":");
+        final ArrayList<Double> values = new ArrayList<Double>(valueFragments.length);
+        for (int i = 0; i < valueFragments.length; i++) {
+            values.add(Double.valueOf(valueFragments[i]));
+        }
 
-        final GeoCPMRunInfo runinfo = new GeoCPMRunInfo(runId, CLIENT_URL);
+        final Rainevent rainEvent = new Rainevent(interval, values);
+
+        // --- get GeoCPM config id
+        final int geoCPMConfigId = (Integer)geocpmBean.getProperty("id");
+
+        final SimulationConfig input = new SimulationConfig(geoCPMConfigId, rainEvent, true);
+
+        String runId = null;
+
         try {
+            final GeoCPMRestClient client = new GeoCPMRestClient(CLIENT_URL);
+            final ExecutionStatus execStatus = client.startSimulation(input);
+            runId = execStatus.getTaskId();
+
+            final GeoCPMRunInfo runinfo = new GeoCPMRunInfo(runId, CLIENT_URL);
             final ObjectMapper mapper = new ObjectMapper();
             final StringWriter writer = new StringWriter();
 

@@ -37,7 +37,7 @@ public final class ImportGeoCPMWizardPanelCFGSelect implements WizardDescriptor.
     private static final transient Logger LOG = Logger.getLogger(ImportGeoCPMWizardPanelCFGSelect.class);
 
     public static final String PROP_GEOCPM_FILE = "__prop_geocpm_file__"; // NOI18N
-    public static final String PROP_DYNA_FILE = "__prop_dyna_file__";     // NOI18N
+    public static final String PROP_DYNA_FOLDER = "__prop_dyna_file__";   // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -98,7 +98,7 @@ public final class ImportGeoCPMWizardPanelCFGSelect implements WizardDescriptor.
         wizard = (WizardDescriptor)settings;
 
         geocpmFile = (File)wizard.getProperty(PROP_GEOCPM_FILE);
-        dynaFile = (File)wizard.getProperty(PROP_DYNA_FILE);
+        dynaFile = (File)wizard.getProperty(PROP_DYNA_FOLDER);
 
         component.init();
 
@@ -110,7 +110,7 @@ public final class ImportGeoCPMWizardPanelCFGSelect implements WizardDescriptor.
         wizard = (WizardDescriptor)settings;
 
         wizard.putProperty(PROP_GEOCPM_FILE, geocpmFile);
-        wizard.putProperty(PROP_DYNA_FILE, dynaFile);
+        wizard.putProperty(PROP_DYNA_FOLDER, dynaFile);
     }
 
     @Override

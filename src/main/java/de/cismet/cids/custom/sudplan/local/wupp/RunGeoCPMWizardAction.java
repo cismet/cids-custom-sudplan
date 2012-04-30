@@ -153,69 +153,10 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
 
         final boolean cancelled = wizard.getValue() != WizardDescriptor.FINISH_OPTION;
 
-        // FIXME: for validation
-        if (!cancelled) {
-            final MetaClass mcI = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", SMSUtils.TABLENAME_MODELINPUT);
-            final MetaClass mcO = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", SMSUtils.TABLENAME_MODELOUTPUT);
-            final MetaClass mcR = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", SMSUtils.TABLENAME_MODELRUN);
-
-            final Thread t = new Thread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            EventQueue.invokeLater(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        ComponentRegistry.getRegistry()
-                                                .getDescriptionPane()
-                                                .gotoMetaObject(mcI, 387, ""); // NOI18N
-                                    }
-                                });
-
-                            try {
-                                Thread.currentThread().sleep(1300);
-                            } catch (final InterruptedException ex) {
-                                // skip
-                            }
-
-                            EventQueue.invokeLater(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        ComponentRegistry.getRegistry()
-                                                .getDescriptionPane()
-                                                .gotoMetaObject(mcR, 387, ""); // NOI18N
-                                    }
-                                });
-
-                            try {
-                                Thread.currentThread().sleep(1800);
-                            } catch (final InterruptedException ex) {
-                                // skip
-                            }
-
-                            EventQueue.invokeLater(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        ComponentRegistry.getRegistry()
-                                                .getDescriptionPane()
-                                                .gotoMetaObject(mcO, 238, ""); // NOI18N
-                                    }
-                                });
-                        }
-                    });
-            t.start();
-
-            return;
-        } else if (true) {
-            return;
-        }
-
         if (!cancelled) {
             try {
                 final CidsBean modelInput = createModelInput(wizard);
+
                 CidsBean modelRun = createModelRun(wizard, modelInput);
 
                 modelRun = modelRun.persist();

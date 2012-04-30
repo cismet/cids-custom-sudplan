@@ -17,7 +17,7 @@ import de.cismet.cids.custom.sudplan.ProgressListener;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.geocpmrest.GeoCPMRestClient;
 import de.cismet.cids.custom.sudplan.geocpmrest.io.ExecutionStatus;
-import de.cismet.cids.custom.sudplan.geocpmrest.io.GeoCPMOutput;
+import de.cismet.cids.custom.sudplan.geocpmrest.io.SimulationResult;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -41,7 +41,7 @@ public final class GeoCPMWatchable extends AbstractModelRunWatchable {
     private final transient String runId;
     private final transient ProgressListener progL;
 
-    private transient GeoCPMOutput output;
+    private transient SimulationResult output;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -150,7 +150,7 @@ public final class GeoCPMWatchable extends AbstractModelRunWatchable {
      *
      * @return  DOCUMENT ME!
      */
-    public GeoCPMOutput getOutput() {
+    public SimulationResult getOutput() {
         return output;
     }
 
@@ -172,8 +172,7 @@ public final class GeoCPMWatchable extends AbstractModelRunWatchable {
                     setStatus(State.RUNNING);
 
                     try {
-                        throw new UnsupportedOperationException("implement"); // NOI18N
-//                        output = client.getResults(runId);
+                        output = client.getResults(runId);
                     } catch (final Exception e) {
                         LOG.error("could not download run results", e); // NOI18N
 

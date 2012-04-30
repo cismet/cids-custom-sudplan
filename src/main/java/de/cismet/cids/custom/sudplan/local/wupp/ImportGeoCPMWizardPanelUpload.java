@@ -24,6 +24,8 @@ import java.awt.EventQueue;
 
 import java.io.File;
 
+import java.text.MessageFormat;
+
 import java.util.concurrent.Future;
 
 import javax.swing.event.ChangeListener;
@@ -37,6 +39,8 @@ import de.cismet.cids.custom.sudplan.geocpmrest.io.ImportConfig;
 import de.cismet.cids.custom.sudplan.geocpmrest.io.ImportStatus;
 
 import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 /**
  * DOCUMENT ME!
@@ -55,6 +59,8 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
     private static final String BIN_GEOCMPFD = "GEOCPMF.D"; // NOI18N
     private static final String BIN_GEOCMPSD = "GEOCPMS.D"; // NOI18N
     private static final String BIN_GEOCMPID = "GEOCPMI.D"; // NOI18N
+    private static final String BIN_GEOCMPND = "GEOCPMN.D"; // NOI18N
+    private static final String DYNA_FILE = "DYNA.EIN";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -98,11 +104,11 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
             wizard = (WizardDescriptor)settings;
 
             final File geocpmFile = (File)wizard.getProperty(ImportGeoCPMWizardPanelCFGSelect.PROP_GEOCPM_FILE);
-            final File dynaFile = (File)wizard.getProperty(ImportGeoCPMWizardPanelCFGSelect.PROP_DYNA_FILE);
+            final File dynaFolder = (File)wizard.getProperty(ImportGeoCPMWizardPanelCFGSelect.PROP_DYNA_FOLDER);
             final CidsBean cfgBean = (CidsBean)wizard.getProperty(ImportGeoCPMWizardPanelMetadata.PROP_GEOCPM_BEAN);
 
             assert geocpmFile != null : "empty geocpm file";  // NOI18N
-            assert dynaFile != null : "empty dyna file";      // NOI18N
+            assert dynaFolder != null : "empty dyna folder";  // NOI18N
             assert cfgBean != null : "empty geocpm cfg bean"; // NOI18N
 
             setStatusEDT(
@@ -134,8 +140,8 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
                                 // FIXME: for the validation
                                 Thread.currentThread().sleep(1333);
                                 // FIXME: read geocpm file final
-                                final String geocpmGzip = GeoCPMUtils.readContentGzip(geocpmFile);
-
+// final String geocpmGzip = GeoCPMUtils.readContentGzip(geocpmFile);
+                                final String geocpmContent = GeoCPMUtils.readContent(geocpmFile);
                                 if (Thread.currentThread().isInterrupted()) {
                                     setStatusEDT(
                                         false,
@@ -151,7 +157,22 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
                                         ImportGeoCPMWizardPanelUpload.class,
                                         "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.readingDyna")); // NOI18N
                                 // FIXME: read dyna files
-                                final String dynaGzip = GeoCPMUtils.readContentGzip(dynaFile);
+// final String dynaGzip = GeoCPMUtils.readContentGzip(dynaFile);
+
+                                final File dynaFile = new File(dynaFolder, DYNA_FILE);
+                                if (!dynaFile.exists()) {
+                                    LOG.error("DYNA file " + dynaFile + " does not exist");                                // NOI18N
+                                    setStatusEDT(
+                                        false,
+                                        MessageFormat.format(
+                                            NbBundle.getMessage(
+                                                ImportGeoCPMWizardPanelUpload.class,
+                                                "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.no_dyna_file"), // NOI18N
+                                            dynaFile));
+                                    return;
+                                }
+
+                                final String dynaContent = GeoCPMUtils.readContent(dynaFile);
 
                                 // FIXME: for the validation
                                 Thread.currentThread().sleep(1333);
@@ -179,15 +200,16 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
                                 final GeoCPMService client = new GeoCPMRestClient(RunoffModelManager.CLIENT_URL);
                                 final ImportConfig cfg = new ImportConfig();
 
-                                cfg.setGeocpmData(geocpmGzip);
-                                cfg.setDynaData(dynaGzip);
+                                cfg.setGeocpmData(geocpmContent);
+                                cfg.setDynaData(dynaContent);
 
                                 cfg.setGeocpmFolder(geocpmFile.getParentFile().getName());
-                                cfg.setDynaFolder(dynaFile.getParentFile().getName());
+                                cfg.setDynaFolder(dynaFolder.getName());
 
                                 File geocpmFDFile = null;
                                 File geocpmSDFile = null;
                                 File geocpmIDFile = null;
+                                File geocpmNDFile = null;
 
                                 final File[] dynaFiles = dynaFile.getParentFile().listFiles();
                                 String fileName;
@@ -200,6 +222,8 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
                                         geocpmSDFile = dynaFiles[i];
                                     } else if (BIN_GEOCMPID.equalsIgnoreCase(fileName)) {
                                         geocpmIDFile = dynaFiles[i];
+                                    } else if (BIN_GEOCMPND.equalsIgnoreCase(fileName)) {
+                                        geocpmNDFile = dynaFiles[i];
                                     }
                                 }
 
@@ -233,9 +257,20 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
                                     return;
                                 }
 
+                                if (geocpmNDFile == null) {
+                                    LOG.error("There is no GEOCPMN.D file in the dyna folder");                        // NOI18N
+                                    setStatusEDT(
+                                        false,
+                                        NbBundle.getMessage(
+                                            ImportGeoCPMWizardPanelUpload.class,
+                                            "ImportGeoCPMWizardPanelUpload.readSettings(Object).status.no_geocpmnd")); // NOI18N
+                                    return;
+                                }
+
                                 cfg.setGeocpmFData(GeoCPMUtils.readBytes(geocpmFDFile));
                                 cfg.setGeocpmSData(GeoCPMUtils.readBytes(geocpmSDFile));
                                 cfg.setGeocpmIData(GeoCPMUtils.readBytes(geocpmIDFile));
+                                cfg.setGeocpmNData(GeoCPMUtils.readBytes(geocpmNDFile));
 
                                 if (Thread.currentThread().isInterrupted()) {
                                     setStatusEDT(
@@ -262,16 +297,19 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
                                 // FIXME: for the validation
                                 Thread.currentThread().sleep(1333);
 
-                                // FIXME: hardcoded domain final MetaClass mc = ClassCacheMultiple.getMetaClass(
-                                // "SUDPLAN-WUPP", // NOI18N "geocpm_configuration"); // NOI18N final MetaObject mo =
-                                // SessionManager.getProxy() .getMetaObject(geocpmId, mc.getID(), "SUDPLAN-WUPP"); //
-                                // NOI18N final CidsBean importBean = mo.getBean(); importBean.setProperty("name",
-                                // cfgBean.getProperty("name")); // NOI18N importBean.setProperty("description",
-                                // cfgBean.getProperty("description")); // NOI18N
-                                // importBean.setProperty("investigation_area",
-                                // cfgBean.getProperty("investigation_area")); // NOI18N
-                                //
-                                // importBean.persist();
+//                                 FIXME: hardcoded domain
+                                final MetaClass mc = ClassCacheMultiple.getMetaClass(
+                                        "SUDPLAN-WUPP", // NOI18N
+                                        "geocpm_configuration"); // NOI18N
+
+                                final MetaObject mo = SessionManager.getProxy()
+                                            .getMetaObject(geocpmId, mc.getID(), "SUDPLAN-WUPP");                        // NOI18N
+                                final CidsBean importBean = mo.getBean();
+                                importBean.setProperty("name", cfgBean.getProperty("name"));                             // NOI18N
+                                importBean.setProperty("description", cfgBean.getProperty("description"));               // NOI18N
+                                importBean.setProperty("investigation_area", cfgBean.getProperty("investigation_area")); // NOI18N
+
+                                importBean.persist();
 
                                 setStatusEDT(
                                     false,

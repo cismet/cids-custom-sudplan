@@ -28,6 +28,9 @@ import java.awt.EventQueue;
 
 import java.io.IOException;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import javax.swing.JPanel;
 
 import de.cismet.cids.custom.sudplan.ManagerType;
@@ -198,6 +201,34 @@ public class RunoffOutputManagerUI extends JPanel {
     /**
      * DOCUMENT ME!
      *
+     * @param   sr  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  MalformedURLException  DOCUMENT ME!
+     */
+    private URL prepareGetMapRequest(final SimulationResult sr) throws MalformedURLException {
+        final String wmsGetMapLink = sr.getWmsGetCapabilitiesRequest()
+                    .replace(
+                        "request=GetCapabilities",
+                        "request=GetMap&"
+                        + "BBOX=<cismap:boundingBox>&"
+                        + "WIDTH=<cismap:width>&"
+                        + "HEIGHT=<cismap:height>&"
+                        + "SRS=<cismap:srs>&"
+                        + "FORMAT=image/png&TRANSPARENT="
+                        + "TRUE&"
+                        + "BGCOLOR=0xF0F0F0&"
+                        + "EXCEPTIONS=application/vnd.ogc.se_xml"
+                        + "&LAYERS="
+                        + sr.getLayerName());
+
+        return new URL(wmsGetMapLink);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  sr    DOCUMENT ME!
      * @param  bbox  DOCUMENT ME!
      */
@@ -211,7 +242,8 @@ public class RunoffOutputManagerUI extends JPanel {
             ortho.setName("Wuppertal Ortophoto"); // NOI18N
             mappingModel.addLayer(ortho);
 
-            final SimpleWMS rLayer = new SimpleWMS(new SimpleWmsGetMapUrl(sr.getWmsResults().toExternalForm()));
+            final SimpleWMS rLayer = new SimpleWMS(new SimpleWmsGetMapUrl(
+                        this.prepareGetMapRequest(sr).toExternalForm()));
             rLayer.setName(NbBundle.getMessage(
                     RunoffOutputManagerUI.class,
                     "RunoffOutputManagerUI.initMap(SimulationResult).resultLayer.name", // NOI18N
@@ -284,7 +316,7 @@ public class RunoffOutputManagerUI extends JPanel {
                         try {
                             if (evt.getClickCount() > 1) {
                                 final SimpleWMS layer = new SimpleWMS(
-                                        new SimpleWmsGetMapUrl(sr.getWmsResults().toExternalForm()));
+                                        new SimpleWmsGetMapUrl(prepareGetMapRequest(sr).toExternalForm()));
                                 layer.setName(
                                     NbBundle.getMessage(
                                         RunoffOutputManagerUI.class,
