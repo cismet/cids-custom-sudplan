@@ -31,7 +31,7 @@ public class SwmmReportParser {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final transient Logger LOG = Logger.getLogger(EtaComputationModel.class);
+    private static final transient Logger LOG = Logger.getLogger(SwmmReportParser.class);
     public static final int MAX_PROGRESS_STEPS = 5;
 
     //~ Instance fields --------------------------------------------------------
