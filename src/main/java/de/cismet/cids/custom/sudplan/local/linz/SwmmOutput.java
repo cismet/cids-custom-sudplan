@@ -53,6 +53,13 @@ public class SwmmOutput {
 
     private String swmmRunName;
 
+    private float r720_1;
+
+    private float VQr;
+
+    private float VQo;
+
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -195,6 +202,62 @@ public class SwmmOutput {
         }
 
         return -1;
+    }
+
+    /**
+     * Get the value of r720_1 Niederschlagshöhe in mm bei einer Regendauer von 12 Stunden (720 Minuten) mit einer
+     * Wiederkehrzeit von 1 Jahr.
+     *
+     * @return  the value of r720_1
+     */
+    public float getR720_1() {
+        return r720_1;
+    }
+
+    /**
+     * Set the value of r720_1.
+     *
+     * @param  r720_1  new value of r720_1
+     */
+    public void setR720_1(final float r720_1) {
+        this.r720_1 = r720_1;
+    }
+
+    /**
+     * Get the value of VQr Summe der Regenabflussmengen eines Jahres (m³/a) (Total volume of surface runoff).
+     *
+     * @return  the value of VQr
+     */
+    public float getVQr() {
+        return VQr;
+    }
+
+    /**
+     * Set the value of VQr.
+     *
+     * @param  VQr  new value of VQr
+     */
+    public void setVQr(final float VQr) {
+        this.VQr = VQr;
+    }
+
+    /**
+     * Get the value of VQo Summe der entlasteten Mischwassermengen eines Jahres (m³/a) (Total volume of overflow
+     * discharge).
+     *
+     * @return  the value of VQo
+     */
+    public float getVQo() {
+        return VQo;
+    }
+
+    /**
+     * Set the value of VQo.
+     *
+     * @param  VQo  new value of VQo
+     */
+    public void setVQo(final float VQo) {
+        this.VQo = VQo;
     }
 
     /**
