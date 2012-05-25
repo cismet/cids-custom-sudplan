@@ -377,7 +377,7 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
 
         int i = 0;
         for (final String node : nodes) {
-            final CsoOverflow csoOverflow = new CsoOverflow(node, volumes[i], frequencys[i], 0.0f);
+            final CsoOverflow csoOverflow = new CsoOverflow(node, volumes[i], frequencys[i], 0.0f, 0.0f);
             swmmResult.getCsoOverflows().put(node, csoOverflow);
             i++;
         }

@@ -59,7 +59,6 @@ public class SwmmOutput {
 
     private float VQo;
 
-
     //~ Constructors -----------------------------------------------------------
 
     /**
