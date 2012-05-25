@@ -135,67 +135,6 @@ public class SwmmReportParser {
 
         swmmOutput.setVQr(VQ_r);
 
-        // Beipsiel: Overflow Werte in den Cso Overflow beans setzen:
-        final String[] csoNames = new String[] {
-                "RDSRUE51",
-                "ULKS1",
-                "FUEAusl",
-                "RKL_Ablauf",
-                "AB_Plesching",
-                "HSU12_1S5b",
-                "HSU1_1RUE2",
-                "ALBSP1nolink",
-                "ALKSP1nolink",
-                "ANFSP1nolink",
-                "EDBSP1nolink",
-                "ENNSP1nolink",
-                "ENNSP2nolink",
-                "RUEB_Traunnolink",
-                "EWDSP1nolink",
-                "FKDSP1nolink",
-                "GLWSP1nolink",
-                "GRSSP2nolink",
-                "HEMSP1nolink",
-                "HHSSP1nolink",
-                "HOESP1nolink",
-                "HOESP2nolink",
-                "HZDSP1nolink",
-                "KRTSP1nolink",
-                "KSSSP1nolink",
-                "LTBSP1nolink",
-                "LTBSP2nolink",
-                "LTBSP3nolink",
-                "RUEB_Lunznolink",
-                "NNKSP1nolink",
-                "OFTSP1nolink",
-                "OTHSP1nolink",
-                "RUEB_Pleshnolink",
-                "PNASP1nolink",
-                "PUKSP1nolink",
-                "RDS20_1S48nolink",
-                "SMMSP1nolink",
-                "STFSP1nolink",
-                "STMSP1nolink",
-                "STYSP1nolink",
-                "RHHB_Wsee3nolink",
-                "HSMSEntlnolink",
-                "WLDSP1nolink",
-                "WLDSP2nolink",
-                "WLGSP1nolink"
-            };
-
-        /**int i = 0;
-        for (final String csoName : csoNames) {
-            final CsoOverflow csoOverflow = new CsoOverflow();
-            csoOverflow.setName(csoName);
-            csoOverflow.setSwmmProject(swmmOutput.getSwmmProject());
-            csoOverflow.setOverflowDuration((float)Math.random() * 100f);
-            csoOverflow.setOverflowFrequency((float)Math.random() * 10f);
-            csoOverflow.setOverflowVolume((float)Math.random() * 1000f);
-            swmmOutput.getCsoOverflows().put(csoName, csoOverflow);
-            i++;
-        }
-        */
         return swmmOutput;
     }
 
@@ -276,8 +215,8 @@ public class SwmmReportParser {
             http.setRequestMethod("GET");
             http.connect();
 
-            swmmReportFile = http.getInputStream();    // (InputStream)uc.getInputStream();//.getInputStream();//new
-                                                       // FileInputStream("c:\\linz_v1_2011-08-29_neu.rpt"); // TODO
+            swmmReportFile = http.getInputStream(); // (InputStream)uc.getInputStream();//.getInputStream();//new
+                                                    // FileInputStream("c:\\linz_v1_2011-08-29_neu.rpt"); // TODO
         } catch (Exception e) {
             e.printStackTrace();
         }

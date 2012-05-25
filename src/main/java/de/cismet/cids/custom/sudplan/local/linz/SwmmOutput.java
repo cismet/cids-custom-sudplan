@@ -45,19 +45,14 @@ public class SwmmOutput {
 
     //~ Instance fields --------------------------------------------------------
 
-    protected transient Map<String, CsoOverflow> csoOverflows = new HashMap<String, CsoOverflow>();
+    private transient Map<String, CsoOverflow> csoOverflows = new HashMap<String, CsoOverflow>();
     private transient Date created;
     private transient String user;
-
-    private int swmmRun;
-
-    private String swmmRunName;
-
-    private float r720_1;
-
-    private float VQr;
-
-    private float VQo;
+    private transient int swmmRun;
+    private transient String swmmRunName;
+    private transient float r720_1;
+    private transient float VQr;
+    private transient float VQo;
 
     //~ Constructors -----------------------------------------------------------
 

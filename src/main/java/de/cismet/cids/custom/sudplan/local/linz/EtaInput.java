@@ -27,12 +27,39 @@ public class EtaInput extends SwmmOutput {
 
     //~ Instance fields --------------------------------------------------------
 
-    protected transient List<EtaConfiguration> etaConfigurations = new ArrayList<EtaConfiguration>();
+    protected transient List<EtaConfiguration> etaConfigurations;
 
     protected String etaFile;
 
-    private int swmmRun;
-    private final transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    private final transient PropertyChangeSupport propertyChangeSupport;
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new EtaInput object.
+     */
+    public EtaInput() {
+        etaConfigurations = new ArrayList<EtaConfiguration>();
+        propertyChangeSupport = new PropertyChangeSupport(this);
+    }
+
+    /**
+     * Creates a new EtaInput object.
+     *
+     * @param  swmmOutput  DOCUMENT ME!
+     */
+    public EtaInput(final SwmmOutput swmmOutput) {
+        this();
+
+        this.setCreated(swmmOutput.getCreated());
+        this.setCsoOverflows(swmmOutput.getCsoOverflows());
+        this.setR720_1(swmmOutput.getR720_1());
+        this.setSwmmProject(swmmOutput.getSwmmRun());
+        this.setSwmmRunName(swmmOutput.getSwmmRunName());
+        this.setUser(swmmOutput.getUser());
+        this.setVQo(swmmOutput.getVQo());
+        this.setVQr(swmmOutput.getVQr());
+    }
 
     //~ Methods ----------------------------------------------------------------
 
@@ -57,7 +84,9 @@ public class EtaInput extends SwmmOutput {
     /**
      * Get the value of etaFile.
      *
-     * @return  the value of etaFile
+     * @return      the value of etaFile
+     *
+     * @deprecated  DOCUMENT ME!
      */
     public String getEtaFile() {
         return etaFile;
@@ -66,7 +95,9 @@ public class EtaInput extends SwmmOutput {
     /**
      * Set the value of etaFile.
      *
-     * @param  etaFile  new value of etaFile
+     * @param       etaFile  new value of etaFile
+     *
+     * @deprecated  DOCUMENT ME!
      */
     public void setEtaFile(final String etaFile) {
         this.etaFile = etaFile;
