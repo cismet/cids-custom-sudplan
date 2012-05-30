@@ -595,6 +595,7 @@ public final class SMSUtils {
      */
     public static void executeAndShowRun(final CidsBean modelRun) {
         final CidsBean modelInput = (CidsBean)modelRun.getProperty("modelinput");                            // NOI18N
+        ComponentRegistry.getRegistry().getDescriptionPane().clear();                                        // NOI18N
         ComponentRegistry.getRegistry().getDescriptionPane().gotoMetaObject(modelInput.getMetaObject(), ""); // NOI18N
         ComponentRegistry.getRegistry().getDescriptionPane().gotoMetaObject(modelRun.getMetaObject(), "");   // NOI18N
 
@@ -745,9 +746,9 @@ public final class SMSUtils {
         Coordinate ur = bbox.getCoordinate();
 
         for (final Coordinate candidate : bbox.getCoordinates()) {
-            if ((candidate.x < ll.x) && (candidate.y < ll.y)) {
+            if ((candidate.x <= ll.x) && (candidate.y <= ll.y)) {
                 ll = candidate;
-            } else if ((candidate.x > ur.x) && (candidate.y > ur.y)) {
+            } else if ((candidate.x >= ur.x) && (candidate.y >= ur.y)) {
                 ur = candidate;
             }
         }

@@ -7,19 +7,40 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.airquality;
 
+import Sirius.navigator.connection.SessionManager;
+
+import Sirius.server.middleware.types.MetaClass;
+import Sirius.server.middleware.types.MetaObject;
+
+import at.ac.ait.enviro.tsapi.handler.DataHandler;
+import at.ac.ait.enviro.tsapi.handler.Datapoint;
+import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
+
+import net.opengis.sps.v_1_0_0.InputDescriptor;
+
+import org.apache.log4j.Logger;
+
+import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
-import org.openide.util.ChangeSupport;
-import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.EventQueue;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Map;
-import java.util.Set;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 
-import javax.swing.event.ChangeListener;
+import de.cismet.cids.custom.sudplan.DataHandlerCache;
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
+import de.cismet.cids.custom.sudplan.dataImport.AbstractWizardPanel;
+import de.cismet.cids.custom.sudplan.server.search.EmissionDatabaseSearch;
+
+import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 /**
  * DOCUMENT ME!
@@ -27,31 +48,47 @@ import javax.swing.event.ChangeListener;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class AirqualityDownscalingWizardPanelDatabase implements WizardDescriptor.Panel {
+public final class AirqualityDownscalingWizardPanelDatabase extends AbstractWizardPanel {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(AirqualityDownscalingWizardPanelDatabase.class);
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient ChangeSupport changeSupport;
-
-    private transient WizardDescriptor wizard;
     private transient AirqualityDownscalingVisualPanelDatabase component;
-    private transient Map<String, Set<Integer>> chosenDbs;
-    private transient Integer startYear;
-    private transient Integer endYear;
 
-    //~ Constructors -----------------------------------------------------------
-
-    /**
-     * Creates a new AirqualityDownscalingWizardPanelScenarios object.
-     */
-    public AirqualityDownscalingWizardPanelDatabase() {
-        changeSupport = new ChangeSupport(this);
-    }
+    private transient String database;
+    private transient List<CidsBean> databases;
+    private transient Exception spsError;
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  DOCUMENT ME!
+     */
+    public static void main(final String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    final AirqualityDownscalingWizardPanelDatabase panel =
+                        new AirqualityDownscalingWizardPanelDatabase();
+                    panel.createComponent();
+                    final WizardDescriptor wizard = new WizardDescriptor(new WizardDescriptor.Panel[] { panel });
+                    final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
+                    dialog.pack();
+                    dialog.setLocationRelativeTo(null);
+                    dialog.setVisible(true);
+                    dialog.toFront();
+                }
+            });
+    }
+
     @Override
-    public Component getComponent() {
+    public Component createComponent() {
         if (component == null) {
             component = new AirqualityDownscalingVisualPanelDatabase(this);
         }
@@ -59,109 +96,149 @@ public final class AirqualityDownscalingWizardPanelDatabase implements WizardDes
         return component;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    String[] getAvailableDatabases() {
-        return new String[] {
-                "Edb1980base",
-                "Edb2005ref",
-                "Edb2030A1B",
-                "Edb19xxZH",
-                "Edb20xxBU"
-            };
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    Map<String, Set<Integer>> getDatabases() {
-        return chosenDbs;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    Integer getStartYear() {
-        return startYear;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    Integer getEndYear() {
-        return endYear;
-    }
-
     @Override
-    public HelpCtx getHelp() {
-        return HelpCtx.DEFAULT_HELP;
-    }
+    public void read(final WizardDescriptor wizard) {
+        database = (String)wizard.getProperty(AirqualityDownscalingWizardAction.PROP_DATABASE);
+        databases = (List<CidsBean>)wizard.getProperty(AirqualityDownscalingWizardAction.PROP_DATABASES);
 
-    @Override
-    public void readSettings(final Object settings) {
-        wizard = (WizardDescriptor)settings;
-        chosenDbs = (Map<String, Set<Integer>>)wizard.getProperty(AirqualityDownscalingWizardAction.PROP_DATABASES);
+        if ((databases != null) && (!databases.isEmpty())) {
+            component.init();
+            return;
+        }
 
-        final Date startDate = (Date)wizard.getProperty(AirqualityDownscalingWizardAction.PROP_START_DATE);
-        final Date endDate = (Date)wizard.getProperty(AirqualityDownscalingWizardAction.PROP_END_DATE);
-        final Calendar cal = GregorianCalendar.getInstance();
+        spsError = null;
 
-        cal.setTime(startDate);
-        startYear = cal.get(Calendar.YEAR);
-        cal.setTime(endDate);
-        endYear = cal.get(Calendar.YEAR);
+        SudplanConcurrency.getSudplanGeneralPurposePool().execute(new Runnable() {
+
+                @Override
+                public void run() {
+                    databases = new LinkedList<CidsBean>();
+                    final List<String> databasesFromSPS = new LinkedList<String>();
+
+                    try {
+                        final Properties filter = new Properties();
+                        filter.put(TimeSeries.PROCEDURE, AirqualityDownscalingModelManager.AQ_TS_DS_PROCEDURE);
+
+                        final DataHandler dataHandler = DataHandlerCache.getInstance()
+                                    .getSPSDataHandler(
+                                        AirqualityDownscalingModelManager.AQ_SPS_LOOKUP,
+                                        AirqualityDownscalingModelManager.AQ_SPS_URL);
+                        final Datapoint datapoint = dataHandler.createDatapoint(filter, null, DataHandler.Access.READ);
+                        final InputDescriptor inputDescriptor = (InputDescriptor)datapoint.getProperties()
+                                    .get("jaxb_desc:emission_scenario");              // NOI18N
+                        databasesFromSPS.addAll(
+                            inputDescriptor.getDefinition().getCommonData().getCategory().getConstraint()
+                                        .getAllowedTokens().getValueList().get(0).getValue());
+                    } catch (final Exception ex) {
+                        LOG.error("Couldn't fetch emission databases from SPS.", ex); // NOI18N
+                        spsError = ex;
+                    }
+
+                    try {
+                        final Collection<MetaObject> databaseMetaObjectsFromSMS = SessionManager.getProxy()
+                                    .customServerSearch(new EmissionDatabaseSearch());
+                        for (final MetaObject databaseMetaObjectFromSMS : databaseMetaObjectsFromSMS) {
+                            databases.add(databaseMetaObjectFromSMS.getBean());
+                        }
+
+                        final Collection<String> databaseNamesFromSMS = new LinkedList<String>();
+                        for (final CidsBean databaseFromSMS : databases) {
+                            final Object databaseName = databaseFromSMS.getProperty("name"); // NOI18N
+                            if (databaseName instanceof String) {
+                                databaseNamesFromSMS.add((String)databaseName);
+                            }
+                        }
+
+                        final MetaClass metaClass = ClassCacheMultiple.getMetaClass(
+                                SessionManager.getSession().getUser().getDomain(),
+                                "emission_database");                                       // NOI18N
+                        for (final String databaseFromSPS : databasesFromSPS) {
+                            if (!databaseNamesFromSMS.contains(databaseFromSPS)) {
+                                final CidsBean database = metaClass.getEmptyInstance().getBean();
+                                database.setProperty("name", databaseFromSPS);              // NOI18N
+                                databases.add(database);
+                            }
+                        }
+                    } catch (final Exception ex) {
+                        LOG.error("Couln't convert result from SPS/SMS to CidsBeans.", ex); // NOI18N
+                        spsError = ex;
+                    }
+
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                component.init();
+
+                                changeSupport.fireChange();
+                            }
+                        });
+                }
+            });
 
         component.init();
     }
 
     @Override
-    public void storeSettings(final Object settings) {
-        wizard = (WizardDescriptor)settings;
-        wizard.putProperty(AirqualityDownscalingWizardAction.PROP_DATABASES, component.getChosenDatabases());
+    public void store(final WizardDescriptor wizard) {
+        wizard.putProperty(AirqualityDownscalingWizardAction.PROP_DATABASE, database);
+        wizard.putProperty(AirqualityDownscalingWizardAction.PROP_DATABASES, databases);
     }
 
     @Override
     public boolean isValid() {
-        if (component.yearEnable()) {
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, null);
+        boolean valid = true;
+        wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, null);
+        wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, null);
+        wizard.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, null);
 
-            if (component.buttonEnable()) {
-                wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, null);
-            } else {
-                wizard.putProperty(
-                    WizardDescriptor.PROP_INFO_MESSAGE,
-                    "This database year combination is already chosen");
-            }
-        } else {
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "The year must be a valid integer");
+        if (spsError != null) {
+            wizard.putProperty(
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                NbBundle.getMessage(
+                    AirqualityDownscalingWizardPanelDatabase.class,
+                    "AirqualityDownscalingWizardPanelDatabase.isValid().spsError")); // NOI18N
+            valid = false;
         }
 
-        return true;
-    }
+        if ((database == null) || (database.trim().length() <= 0)) {
+            wizard.putProperty(
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                NbBundle.getMessage(
+                    AirqualityDownscalingWizardPanelDatabase.class,
+                    "AirqualityDownscalingWizardPanelDatabase.isValid().noDatabase")); // NOI18N
+            valid = false;
+        }
 
-    @Override
-    public void addChangeListener(final ChangeListener l) {
-        changeSupport.addChangeListener(l);
-    }
-
-    @Override
-    public void removeChangeListener(final ChangeListener l) {
-        changeSupport.removeChangeListener(l);
+        return valid;
     }
 
     /**
      * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    protected void fireChangeEvent() {
+    public String getDatabase() {
+        return database;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  database  DOCUMENT ME!
+     */
+    public void setDatabase(final String database) {
+        this.database = database;
+
         changeSupport.fireChange();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public List<CidsBean> getDatabases() {
+        return databases;
     }
 }

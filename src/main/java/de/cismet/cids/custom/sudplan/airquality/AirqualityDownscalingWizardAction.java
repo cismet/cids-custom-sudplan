@@ -31,8 +31,6 @@ import java.text.MessageFormat;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Map;
-import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
@@ -42,8 +40,10 @@ import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -51,20 +51,24 @@ import de.cismet.cismap.commons.features.Feature;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-//@ServiceProvider(service = CommonFeatureAction.class)
+@ServiceProvider(service = CommonFeatureAction.class)
 public final class AirqualityDownscalingWizardAction extends AbstractAction implements CommonFeatureAction {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String PROP_SCENARIO = "__prop_scenario__";       // NOI18N
-    public static final String PROP_LL_COORD = "__prop_ll_coord__";       // NOI18N
-    public static final String PROP_UR_COORD = "__prop_ur_coord__";       // NOI18N
-    public static final String PROP_GRID_SIZE = "__prop_grid_size__";     // NOI18N
-    public static final String PROP_START_DATE = "__prop_start_date__";   // NOI18N
-    public static final String PROP_END_DATE = "__prop_end_date__";       // NOI18N
-    public static final String PROP_DATABASES = "__prop_databases__";     // NOI18N
-    public static final String PROP_NAME = "__prop_name__";               // NOI18N
-    public static final String PROP_DESCRIPTION = "__prop_description__"; // NOI18N
+    public static final String PROP_SCENARIO = "__prop_scenario__";                  // NOI18N
+    public static final String PROP_SCENARIOS = "__prop_scenarios__";                // NOI18N
+    public static final String PROP_GRID_LOWERLEFT = "__prop_grid_lowerleft__";      // NOI18N
+    public static final String PROP_GRID_UPPERRIGHT = "__prop_grid_upperright__";    // NOI18N
+    public static final String PROP_GRIDCELL_SIZE = "__prop_grid_cell_size__";       // NOI18N
+    public static final String PROP_GRIDCELL_COUNT_X = "__prop_grid_cell_count_x__"; // NOI18N
+    public static final String PROP_GRIDCELL_COUNT_Y = "__prop_grid_cell_count_y__"; // NOI18N
+    public static final String PROP_START_DATE = "__prop_start_date__";              // NOI18N
+    public static final String PROP_END_DATE = "__prop_end_date__";                  // NOI18N //NOI18N
+    public static final String PROP_DATABASE = "__prop_database__";
+    public static final String PROP_DATABASES = "__prop_databases__";                // NOI18N
+    public static final String PROP_NAME = "__prop_name__";                          // NOI18N
+    public static final String PROP_DESCRIPTION = "__prop_description__";            // NOI18N
 
     private static final transient Logger LOG = Logger.getLogger(AirqualityDownscalingWizardAction.class);
 
@@ -80,7 +84,9 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
      * Creates a new AirqualityDownscalingWizardAction object.
      */
     public AirqualityDownscalingWizardAction() {
-        super("Perform Airquality downscaling");
+        super(NbBundle.getMessage(
+                AirqualityDownscalingWizardAction.class,
+                "AirqualityDownscalingWizardAction.AirqualityDownscalingWizardAction().name")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -95,19 +101,17 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
 
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
-                    new AirqualityDownscalingWizardPanelGridSize(),
-                    new AirqualityDownscalingWizardPanelBoundaries(),
-                    new AirqualityDownscalingWizardPanelScenarios(),
-                    new AirqualityDownscalingWizardPanelTargetDate(),
+                    new AirqualityDownscalingWizardPanelGrid(),
+                    new AirqualityDownscalingWizardPanelScenario(),
+                    new AirqualityDownscalingWizardPanelDate(),
                     new AirqualityDownscalingWizardPanelDatabase(),
                     new AirqualityDownscalingWizardPanelMetadata()
                 };
             final String[] steps = new String[panels.length];
             for (int i = 0; i < panels.length; i++) {
                 final Component c = panels[i].getComponent();
-                // Default step name to component name of panel. Mainly useful
-                // for getting the name of the target chooser to appear in the
-                // list of steps.
+                // Default step name to component name of panel. Mainly useful for getting the name of the target
+                // chooser to appear in the list of steps.
                 steps[i] = c.getName();
                 if (c instanceof JComponent) {
                     // assume Swing components
@@ -139,15 +143,42 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
     public void actionPerformed(final ActionEvent e) {
         assert source != null : "cannot perform action on empty source"; // NOI18N
 
-        final Coordinate[] llUr = SMSUtils.getLlAndUr(source.getGeometry());
-
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
         wizard.setTitleFormat(new MessageFormat("{0}"));                                         // NOI18N
         wizard.setTitle(NbBundle.getMessage(
                 AirqualityDownscalingWizardAction.class,
                 "AirqualityDownscalingWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
-        wizard.putProperty(PROP_LL_COORD, llUr[0]);
-        wizard.putProperty(PROP_UR_COORD, llUr[1]);
+
+        if (source instanceof GridFeature) {
+            final GridFeature gridFeature = (GridFeature)source;
+            wizard.putProperty(PROP_GRID_LOWERLEFT, gridFeature.getLowerleft());
+            wizard.putProperty(PROP_GRID_UPPERRIGHT, gridFeature.getUpperright());
+            wizard.putProperty(PROP_GRIDCELL_SIZE, gridFeature.getGridcellSize());
+            wizard.putProperty(PROP_GRIDCELL_COUNT_X, gridFeature.getGridcellCountX());
+            wizard.putProperty(PROP_GRIDCELL_COUNT_Y, gridFeature.getGridcellCountY());
+        } else {
+            final Coordinate[] lowerleftAndUpperright = SMSUtils.getLlAndUr(source.getGeometry());
+            lowerleftAndUpperright[0].x = Math.floor(lowerleftAndUpperright[0].x);
+            lowerleftAndUpperright[0].y = Math.floor(lowerleftAndUpperright[0].y);
+            lowerleftAndUpperright[1].x = Math.floor(lowerleftAndUpperright[1].x);
+            lowerleftAndUpperright[1].y = Math.floor(lowerleftAndUpperright[1].y);
+
+            wizard.putProperty(PROP_GRID_LOWERLEFT, lowerleftAndUpperright[0]);
+            wizard.putProperty(PROP_GRID_UPPERRIGHT, lowerleftAndUpperright[1]);
+            wizard.putProperty(PROP_GRIDCELL_SIZE, Integer.valueOf(1000));
+            wizard.putProperty(
+                PROP_GRIDCELL_COUNT_X,
+                Math.round(Math.floor((lowerleftAndUpperright[1].x - lowerleftAndUpperright[0].x) / 1000)));
+            wizard.putProperty(
+                PROP_GRIDCELL_COUNT_Y,
+                Math.round(Math.floor((lowerleftAndUpperright[1].y - lowerleftAndUpperright[0].y) / 1000)));
+        }
+
+        try {
+            CismapBroker.getInstance().getMappingComponent().getFeatureCollection().removeFeature(source);
+        } catch (final Exception ex) {
+            LOG.warn("Could not remove source feature from mapping component.", ex); // NOI18N
+        }
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -165,11 +196,11 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
 
                 SMSUtils.executeAndShowRun(modelRun);
             } catch (final Exception ex) {
-                final String message = "cannot perform airquality downscaling";
+                final String message = "Cannot perform airquality downscaling."; // NOI18N
                 LOG.error(message, ex);
                 JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
                     message,
-                    "Error",
+                    "Error",                                                     // NOI18N
                     JOptionPane.ERROR_MESSAGE);
             }
         }
@@ -186,42 +217,53 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
      */
     private CidsBean createModelInput(final WizardDescriptor wizard) throws IOException {
         final String scenario = (String)wizard.getProperty(PROP_SCENARIO);
-        final String wizName = (String)wizard.getProperty(PROP_NAME);
+        final String nameFromWizard = (String)wizard.getProperty(PROP_NAME);
+        final String description = (String)wizard.getProperty(PROP_DESCRIPTION);
         final Date startDate = (Date)wizard.getProperty(PROP_START_DATE);
         final Date endDate = (Date)wizard.getProperty(PROP_END_DATE);
-        final Coordinate llCoord = (Coordinate)wizard.getProperty(PROP_LL_COORD);
-        final Coordinate urCoord = (Coordinate)wizard.getProperty(PROP_UR_COORD);
-        final Integer gridSize = (Integer)wizard.getProperty(PROP_GRID_SIZE);
-        final Map<String, Set<Integer>> databases = (Map<String, Set<Integer>>)wizard.getProperty(PROP_DATABASES);
+        final Coordinate lowerleft = (Coordinate)wizard.getProperty(PROP_GRID_LOWERLEFT);
+        final Coordinate upperright = (Coordinate)wizard.getProperty(PROP_GRID_UPPERRIGHT);
+        final Integer gridcellSize = (Integer)wizard.getProperty(PROP_GRIDCELL_SIZE);
+        final Long gridcellCountX = (Long)wizard.getProperty(PROP_GRIDCELL_COUNT_X);
+        final Long gridcellCountY = (Long)wizard.getProperty(PROP_GRIDCELL_COUNT_Y);
+        final String database = (String)wizard.getProperty(PROP_DATABASE);
 
-        assert scenario != null : "scenario was not set";    // NOI18N
-        assert wizName != null : "wizname was not set";      // NOI18N
-        assert startDate != null : "startDate was not set";  // NOI18N
-        assert endDate != null : "endDate was not set";      // NOI18N
-        assert llCoord != null : "llcoord was not set";      // NOI18N
-        assert urCoord != null : "urcoord was not set";      // NOI18N
-        assert gridSize != null : "gridSize was not set";    // NOI18N
-        assert databases != null : "databases were not set"; // NOI18N
+        assert scenario != null : "scenario was not set";       // NOI18N
+        assert nameFromWizard != null : "wizname was not set";  // NOI18N
+        assert description != null : "wizname was not set";     // NOI18N
+        assert startDate != null : "startDate was not set";     // NOI18N
+        assert endDate != null : "endDate was not set";         // NOI18N
+        assert lowerleft != null : "llcoord was not set";       // NOI18N
+        assert upperright != null : "urcoord was not set";      // NOI18N
+        assert gridcellSize != null : "gridSize was not set";   // NOI18N
+        assert gridcellCountX != null : "gridSize was not set"; // NOI18N
+        assert gridcellCountY != null : "gridSize was not set"; // NOI18N
+        assert database != null : "database was not set";       // NOI18N
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("creating new airquality modelinput: scenario=" + scenario); // NOI18N
+            LOG.debug("creating new airquality modelinput: scenario=" + scenario); // NOI18N //NOI18N
         }
 
         final Date created = GregorianCalendar.getInstance().getTime();
         final String user = SessionManager.getSession().getUser().getName();
-        final String name = "Airquality downscaling input (" + wizName + ")";
+        final String name = "Input of '" + nameFromWizard + "'"; // NOI18N
 
+        // TODO: Remove hardwired SRS
         final AirqualityDownscalingInput input = new AirqualityDownscalingInput(
                 created,
                 user,
-                name,
+                nameFromWizard,
+                description,
                 scenario,
                 startDate,
                 endDate,
-                llCoord,
-                urCoord,
-                gridSize,
-                databases);
+                lowerleft,
+                upperright,
+                gridcellSize,
+                gridcellCountX,
+                gridcellCountY,
+                database,
+                "EPSG:3021"); // NOI18N
 
         return SMSUtils.createModelInput(name, input, SMSUtils.Model.AQ_DS);
     }
@@ -246,8 +288,8 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
         if (LOG.isDebugEnabled()) {
             LOG.debug("creating new modelrun: " // NOI18N
                         + "name=" + name  // NOI18N
-                        + " || description=" + description // NOI18N
-                        + " || cidsbean=" + inputBean); // NOI18N
+                        + " || description=" + description // NOI18N //NOI18N
+                        + " || cidsbean=" + inputBean); // NOI18N //NOI18N //NOI18N
         }
 
         return SMSUtils.createModelRun(name, description, inputBean);
@@ -265,27 +307,47 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
 
     @Override
     public boolean isActive() {
-        // TBD
-        if (true) {
-            return false;
-        }
-
         assert source != null : "source must be set before requesting isActive"; // NOI18N
 
         boolean active;
-        final Geometry geom = source.getGeometry();
 
-        assert geom != null : "feature must have a geometry"; // NOI18N
+        final Crs srs = CismapBroker.getInstance().getSrs();
+        // TODO: Dynamic SRID?!
+        active = (srs != null) && (srs.getName() != null) && srs.getName().endsWith(":3021"); // NOI18N
 
-        // assume quadrangle instead of rectangle because of coordinate transformation inaccuracy
-        if (geom.getNumPoints() == 5) {
-            active = true;
-        } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("action only supports quadrangles"); // NOI18N
+        if (!active) {
+            return active;
+        }
+
+        if (!(source instanceof GridFeature)) {
+            final Geometry geometry = source.getGeometry();
+
+            if (geometry == null) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No geometry defined to start airquality downscaling wizard."); // NOI18N
+                }
+
+                active = false;
+            } else if (!geometry.isRectangle()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Airquality downscaling can only be performed on rectangles."); // NOI18N
+                }
+
+                active = false;
+            } else {
+                final Coordinate[] lowerleftAndUpperright = SMSUtils.getLlAndUr(geometry);
+                final double width = lowerleftAndUpperright[1].x - lowerleftAndUpperright[0].x;
+                final double height = lowerleftAndUpperright[1].y - lowerleftAndUpperright[0].y;
+
+                if (((Math.abs(width) - 1000D) < 0.0001) || ((Math.abs(height) - 1000D) < 0.0001)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(
+                            "Airquality downscaling can only be performed on quadrangles which sides are at least 1000m long."); // NOI18N
+                    }
+
+                    active = false;
+                }
             }
-
-            active = false;
         }
 
         return active;

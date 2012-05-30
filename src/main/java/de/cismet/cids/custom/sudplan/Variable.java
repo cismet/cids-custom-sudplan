@@ -7,8 +7,17 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.map.JsonSerializableWithType;
+import org.codehaus.jackson.map.SerializerProvider;
+import org.codehaus.jackson.map.TypeSerializer;
+
 import org.openide.util.NbBundle;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -18,7 +27,7 @@ import java.io.Serializable;
  * @version  $Revision$, $Date$
  */
 // TODO: refactor as soon as abstract enums are supported
-public final class Variable extends LocalisedEnum<Variable> implements Serializable {
+public final class Variable extends LocalisedEnum<Variable> implements Serializable, JsonSerializableWithType {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -28,6 +37,9 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
     public static final Variable PRECIPITATION = new Variable(
             "urn:ogc:def:property:OGC:prec", // NOI18N
             NbBundle.getMessage(Variable.class, "Variable.PRECIPITATION.localisedName")); // NOI18N
+    public static final Variable NOX = new Variable(
+            "urn:ogc:def:property:OGC:NOX", // NOI18N
+            NbBundle.getMessage(Variable.class, "Variable.NOX.localisedName")); // NOI18N
     public static final Variable NO2 = new Variable(
             "urn:ogc:def:property:OGC:NO2", // NOI18N
             NbBundle.getMessage(Variable.class, "Variable.NO2.localisedName")); // NOI18N
@@ -74,6 +86,7 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
      *
      * @param  localisedName  DOCUMENT ME!
      */
+    @JsonIgnore
     private Variable(final String localisedName) {
         this(null, localisedName);
     }
@@ -114,6 +127,7 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
      *
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
+    @JsonCreator
     public static Variable getVariable(final String variable) {
         for (final Variable v : values()) {
             if (v.getPropertyKey().equals(variable)) {
@@ -134,6 +148,7 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
                 EVAPORATION,
                 LOCAL_Q,
                 MEAN_Q,
+                NOX,
                 NO2,
                 O3,
                 PM10,
@@ -143,5 +158,18 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
                 SOIL_MOISTURE,
                 TEMPERATURE
             };
+    }
+
+    @Override
+    public void serialize(final JsonGenerator jgen, final SerializerProvider provider) throws IOException,
+        JsonProcessingException {
+        jgen.writeString(getPropertyKey());
+    }
+
+    @Override
+    public void serializeWithType(final JsonGenerator jgen,
+            final SerializerProvider provider,
+            final TypeSerializer typeSer) throws IOException, JsonProcessingException {
+        serialize(jgen, provider);
     }
 }

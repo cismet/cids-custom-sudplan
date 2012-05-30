@@ -69,6 +69,19 @@ public final class SudplanStartupHook implements StartupHook {
                         if (m instanceof AbstractAsyncModelManager) {
                             try {
                                 m.setCidsBean(mo.getBean());
+                                final RunInfo runInfo = ((AbstractAsyncModelManager)m).getRunInfo();
+
+                                if ((runInfo == null) || runInfo.isBroken() || runInfo.isCanceled()) {
+                                    if (LOG.isInfoEnabled()) {
+                                        LOG.info(
+                                            "Run '"
+                                                    + mo
+                                                    + "' is broken or cancelled. Will not start a watchable."); // NOI18N
+                                    }
+
+                                    continue;
+                                }
+
                                 final Watchable watchable = ((AbstractAsyncModelManager)m).createWatchable();
 
                                 if (LOG.isDebugEnabled()) {

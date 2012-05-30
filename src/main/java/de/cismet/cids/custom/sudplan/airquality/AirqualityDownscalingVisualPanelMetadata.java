@@ -26,7 +26,8 @@ public final class AirqualityDownscalingVisualPanelMetadata extends javax.swing.
     //~ Instance fields --------------------------------------------------------
 
     private final transient AirqualityDownscalingWizardPanelMetadata model;
-    private final transient DocumentListener docL;
+    private final transient DocumentListener changeModelNameListener;
+    private final transient DocumentListener changeModelDescriptionListener;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
@@ -45,7 +46,8 @@ public final class AirqualityDownscalingVisualPanelMetadata extends javax.swing.
      */
     public AirqualityDownscalingVisualPanelMetadata(final AirqualityDownscalingWizardPanelMetadata model) {
         this.model = model;
-        this.docL = new DocumentListenerImpl();
+        changeModelNameListener = new ChangeModelListener(true);
+        changeModelDescriptionListener = new ChangeModelListener(false);
 
         // name of the wizard step
         this.setName(NbBundle.getMessage(
@@ -54,8 +56,12 @@ public final class AirqualityDownscalingVisualPanelMetadata extends javax.swing.
 
         initComponents();
 
-        txtName.getDocument().addDocumentListener(WeakListeners.document(docL, txtName.getDocument()));
-        txaDescription.getDocument().addDocumentListener(WeakListeners.document(docL, txaDescription.getDocument()));
+        txtName.getDocument()
+                .addDocumentListener(WeakListeners.document(changeModelNameListener, txtName.getDocument()));
+        txaDescription.getDocument()
+                .addDocumentListener(WeakListeners.document(
+                        changeModelDescriptionListener,
+                        txaDescription.getDocument()));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -72,12 +78,11 @@ public final class AirqualityDownscalingVisualPanelMetadata extends javax.swing.
             txtName.setText(model.getName());
         }
 
-        txtName.setSelectionStart(0);
-        txtName.setSelectionEnd(txtName.getText().length());
+        txtName.selectAll();
 
         // FIXME: ATR hack to pre-populate the meta information
         if (model.getDescription() == null) {
-            txaDescription.setText("This is a demo run to demonstrate airquality downscaling.");
+            txaDescription.setText("This is a demo run to demonstrate airquality downscaling."); // NOI18N
         } else {
             txaDescription.setText(model.getDescription());
         }
@@ -89,26 +94,6 @@ public final class AirqualityDownscalingVisualPanelMetadata extends javax.swing.
                     txtName.requestFocus();
                 }
             });
-
-        model.fireChangeEvent();
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    String getSelectedName() {
-        return txtName.getText();
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    String getSelectedDescription() {
-        return txaDescription.getText();
     }
 
     /**
@@ -123,14 +108,16 @@ public final class AirqualityDownscalingVisualPanelMetadata extends javax.swing.
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
+        lblName.setLabelFor(txtName);
         lblName.setText(NbBundle.getMessage(
                 AirqualityDownscalingVisualPanelMetadata.class,
                 "AirqualityDownscalingVisualPanelMetadata.lblName.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(6, 6, 6, 6);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblName, gridBagConstraints);
 
         txtName.setText(NbBundle.getMessage(
@@ -141,17 +128,20 @@ public final class AirqualityDownscalingVisualPanelMetadata extends javax.swing.
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(6, 6, 6, 6);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(txtName, gridBagConstraints);
 
+        lblDescription.setLabelFor(txaDescription);
         lblDescription.setText(NbBundle.getMessage(
                 AirqualityDownscalingVisualPanelMetadata.class,
                 "AirqualityDownscalingVisualPanelMetadata.lblDescription.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 6);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
         add(lblDescription, gridBagConstraints);
 
         txaDescription.setColumns(20);
@@ -164,7 +154,7 @@ public final class AirqualityDownscalingVisualPanelMetadata extends javax.swing.
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(6, 6, 6, 6);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jScrollPane1, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
@@ -175,23 +165,49 @@ public final class AirqualityDownscalingVisualPanelMetadata extends javax.swing.
      *
      * @version  $Revision$, $Date$
      */
-    private final class DocumentListenerImpl implements DocumentListener {
+    private final class ChangeModelListener implements DocumentListener {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final boolean name;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new ChangeModelListener object.
+         *
+         * @param  name  DOCUMENT ME!
+         */
+        public ChangeModelListener(final boolean name) {
+            this.name = name;
+        }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
         public void insertUpdate(final DocumentEvent e) {
-            model.fireChangeEvent();
+            updateModel();
         }
 
         @Override
         public void removeUpdate(final DocumentEvent e) {
-            model.fireChangeEvent();
+            updateModel();
         }
 
         @Override
         public void changedUpdate(final DocumentEvent e) {
-            model.fireChangeEvent();
+            updateModel();
+        }
+
+        /**
+         * DOCUMENT ME!
+         */
+        private void updateModel() {
+            if (name) {
+                model.setName(txtName.getText());
+            } else {
+                model.setDescription(txaDescription.getText());
+            }
         }
     }
 }

@@ -7,24 +7,27 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.airquality;
 
+import org.apache.log4j.Logger;
+
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Component;
 
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
+import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 /**
  * DOCUMENT ME!
@@ -36,27 +39,31 @@ public final class AirqualityDownscalingVisualPanelDatabase extends javax.swing.
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final String SEP = " -> "; // NOI18N
+    private static final transient Logger LOG = Logger.getLogger(AirqualityDownscalingVisualPanelDatabase.class);
+
+    private static final transient DefaultListModel MODEL_LOADING = new DefaultListModel();
+
+    static {
+        MODEL_LOADING.addElement(NbBundle.getMessage(
+                AirqualityDownscalingVisualPanelScenario.class,
+                "AirqualityDownscalingVisualPanelDatabase.MODEL_LOADING")); // NOI18N
+    }
 
     //~ Instance fields --------------------------------------------------------
 
     private final transient AirqualityDownscalingWizardPanelDatabase model;
-    private final transient DocumentListener docL;
-    private final transient ListSelectionListener listL;
-    private final transient ActionListener chooseYearL;
-    private final transient ActionListener removeL;
+    private final transient ListSelectionListener changeModelListener;
+    private final transient Comparator<CidsBean> emissionDatabaseComparator;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnChoose;
-    private javax.swing.JButton btnRemove;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblAvailableDbs;
-    private javax.swing.JLabel lblChosenDbs;
-    private javax.swing.JLabel lblYear;
-    private javax.swing.JList lstAvailableDbs;
-    private javax.swing.JList lstChosenDbs;
-    private javax.swing.JTextField txtYear;
+    private javax.swing.JLabel lblDescription;
+    private javax.swing.JLabel lblDescriptionValue;
+    private javax.swing.JList lstDatabases;
+    private javax.swing.JPanel pnlDatabases;
+    private javax.swing.JPanel pnlDescription;
+    private javax.swing.JScrollPane scpDatabases;
+    private javax.swing.JSplitPane splContainer;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -68,26 +75,21 @@ public final class AirqualityDownscalingVisualPanelDatabase extends javax.swing.
      */
     public AirqualityDownscalingVisualPanelDatabase(final AirqualityDownscalingWizardPanelDatabase model) {
         this.model = model;
-        this.docL = new DocumentListenerImpl();
-        this.listL = new ListSelectionListenerImpl();
-        this.chooseYearL = new ChooseYearActionListener();
-        this.removeL = new RemoveActionListener();
+        changeModelListener = new ChangeModelListener();
 
-        // name of the wizard step
         this.setName(NbBundle.getMessage(
                 AirqualityDownscalingVisualPanelDatabase.class,
                 "AirqualityDownscalingVisualPanelDatabase.this.name")); // NOI18N
 
         initComponents();
 
-        txtYear.getDocument().addDocumentListener(WeakListeners.document(docL, txtYear.getDocument()));
-        lstChosenDbs.addListSelectionListener(WeakListeners.create(ListSelectionListener.class, listL, lstChosenDbs));
-        lstAvailableDbs.addListSelectionListener(WeakListeners.create(
+        lstDatabases.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        lstDatabases.addListSelectionListener(WeakListeners.create(
                 ListSelectionListener.class,
-                listL,
-                lblAvailableDbs));
-        btnChoose.addActionListener(WeakListeners.create(ActionListener.class, chooseYearL, btnChoose));
-        btnRemove.addActionListener(WeakListeners.create(ActionListener.class, removeL, btnRemove));
+                changeModelListener,
+                lstDatabases));
+
+        emissionDatabaseComparator = new EmissionDatabaseComparator();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -96,76 +98,38 @@ public final class AirqualityDownscalingVisualPanelDatabase extends javax.swing.
      * DOCUMENT ME!
      */
     void init() {
-        final Map<String, Set<Integer>> databases = model.getDatabases();
-        if (databases != null) {
-            final DefaultListModel dlm = (DefaultListModel)lstChosenDbs.getModel();
-            dlm.clear();
+        // It's important to get the selected database before invoking the ListSelectionListener, e. g. by calling
+        // clear(). The ListSelectionListener would reset the selected database.
+        final String databaseFromModel = model.getDatabase();
+        final List<CidsBean> databases = model.getDatabases();
 
-            for (final String key : databases.keySet()) {
-                final Set<Integer> values = databases.get(key);
-                for (final Integer value : values.toArray(new Integer[values.size()])) {
-                    dlm.addElement(key + SEP + value);
-                }
+        lstDatabases.setEnabled((databases != null) && (!databases.isEmpty()));
+
+        if ((databases == null) || (databases.isEmpty())) {
+            lstDatabases.setModel(MODEL_LOADING);
+            lstDatabases.clearSelection();
+            return;
+        } else {
+            if ((lstDatabases.getModel() == null) || lstDatabases.getModel().equals(MODEL_LOADING)) {
+                lstDatabases.setModel(new DefaultListModel());
             }
         }
 
-        final String[] availableDBs = model.getAvailableDatabases();
+        Collections.sort(databases, emissionDatabaseComparator);
 
-        assert availableDBs != null : "available DBs must not be null"; // NOI18N
+        final DefaultListModel listModel = (DefaultListModel)lstDatabases.getModel();
+        listModel.clear();
 
-        Arrays.sort(availableDBs);
-        final DefaultListModel dlm = (DefaultListModel)lstAvailableDbs.getModel();
-        dlm.clear();
-        for (final String avaliable : availableDBs) {
-            dlm.addElement(avaliable);
-        }
-        lstAvailableDbs.setSelectedIndex(0);
-
-        final Integer year = ((model.getEndYear() - model.getStartYear()) / 2) + model.getStartYear();
-        txtYear.setText(year.toString());
-
-        btnChoose.setEnabled(buttonEnable());
-
-        model.fireChangeEvent();
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    Map<String, Set<Integer>> getChosenDatabases() {
-        final Map<String, Set<Integer>> map = new HashMap<String, Set<Integer>>();
-
-        final DefaultListModel lstModel = (DefaultListModel)lstChosenDbs.getModel();
-        final Enumeration<?> elements = lstModel.elements();
-
-        while (elements.hasMoreElements()) {
-            final String element = (String)elements.nextElement();
-            final String[] split = element.split(SEP);
-            final String dbname = split[0];
-            final Integer year = Integer.valueOf(split[1]);
-
-            Set<Integer> years = map.get(dbname);
-
-            if (years == null) {
-                years = new HashSet<Integer>();
-                map.put(dbname, years);
-            }
-
-            years.add(year);
+        for (final CidsBean database : databases) {
+            listModel.addElement(database);
         }
 
-        return map;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    String getChosenYear() {
-        return txtYear.getText();
+        if (databaseFromModel == null) {
+            lstDatabases.setSelectedIndex(0);
+            model.setDatabase((String)((CidsBean)lstDatabases.getSelectedValue()).getProperty("name")); // NOI18N
+        } else {
+            lstDatabases.setSelectedValue(databaseFromModel, true);
+        }
     }
 
     /**
@@ -175,168 +139,60 @@ public final class AirqualityDownscalingVisualPanelDatabase extends javax.swing.
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
-
+        splContainer = new javax.swing.JSplitPane();
+        pnlDatabases = new javax.swing.JPanel();
         lblAvailableDbs = new javax.swing.JLabel();
-        lblChosenDbs = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        lstAvailableDbs = new javax.swing.JList();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        lstChosenDbs = new javax.swing.JList();
-        btnChoose = new javax.swing.JButton();
-        lblYear = new javax.swing.JLabel();
-        txtYear = new javax.swing.JTextField();
-        btnRemove = new javax.swing.JButton();
+        scpDatabases = new javax.swing.JScrollPane();
+        lstDatabases = new javax.swing.JList();
+        pnlDescription = new javax.swing.JPanel();
+        lblDescription = new javax.swing.JLabel();
+        lblDescriptionValue = new javax.swing.JLabel();
 
+        setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
         setMinimumSize(new java.awt.Dimension(200, 150));
         setPreferredSize(new java.awt.Dimension(450, 300));
-        setLayout(new java.awt.GridBagLayout());
+        setLayout(new java.awt.BorderLayout());
 
+        splContainer.setBorder(null);
+        splContainer.setDividerSize(0);
+        splContainer.setResizeWeight(0.5);
+        splContainer.setEnabled(false);
+
+        pnlDatabases.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 5));
+        pnlDatabases.setLayout(new java.awt.BorderLayout(0, 10));
+
+        lblAvailableDbs.setLabelFor(lstDatabases);
         lblAvailableDbs.setText(NbBundle.getMessage(
                 AirqualityDownscalingVisualPanelDatabase.class,
                 "AirqualityDownscalingVisualPanelDatabase.lblAvailableDbs.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblAvailableDbs, gridBagConstraints);
+        pnlDatabases.add(lblAvailableDbs, java.awt.BorderLayout.PAGE_START);
 
-        lblChosenDbs.setText(NbBundle.getMessage(
+        lstDatabases.setModel(new DefaultListModel());
+        lstDatabases.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        lstDatabases.setCellRenderer(new EmissionDatabaseRenderer());
+        scpDatabases.setViewportView(lstDatabases);
+
+        pnlDatabases.add(scpDatabases, java.awt.BorderLayout.CENTER);
+
+        splContainer.setLeftComponent(pnlDatabases);
+
+        pnlDescription.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        pnlDescription.setLayout(new java.awt.BorderLayout(0, 10));
+
+        lblDescription.setLabelFor(lblDescriptionValue);
+        lblDescription.setText(org.openide.util.NbBundle.getMessage(
                 AirqualityDownscalingVisualPanelDatabase.class,
-                "AirqualityDownscalingVisualPanelDatabase.lblChosenDbs.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblChosenDbs, gridBagConstraints);
+                "AirqualityDownscalingVisualPanelDatabase.lblDescription.text")); // NOI18N
+        pnlDescription.add(lblDescription, java.awt.BorderLayout.PAGE_START);
 
-        lstAvailableDbs.setModel(new DefaultListModel());
-        lstAvailableDbs.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jScrollPane1.setViewportView(lstAvailableDbs);
+        lblDescriptionValue.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        lblDescriptionValue.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+        pnlDescription.add(lblDescriptionValue, java.awt.BorderLayout.CENTER);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridheight = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jScrollPane1, gridBagConstraints);
+        splContainer.setRightComponent(pnlDescription);
 
-        lstChosenDbs.setModel(new DefaultListModel());
-        jScrollPane2.setViewportView(lstChosenDbs);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridheight = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jScrollPane2, gridBagConstraints);
-
-        btnChoose.setText(NbBundle.getMessage(
-                AirqualityDownscalingVisualPanelDatabase.class,
-                "AirqualityDownscalingVisualPanelDatabase.btnChoose.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
-        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
-        add(btnChoose, gridBagConstraints);
-
-        lblYear.setText(NbBundle.getMessage(
-                AirqualityDownscalingVisualPanelDatabase.class,
-                "AirqualityDownscalingVisualPanelDatabase.lblYear.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.ipadx = 13;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
-        gridBagConstraints.insets = new java.awt.Insets(0, 6, 1, 6);
-        add(lblYear, gridBagConstraints);
-
-        txtYear.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtYear.setText(NbBundle.getMessage(
-                AirqualityDownscalingVisualPanelDatabase.class,
-                "AirqualityDownscalingVisualPanelDatabase.txtYear.text")); // NOI18N
-        txtYear.setMaximumSize(new java.awt.Dimension(50, 28));
-        txtYear.setMinimumSize(new java.awt.Dimension(50, 28));
-        txtYear.setPreferredSize(new java.awt.Dimension(50, 28));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(0, 6, 6, 6);
-        add(txtYear, gridBagConstraints);
-
-        btnRemove.setText(NbBundle.getMessage(
-                AirqualityDownscalingVisualPanelDatabase.class,
-                "AirqualityDownscalingVisualPanelDatabase.btnRemove.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(13, 13, 13, 13);
-        add(btnRemove, gridBagConstraints);
-    }                                                                        // </editor-fold>//GEN-END:initComponents
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    boolean buttonEnable() {
-        boolean enable;
-        if (yearEnable()) {
-            final String selected = (String)lstAvailableDbs.getSelectedValue();
-            if (selected == null) {
-                enable = false;
-            } else {
-                final Map<String, Set<Integer>> chosen = getChosenDatabases();
-                final Set<Integer> years = chosen.get(selected);
-                if (years == null) {
-                    enable = true;
-                } else {
-                    final Integer year = Integer.parseInt(txtYear.getText());
-                    if (years.contains(year)) {
-                        enable = false;
-                    } else {
-                        enable = true;
-                    }
-                }
-            }
-        } else {
-            enable = false;
-        }
-
-        return enable;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    boolean yearEnable() {
-        final String year = txtYear.getText();
-
-        if ((year == null) || year.isEmpty()) {
-            return false;
-        }
-
-        try {
-            Integer.parseInt(year);
-
-            return true;
-        } catch (final NumberFormatException ex) {
-            return false;
-        }
-    }
+        add(splContainer, java.awt.BorderLayout.CENTER);
+    } // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -345,18 +201,30 @@ public final class AirqualityDownscalingVisualPanelDatabase extends javax.swing.
      *
      * @version  $Revision$, $Date$
      */
-    private final class RemoveActionListener implements ActionListener {
+    private final class ChangeModelListener implements ListSelectionListener {
 
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public void actionPerformed(final ActionEvent e) {
-            final int selected = lstChosenDbs.getSelectedIndex();
-            if (selected > -1) {
-                ((DefaultListModel)lstChosenDbs.getModel()).remove(selected);
+        public void valueChanged(final ListSelectionEvent e) {
+            if (MODEL_LOADING.equals(lstDatabases.getModel()) || e.getValueIsAdjusting()) {
+                lblDescriptionValue.setText(""); // NOI18N
+                return;
+            }
 
-                model.fireChangeEvent();
-                btnChoose.setEnabled(buttonEnable());
+            final CidsBean selectedDatabase = (CidsBean)lstDatabases.getSelectedValue();
+
+            if (selectedDatabase != null) {
+                model.setDatabase((String)selectedDatabase.getProperty("name")); // NOI18N
+
+                if (selectedDatabase.getProperty("description") instanceof String) {  // NOI18N
+                    lblDescriptionValue.setText("<html><p>"
+                                + (String)selectedDatabase.getProperty("description") // NOI18N
+                                + "</p></html>");                                     // NOI18N
+                }
+            } else {
+                model.setDatabase(null);
+                lblDescriptionValue.setText("");                                      // NOI18N
             }
         }
     }
@@ -366,15 +234,36 @@ public final class AirqualityDownscalingVisualPanelDatabase extends javax.swing.
      *
      * @version  $Revision$, $Date$
      */
-    private final class ListSelectionListenerImpl implements ListSelectionListener {
+    protected final class EmissionDatabaseComparator implements Comparator<CidsBean> {
 
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public void valueChanged(final ListSelectionEvent e) {
-            model.fireChangeEvent();
+        public int compare(final CidsBean o1, final CidsBean o2) {
+            if ((o1 == null) && (o2 == null)) {
+                return 0;
+            }
+            if (o1 == null) {
+                return -1;
+            }
+            if (o2 == null) {
+                return 1;
+            }
 
-            btnChoose.setEnabled(buttonEnable());
+            final Object nameObject1 = o1.getProperty("name"); // NOI18N
+            final Object nameObject2 = o2.getProperty("name"); // NOI18N
+
+            if (!(nameObject1 instanceof String) && !(nameObject2 instanceof String)) {
+                return 0;
+            }
+            if (!(nameObject1 instanceof String)) {
+                return -1;
+            }
+            if (!(nameObject2 instanceof String)) {
+                return 1;
+            }
+
+            return ((String)nameObject1).compareToIgnoreCase((String)nameObject2);
         }
     }
 
@@ -383,45 +272,44 @@ public final class AirqualityDownscalingVisualPanelDatabase extends javax.swing.
      *
      * @version  $Revision$, $Date$
      */
-    private final class DocumentListenerImpl implements DocumentListener {
+    protected final class EmissionDatabaseRenderer extends JLabel implements ListCellRenderer {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new GridRenderer object.
+         */
+        public EmissionDatabaseRenderer() {
+            setOpaque(true);
+        }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public void changedUpdate(final DocumentEvent e) {
-            model.fireChangeEvent();
+        public Component getListCellRendererComponent(final JList list,
+                final Object value,
+                final int index,
+                final boolean isSelected,
+                final boolean cellHasFocus) {
+            if (isSelected) {
+                setBackground(UIManager.getDefaults().getColor("List.selectionBackground")); // NOI18N
+                setForeground(UIManager.getDefaults().getColor("List.selectionForeground")); // NOI18N
+            } else {
+                setBackground(UIManager.getDefaults().getColor("List.background"));          // NOI18N
+                setForeground(UIManager.getDefaults().getColor("List.foreground"));          // NOI18N
+            }
 
-            btnChoose.setEnabled(buttonEnable());
-        }
+            if (value instanceof CidsBean) {
+                final Object name = ((CidsBean)value).getProperty("name"); // NOI18N
+                if (name instanceof String) {
+                    setText((String)name);
+                } else {
+                    // TODO: Something better?!
+                    setText("Erroneous emission database"); // NOI18N
+                }
+            }
 
-        @Override
-        public void insertUpdate(final DocumentEvent e) {
-            changedUpdate(e);
-        }
-
-        @Override
-        public void removeUpdate(final DocumentEvent e) {
-            changedUpdate(e);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private final class ChooseYearActionListener implements ActionListener {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            final String selectedDb = (String)lstAvailableDbs.getSelectedValue();
-            final String year = txtYear.getText();
-
-            ((DefaultListModel)lstChosenDbs.getModel()).addElement(selectedDb + SEP + year);
-
-            btnChoose.setEnabled(buttonEnable());
+            return this;
         }
     }
 }

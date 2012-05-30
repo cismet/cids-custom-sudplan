@@ -308,17 +308,26 @@ public abstract class AbstractModelManager implements ModelManager {
                         final ObjectMapper mapper = new ObjectMapper();
                         mapper.writeValue(writer, runInfo);
                         cidsBean.setProperty("runinfo", writer.toString());
-                    } catch (Throwable t) {
-                        LOG.error("could not set run info: " + t.getMessage(), t);
+                    } catch (final Exception ex) {
+                        LOG.error("could not set run info: " + ex.getMessage(), ex);
                     }
 
                     try {
                         cidsBean = cidsBean.persist();
-                    } catch (Throwable t) {
-                        LOG.error("could not persists cids bean: " + t.getMessage(), t);
+                    } catch (final Exception ex) {
+                        LOG.error("could not persists cids bean: " + ex.getMessage(), ex);
                     }
 
                     final ComponentRegistry reg = ComponentRegistry.getRegistry();
+                    final String reloadId = getReloadId();
+                    if (reloadId == null) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("won't perform reload after model run finished, since no id is provided"); // NOI18N
+                        }
+                    } else {
+                        reg.getCatalogueTree().requestRefreshNode(reloadId);
+                    }
+
                     final CidsBeanRenderer currentRenderer = reg.getDescriptionPane().currentRenderer();
                     if (currentRenderer == null) {
                         if (LOG.isDebugEnabled()) {

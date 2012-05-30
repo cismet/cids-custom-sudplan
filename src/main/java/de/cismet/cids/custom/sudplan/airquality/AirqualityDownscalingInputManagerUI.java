@@ -7,23 +7,15 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.airquality;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
-
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.DefaultListModel;
-
 import de.cismet.cids.custom.sudplan.SMSUtils;
 
-import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -39,34 +31,36 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
 
     private final transient AirqualityDownscalingInput model;
 
-    private final transient ActionListener showBBoxL;
+    private final transient ActionListener showBoundingBox;
 
-    private transient PureNewFeature bboxFeature;
+    private transient Feature grid;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private final transient javax.swing.JButton btnShowBBox = new javax.swing.JButton();
-    private final transient javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
+    private final transient javax.swing.JButton btnShowBoundingBox = new javax.swing.JButton();
     private final transient javax.swing.JLabel lblCreated = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblCreatedBy = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblCreatedByValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblCreatedValue = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblDatabases = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblDatabase = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblDatabaseValue = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblDescription = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblDescriptionValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblEndDate = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblEndDateValue = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblGridSize = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblGridSizeValue = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblLLCoord = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblLLCoordValue = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblGridcellSize = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblGridcellSizeValue = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblLowerleft = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblLowerleftValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblName = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblNameValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblScenario = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblScenarioValue = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblSrs = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblSrsValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblStartDate = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblStartDateValue = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblURCoord = new javax.swing.JLabel();
-    private final transient javax.swing.JLabel lblURCoordValue = new javax.swing.JLabel();
-    private final transient javax.swing.JList lstDatabases = new javax.swing.JList();
-    private final transient javax.swing.JPanel pnlFiller = new javax.swing.JPanel();
+    private final transient javax.swing.JLabel lblUpperright = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblUpperrightValue = new javax.swing.JLabel();
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -78,13 +72,16 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
      */
     public AirqualityDownscalingInputManagerUI(final AirqualityDownscalingInput model) {
         this.model = model;
-        this.showBBoxL = new ShowBBoxActionListener();
+        this.showBoundingBox = new ShowBoundingBox();
 
         initComponents();
 
         init();
 
-        btnShowBBox.addActionListener(WeakListeners.create(ActionListener.class, showBBoxL, btnShowBBox));
+        btnShowBoundingBox.addActionListener(WeakListeners.create(
+                ActionListener.class,
+                showBoundingBox,
+                btnShowBoundingBox));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -96,37 +93,24 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
         lblNameValue.setText(model.getName());
         lblCreatedValue.setText(model.getCreated().toString());
         lblCreatedByValue.setText(model.getCreatedBy());
-        lblScenarioValue.setText(model.getScenario());
-        lblStartDateValue.setText(model.getStartDate().toString());
-        lblEndDateValue.setText(model.getEndDate().toString());
-        lblLLCoordValue.setText(model.getLlCoord().toString());
-        lblURCoordValue.setText(model.getUrCoord().toString());
-        lblGridSizeValue.setText(String.valueOf(model.getGridSize())
+        lblLowerleftValue.setText(model.getLowerleft().toString());
+        lblUpperrightValue.setText(model.getUpperright().toString());
+        lblGridcellSizeValue.setText(String.valueOf(model.getGridcellSize())
                     + NbBundle.getMessage(
                         AirqualityDownscalingInputManagerUI.class,
                         "AirqualityDownscalingInputManagerUI.lblGridSizeValue.text.appendix")); // NOI18N
+        lblScenarioValue.setText(model.getScenario());
+        lblStartDateValue.setText(model.getStartDate().toString());
+        lblEndDateValue.setText(model.getEndDate().toString());
+        lblDatabaseValue.setText(model.getDatabase());
+        lblDescriptionValue.setText(model.getDescription());
+        lblSrsValue.setText(model.getSrs());
 
-        final DefaultListModel dlm = (DefaultListModel)lstDatabases.getModel();
-        for (final String db : model.getDatabases().keySet()) {
-            for (final Integer year : model.getDatabases().get(db)) {
-                dlm.addElement(db + " -> " + year); // NOI18N
-            }
-        }
-
-        final GeometryFactory factory = new GeometryFactory();
-
-        final Coordinate ll = model.getLlCoord();
-        final Coordinate ur = model.getUrCoord();
-        final Coordinate[] bbox = new Coordinate[5];
-        bbox[0] = ll;
-        bbox[1] = new Coordinate(ll.x, ur.y);
-        bbox[2] = ur;
-        bbox[3] = new Coordinate(ur.x, ll.y);
-        bbox[4] = ll;
-        final LinearRing ring = new LinearRing(new CoordinateArraySequence(bbox), factory);
-        final Geometry geometry = factory.createPolygon(ring, new LinearRing[0]);
-        bboxFeature = new PureNewFeature(geometry);
-        bboxFeature.setName(model.getName()); // NOI18N
+        grid = new GridFeature(model.getGridcellCountX(),
+                model.getGridcellCountY(),
+                model.getGridcellSize(),
+                model.getLowerleft(),
+                model.getUpperright());
     }
 
     /**
@@ -141,24 +125,28 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
+        lblName.setLabelFor(lblNameValue);
         lblName.setText(NbBundle.getMessage(
                 AirqualityDownscalingInputManagerUI.class,
                 "AirqualityDownscalingInputManagerUI.lblName.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblName, gridBagConstraints);
 
+        lblCreated.setLabelFor(lblCreatedValue);
         lblCreated.setText(NbBundle.getMessage(
                 AirqualityDownscalingInputManagerUI.class,
                 "AirqualityDownscalingInputManagerUI.lblCreated.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblCreated, gridBagConstraints);
 
         lblCreatedValue.setText(NbBundle.getMessage(
@@ -167,10 +155,10 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblCreatedValue, gridBagConstraints);
 
         lblNameValue.setText(NbBundle.getMessage(
@@ -179,20 +167,22 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblNameValue, gridBagConstraints);
 
+        lblCreatedBy.setLabelFor(lblCreatedByValue);
         lblCreatedBy.setText(NbBundle.getMessage(
                 AirqualityDownscalingInputManagerUI.class,
                 "AirqualityDownscalingInputManagerUI.lblCreatedBy.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblCreatedBy, gridBagConstraints);
 
         lblCreatedByValue.setText(NbBundle.getMessage(
@@ -201,20 +191,22 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblCreatedByValue, gridBagConstraints);
 
+        lblScenario.setLabelFor(lblScenarioValue);
         lblScenario.setText(NbBundle.getMessage(
                 AirqualityDownscalingInputManagerUI.class,
                 "AirqualityDownscalingInputManagerUI.lblScenario.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblScenario, gridBagConstraints);
 
         lblScenarioValue.setText(NbBundle.getMessage(
@@ -222,21 +214,23 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
                 "AirqualityDownscalingInputManagerUI.lblScenarioValue.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblScenarioValue, gridBagConstraints);
 
+        lblStartDate.setLabelFor(lblStartDateValue);
         lblStartDate.setText(NbBundle.getMessage(
                 AirqualityDownscalingInputManagerUI.class,
                 "AirqualityDownscalingInputManagerUI.lblStartDate.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblStartDate, gridBagConstraints);
 
         lblStartDateValue.setText(NbBundle.getMessage(
@@ -244,21 +238,23 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
                 "AirqualityDownscalingInputManagerUI.lblStartDateValue.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblStartDateValue, gridBagConstraints);
 
+        lblEndDate.setLabelFor(lblEndDateValue);
         lblEndDate.setText(NbBundle.getMessage(
                 AirqualityDownscalingInputManagerUI.class,
                 "AirqualityDownscalingInputManagerUI.lblEndDate.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblEndDate, gridBagConstraints);
 
         lblEndDateValue.setText(NbBundle.getMessage(
@@ -266,130 +262,159 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
                 "AirqualityDownscalingInputManagerUI.lblEndDateValue.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblEndDateValue, gridBagConstraints);
 
-        lblLLCoord.setText(NbBundle.getMessage(
+        lblLowerleft.setLabelFor(lblLowerleftValue);
+        lblLowerleft.setText(NbBundle.getMessage(
                 AirqualityDownscalingInputManagerUI.class,
-                "AirqualityDownscalingInputManagerUI.lblLLCoord.text")); // NOI18N
+                "AirqualityDownscalingInputManagerUI.lblLowerleft.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-        add(lblLLCoord, gridBagConstraints);
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblLowerleft, gridBagConstraints);
 
-        lblURCoord.setText(NbBundle.getMessage(
+        lblUpperright.setLabelFor(lblUpperrightValue);
+        lblUpperright.setText(NbBundle.getMessage(
                 AirqualityDownscalingInputManagerUI.class,
-                "AirqualityDownscalingInputManagerUI.lblURCoord.text")); // NOI18N
+                "AirqualityDownscalingInputManagerUI.lblUpperright.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-        add(lblURCoord, gridBagConstraints);
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblUpperright, gridBagConstraints);
 
-        lblLLCoordValue.setText(NbBundle.getMessage(
+        lblLowerleftValue.setText(NbBundle.getMessage(
                 AirqualityDownscalingInputManagerUI.class,
-                "AirqualityDownscalingInputManagerUI.lblLLCoordValue.text")); // NOI18N
+                "AirqualityDownscalingInputManagerUI.lblLowerleftValue.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-        add(lblLLCoordValue, gridBagConstraints);
-
-        lblURCoordValue.setText(NbBundle.getMessage(
-                AirqualityDownscalingInputManagerUI.class,
-                "AirqualityDownscalingInputManagerUI.lblURCoordValue.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-        add(lblURCoordValue, gridBagConstraints);
-
-        lblGridSize.setText(NbBundle.getMessage(
-                AirqualityDownscalingInputManagerUI.class,
-                "AirqualityDownscalingInputManagerUI.lblGridSize.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-        add(lblGridSize, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblLowerleftValue, gridBagConstraints);
 
-        lblGridSizeValue.setText(NbBundle.getMessage(
+        lblUpperrightValue.setText(NbBundle.getMessage(
                 AirqualityDownscalingInputManagerUI.class,
-                "AirqualityDownscalingInputManagerUI.lblGridSizeValue.text")); // NOI18N
+                "AirqualityDownscalingInputManagerUI.lblUpperrightValue.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-        add(lblGridSizeValue, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblUpperrightValue, gridBagConstraints);
 
-        lblDatabases.setText(NbBundle.getMessage(
+        lblGridcellSize.setLabelFor(lblGridcellSizeValue);
+        lblGridcellSize.setText(NbBundle.getMessage(
                 AirqualityDownscalingInputManagerUI.class,
-                "AirqualityDownscalingInputManagerUI.lblDatabases.text")); // NOI18N
+                "AirqualityDownscalingInputManagerUI.lblGridcellSize.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-        add(lblDatabases, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblGridcellSize, gridBagConstraints);
 
-        lstDatabases.setModel(new DefaultListModel());
-        lstDatabases.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        lstDatabases.setFocusable(false);
-        lstDatabases.setRequestFocusEnabled(false);
-        jScrollPane1.setViewportView(lstDatabases);
+        lblGridcellSizeValue.setText(NbBundle.getMessage(
+                AirqualityDownscalingInputManagerUI.class,
+                "AirqualityDownscalingInputManagerUI.lblGridcellSizeValue.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblGridcellSizeValue, gridBagConstraints);
 
+        lblDatabase.setLabelFor(lblDatabaseValue);
+        lblDatabase.setText(NbBundle.getMessage(
+                AirqualityDownscalingInputManagerUI.class,
+                "AirqualityDownscalingInputManagerUI.lblDatabase.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 6;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-        add(jScrollPane1, gridBagConstraints);
-
-        pnlFiller.setOpaque(false);
-
-        final org.jdesktop.layout.GroupLayout pnlFillerLayout = new org.jdesktop.layout.GroupLayout(pnlFiller);
-        pnlFiller.setLayout(pnlFillerLayout);
-        pnlFillerLayout.setHorizontalGroup(
-            pnlFillerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 18, Short.MAX_VALUE));
-        pnlFillerLayout.setVerticalGroup(
-            pnlFillerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 292, Short.MAX_VALUE));
-
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblDatabase, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 7;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-        add(pnlFiller, gridBagConstraints);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblDatabaseValue, gridBagConstraints);
 
-        btnShowBBox.setText(NbBundle.getMessage(
+        lblDescription.setLabelFor(lblDescriptionValue);
+        lblDescription.setText(org.openide.util.NbBundle.getMessage(
                 AirqualityDownscalingInputManagerUI.class,
-                "AirqualityDownscalingInputManagerUI.btnShowBBox.text")); // NOI18N
+                "AirqualityDownscalingInputManagerUI.lblDescription.text")); // NOI18N
+        lblDescription.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-        add(btnShowBBox, gridBagConstraints);
-    }                                                                     // </editor-fold>//GEN-END:initComponents
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblDescription, gridBagConstraints);
+
+        lblDescriptionValue.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weighty = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblDescriptionValue, gridBagConstraints);
+
+        btnShowBoundingBox.setText(NbBundle.getMessage(
+                AirqualityDownscalingInputManagerUI.class,
+                "AirqualityDownscalingInputManagerUI.btnShowBoundingBox.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(btnShowBoundingBox, gridBagConstraints);
+
+        lblSrs.setLabelFor(lblSrsValue);
+        lblSrs.setText(org.openide.util.NbBundle.getMessage(
+                AirqualityDownscalingInputManagerUI.class,
+                "AirqualityDownscalingInputManagerUI.lblSrs.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblSrs, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblSrsValue, gridBagConstraints);
+    }                                                                // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -398,15 +423,16 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
      *
      * @version  $Revision$, $Date$
      */
-    private final class ShowBBoxActionListener implements ActionListener {
+    private final class ShowBoundingBox implements ActionListener {
 
         //~ Methods ------------------------------------------------------------
 
         @Override
         public void actionPerformed(final ActionEvent e) {
             final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
-            // collection will not add the feature if it is already present
-            mc.getFeatureCollection().addFeature(bboxFeature);
+
+            // TODO: collection will not add the feature if it is already present
+            mc.getFeatureCollection().addFeature(grid);
             SMSUtils.showMappingComponent();
         }
     }
