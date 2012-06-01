@@ -122,7 +122,7 @@ public final class AirqualityDownscalingWizardPanelGrid extends AbstractWizardPa
 
         if ((choosenGridSize == null) || choosenGridSize.isEmpty()) {
             wizard.putProperty(
-                WizardDescriptor.PROP_WARNING_MESSAGE,
+                WizardDescriptor.PROP_INFO_MESSAGE,
                 NbBundle.getMessage(
                     AirqualityDownscalingWizardPanelGrid.class,
                     "AirqualityDownscalingWizardPanelGrid.isValid().gridSizeEmpty")); // NOI18N

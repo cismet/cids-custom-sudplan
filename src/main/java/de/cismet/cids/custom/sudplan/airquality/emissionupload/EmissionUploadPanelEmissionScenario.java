@@ -55,7 +55,7 @@ public class EmissionUploadPanelEmissionScenario extends AbstractWizardPanel {
             valid = false;
         } else if (!emissionScenarioName.matches("[0-9a-zA-Z_]{1,10}")) {                 // NOI18N
             wizard.putProperty(
-                WizardDescriptor.PROP_INFO_MESSAGE,
+                WizardDescriptor.PROP_WARNING_MESSAGE,
                 NbBundle.getMessage(
                     EmissionUploadVisualPanelEmissionScenario.class,
                     "EmissionUploadVisualPanelEmissionScenario.isValid().name.invalid")); // NOI18N

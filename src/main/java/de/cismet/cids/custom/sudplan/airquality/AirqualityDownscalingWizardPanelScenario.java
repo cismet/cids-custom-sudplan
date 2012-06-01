@@ -185,7 +185,7 @@ public final class AirqualityDownscalingWizardPanelScenario extends AbstractWiza
 
         if (scenario == null) {
             wizard.putProperty(
-                WizardDescriptor.PROP_WARNING_MESSAGE,
+                WizardDescriptor.PROP_INFO_MESSAGE,
                 NbBundle.getMessage(
                     AirqualityDownscalingWizardPanelScenario.class,
                     "AirqualityDownscalingWizardPanelScenario.isValid().noScenario"));

@@ -203,7 +203,7 @@ public final class AirqualityDownscalingWizardPanelDatabase extends AbstractWiza
 
         if ((database == null) || (database.trim().length() <= 0)) {
             wizard.putProperty(
-                WizardDescriptor.PROP_WARNING_MESSAGE,
+                WizardDescriptor.PROP_INFO_MESSAGE,
                 NbBundle.getMessage(
                     AirqualityDownscalingWizardPanelDatabase.class,
                     "AirqualityDownscalingWizardPanelDatabase.isValid().noDatabase")); // NOI18N

@@ -97,7 +97,7 @@ public final class AirqualityDownscalingWizardPanelDate extends AbstractWizardPa
 
         if ((startDate == null) || (endDate == null)) {
             wizard.putProperty(
-                WizardDescriptor.PROP_WARNING_MESSAGE,
+                WizardDescriptor.PROP_INFO_MESSAGE,
                 NbBundle.getMessage(
                     AirqualityDownscalingWizardPanelDate.class,
                     "AirqualityDownscalingWizardPanelDate.isValid().noStartOrEndDate"));  // NOI18N

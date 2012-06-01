@@ -64,7 +64,7 @@ public final class AirqualityDownscalingWizardPanelMetadata extends AbstractWiza
 
         if ((name == null) || name.trim().isEmpty()) {
             wizard.putProperty(
-                WizardDescriptor.PROP_WARNING_MESSAGE,
+                WizardDescriptor.PROP_INFO_MESSAGE,
                 NbBundle.getMessage(
                     AirqualityDownscalingWizardPanelMetadata.class,
                     "AirqualityDownscalingWizardPanelMetadata.isValid().emptyName"));        // NOI18N
