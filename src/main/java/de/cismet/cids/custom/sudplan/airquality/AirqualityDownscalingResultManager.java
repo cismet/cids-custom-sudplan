@@ -417,19 +417,19 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
         } else if (Resolution.YEAR.equals(result.getResolution())) {
             title.append(now.get(Calendar.YEAR));
         } else if (Resolution.MONTH.equals(result.getResolution())) {
-            title.append(now.get(Calendar.MONTH));
+            title.append(now.get(Calendar.MONTH) + 1);
             title.append('.');
             title.append(now.get(Calendar.YEAR));
         } else if (Resolution.DAY.equals(result.getResolution())) {
             title.append(now.get(Calendar.DAY_OF_MONTH));
             title.append('.');
-            title.append(now.get(Calendar.MONTH));
+            title.append(now.get(Calendar.MONTH) + 1);
             title.append('.');
             title.append(now.get(Calendar.YEAR));
         } else if (Resolution.HOUR.equals(result.getResolution())) {
             title.append(now.get(Calendar.DAY_OF_MONTH));
             title.append('.');
-            title.append(now.get(Calendar.MONTH));
+            title.append(now.get(Calendar.MONTH) + 1);
             title.append('.');
             title.append(now.get(Calendar.YEAR));
             title.append(' ');
