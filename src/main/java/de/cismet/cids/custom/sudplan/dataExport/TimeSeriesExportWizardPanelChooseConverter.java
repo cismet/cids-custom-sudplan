@@ -12,8 +12,8 @@ import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
+import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
-import de.cismet.cids.custom.sudplan.dataImport.AbstractWizardPanel;
 
 /**
  * DOCUMENT ME!
