@@ -8,20 +8,29 @@
 package de.cismet.cids.custom.sudplan;
 
 import at.ac.ait.enviro.sudplan.util.EnvelopeQueryParameter;
+import at.ac.ait.enviro.sudplan.util.PropertyNames;
 import at.ac.ait.enviro.tsapi.handler.DataHandler;
 import at.ac.ait.enviro.tsapi.handler.Datapoint;
 import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
+import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
 
+import se.smhi.sudplan.client.Sample;
+import se.smhi.sudplan.client.SudPlanHypeAPI;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 
+import java.text.DateFormat;
+
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -32,6 +41,7 @@ import de.cismet.cids.custom.sudplan.commons.CismetExecutors;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.converter.TimeSeriesSerializer;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
+import de.cismet.cids.custom.sudplan.hydrology.HydrologyCache;
 
 /**
  * DOCUMENT ME!
@@ -173,6 +183,8 @@ public final class TimeseriesRetriever {
                 return fromTSTB();
             } else if (TimeseriesRetrieverConfig.PROTOCOL_DAV.equals(config.getProtocol())) {
                 return fromDav();
+            } else if (TimeseriesRetrieverConfig.PROTOCOL_HYPE.equals(config.getProtocol())) {
+                return fromHype();
             } else {
                 throw new TimeseriesRetrieverException("unknown config: " + config); // NOI18N
             }
@@ -265,10 +277,6 @@ public final class TimeseriesRetriever {
                 LOG.debug("GET location2: " + location);
             }
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("GET location3: " + location);
-            }
-
             final GetMethod get = new GetMethod(location);
             BufferedInputStream bis = null;
             try {
@@ -304,6 +312,47 @@ public final class TimeseriesRetriever {
                         LOG.warn("cannot close inputstream", ex); // NOI18N
                     }
                 }
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         *
+         * @throws  TimeseriesRetrieverException  DOCUMENT ME!
+         */
+        private TimeSeries fromHype() throws TimeseriesRetrieverException {
+            final SudPlanHypeAPI hypeClient = HydrologyCache.getInstance().getHypeClient();
+            final DateFormat df = HydrologyCache.getInstance().getHydroDateFormat();
+
+            final TimeStamp start = config.getInterval().getStart();
+            final TimeStamp end = config.getInterval().getEnd();
+            try {
+                final List<Sample> tsSamples = hypeClient.getTimeSeries(config.getOffering(),
+                        Integer.parseInt(config.getFoi()),
+                        df.format(start.asDate()),
+                        df.format(end.asDate()));
+
+                final TimeSeriesImpl ts = new TimeSeriesImpl();
+                ts.setTSProperty(TimeSeries.VALUE_KEYS, new String[] { PropertyNames.VALUE });
+                ts.setTSProperty(TimeSeries.VALUE_JAVA_CLASS_NAMES, new String[] { Float.class.getName() });
+                ts.setTSProperty(TimeSeries.VALUE_TYPES, new String[] { TimeSeries.VALUE_TYPE_NUMBER });
+                ts.setTSProperty(TimeSeries.VALUE_OBSERVED_PROPERTY_URNS, new String[] { config.getObsProp() });
+                ts.setTSProperty(TimeSeries.VALUE_UNITS, new String[] { Unit.M3S.getPropertyKey() });
+
+                for (final Sample sample : tsSamples) {
+                    final Date date = sample.getDate().toDateMidnight().toDate();
+                    ts.setValue(new TimeStamp(date),
+                        PropertyNames.VALUE,
+                        Double.valueOf(sample.getValue()).floatValue());
+                }
+
+                return ts;
+            } catch (final Exception ex) {
+                final String message = "cannot fetch timeseries from hype: " + config; // NOI18N
+                LOG.error(message, ex);
+                throw new TimeseriesRetrieverException(message, ex);
             }
         }
     }

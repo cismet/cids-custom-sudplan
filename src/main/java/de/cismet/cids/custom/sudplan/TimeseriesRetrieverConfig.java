@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 
@@ -43,6 +42,7 @@ public final class TimeseriesRetrieverConfig {
 
     public static final String PROTOCOL_TSTB = "tstb"; // NOI18N
     public static final String PROTOCOL_DAV = "dav";   // NOI18N
+    public static final String PROTOCOL_HYPE = "hype"; // NOI18N
 
     private static final String TOKEN_TIMEINTERVAL = "ts:interval";
     private static final Pattern PATTERN = Pattern.compile("[\\],\\[](\\w+);(\\w+)[\\],\\[]");
@@ -60,11 +60,7 @@ public final class TimeseriesRetrieverConfig {
     private final String offering;
 
     private final Geometry geometry;
-    private TimeInterval interval = new TimeInterval(
-            TimeInterval.Openness.OPEN,
-            TimeStamp.NEGATIVE_INFINITY,
-            TimeStamp.POSITIVE_INFINITY,
-            TimeInterval.Openness.OPEN);
+    private TimeInterval interval;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -123,29 +119,29 @@ public final class TimeseriesRetrieverConfig {
             throw new NullPointerException("Resolution must not be null");
         }
 
-        String offering;
-        String procedure;
+        final String changedOffering;
+        final String changedProcedure;
         if (PROTOCOL_DAV.equals(this.getProtocol())) {
-            offering = this.offering.replaceFirst("_unknown$", '_' + resolution.getPrecision());                  // NOI18N
-            procedure = this.procedure.replaceFirst("prec:unknown", "prec:" + resolution.getPrecision());         // NOI18N
+            changedOffering = this.offering.replaceFirst("_unknown$", '_' + resolution.getPrecision());                  // NOI18N
+            changedProcedure = this.procedure.replaceFirst("prec:unknown", "prec:" + resolution.getPrecision());         // NOI18N
         } else {
-            offering = this.offering.replaceFirst("prec_\\d+[YMdhms]", "prec_" + resolution.getOfferingSuffix()); // NOI18N
-            procedure = this.procedure.replaceFirst("prec:\\d+[YMs]", "prec:" + resolution.getPrecision());       // NOI18N
+            changedOffering = this.offering.replaceFirst("prec_\\d+[YMdhms]", "prec_" + resolution.getOfferingSuffix()); // NOI18N
+            changedProcedure = this.procedure.replaceFirst("prec:\\d+[YMs]", "prec:" + resolution.getPrecision());       // NOI18N
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug(MessageFormat.format(
                     "Changed offering {0} to {1} and procedure {2} to {3}",
-                    new Object[] { this.offering, offering, this.procedure, procedure }));
+                    new Object[] { this.offering, changedOffering, this.procedure, changedProcedure }));
         }
 
         final TimeseriesRetrieverConfig config = new TimeseriesRetrieverConfig(
                 this.protocol,
                 this.handlerLookup,
                 this.location,
-                procedure,
+                changedProcedure,
                 this.foi,
                 this.obsProp,
-                offering,
+                changedOffering,
                 this.geometry,
                 this.interval);
 
@@ -319,6 +315,19 @@ public final class TimeseriesRetrieverConfig {
     /**
      * DOCUMENT ME!
      *
+     * @param   hypeUrl  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  MalformedURLException  DOCUMENT ME!
+     */
+    public static TimeseriesRetrieverConfig fromHypeUrl(final String hypeUrl) throws MalformedURLException {
+        return fromUrl(hypeUrl, PROTOCOL_HYPE);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   url  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -334,6 +343,8 @@ public final class TimeseriesRetrieverConfig {
             return fromUrl(url, PROTOCOL_TSTB);
         } else if (url.startsWith(PROTOCOL_DAV)) {
             return fromUrl(url, PROTOCOL_DAV);
+        } else if (url.startsWith(PROTOCOL_HYPE)) {
+            return fromUrl(url, PROTOCOL_HYPE);
         } else {
             throw new MalformedURLException("unknown protocol: " + url); // NOI18N
         }
@@ -358,18 +369,18 @@ public final class TimeseriesRetrieverConfig {
             LOG.debug("processing: " + url);
         }
 
-        final String[] tstbToken = url.split(":", 2);                                      // NOI18N
-        if ((tstbToken.length < 2) || !tstbToken[0].equals(token)) {                       // NOI18N
+        final String[] tokenSplit = url.split(":", 2);                                     // NOI18N
+        if ((tokenSplit.length < 2) || !tokenSplit[0].equals(token)) {                     // NOI18N
             throw new MalformedURLException("invalid url: " + url + " | token: " + token); // NOI18N
         }
 
         final TimeseriesRetrieverConfig config;
-        final String[] lookupToken = tstbToken[1].split("@", 2); // NOI18N
+        final String[] lookupToken = tokenSplit[1].split("@", 2); // NOI18N
         final String handlerLookup;
         final String remaining;
         if (lookupToken.length == 1) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("no handler lookup present");          // NOI18N
+                LOG.debug("no handler lookup present");           // NOI18N
             }
 
             handlerLookup = null;
