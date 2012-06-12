@@ -11,6 +11,7 @@ import org.openide.WizardDescriptor;
 
 import java.awt.Component;
 
+import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
 import de.cismet.cids.custom.sudplan.converter.Converter;
 
 /**

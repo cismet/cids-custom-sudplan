@@ -13,6 +13,8 @@ import java.awt.Component;
 
 import java.io.File;
 
+import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
+
 /**
  * DOCUMENT ME!
  *
