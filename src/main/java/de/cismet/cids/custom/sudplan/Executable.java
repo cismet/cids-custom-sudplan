@@ -9,8 +9,6 @@ package de.cismet.cids.custom.sudplan;
 
 import java.io.IOException;
 
-import de.cismet.cids.dynamics.CidsBean;
-
 /**
  * DOCUMENT ME!
  *
