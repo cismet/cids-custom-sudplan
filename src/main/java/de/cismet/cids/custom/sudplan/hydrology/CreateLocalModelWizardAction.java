@@ -173,7 +173,6 @@ public final class CreateLocalModelWizardAction extends AbstractAction {
             try {
                 final User user = SessionManager.getSession().getUser();
                 final MetaClass hwClass = ClassCacheMultiple.getMetaClass(user.getDomain(), "hydrology_workspace"); // NOI18N
-                final MetaClass runClass = ClassCacheMultiple.getMetaClass(user.getDomain(), "run");                // NOI18N
 
                 CidsBean hwBean = hwClass.getEmptyInstance().getBean();
                 hwBean.setProperty("basin_id", basinId); // NOI18N
@@ -201,9 +200,9 @@ public final class CreateLocalModelWizardAction extends AbstractAction {
 
                 HydrologyCache.getInstance().setCurrentWorkspace(hwBean);
 
-                // TODO: reload catalogue
+                ComponentRegistry.getRegistry().getCatalogueTree().requestRefreshNode("hydrology.localmodel"); // NOI18N
             } catch (final Exception ex) {
-                LOG.error("cannot create new hydrology workspace", ex); // NOI18N
+                LOG.error("cannot create new hydrology workspace", ex);                                        // NOI18N
             }
         }
     }
