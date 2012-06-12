@@ -7,24 +7,19 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.hydrology;
 
-import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
-
 import org.apache.log4j.Logger;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
-import java.util.concurrent.Future;
+import java.util.HashMap;
 
 import javax.swing.JLabel;
 
-import de.cismet.cids.custom.sudplan.Resolution;
-import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
+import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
-import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.TimeSeriesVisualisationFactory;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.VisualisationType;
+import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -71,68 +66,62 @@ public class CalibrationOutputManagerUI extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     private void init() {
-        final Runnable r = new Runnable() {
+        try {
+            final HashMap<TimeseriesRetrieverConfig, TimeseriesConverter> configs =
+                new HashMap<TimeseriesRetrieverConfig, TimeseriesConverter>(3);
 
-                @Override
-                public void run() {
-                    try {
-                        final TimeSeriesVisualisation vis = TimeSeriesVisualisationFactory.getInstance()
-                                    .createVisualisation(VisualisationType.SIMPLE);
+            final CidsBean resultTsBean = model.fetchResultTs();
+            final String url = (String)resultTsBean.getProperty("uri"); // NOI18N
+            final TimeseriesRetrieverConfig cfg = TimeseriesRetrieverConfig.fromUrl(url);
+            configs.put(cfg, SMSUtils.loadConverter(resultTsBean));
 
-                        final CidsBean resultTsBean = model.fetchResultTs();
-                        final String url = (String)resultTsBean.getProperty("uri"); // NOI18N
-                        final TimeseriesRetrieverConfig cfg = TimeseriesRetrieverConfig.fromUrl(url)
-                                    .changeResolution(Resolution.DAY);
-                        final Future<TimeSeries> tsFuture = TimeseriesRetriever.getInstance().retrieve(cfg);
-                        final TimeSeries resultTs = tsFuture.get();
+            if (model.getInputTs() == null) {
+                LOG.warn("there is no input timeseries for output: " + model);  // NOI18N
+            } else {
+                final CidsBean inputTsBean = model.fetchInputTs();
+                final String urlInput = (String)inputTsBean.getProperty("uri"); // NOI18N
+                final TimeseriesRetrieverConfig cfgInput = TimeseriesRetrieverConfig.fromUrl(urlInput);
+                configs.put(cfgInput, SMSUtils.loadConverter(inputTsBean));
+            }
 
-                        vis.addTimeSeries(resultTs);
+            final Runnable r = new Runnable() {
 
-                        if (model.getInputTs() == null) {
-                            LOG.warn("there is no input timeseries for output: " + model);  // NOI18N
-                        } else {
-                            final CidsBean inputTsBean = model.fetchInputTs();
-                            final String urlInput = (String)inputTsBean.getProperty("uri"); // NOI18N
-                            final TimeseriesRetrieverConfig cfgInput = TimeseriesRetrieverConfig.fromUrl(urlInput);
-                            final Future<TimeSeries> tsFutInput = TimeseriesRetriever.getInstance().retrieve(cfgInput);
-                            final TimeSeries inputTs = tsFutInput.get();
-
-                            vis.addTimeSeries(inputTs);
-                        }
-
-                        EventQueue.invokeLater(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    CalibrationOutputManagerUI.this.remove(lblLoading);
-                                    lblLoading.dispose();
-                                    CalibrationOutputManagerUI.this.setLayout(new BorderLayout());
-                                    CalibrationOutputManagerUI.this.add(vis.getVisualisationUI(), BorderLayout.CENTER);
-                                    CalibrationOutputManagerUI.this.invalidate();
-                                    CalibrationOutputManagerUI.this.validate();
-                                }
-                            });
-                    } catch (final Exception ex) {
-                        final String message = "cannot create output visualisation"; // NOI18N
-                        LOG.error(message, ex);
-
-                        EventQueue.invokeLater(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    CalibrationOutputManagerUI.this.remove(lblLoading);
-                                    lblLoading.dispose();
-                                    CalibrationOutputManagerUI.this.setLayout(new BorderLayout());
-                                    CalibrationOutputManagerUI.this.add(
-                                        new JLabel(message + ": " + ex), // NOI18N
-                                        BorderLayout.CENTER);
-                                }
-                            });
+                    @Override
+                    public void run() {
+                        final TimeseriesChartPanel tcp = new TimeseriesChartPanel(configs, false, null);
+                        remove(lblLoading);
+                        lblLoading.dispose();
+                        setLayout(new BorderLayout());
+                        add(tcp, BorderLayout.CENTER);
                     }
-                }
-            };
+                };
 
-        SudplanConcurrency.getSudplanGeneralPurposePool().execute(r);
+            if (EventQueue.isDispatchThread()) {
+                r.run();
+            } else {
+                EventQueue.invokeLater(r);
+            }
+        } catch (final Exception e) {
+            final String message = "cannot create output visualisation"; // NOI18N
+            LOG.error(message, e);
+
+            final Runnable r = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        remove(lblLoading);
+                        lblLoading.dispose();
+                        setLayout(new BorderLayout());
+                        add(new JLabel(message + ": " + e), BorderLayout.CENTER); // NOI18N
+                    }
+                };
+
+            if (EventQueue.isDispatchThread()) {
+                r.run();
+            } else {
+                EventQueue.invokeLater(r);
+            }
+        }
     }
 
     /**

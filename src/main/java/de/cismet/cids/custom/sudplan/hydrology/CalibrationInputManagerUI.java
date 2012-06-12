@@ -13,6 +13,7 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import org.apache.log4j.Logger;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.EventQueue;
 
 import java.util.Map.Entry;
@@ -109,8 +110,15 @@ public class CalibrationInputManagerUI extends javax.swing.JPanel {
                                     lblLoading.dispose();
                                     CalibrationInputManagerUI.this.setLayout(new BorderLayout());
                                     CalibrationInputManagerUI.this.add(vis.getVisualisationUI(), BorderLayout.CENTER);
-                                    CalibrationInputManagerUI.this.invalidate();
-                                    CalibrationInputManagerUI.this.validate();
+
+                                    Container parent = CalibrationInputManagerUI.this;
+                                    Container current = getParent();
+                                    while (current != null) {
+                                        parent = current;
+                                        current = parent.getParent();
+                                    }
+                                    parent.invalidate();
+                                    parent.validate();
                                 }
                             });
                     } catch (final Exception e) {
