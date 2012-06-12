@@ -19,7 +19,7 @@ import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.EventQueue;
 
-import de.cismet.cids.custom.sudplan.dataImport.AbstractWizardPanel;
+import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
 
 /**
  * DOCUMENT ME!

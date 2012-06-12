@@ -12,7 +12,7 @@ import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
-import de.cismet.cids.custom.sudplan.dataImport.AbstractWizardPanel;
+import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
 
 /**
  * DOCUMENT ME!

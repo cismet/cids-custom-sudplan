@@ -21,11 +21,11 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.concurrent.Future;
 
+import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
 import de.cismet.cids.custom.sudplan.StatusPanel;
 import de.cismet.cids.custom.sudplan.airquality.emissionupload.EmissionUpload.Action;
 import de.cismet.cids.custom.sudplan.airquality.emissionupload.EmissionUpload.State;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
-import de.cismet.cids.custom.sudplan.dataImport.AbstractWizardPanel;
 
 import de.cismet.cismap.commons.Crs;
 

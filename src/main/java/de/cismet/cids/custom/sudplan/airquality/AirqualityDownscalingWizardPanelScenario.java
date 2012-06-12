@@ -24,9 +24,9 @@ import java.awt.EventQueue;
 import java.util.List;
 import java.util.Properties;
 
+import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
 import de.cismet.cids.custom.sudplan.DataHandlerCache;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
-import de.cismet.cids.custom.sudplan.dataImport.AbstractWizardPanel;
 
 /**
  * DOCUMENT ME!

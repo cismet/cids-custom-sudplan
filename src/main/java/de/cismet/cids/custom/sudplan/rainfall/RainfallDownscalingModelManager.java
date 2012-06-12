@@ -437,11 +437,8 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
      * @throws  IOException            DOCUMENT ME!
      * @throws  IllegalStateException  DOCUMENT ME!
      */
-    public static RainfallDownscalingInput inputFromRun(final CidsBean runBean) throws IOException {
-        final Manager manager = SMSUtils.loadManagerFromRun(runBean, ManagerType.INPUT);
-        manager.setCidsBean((CidsBean)runBean.getProperty("modelinput")); // NOI18N
-
-        final Object resource = manager.getUR();
+    private RainfallDownscalingInput inputFromRun(final CidsBean runBean) throws IOException {
+        final Object resource = SMSUtils.inputFromRun(runBean);
         if (!(resource instanceof RainfallDownscalingInput)) {
             throw new IllegalStateException("manager resource is not suited for rainfall downscaling"); // NOI18N
         }

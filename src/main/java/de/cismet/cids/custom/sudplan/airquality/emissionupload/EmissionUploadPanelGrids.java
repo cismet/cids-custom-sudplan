@@ -18,7 +18,7 @@ import java.io.File;
 
 import java.util.Collection;
 
-import de.cismet.cids.custom.sudplan.dataImport.AbstractWizardPanel;
+import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
 
 /**
  * DOCUMENT ME!

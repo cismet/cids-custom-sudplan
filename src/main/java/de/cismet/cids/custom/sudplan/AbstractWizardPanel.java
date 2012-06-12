@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.dataImport;
+package de.cismet.cids.custom.sudplan;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
