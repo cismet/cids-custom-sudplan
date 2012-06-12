@@ -20,7 +20,6 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import de.cismet.cids.custom.sudplan.TimeSeriesTestUtil;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -31,13 +30,13 @@ import static org.junit.Assert.*;
 public class TimeSeriesSerializerTest 
 {
     @Test(expected=NullPointerException.class)
-    public void testSerializationWithNullParam()
+    public void testSerializationWithNullParam() throws Exception
     {
         TimeSeriesSerializer.serializeTimeSeries(null);
     }
     
     @Test
-    public void testSerialization()
+    public void testSerialization() throws Exception
     {
         final TimeSeries ts    = TimeSeriesTestUtil.createTestTimeSeries();
         final byte[]     tsRep = TimeSeriesSerializer.serializeTimeSeries(ts);
@@ -59,7 +58,7 @@ public class TimeSeriesSerializerTest
     }
     
     @Test(expected=NullPointerException.class)
-    public void testSerializationToStreamWithNullParam()
+    public void testSerializationToStreamWithNullParam() throws Exception
     {
         TimeSeriesSerializer.serializeTimeSeriesToInputStream(null);
     }

@@ -119,8 +119,10 @@ public final class TimeSeriesSerializer implements TimeseriesConverter {
      * @param   ts  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
      */
-    public static InputStream serializeTimeSeriesToInputStream(final TimeSeries ts) {
+    public static InputStream serializeTimeSeriesToInputStream(final TimeSeries ts) throws IOException {
         return new ByteArrayInputStream(serializeTimeSeries(ts));
     }
 
@@ -131,9 +133,10 @@ public final class TimeSeriesSerializer implements TimeseriesConverter {
      *
      * @return  DOCUMENT ME!
      *
+     * @throws  IOException           DOCUMENT ME!
      * @throws  NullPointerException  DOCUMENT ME!
      */
-    public static byte[] serializeTimeSeries(final TimeSeries ts) {
+    public static byte[] serializeTimeSeries(final TimeSeries ts) throws IOException {
         if (ts == null) {
             throw new NullPointerException("Given TimeSeries instance must not be null");
         }
@@ -183,7 +186,7 @@ public final class TimeSeriesSerializer implements TimeseriesConverter {
                     final String[] values = (String[])prop;
                     for (int i = 0; i < values.length; i++) {
                         writer.write(FIELD_SEP_AS_CHAR);
-                        writer.write(values[i]);
+                        writer.write(String.valueOf(values[i]));
                     }
                     writer.newLine();
                 } else {
@@ -210,15 +213,15 @@ public final class TimeSeriesSerializer implements TimeseriesConverter {
             }
 
             writer.flush();
-        } catch (Exception e) {
-            LOG.error("An error occured while serializing TimeSeries: " + ts, e);
-            return new byte[0];
+        } catch (final Exception e) {
+            final String message = "An error occured while serializing TimeSeries: " + ts; // NOI18N
+            LOG.error(message, e);
+            throw new IOException(message, e);
         } finally {
             try {
                 writer.close();
-            } catch (Exception e) {
-                LOG.error("An error occured while closing Writer", e);
-                return new byte[0];
+            } catch (final Exception e) {
+                LOG.warn("An error occured while closing Writer", e);                      // NOI18N
             }
         }
 
