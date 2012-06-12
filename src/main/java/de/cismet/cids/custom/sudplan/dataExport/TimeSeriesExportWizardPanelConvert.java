@@ -26,12 +26,12 @@ import java.util.concurrent.Future;
 
 import javax.swing.JButton;
 
+import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
 import de.cismet.cids.custom.sudplan.StatusPanel;
 import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
-import de.cismet.cids.custom.sudplan.dataImport.AbstractWizardPanel;
 
 /**
  * DOCUMENT ME!
