@@ -10,13 +10,11 @@ package de.cismet.cids.custom.sudplan.local.linz.model;
 import org.apache.log4j.Logger;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 import java.util.Date;
 import java.util.List;
 
-import de.cismet.cids.custom.sudplan.*;
 import de.cismet.cids.custom.sudplan.local.linz.EtaConfiguration;
 import de.cismet.cids.custom.sudplan.local.linz.EtaInput;
 import de.cismet.cids.custom.sudplan.local.linz.EtaOutput;
@@ -288,9 +286,9 @@ public class EtaComputationModel {
                 if (csoName.equals("RKL_Ablauf")) {
                     etaConfiguration.setEnabled(false);
                 }
-                // etaConfiguration.setEnabled(Math.random() > 0.5d);
+
                 etaConfiguration.setName(csoName);
-                // ((float)Math.random() * 10f);
+
                 if (csoName.equals("ULKS1")
                             || csoName.equals("AB_Plesching")
                             || csoName.equals("ALKSP1nolink")
@@ -311,8 +309,7 @@ public class EtaComputationModel {
                             || csoName.equals("PNASP1nolink")
                             || csoName.equals("SMMSP1nolink")
                             || csoName.equals("STYSP1nolink")
-                            ||// csoName.equals("RHHB_Weikerlsee3nolink") ||
-                            csoName.equals("WLDSP1nolink")
+                            || csoName.equals("WLDSP1nolink")
                             || csoName.equals("WLDSP2nolink")
                             || csoName.equals("WLGSP1nolink")) {
                     etaConfiguration.setSedimentationEfficency(21.0f);
