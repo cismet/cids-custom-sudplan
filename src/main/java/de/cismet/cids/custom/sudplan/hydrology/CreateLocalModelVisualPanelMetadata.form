@@ -58,12 +58,6 @@
       </Constraints>
     </Component>
     <Component class="javax.swing.JLabel" name="lblPoiValue">
-      <BindingProperties>
-        <BindingProperty name="text" source="Form" sourcePath="${model.basinId}" target="lblPoiValue" targetPath="text" updateStrategy="1" immediately="false">
-          <Property name="nullValue" type="java.lang.String" value="&lt;null&gt;"/>
-          <Property name="incompletePathValue" type="java.lang.String" value="&lt;unreadable&gt;"/>
-        </BindingProperty>
-      </BindingProperties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
           <GridBagConstraints gridX="1" gridY="1" gridWidth="1" gridHeight="1" fill="1" ipadX="0" ipadY="0" insetsTop="5" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="23" weightX="0.0" weightY="0.0"/>

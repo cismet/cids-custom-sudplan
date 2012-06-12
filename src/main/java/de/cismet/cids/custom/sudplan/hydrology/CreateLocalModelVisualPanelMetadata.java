@@ -52,6 +52,9 @@ public class CreateLocalModelVisualPanelMetadata extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     void init() {
+        // won't use bind, because the value is read too early
+        lblPoiValue.setText(String.valueOf(model.getBasinId()));
+
         if (model.getName() == null) {
             txtName.setText("Local Model for catchment area " + model.getBasinId());
         }
@@ -129,17 +132,6 @@ public class CreateLocalModelVisualPanelMetadata extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblPoi, gridBagConstraints);
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${model.basinId}"),
-                lblPoiValue,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("<null>");
-        binding.setSourceUnreadableValue("<unreadable>");
-        bindingGroup.addBinding(binding);
-
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
