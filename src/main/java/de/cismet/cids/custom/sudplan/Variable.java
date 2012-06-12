@@ -68,6 +68,13 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
             "urn:ogc:def:property:OGC:LocalQ", // NOI18N
             NbBundle.getMessage(Variable.class, "Variable.LOCAL_Q.localisedName")); // NOI18N
 
+    // FIXME: what are those variables, ask the hydrologists
+    public static final Variable COUT = new Variable("urn:ogc:def:property:OGC:cout");
+    public static final Variable CRUN = new Variable("urn:ogc:def:property:OGC:crun");
+    public static final Variable CPRC = new Variable("urn:ogc:def:property:OGC:cprc");
+    public static final Variable CTMP = new Variable("urn:ogc:def:property:OGC:ctmp");
+    public static final Variable GWAT = new Variable("urn:ogc:def:property:OGC:gwat");
+
     //~ Instance fields --------------------------------------------------------
 
     private final String propertyKey;
@@ -156,7 +163,12 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
                 PRECIPITATION,
                 SO2,
                 SOIL_MOISTURE,
-                TEMPERATURE
+                TEMPERATURE,
+                COUT,
+                CPRC,
+                CRUN,
+                CTMP,
+                GWAT
             };
     }
 
