@@ -96,7 +96,7 @@ public final class TimeSeriesAggregator {
                 cal.setTime(timestamps[i].asDate());
                 startDay = cal.get(Calendar.DAY_OF_YEAR);
                 startDayIndex = i;
-                aggregatedValue = (Float)ts.getValue(timestamps[0], PropertyNames.VALUE);
+                aggregatedValue = (Float)ts.getValue(timestamps[i], PropertyNames.VALUE);
             }
         }
 
