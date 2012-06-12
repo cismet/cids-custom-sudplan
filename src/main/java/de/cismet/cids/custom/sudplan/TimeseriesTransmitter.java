@@ -15,6 +15,8 @@ import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
+
 import java.net.URL;
 
 import java.util.concurrent.Callable;
@@ -135,24 +137,38 @@ public final class TimeseriesTransmitter {
             final HttpClient client = TimeSeriesRemoteHelper.createHttpClient();
 
             final PutMethod put = new PutMethod(this.targetLocation.toExternalForm());
-            final ByteArrayRequestEntity requestEntity = new ByteArrayRequestEntity(TimeSeriesSerializer
-                            .serializeTimeSeries(this.ts));
-            put.setRequestEntity(requestEntity);
+
+            final ByteArrayRequestEntity requestEntity;
+            try {
+                requestEntity = new ByteArrayRequestEntity(TimeSeriesSerializer.serializeTimeSeries(this.ts));
+            } catch (final IOException e) {
+                final String message = "cannot create request entity for timeseries: " + ts; // NOI18N
+                LOG.error(message, e);
+                throw new TimeseriesRetrieverException(message, e);
+            }
 
             try {
+                put.setRequestEntity(requestEntity);
+
                 client.executeMethod(put);
                 final int statusCode = put.getStatusCode();
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Leaving sendToDav() with status code: " + statusCode);
                 }
+
                 return (statusCode == 201) || (statusCode == 202);
             } catch (final Exception ex) {
-                LOG.error(put.getStatusText(), ex);
+                final String message = put.getStatusText();
+
+                LOG.error(message, ex);
+
                 put.abort();
+
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Leaving sendToDav() with error", ex);
                 }
-                throw new TimeseriesRetrieverException(put.getStatusText(), ex);
+
+                throw new TimeseriesRetrieverException(message, ex);
             } finally {
                 put.releaseConnection();
             }
