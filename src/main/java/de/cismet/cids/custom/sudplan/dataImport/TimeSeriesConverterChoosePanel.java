@@ -12,6 +12,7 @@
  */
 package de.cismet.cids.custom.sudplan.dataImport;
 
+import de.cismet.cids.custom.sudplan.converter.HydrologyTimeseriesConverter;
 import de.cismet.cids.custom.sudplan.converter.LinzTimeseriesConverter;
 import de.cismet.cids.custom.sudplan.converter.TimeSeriesSerializer;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
@@ -66,6 +67,7 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
         this.cboConverterChooser.removeAllItems();
         this.cboConverterChooser.addItem(new WuppertalTimeseriesConverter());
         this.cboConverterChooser.addItem(new LinzTimeseriesConverter());
+        this.cboConverterChooser.addItem(new HydrologyTimeseriesConverter());
         this.cboConverterChooser.addItem(TimeSeriesSerializer.getInstance());
     }
 

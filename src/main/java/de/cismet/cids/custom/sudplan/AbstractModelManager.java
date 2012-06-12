@@ -523,6 +523,6 @@ public abstract class AbstractModelManager implements ModelManager {
 
     @Override
     public RunInfo getRunInfo() {
-        return SMSUtils.getRunInfo(cidsBean, RunInfo.class);
+        return SMSUtils.getRunInfo(cidsBean, DefaultRunInfo.class);
     }
 }

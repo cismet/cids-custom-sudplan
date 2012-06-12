@@ -18,6 +18,7 @@ import Sirius.navigator.ui.tree.MetaCatalogueTree;
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
 import Sirius.server.middleware.types.MetaObjectNode;
+import Sirius.server.newuser.User;
 import Sirius.server.search.Query;
 import Sirius.server.search.SearchResult;
 import Sirius.server.sql.SystemStatement;
@@ -36,6 +37,8 @@ import org.openide.util.ImageUtilities;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import java.text.MessageFormat;
+
 import java.util.Properties;
 import java.util.concurrent.Future;
 
@@ -44,6 +47,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
+import de.cismet.cids.custom.sudplan.rainfall.RainfallDownscalingInput;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -75,6 +79,8 @@ public final class SMSUtils {
     public static final String DOMAIN_SUDPLAN_WUPP = "SUDPLAN-WUPP";                    // NOI18N
     public static final String EPSG_WUPP = "EPSG:31466";                                // NOI18N
 
+    private static final String RUN_FROM_IO_QUERY = "SELECT {0}, {1} FROM run WHERE modelinput = {2}"; // NOI18N
+
     //~ Enums ------------------------------------------------------------------
 
     /**
@@ -88,7 +94,8 @@ public final class SMSUtils {
 
         AQ_DS("Airquality Downscaling"),        // NOI18N
         RF_DS("Rainfall Downscaling"),          // NOI18N
-        HY_CAL("Hydrology Calibration"),        // NOI18N
+        HY_CAL("Hydrological Calibration"),     // NOI18N
+        HY_SIM("Hydrological Simulation"),      // NOI18N
         GEOCPM("Wuppertal Abfluss Berechnung"), // NOI18N
         SWMM("EPA SWMM 5.0"),                   // NOI18N
         LINZ_ETA("Linz Wirkungsgradberechnung"); // NOI18N
@@ -290,6 +297,64 @@ public final class SMSUtils {
                         + " || modelinput=" + modelInput;                                              // NOI18N
             LOG.error(message, e);
             throw new IOException(name, e);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   ioBean  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    public static CidsBean loadModelManagerBeanFromIO(final CidsBean ioBean) {
+        try {
+            final User user = SessionManager.getSession().getUser();
+            final MetaClass runClass = ClassCacheMultiple.getMetaClass(user.getDomain(), "run"); // NOI18N
+            final String query = MessageFormat.format(
+                    RUN_FROM_IO_QUERY,
+                    runClass.getID(),
+                    runClass.getPrimaryKey(),
+                    ioBean.getMetaObject().getID());
+            final MetaObject[] mos = SessionManager.getProxy().getMetaObjectByQuery(user, query);
+
+            if (mos.length > 1) {
+                throw new IllegalStateException("too many model manager instances found: " + mos.length); // NOI18N
+            } else if (mos.length < 1) {
+                throw new IllegalStateException("io without model manager instance: " + ioBean);          // NOI18N
+            }
+
+            return mos[0].getBean();
+        } catch (final Exception e) {
+            final String message = "cannot load model manager instance bean from io: " + ioBean; // NOI18N
+            LOG.error(message, e);
+            throw new IllegalStateException(message, e);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   ioBean  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    public static Manager loadModelManagerInstanceFromIO(final CidsBean ioBean) {
+        try {
+            final Manager mManager = loadManagerFromModel((CidsBean)ioBean.getProperty("model"), ManagerType.MODEL); // NOI18N
+            final CidsBean mBean = loadModelManagerBeanFromIO(ioBean);
+
+            mManager.setCidsBean(mBean);
+
+            return mManager;
+        } catch (final Exception e) {
+            final String message = "cannot load model manager instance from io: " + ioBean; // NOI18N
+            LOG.error(message, e);
+            throw new IllegalStateException(message, e);
         }
     }
 
@@ -783,5 +848,21 @@ public final class SMSUtils {
         }
 
         return null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   runBean  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
+    public static Object inputFromRun(final CidsBean runBean) throws IOException {
+        final Manager manager = SMSUtils.loadManagerFromRun(runBean, ManagerType.INPUT);
+        manager.setCidsBean((CidsBean)runBean.getProperty("modelinput")); // NOI18N
+
+        return manager.getUR();
     }
 }
