@@ -45,6 +45,8 @@ public final class ProgressWatch {
      * Creates a new ProgressWatch object.
      */
     private ProgressWatch() {
+        // FIXME: it is highly desirable to have a customised scheduledThreadPool since there are some issues that
+        // will go uncaught
         poller = Executors.newScheduledThreadPool(5, SudplanConcurrency.createThreadFactory("progress-watch")); // NOI18N
         deregisterDispatcher = CismetExecutors.newSingleThreadExecutor(
                 SudplanConcurrency.createThreadFactory("deregister-dispatcher"));                               // NOI18N
