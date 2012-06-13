@@ -13,10 +13,7 @@ import org.openide.WizardDescriptor;
 
 import java.awt.Component;
 
-import java.io.IOException;
-
 import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
-import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 
