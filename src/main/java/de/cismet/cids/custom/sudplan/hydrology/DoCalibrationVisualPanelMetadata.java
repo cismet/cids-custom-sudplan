@@ -41,6 +41,8 @@ public class DoCalibrationVisualPanelMetadata extends javax.swing.JPanel {
         this.model = model;
 
         initComponents();
+
+        setName("Enter Metadata");
     }
 
     //~ Methods ----------------------------------------------------------------

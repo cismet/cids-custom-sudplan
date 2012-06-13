@@ -108,7 +108,7 @@ public final class DoCalibrationWizardAction extends AbstractAction {
     public void actionPerformed(final ActionEvent e) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
         wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
-        wizard.setTitle("Create Local Model");           // NOI18N
+        wizard.setTitle("Do Calibration");               // NOI18N
 
         final CidsBean currWorkspace = HydrologyCache.getInstance().getCurrentWorkspace();
         if (currWorkspace != null) {
