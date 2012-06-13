@@ -16,6 +16,9 @@ import se.smhi.sudplan.client.exception.UnrecoverableException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import de.cismet.cids.dynamics.CidsBean;
 
 /**
@@ -35,6 +38,7 @@ public final class HydrologyCache {
 
     private final transient SudPlanHypeAPI hypeClient;
     private final transient Scenario calibrationScenario;
+    private final transient Set<Scenario> simulationScenarios;
     private final transient DateFormat hydroDateFormat;
 
     private transient CidsBean currentWorkspace;
@@ -48,13 +52,15 @@ public final class HydrologyCache {
      */
     private HydrologyCache() {
         hypeClient = new SudPlanHypeAPI("79.125.2.136"); // NOI18N
+        simulationScenarios = new HashSet<Scenario>();
 
         Scenario calScenario = null;
         try {
             for (final Scenario s : hypeClient.listScenarios()) {
                 if ("NORMAL".equals(s.getScenarioId())) { // NOI18N
                     calScenario = s;
-                    break;
+                } else {
+                    simulationScenarios.add(s);
                 }
             }
 
@@ -117,6 +123,15 @@ public final class HydrologyCache {
      */
     public Scenario getCalibrationScenario() {
         return calibrationScenario;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Set<Scenario> getSimulationScenarios() {
+        return simulationScenarios;
     }
 
     /**
