@@ -120,7 +120,8 @@ public class SingleCatchmentAreaFeature extends DefaultStyledFeature implements 
                 null,
                 new CreateLocalModelWizardAction(feature),
                 new AssignTimeseriesWizardAction(feature),
-                new DoCalibrationWizardAction());
+                new DoCalibrationWizardAction(),
+                new DoSimulationWizardAction(feature));
     }
 
     @Override
