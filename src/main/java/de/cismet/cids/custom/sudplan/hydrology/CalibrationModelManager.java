@@ -237,76 +237,6 @@ public final class CalibrationModelManager extends AbstractAsyncModelManager {
         }
     }
 
-//    /**
-//     * we won't use a special inputstream for the upload of the timeseries because it is more overhead than writing an
-//     * appropriate file.
-//     *
-//     * @param   basinId     DOCUMENT ME!
-//     * @param   timeseries  DOCUMENT ME!
-//     * @param   begin       DOCUMENT ME!
-//     * @param   end         DOCUMENT ME!
-//     *
-//     * @return  DOCUMENT ME!
-//     *
-//     * @throws  IOException            DOCUMENT ME!
-//     * @throws  IllegalStateException  DOCUMENT ME!
-//     */
-//    @Deprecated
-//    private File writeTmpFile(final int basinId, final TimeSeries timeseries, final Date begin, final Date end)
-//            throws IOException {
-//        final File tmp = File.createTempFile("hydro_ts_" + System.currentTimeMillis(), "txt"); // NOI18N
-//        tmp.deleteOnExit();
-//
-//        BufferedWriter bw = null;
-//
-//        try {
-//            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tmp), "UTF-8")); // NOI18N
-//
-//            bw.write("Date\t" + basinId + "\n"); // NOI18N
-//
-//            final Calendar cal = new GregorianCalendar();
-//            final Calendar endCal = new GregorianCalendar();
-//            final DateFormat df = HydrologyCache.getInstance().getHydroDateFormat();
-//            cal.setTime(begin);
-//            endCal.setTime(end);
-//
-//            while (!cal.after(endCal)) {
-//                // day by day
-//                bw.write(df.format(cal.getTime()));
-//                bw.write('\t');
-//
-//                final Object value = timeseries.getValue(new TimeStamp(cal.getTimeInMillis()), PropertyNames.VALUE);
-//
-//                if (value == null) {
-//                    if (LOG.isDebugEnabled()) {
-//                        LOG.debug("no value for timestamp: [basinid=" + basinId + "|timeseries=" + timeseries // NOI18N
-//                                    + "|date="   // NOI18N
-//                                    + df.format(cal) + "]"); // NOI18N
-//                    }
-//
-//                    bw.write("-9999\n");                                                               // NOI18N
-//                } else if (!(value instanceof Float)) {
-//                    throw new IllegalStateException("unsupported time series value format: " + value); // NOI18N
-//                } else {
-//                    bw.write(String.valueOf(value));
-//                    bw.write('\n');
-//                }
-//
-//                cal.add(Calendar.DAY_OF_YEAR, 1);
-//            }
-//
-//            return tmp;
-//        } finally {
-//            if (bw != null) {
-//                try {
-//                    bw.close();
-//                } catch (final IOException e) {
-//                    LOG.warn("cannot close hydro ts writer", e); // NOI18N
-//                }
-//            }
-//        }
-//    }
-
     /**
      * we won't use a special inputstream for the upload of the timeseries because it is more overhead than writing an
      * appropriate file.
@@ -417,7 +347,15 @@ public final class CalibrationModelManager extends AbstractAsyncModelManager {
 
     @Override
     protected String getReloadId() {
-        return null;
+        try {
+            final CalibrationInput input = inputFromRun(cidsBean);
+
+            return "hydrology.localmodel." + input.getHydrologyWorkspaceId() + ".calibration";
+        } catch (final IOException ex) {
+            LOG.warn("cannot fetch input from run, reload id cannot be built", ex); // NOI18N
+
+            return null;
+        }
     }
 
     @Override
