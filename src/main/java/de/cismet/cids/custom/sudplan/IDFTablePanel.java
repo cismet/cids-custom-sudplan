@@ -7,18 +7,28 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import java.awt.Component;
 
-import java.util.List;
+import java.io.StringReader;
 
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedMap;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
+
+import de.cismet.cids.custom.sudplan.converter.Euler2ComputationWizardAction;
+import de.cismet.cids.custom.sudplan.geocpmrest.io.Rainevent;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 /**
  * DOCUMENT ME!
@@ -31,6 +41,11 @@ public class IDFTablePanel extends javax.swing.JPanel {
     //~ Instance fields --------------------------------------------------------
 
     private final transient IDFCurve curve;
+    private transient int selectedColIndex;
+    private transient int selectedRowStart;
+    private transient int selectedRowEnd;
+    private final JPopupMenu popup;
+    private final JMenuItem menuItem;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
@@ -50,9 +65,67 @@ public class IDFTablePanel extends javax.swing.JPanel {
         initComponents();
 
         init();
+
+        popup = new JPopupMenu();
+        popup.add(menuItem = new JMenuItem("Berechnung"));
+        menuItem.addActionListener(new Euler2ComputationWizardAction(this, curve));
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getSelectedColIndex() {
+        return selectedColIndex;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectedColIndex  DOCUMENT ME!
+     */
+    public void setSelectedColIndex(final int selectedColIndex) {
+        this.selectedColIndex = selectedColIndex;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getSelectedRowEnd() {
+        return selectedRowEnd;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectedRowEnd  DOCUMENT ME!
+     */
+    public void setSelectedRowEnd(final int selectedRowEnd) {
+        this.selectedRowEnd = selectedRowEnd;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getSelectedRowStart() {
+        return selectedRowStart;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectedRowStart  DOCUMENT ME!
+     */
+    public void setSelectedRowStart(final int selectedRowStart) {
+        this.selectedRowStart = selectedRowStart;
+    }
 
     /**
      * DOCUMENT ME!
@@ -61,6 +134,10 @@ public class IDFTablePanel extends javax.swing.JPanel {
         tblIDF.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         tblIDF.getTableHeader().setReorderingAllowed(false);
         tblIDF.setCellSelectionEnabled(true);
+
+//        final String json = (String)cidsBean_idfcurve.getProperty("uri"); // NOI18N
+//        final ObjectMapper mapper = new ObjectMapper();
+//        final IDFCurve curve = mapper.readValue(new StringReader(json), IDFCurve.class);
 
         final List<Integer> frequencies = curve.getFrequencies();
         final Object[] columnHeaders = new Object[frequencies.size() + 1];
@@ -83,6 +160,39 @@ public class IDFTablePanel extends javax.swing.JPanel {
             tcm.getColumn(i).setCellRenderer(renderer);
             tcm.getColumn(i).setHeaderRenderer(renderer);
         }
+
+        tblIDF.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
+                @Override
+                public void valueChanged(final ListSelectionEvent lse) {
+                    if (lse.getValueIsAdjusting()) {
+                        return;
+                    }
+                    final int colIndexStart = tblIDF.getSelectedColumn();
+                    final int colIndexEnd = tblIDF.getColumnModel().getSelectionModel().getMaxSelectionIndex();
+                    final int rowIndexStart = tblIDF.getSelectedRow();
+                    final int rowIndexEnd = tblIDF.getSelectionModel().getMaxSelectionIndex();
+
+                    if ((colIndexStart != colIndexEnd) || (rowIndexStart != 0)) {
+                        menuItem.setEnabled(false);
+                    } else {
+                        menuItem.setEnabled(true);
+
+                        setSelectedColIndex(colIndexEnd);
+                        setSelectedRowStart(rowIndexStart);
+                        setSelectedRowEnd(rowIndexEnd);
+
+                        /*
+                         * final List<Double> data = new ArrayList<Double>();
+                         *
+                         * for (int i = rowIndexStart; i <= rowIndexEnd; i++) { final Double value =
+                         * (Double)curve.getDurationIntensityRows()[i][colIndexEnd]; if (value != null) {
+                         * data.add(value); } }
+                         **/
+
+                    }
+                }
+            });
     }
 
     /**
@@ -108,6 +218,17 @@ public class IDFTablePanel extends javax.swing.JPanel {
                     { null, null, null, null }
                 },
                 new String[] { "Title 1", "Title 2", "Title 3", "Title 4" }));
+        tblIDF.addMouseListener(new java.awt.event.MouseAdapter() {
+
+                @Override
+                public void mousePressed(final java.awt.event.MouseEvent evt) {
+                    tblIDFMousePressed(evt);
+                }
+                @Override
+                public void mouseReleased(final java.awt.event.MouseEvent evt) {
+                    tblIDFMouseReleased(evt);
+                }
+            });
         jScrollPane1.setViewportView(tblIDF);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -120,6 +241,35 @@ public class IDFTablePanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jScrollPane1, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void tblIDFMouseReleased(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_tblIDFMouseReleased
+        showPopup(evt);
+    }                                                                       //GEN-LAST:event_tblIDFMouseReleased
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void tblIDFMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_tblIDFMousePressed
+        showPopup(evt);
+    }                                                                      //GEN-LAST:event_tblIDFMousePressed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
+    private void showPopup(final java.awt.event.MouseEvent e) {
+        if (e.isPopupTrigger()) {
+            popup.show(e.getComponent(), e.getX(), e.getY());
+        }
+    }
 
     //~ Inner Classes ----------------------------------------------------------
 

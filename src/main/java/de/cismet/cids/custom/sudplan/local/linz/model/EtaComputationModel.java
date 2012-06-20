@@ -308,7 +308,7 @@ public class EtaComputationModel {
                             || csoName.equals("OTHSP1nolink")
                             || csoName.equals("PNASP1nolink")
                             || csoName.equals("SMMSP1nolink")
-                            || csoName.equals("STYSP1nolink")
+                            || csoName.equals("STYSP1nolink") // csoName.equals("RHHB_Weikerlsee3nolink") ||
                             || csoName.equals("WLDSP1nolink")
                             || csoName.equals("WLDSP2nolink")
                             || csoName.equals("WLGSP1nolink")) {
