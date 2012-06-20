@@ -153,12 +153,13 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         bindingGroup.bind();
 
         try {
-            final String json = (String)cidsBean.getProperty("uri"); // NOI18N
-            final ObjectMapper mapper = new ObjectMapper();
-            final IDFCurve curve = mapper.readValue(new StringReader(json), IDFCurve.class);
+//            final String json = (String)cidsBean.getProperty("uri"); // NOI18N
+//            final ObjectMapper mapper = new ObjectMapper();
+//            final IDFCurve curve = mapper.readValue(new StringReader(json), IDFCurve.class);
 
             pnlIdf.removeAll();
-            pnlIdf.add(new IDFTablePanel(curve));
+            // pnlIdf.add(new IDFTablePanel(curve));
+            pnlIdf.add(new IDFTablePanel(cidsBean));
         } catch (final Exception ex) {
             LOG.error("cannot initialise IDF renderer", ex); // NOI18N
 

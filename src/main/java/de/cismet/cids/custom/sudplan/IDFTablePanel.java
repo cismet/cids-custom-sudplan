@@ -7,10 +7,17 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import org.apache.log4j.Logger;
+
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+
+import org.openide.util.Exceptions;
 
 import java.awt.Component;
 
+import java.io.IOException;
 import java.io.StringReader;
 
 import java.util.AbstractList;
@@ -38,9 +45,13 @@ import de.cismet.cids.dynamics.CidsBean;
  */
 public class IDFTablePanel extends javax.swing.JPanel {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(IDFTablePanel.class);
+
     //~ Instance fields --------------------------------------------------------
 
-    private final transient IDFCurve curve;
+    private transient CidsBean cidsBeanIDFcurve;
     private transient int selectedColIndex;
     private transient int selectedRowStart;
     private transient int selectedRowEnd;
@@ -57,21 +68,42 @@ public class IDFTablePanel extends javax.swing.JPanel {
     /**
      * Creates new form IDFTablePanel.
      *
-     * @param  curve  DOCUMENT ME!
+     * @param  cidsBeanIDFcurve  curve DOCUMENT ME!
      */
-    public IDFTablePanel(final IDFCurve curve) {
-        this.curve = curve;
+    public IDFTablePanel(final CidsBean cidsBeanIDFcurve) {
+        this.cidsBeanIDFcurve = cidsBeanIDFcurve;
 
         initComponents();
 
         init();
 
         popup = new JPopupMenu();
-        popup.add(menuItem = new JMenuItem("Berechnung"));
-        menuItem.addActionListener(new Euler2ComputationWizardAction(this, curve));
+        popup.add(menuItem = new JMenuItem(
+                    org.openide.util.NbBundle.getMessage(
+                        IDFTablePanel.class,
+                        "IDFTablePanle(CidsBean).menuItem.computation")));
+        menuItem.addActionListener(new Euler2ComputationWizardAction(this));
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public CidsBean getCidsBeanIDFcurve() {
+        return cidsBeanIDFcurve;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  cidsBeanIDFcurve  DOCUMENT ME!
+     */
+    public void setCidsBeanIDFcurve(final CidsBean cidsBeanIDFcurve) {
+        this.cidsBeanIDFcurve = cidsBeanIDFcurve;
+    }
 
     /**
      * DOCUMENT ME!
@@ -129,15 +161,24 @@ public class IDFTablePanel extends javax.swing.JPanel {
 
     /**
      * DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
      */
     private void init() {
         tblIDF.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         tblIDF.getTableHeader().setReorderingAllowed(false);
         tblIDF.setCellSelectionEnabled(true);
 
-//        final String json = (String)cidsBean_idfcurve.getProperty("uri"); // NOI18N
-//        final ObjectMapper mapper = new ObjectMapper();
-//        final IDFCurve curve = mapper.readValue(new StringReader(json), IDFCurve.class);
+        final String json = (String)cidsBeanIDFcurve.getProperty("uri"); // NOI18N
+        final ObjectMapper mapper = new ObjectMapper();
+        final IDFCurve curve;
+        try {
+            curve = mapper.readValue(new StringReader(json), IDFCurve.class);
+        } catch (IOException ex) {
+            final String message = "cannot read idf data from uri";      // NOI18N
+            LOG.error(message, ex);
+            throw new IllegalStateException(message, ex);
+        }
 
         final List<Integer> frequencies = curve.getFrequencies();
         final Object[] columnHeaders = new Object[frequencies.size() + 1];
