@@ -7,6 +7,23 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.hydrology;
 
+import org.apache.log4j.Logger;
+
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import java.util.HashMap;
+
+import javax.swing.JLabel;
+
+import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
+import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
+import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
+
+import de.cismet.cids.dynamics.CidsBean;
+
 /**
  * DOCUMENT ME!
  *
@@ -15,9 +32,18 @@ package de.cismet.cids.custom.sudplan.hydrology;
  */
 public class SimulationOutputManagerUI extends javax.swing.JPanel {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    /** LOGGER. */
+    private static final transient Logger LOG = Logger.getLogger(SimulationOutputManagerUI.class);
+
     //~ Instance fields --------------------------------------------------------
 
     private final transient SimulationOutputManager model;
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private de.cismet.cids.custom.sudplan.LoadingLabel lblLoading;
+    // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
 
@@ -30,9 +56,70 @@ public class SimulationOutputManagerUI extends javax.swing.JPanel {
         this.model = model;
 
         initComponents();
+
+        init();
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void init() {
+        final Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        final SimulationOutput output = model.getUR();
+
+                        final HashMap<TimeseriesRetrieverConfig, TimeseriesConverter> cfgs =
+                            new HashMap<TimeseriesRetrieverConfig, TimeseriesConverter>();
+                        for (final Integer tsId : output.getResultTsIds()) {
+                            final CidsBean tsBean = SMSUtils.fetchCidsBean(tsId, SMSUtils.TABLENAME_TIMESERIES);
+                            final String url = (String)tsBean.getProperty("uri"); // NOI18N
+                            final TimeseriesRetrieverConfig cfg = TimeseriesRetrieverConfig.fromUrl(url);
+
+                            cfgs.put(cfg, null);
+                        }
+
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    final TimeseriesChartPanel tcp = new TimeseriesChartPanel(cfgs, false, null);
+                                    remove(lblLoading);
+                                    lblLoading.dispose();
+                                    setLayout(new BorderLayout());
+                                    add(tcp, BorderLayout.CENTER);
+                                    invalidate();
+                                    validate();
+                                }
+                            });
+                    } catch (final Exception e) {
+                        final String message = "cannot create output visualisation"; // NOI18N
+                        LOG.error(message, e);
+
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    remove(lblLoading);
+                                    lblLoading.dispose();
+                                    setLayout(new BorderLayout());
+                                    add(new JLabel(message + ": " + e), BorderLayout.CENTER); // NOI18N
+                                }
+                            });
+                    }
+                }
+            };
+
+        if (EventQueue.isDispatchThread()) {
+            SudplanConcurrency.getSudplanGeneralPurposePool().execute(r);
+        } else {
+            r.run();
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
@@ -41,15 +128,20 @@ public class SimulationOutputManagerUI extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        final org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 400, Short.MAX_VALUE));
-        layout.setVerticalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 300, Short.MAX_VALUE));
+        final java.awt.GridBagConstraints gridBagConstraints;
+
+        lblLoading = new de.cismet.cids.custom.sudplan.LoadingLabel();
+
+        setOpaque(false);
+        setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 50, 0, 0);
+        add(lblLoading, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    // End of variables declaration//GEN-END:variables
-
 }

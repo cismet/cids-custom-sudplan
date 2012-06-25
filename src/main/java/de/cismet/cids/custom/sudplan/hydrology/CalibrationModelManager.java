@@ -104,8 +104,9 @@ public final class CalibrationModelManager extends AbstractAsyncModelManager {
 
         fireProgressed(1, MAX_STEPS, "Set calibration simulation time range");
 
-        final CidsBean hwBean = SMSUtils.fetchCidsBean(input.getHydrologyWorkspaceId(), "hydrology_workspace"); // NOI18N
-        final String localModelId = (String)hwBean.getProperty("local_model_id");                               // NOI18N
+        final CidsBean hwBean = SMSUtils.fetchCidsBean(input.getHydrologyWorkspaceId(),
+                SMSUtils.TABLENAME_HYDROLOGY_WORKSPACE);
+        final String localModelId = (String)hwBean.getProperty("local_model_id"); // NOI18N
 
         try {
             hypeClient.setSimulationTime(
@@ -327,8 +328,7 @@ public final class CalibrationModelManager extends AbstractAsyncModelManager {
 
             final CalibrationWatchable watchable = (CalibrationWatchable)getWatchable();
             CidsBean tsBean = tsClass.getEmptyInstance().getBean();
-            // FIXME: proper name
-            tsBean.setProperty("name", "Cout");
+            tsBean.setProperty("name", watchable.getResultTs().getOffering());
             tsBean.setProperty("uri", watchable.getResultTs().toUrl()); // NOI18N
             tsBean.setProperty("forecast", Boolean.FALSE);              // NOI18N
             tsBean = tsBean.persist();
@@ -337,7 +337,9 @@ public final class CalibrationModelManager extends AbstractAsyncModelManager {
             output.setResultTs(tsBean.getMetaObject().getID());
             output.setInputTs(inputTsId);
 
-            return SMSUtils.createModelOutput("Result of Calibration run", output, Model.HY_CAL);
+            return SMSUtils.createModelOutput("Result of Calibration run " + cidsBean.getProperty("name"),
+                    output,
+                    Model.HY_CAL);
         } catch (final Exception ex) {
             final String message = "cannot create output"; // NOI18N
             LOG.error(message, ex);

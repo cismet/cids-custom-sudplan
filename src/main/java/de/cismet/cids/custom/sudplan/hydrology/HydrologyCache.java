@@ -19,6 +19,8 @@ import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.cismet.cids.custom.sudplan.Variable;
+
 import de.cismet.cids.dynamics.CidsBean;
 
 /**
@@ -40,6 +42,7 @@ public final class HydrologyCache {
     private final transient Scenario calibrationScenario;
     private final transient Set<Scenario> simulationScenarios;
     private final transient DateFormat hydroDateFormat;
+    private final transient String[] vars;
 
     private transient CidsBean currentWorkspace;
 
@@ -75,7 +78,8 @@ public final class HydrologyCache {
             throw new IllegalStateException(message, ex);
         }
 
-        hydroDateFormat = new SimpleDateFormat("yyyy-MM-dd"); // NOI18N
+        hydroDateFormat = new SimpleDateFormat("yyyy-MM-dd");                   // NOI18N
+        vars = new String[] { "cout", "crun", "cprc", "ctmp", "gwat", "soim" }; // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -141,6 +145,73 @@ public final class HydrologyCache {
      */
     public DateFormat getHydroDateFormat() {
         return hydroDateFormat;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String[] getVars() {
+        return vars;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   var  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalArgumentException  DOCUMENT ME!
+     */
+    public Variable getVariableForVar(final String var) {
+        if (var == null) {
+            return null;
+        } else if ("cout".equals(var)) {
+            return Variable.COUT;
+        } else if ("crun".equals(var)) {
+            return Variable.CRUN;
+        } else if ("cprc".equals(var)) {
+            return Variable.CPRC;
+        } else if ("ctmp".equals(var)) {
+            return Variable.CTMP;
+        } else if ("gwat".equals(var)) {
+            return Variable.GWAT;
+        } else if ("soim".equals(var)) {
+            return Variable.SOIL_MOISTURE;
+        } else {
+            throw new IllegalArgumentException("unknown var: " + var); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   variable  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalArgumentException  DOCUMENT ME!
+     */
+    public String getVarForVariable(final Variable variable) {
+        if (variable == null) {
+            return null;
+        } else if (Variable.COUT.equals(variable)) {
+            return "cout";
+        } else if (Variable.CRUN.equals(variable)) {
+            return "crun";
+        } else if (Variable.CPRC.equals(variable)) {
+            return "cprc";
+        } else if (Variable.CTMP.equals(variable)) {
+            return "ctmp";
+        } else if (Variable.GWAT.equals(variable)) {
+            return "gwat";
+        } else if (Variable.SOIL_MOISTURE.equals(variable)) {
+            return "soim";
+        } else {
+            throw new IllegalArgumentException("unsupported variable: " + variable); // NOI18N
+        }
     }
 
     //~ Inner Classes ----------------------------------------------------------

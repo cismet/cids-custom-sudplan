@@ -7,7 +7,10 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.hydrology;
 
+import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.ui.ComponentRegistry;
+
+import Sirius.server.newuser.User;
 
 import org.apache.log4j.Logger;
 
@@ -28,6 +31,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
@@ -131,6 +135,13 @@ public final class DoSimulationWizardAction extends AbstractAction {
         return panels;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   e  DOCUMENT ME!
+     *
+     * @throws  RuntimeException  DOCUMENT ME!
+     */
     @Override
     public void actionPerformed(final ActionEvent e) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
@@ -162,24 +173,33 @@ public final class DoSimulationWizardAction extends AbstractAction {
             final String name = (String)wizard.getProperty(DoSimulationWizardPanelSelectMetadata.PROP_NAME);
             final String desc = (String)wizard.getProperty(DoSimulationWizardPanelSelectMetadata.PROP_DESC);
 
-            if (true) {
-                LOG.fatal("[hwid=" + hwBean.getMetaObject().getID() + "|scenario=" + scenario.getScenarioId()
-                            + "|startdate=" + DateFormat.getDateInstance().format(startDate) + "|enddate="
-                            + DateFormat.getDateInstance().format(endDate) + "|name=" + name + "|desc=" + desc + "]");
-
-                return;
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("wizard results: [hwid=" + hwBean.getMetaObject().getID() // NOI18N
+                            + "|scenario=" + scenario.getScenarioId()        // NOI18N
+                            + "|startdate=" + DateFormat.getDateInstance().format(startDate) // NOI18N
+                            + "|enddate=" + DateFormat.getDateInstance().format(endDate) // NOI18N
+                            + "|name=" + name                                // NOI18N
+                            + "|desc=" + desc + "]");                        // NOI18N
             }
 
             try {
+                final User user = SessionManager.getSession().getUser();
+
                 final SimulationInput input = new SimulationInput();
                 input.setHydrologyWorkspaceId(hwBean.getMetaObject().getID());
                 input.setScenario(scenario);
                 input.setStartDate(startDate);
                 input.setEndDate(endDate);
+                input.setCreatedBy(user.toString());
+                input.setCreated(new Date(System.currentTimeMillis()));
 
-                final CidsBean inputBean = SMSUtils.createModelInput("Input of " + name, null, Model.HY_SIM);
+                final CidsBean inputBean = SMSUtils.createModelInput("Input of " + name, input, Model.HY_SIM);
                 final CidsBean runBean = SMSUtils.createModelRun(name, desc, inputBean);
                 runBean.persist();
+
+                final List<CidsBean> simulations = hwBean.getBeanCollectionProperty("simulations"); // NOI18N
+                simulations.add(runBean);
+                hwBean.persist();
 
                 SMSUtils.executeAndShowRun(runBean);
             } catch (final Exception ex) {

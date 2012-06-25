@@ -21,6 +21,8 @@ public final class SimulationInput {
 
     //~ Instance fields --------------------------------------------------------
 
+    private transient Date created;
+    private transient String createdBy;
     private transient Integer hydrologyWorkspaceId;
     private transient Scenario scenario;
     private transient Date startDate;
@@ -98,5 +100,41 @@ public final class SimulationInput {
      */
     public void setStartDate(final Date startDate) {
         this.startDate = startDate;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Date getCreated() {
+        return created;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  created  DOCUMENT ME!
+     */
+    public void setCreated(final Date created) {
+        this.created = created;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  createdBy  DOCUMENT ME!
+     */
+    public void setCreatedBy(final String createdBy) {
+        this.createdBy = createdBy;
     }
 }
