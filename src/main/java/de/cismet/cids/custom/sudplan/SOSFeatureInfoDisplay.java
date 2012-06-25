@@ -490,6 +490,8 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
                         final String[] split = offering.split("_");                                      // NOI18N
                         if (split.length == 4) {
                             scenario = split[1];
+                        } else if (split.length == 1) {
+                            scenario = split[0];
                         } else {
                             throw new InitialisationException("invalid offering encoding: " + offering); // NOI18N
                         }
@@ -529,6 +531,16 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("unreconised key: " + key);                                        // NOI18N
                         }
+                    }
+                } else if (keyword.startsWith(KEY_SOS_URL)) {
+                    // in case of complete url (e.g. capabilities link) there are more '=' in the string
+                    final String urlString = keyword.substring(keyword.indexOf('=') + 1);
+                    try {
+                        sosUrl = new URL(urlString);
+                    } catch (final MalformedURLException e) {
+                        final String message = "invalid sos url: " + urlString; // NOI18N
+                        LOG.error(message, e);
+                        throw new InitialisationException(message, e);
                     }
                 } else {
                     if (LOG.isDebugEnabled()) {
