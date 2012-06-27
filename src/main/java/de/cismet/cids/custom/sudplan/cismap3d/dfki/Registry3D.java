@@ -17,7 +17,7 @@ import java.awt.Dimension;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-final class Registry3D {
+public final class Registry3D {
 
     //~ Instance fields --------------------------------------------------------
 

@@ -34,7 +34,6 @@ import org.apache.log4j.Logger;
 
 import org.openide.util.WeakListeners;
 import org.openide.util.lookup.ServiceProvider;
-import org.openide.util.lookup.ServiceProviders;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DropTargetDragEvent;
@@ -60,6 +59,7 @@ import de.cismet.cids.custom.sudplan.cismap3d.Canvas3D;
 import de.cismet.cids.custom.sudplan.cismap3d.DropTarget3D;
 
 import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 
 /**
@@ -100,7 +100,13 @@ public final class Canvas3DImpl implements Canvas3D, DropTarget3D {
 
     @Override
     public void home() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        final Geometry homeBBoxGeom = CismapBroker.getInstance()
+                    .getMappingComponent()
+                    .getMappingModel()
+                    .getInitialBoundingBox()
+                    .getGeometry(4326);
+        setCameraDirection(new Vector3d(0, 0, 1));
+        setBoundingBox(homeBBoxGeom);
     }
 
     @Override
