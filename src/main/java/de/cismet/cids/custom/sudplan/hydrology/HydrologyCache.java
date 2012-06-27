@@ -7,6 +7,13 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.hydrology;
 
+import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.exception.ConnectionException;
+
+import Sirius.server.middleware.types.MetaClass;
+import Sirius.server.middleware.types.MetaObject;
+import Sirius.server.newuser.User;
+
 import org.apache.log4j.Logger;
 
 import se.smhi.sudplan.client.Scenario;
@@ -14,14 +21,18 @@ import se.smhi.sudplan.client.SudPlanHypeAPI;
 import se.smhi.sudplan.client.exception.UnrecoverableException;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.Variable;
 
 import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 /**
  * DOCUMENT ME!
@@ -35,6 +46,9 @@ public final class HydrologyCache {
 
     /** LOGGER. */
     private static final transient Logger LOG = Logger.getLogger(HydrologyCache.class);
+
+    private static final String WORKSPACE_MO_QUERY =
+        "SELECT {0}, hw.{1} FROM hydrology_workspace hw, run r WHERE hw.calibration = r.id AND r.modelinput = {2}"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -211,6 +225,49 @@ public final class HydrologyCache {
             return "soim";
         } else {
             throw new IllegalArgumentException("unsupported variable: " + variable); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   calInput  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  ConnectionException  DOCUMENT ME!
+     */
+    public CidsBean getWorkspaceFromCalInput(final CidsBean calInput) throws ConnectionException {
+        final User user = SessionManager.getSession().getUser();
+        final MetaClass hwClass = ClassCacheMultiple.getMetaClass(user.getDomain(),
+                SMSUtils.TABLENAME_HYDROLOGY_WORKSPACE);
+
+        final String query = MessageFormat.format(
+                WORKSPACE_MO_QUERY,
+                hwClass.getID(),
+                hwClass.getPrimaryKey(),
+                calInput.getMetaObject().getID());
+
+        final MetaObject[] mos = SessionManager.getProxy().getMetaObjectByQuery(user, query);
+        if (mos.length == 1) {
+            return mos[0].getBean();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  ConnectionException  DOCUMENT ME!
+     */
+    public void reloadCurrentWorkspace() throws ConnectionException {
+        if (getCurrentWorkspace() != null) {
+            final MetaObject womo = getCurrentWorkspace().getMetaObject();
+            final String domain = SessionManager.getSession().getUser().getDomain();
+            final MetaObject newWomo = SessionManager.getProxy().getMetaObject(womo.getID(), womo.getClassID(), domain);
+
+            setCurrentWorkspace(newWomo.getBean());
         }
     }
 
