@@ -8,10 +8,8 @@
 package de.cismet.cids.custom.sudplan.hydrology;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.geom.PrecisionModel;
+
+import org.apache.log4j.Logger;
 
 import org.deegree.datatypes.QualifiedName;
 import org.deegree.model.feature.Feature;
@@ -42,24 +40,34 @@ import de.cismet.tools.gui.ActionsProvider;
  */
 public class SingleCatchmentAreaFeature extends DefaultStyledFeature implements ActionsProvider, XStyledFeature {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    /** LOGGER. */
+    private static final transient Logger LOG = Logger.getLogger(SingleCatchmentAreaFeature.class);
+
     //~ Instance fields --------------------------------------------------------
 
     protected final transient Feature feature;
 
     private final transient QualifiedName renderFeatureName;
+    private final transient QualifiedName catchmentIdName;
     private final transient ImageIcon icon;
+
+    private final transient String name;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new SingleCatchmentAreaFeature object.
      *
-     * @param   feature  DOCUMENT ME!
+     * @param   feature          DOCUMENT ME!
+     * @param   catchmentIdName  DOCUMENT ME!
      *
      * @throws  GeometryException  DOCUMENT ME!
      */
-    public SingleCatchmentAreaFeature(final Feature feature) throws GeometryException {
-        this(feature, null);
+    public SingleCatchmentAreaFeature(final Feature feature, final QualifiedName catchmentIdName)
+            throws GeometryException {
+        this(feature, null, catchmentIdName);
     }
 
     /**
@@ -67,48 +75,37 @@ public class SingleCatchmentAreaFeature extends DefaultStyledFeature implements 
      *
      * @param   feature            DOCUMENT ME!
      * @param   renderFeatureName  DOCUMENT ME!
+     * @param   catchmentIdName    DOCUMENT ME!
      *
      * @throws  GeometryException         DOCUMENT ME!
      * @throws  IllegalArgumentException  DOCUMENT ME!
-     * @throws  IllegalStateException     DOCUMENT ME!
      */
-    public SingleCatchmentAreaFeature(final Feature feature, final QualifiedName renderFeatureName)
-            throws GeometryException {
+    public SingleCatchmentAreaFeature(final Feature feature,
+            final QualifiedName renderFeatureName,
+            final QualifiedName catchmentIdName) throws GeometryException {
         if (feature == null) {
             throw new IllegalArgumentException("feature must not be null"); // NOI18N
         }
 
         this.feature = feature;
         this.renderFeatureName = renderFeatureName;
+        this.catchmentIdName = catchmentIdName;
         this.icon = ImageUtilities.loadImageIcon(
                 "de/cismet/cids/custom/sudplan/hydrology/catchment_area_16.png", // NOI18N
                 false);
 
-        final Geometry geom = WFSUtils.extractGeometry(feature, renderFeatureName);
+        final Object value = WFSUtils.getFeaturePropertyValue(feature, catchmentIdName);
 
-        final Geometry areaGeometry;
-        // FIXME: performance hack as long as wfs delivers union geometries with holes
-        if ((renderFeatureName != null) && "upstream_geom".equals(renderFeatureName.getLocalName())) { // NOI18N
-            Polygon candidate = null;
-            for (int i = 0; i < geom.getNumGeometries(); ++i) {
-                final Geometry g = geom.getGeometryN(i);
-                if ((g instanceof Polygon)
-                            && ((candidate == null) || (candidate.getNumPoints() < g.getNumPoints()))) {
-                    candidate = (Polygon)g;
-                }
-            }
-
-            if (candidate == null) {
-                throw new IllegalStateException("no outer ring found"); // NOI18N
-            }
-
-            final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-            areaGeometry = gf.createPolygon((LinearRing)candidate.getExteriorRing(), new LinearRing[0]);
+        if (value instanceof String) {
+            name = "Catchment Area " + value;
         } else {
-            areaGeometry = geom;
+            LOG.warn("cannot fetch catchment area id from feature: " + feature); // NOI18N
+            name = feature.getId();
         }
 
-        setGeometry(areaGeometry);
+        final Geometry geom = WFSUtils.extractGeometry(feature, renderFeatureName);
+
+        setGeometry(geom);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -119,7 +116,7 @@ public class SingleCatchmentAreaFeature extends DefaultStyledFeature implements 
                 new ShowUpstreamAreasForAreaAction(feature),
                 null,
                 new CreateLocalModelWizardAction(feature),
-                new AssignTimeseriesWizardAction(feature),
+                new AssignTimeseriesWizardAction(feature, catchmentIdName),
                 new DoCalibrationWizardAction(),
                 new DoSimulationWizardAction(feature));
     }
@@ -131,7 +128,7 @@ public class SingleCatchmentAreaFeature extends DefaultStyledFeature implements 
 
     @Override
     public String getName() {
-        return feature.getId();
+        return name;
     }
 
     @Override

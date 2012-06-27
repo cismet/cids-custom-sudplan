@@ -94,22 +94,22 @@ public final class ShowCatchmentAreaForPointAction extends AbstractWFSFeatureRet
     }
 
     @Override
-    protected String getCapabilitiesUrl() {
+    public String getCapabilitiesUrl() {
         return HYDRO_WFS_CAPABILITIES;
     }
 
     @Override
-    protected QualifiedName getFeatureQName() {
+    public QualifiedName getFeatureQName() {
         return new QualifiedName(HYDRO_WFS_QNAME_PREFIX, "basin", HYDRO_WFS_QNAME_URI); // NOI18N
     }
 
     @Override
-    protected String getStatusMessage() {
+    public String getStatusMessage() {
         return "Fetching Catchment Area";
     }
 
     @Override
-    protected String createFeatureQuery(final FeatureType featureType) {
+    public String createFeatureQuery(final FeatureType featureType) {
         final Geometry geom = CrsTransformer.transformToGivenCrs(getPoint(), "EPSG:4326"); // NOI18N
         final Coordinate coord = geom.getCoordinate();
 
@@ -152,12 +152,16 @@ public final class ShowCatchmentAreaForPointAction extends AbstractWFSFeatureRet
     }
 
     @Override
-    protected Collection<? extends Feature> createFeatures(final FeatureCollection featureCollection)
-            throws WFSRetrievalException {
+    public Collection<Feature> createFeatures(final FeatureCollection featureCollection) throws WFSRetrievalException {
         if (featureCollection.size() == 1) {
             final ArrayList<Feature> features = new ArrayList<Feature>(1);
             try {
-                features.add(new SingleCatchmentAreaFeature(featureCollection.getFeature(0)));
+                features.add(new SingleCatchmentAreaFeature(
+                        featureCollection.getFeature(0),
+                        new QualifiedName(
+                            ShowCatchmentAreaForPointAction.HYDRO_WFS_QNAME_PREFIX,
+                            "subid", // NOI18N
+                            ShowCatchmentAreaForPointAction.HYDRO_WFS_QNAME_URI)));
             } catch (final GeometryException ex) {
                 final String message = "cannot create single catchment area feature"; // NOI18N
                 LOG.error(message, ex);
