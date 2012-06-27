@@ -94,6 +94,8 @@ public class AssignTimeseriesVisualPanelSelectTS extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     void init() {
+        bindingGroup.unbind();
+
         final DefaultListModel listModel = new DefaultListModel();
         lstTimeseries.setModel(listModel);
 
@@ -116,6 +118,8 @@ public class AssignTimeseriesVisualPanelSelectTS extends javax.swing.JPanel {
             LOG.error("cannot fetch timeseries meta objects", ex); // NOI18N
             listModel.addElement("Error while searching for timeseries: " + ex);
         }
+
+        bindingGroup.bind();
     }
 
     /**

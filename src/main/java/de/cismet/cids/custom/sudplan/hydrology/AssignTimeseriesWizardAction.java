@@ -7,11 +7,7 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.hydrology;
 
-import Sirius.navigator.connection.SessionManager;
-import Sirius.navigator.exception.ConnectionException;
 import Sirius.navigator.ui.ComponentRegistry;
-
-import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
 
@@ -42,7 +38,7 @@ import de.cismet.cids.dynamics.CidsBean;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class AssignTimeseriesWizardAction extends AbstractAction {
+public class AssignTimeseriesWizardAction extends AbstractAction {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -56,6 +52,7 @@ public final class AssignTimeseriesWizardAction extends AbstractAction {
 
     /** the feature where the action is performed. */
     private final transient org.deegree.model.feature.Feature areaFeature;
+    private final transient QualifiedName catchmentIdName;
 
     private transient WizardDescriptor.Panel[] panels;
 
@@ -64,12 +61,15 @@ public final class AssignTimeseriesWizardAction extends AbstractAction {
     /**
      * Creates a new AssignTimeseriesWizardAction object.
      *
-     * @param  areaFeature  DOCUMENT ME!
+     * @param  areaFeature      DOCUMENT ME!
+     * @param  catchmentIdName  DOCUMENT ME!
      */
-    public AssignTimeseriesWizardAction(final org.deegree.model.feature.Feature areaFeature) {
+    public AssignTimeseriesWizardAction(final org.deegree.model.feature.Feature areaFeature,
+            final QualifiedName catchmentIdName) {
         super("Assign Timeseries"); // NOI18N
 
         this.areaFeature = areaFeature;
+        this.catchmentIdName = catchmentIdName;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -115,30 +115,46 @@ public final class AssignTimeseriesWizardAction extends AbstractAction {
         return panels;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   e  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
     @Override
     public void actionPerformed(final ActionEvent e) {
+        final Object value = WFSUtils.getFeaturePropertyValue(areaFeature, catchmentIdName);
+
+        final int subId;
+        // the id is an integer, but the property value is a string
+        if (value instanceof String) {
+            subId = Integer.valueOf((String)value);
+        } else {
+            throw new IllegalStateException("property value not instanceof string: " + value); // NOI18N
+        }
+
+        actionPerformed(subId);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   subId  DOCUMENT ME!
+     *
+     * @throws  RuntimeException  DOCUMENT ME!
+     */
+    protected void actionPerformed(final int subId) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
         wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
-        wizard.setTitle("Create Local Model");           // NOI18N
+        wizard.setTitle("Assign Time Series");           // NOI18N
 
         final CidsBean currWorkspace = HydrologyCache.getInstance().getCurrentWorkspace();
         if (currWorkspace != null) {
             wizard.putProperty(PROP_SELECTED_CALIBRATION_INPUT, currWorkspace.getProperty("calibration.modelinput")); // NOI18N
         }
 
-        final Object value = WFSUtils.getFeaturePropertyValue(
-                areaFeature,
-                new QualifiedName(
-                    ShowCatchmentAreaForPointAction.HYDRO_WFS_QNAME_PREFIX,
-                    "subid", // NOI18N
-                    ShowCatchmentAreaForPointAction.HYDRO_WFS_QNAME_URI));
-
-        // the id is an integer, but the property value is a string
-        if (value instanceof String) {
-            wizard.putProperty(PROP_BASIN_ID, Integer.valueOf((String)value));
-        } else {
-            throw new IllegalStateException("property value not instanceof string: " + value); // NOI18N
-        }
+        wizard.putProperty(PROP_BASIN_ID, subId);
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -148,17 +164,17 @@ public final class AssignTimeseriesWizardAction extends AbstractAction {
 
         final boolean cancelled = wizard.getValue() != WizardDescriptor.FINISH_OPTION;
         if (!cancelled) {
-            final CidsBean selectedCalibrationInput = (CidsBean)wizard.getProperty(PROP_SELECTED_CALIBRATION_INPUT);
+            final CidsBean selectedCalInput = (CidsBean)wizard.getProperty(PROP_SELECTED_CALIBRATION_INPUT);
             final CidsBean selectedTimeseries = (CidsBean)wizard.getProperty(
                     AssignTimeseriesWizardPanelSelectTS.PROP_SELECTED_TS);
 
             final CalibrationInputManager cim = new CalibrationInputManager();
-            cim.setCidsBean(selectedCalibrationInput);
+            cim.setCidsBean(selectedCalInput);
 
             final CalibrationInput ci;
             try {
                 ci = cim.getUR();
-                ci.putTimeseries(Integer.valueOf((String)value), selectedTimeseries.getMetaObject().getID());
+                ci.putTimeseries(subId, selectedTimeseries.getMetaObject().getID());
 
                 final StringWriter writer = new StringWriter();
                 final ObjectMapper mapper = new ObjectMapper();
@@ -169,39 +185,31 @@ public final class AssignTimeseriesWizardAction extends AbstractAction {
                 // ensure freshness, if it is still the selected one
                 boolean isCurrentWorkspace = false;
                 if ((currWorkspace != null)
-                            && selectedCalibrationInput.equals(currWorkspace.getProperty("calibration.modelinput"))) { // NOI18N
+                            && selectedCalInput.equals(currWorkspace.getProperty("calibration.modelinput"))) { // NOI18N
                     isCurrentWorkspace = true;
                 }
 
-                selectedCalibrationInput.setProperty("ur", writer.toString()); // NOI18N
-                selectedCalibrationInput.persist();
+                selectedCalInput.setProperty("ur", writer.toString()); // NOI18N
+                selectedCalInput.persist();
 
                 if (isCurrentWorkspace) {
-                    reloadWorkspace(currWorkspace);
+                    HydrologyCache.getInstance().reloadCurrentWorkspace();
+                } else {
+                    final CidsBean hwBean = HydrologyCache.getInstance().getWorkspaceFromCalInput(selectedCalInput);
+                    HydrologyCache.getInstance().setCurrentWorkspace(hwBean);
                 }
 
-                // TODO: reload catalogue
+                ComponentRegistry.getRegistry()
+                        .getCatalogueTree()
+                        .requestRefreshNode("hydrology.localmodel." // NOI18N
+                            + HydrologyCache.getInstance().getCurrentWorkspace().getMetaObject().getID()
+                            + ".calibration"); // NOI18N
             } catch (final Exception ex) {
-                final String message = "cannot assign timeseries to catchment area " + value; // NOI18N
+                final String message = "cannot assign timeseries to catchment area " + subId; // NOI18N
                 LOG.error(message, ex);
                 // TODO: throw proper exception
                 throw new RuntimeException(message, ex);
             }
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   workspace  DOCUMENT ME!
-     *
-     * @throws  ConnectionException  DOCUMENT ME!
-     */
-    private void reloadWorkspace(final CidsBean workspace) throws ConnectionException {
-        final MetaObject womo = workspace.getMetaObject();
-        final String domain = SessionManager.getSession().getUser().getDomain();
-        final MetaObject newWomo = SessionManager.getProxy().getMetaObject(womo.getID(), womo.getClassID(), domain);
-
-        HydrologyCache.getInstance().setCurrentWorkspace(newWomo.getBean());
     }
 }

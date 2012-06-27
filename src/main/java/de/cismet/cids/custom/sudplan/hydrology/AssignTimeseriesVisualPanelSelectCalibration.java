@@ -96,6 +96,8 @@ public final class AssignTimeseriesVisualPanelSelectCalibration extends javax.sw
      * DOCUMENT ME!
      */
     void init() {
+        bindingGroup.unbind();
+
         final DefaultListModel listModel = new DefaultListModel();
         lstCalibrations.setModel(listModel);
 
@@ -118,6 +120,8 @@ public final class AssignTimeseriesVisualPanelSelectCalibration extends javax.sw
             LOG.error("cannot fetch calibration model input meta objects", ex); // NOI18N
             listModel.addElement("Error while searching for calibration model inputs: " + ex);
         }
+
+        bindingGroup.bind();
     }
 
     /**

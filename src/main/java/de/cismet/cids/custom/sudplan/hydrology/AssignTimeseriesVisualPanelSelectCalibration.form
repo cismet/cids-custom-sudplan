@@ -23,7 +23,7 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Available Calibrations">
+            <TitledBorder title="Available Local Models">
               <ResourceString PropertyName="titleX" bundle="de/cismet/cids/custom/sudplan/hydrology/Bundle.properties" key="AssignTimeseriesVisualPanelSelectCalibration.pnlCalibrations.border.title" replaceFormat="NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </TitledBorder>
           </Border>
