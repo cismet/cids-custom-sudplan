@@ -13,9 +13,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import org.openide.util.NbBundle;
 
+import java.awt.BorderLayout;
+
 import java.io.StringReader;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
+import de.cismet.cids.custom.sudplan.IDFChartPanel;
 import de.cismet.cids.custom.sudplan.IDFCurve;
 import de.cismet.cids.custom.sudplan.IDFTablePanel;
 
@@ -34,10 +37,12 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JLabel lblUnit;
     private javax.swing.JLabel lblYear;
     private javax.swing.JLabel lblYearValue;
     private javax.swing.JPanel pnlFiller;
     private javax.swing.JPanel pnlIdf;
+    private javax.swing.JTextField txtUnit;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
@@ -68,22 +73,17 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         jCheckBox1 = new javax.swing.JCheckBox();
         lblYear = new javax.swing.JLabel();
         lblYearValue = new javax.swing.JLabel();
+        lblUnit = new javax.swing.JLabel();
+        txtUnit = new javax.swing.JTextField();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
         pnlFiller.setOpaque(false);
-
-        final org.jdesktop.layout.GroupLayout pnlFillerLayout = new org.jdesktop.layout.GroupLayout(pnlFiller);
-        pnlFiller.setLayout(pnlFillerLayout);
-        pnlFillerLayout.setHorizontalGroup(
-            pnlFillerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 709, Short.MAX_VALUE));
-        pnlFillerLayout.setVerticalGroup(
-            pnlFillerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 267, Short.MAX_VALUE));
-
+        pnlFiller.setLayout(new java.awt.BorderLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
@@ -98,10 +98,11 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
         add(pnlIdf, gridBagConstraints);
 
         jCheckBox1.setText(NbBundle.getMessage(IdfCurveRenderer.class, "IdfCurveRenderer.jCheckBox1.text")); // NOI18N
@@ -127,6 +128,7 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblYear, gridBagConstraints);
 
@@ -141,8 +143,24 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblYearValue, gridBagConstraints);
+
+        lblUnit.setText(org.openide.util.NbBundle.getMessage(IdfCurveRenderer.class, "IdfCurveRenderer.lblUnit.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblUnit, gridBagConstraints);
+
+        txtUnit.setText(org.openide.util.NbBundle.getMessage(IdfCurveRenderer.class, "IdfCurveRenderer.txtUnit.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(txtUnit, gridBagConstraints);
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
@@ -152,6 +170,9 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         bindingGroup.unbind();
         bindingGroup.bind();
 
+        txtUnit.setText("Rainfall intensity in [mm/h]");
+        txtUnit.setEditable(false);
+
         try {
 //            final String json = (String)cidsBean.getProperty("uri"); // NOI18N
 //            final ObjectMapper mapper = new ObjectMapper();
@@ -160,6 +181,8 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
             pnlIdf.removeAll();
             // pnlIdf.add(new IDFTablePanel(curve));
             pnlIdf.add(new IDFTablePanel(cidsBean));
+            pnlFiller.removeAll();
+            pnlFiller.add(new IDFChartPanel(cidsBean), BorderLayout.CENTER);
         } catch (final Exception ex) {
             LOG.error("cannot initialise IDF renderer", ex); // NOI18N
 
