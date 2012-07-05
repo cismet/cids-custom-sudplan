@@ -144,7 +144,7 @@ public class EmissionUploadVisualPanelGrids extends javax.swing.JPanel {
         pnlListControls.add(btnAddGrid);
 
         btnRemoveGrid.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/sudplan/airquality/emissionupload/edit_delete.png"))); // NOI18N
+                getClass().getResource("/de/cismet/cids/custom/sudplan/airquality/emissionupload/edit_remove.png"))); // NOI18N
         btnRemoveGrid.setEnabled(false);
         btnRemoveGrid.setFocusPainted(false);
         btnRemoveGrid.addActionListener(new java.awt.event.ActionListener() {
@@ -158,8 +158,8 @@ public class EmissionUploadVisualPanelGrids extends javax.swing.JPanel {
 
         pnlList.add(pnlListControls, java.awt.BorderLayout.PAGE_END);
 
-        splContainer.setRightComponent(pnlList);
-        splContainer.setLeftComponent(pnlGrid);
+        splContainer.setLeftComponent(pnlList);
+        splContainer.setRightComponent(pnlGrid);
 
         add(splContainer, java.awt.BorderLayout.CENTER);
     } // </editor-fold>//GEN-END:initComponents

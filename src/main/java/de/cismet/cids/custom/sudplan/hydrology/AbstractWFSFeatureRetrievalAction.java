@@ -7,11 +7,9 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.hydrology;
 
-
 import org.apache.log4j.Logger;
 
 import java.awt.event.ActionEvent;
-
 
 import java.util.Collection;
 
@@ -62,12 +60,11 @@ public abstract class AbstractWFSFeatureRetrievalAction extends AbstractAction i
     @Override
     public final void actionPerformed(final ActionEvent actionEvent) {
         final Collection<Feature> features = WFSUtils.fetchFeatures(this);
-        
-        if(features != null){
 
-                                        final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
-                                        mc.getFeatureCollection().addFeatures(features);
-                                        mc.zoomToFeatureCollection();
+        if (features != null) {
+            final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+            mc.getFeatureCollection().addFeatures(features);
+            mc.zoomToFeatureCollection();
         }
     }
 }
