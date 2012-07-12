@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
-import com.lowagie.text.Rectangle;
-
 import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -22,21 +20,29 @@ import java.awt.Graphics;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
-import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 
 import java.io.IOException;
 import java.io.StringReader;
 
 import java.util.List;
-import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
@@ -180,8 +186,6 @@ public class IDFTablePanel extends javax.swing.JPanel {
         tblIDF.getTableHeader().setReorderingAllowed(false);
         tblIDF.setCellSelectionEnabled(true);
 
-        // (new TableRowHeader(tblIDF, spIDF));
-
         final String json = (String)cidsBeanIDFcurve.getProperty("uri"); // NOI18N
         final ObjectMapper mapper = new ObjectMapper();
         final IDFCurve curve;
@@ -200,13 +204,6 @@ public class IDFTablePanel extends javax.swing.JPanel {
 
         final IDFTableModel model = new IDFTableModel(curve.getDurationIntensityRows(), columnHeaders);
 
-//        final DefaultTableModel dtm = new DefaultTableModel(curve.getDurationIntensityRows(), columnHeaders) {
-//
-//                @Override
-//                public boolean isCellEditable(final int row, final int column) {
-//                    return false;
-//                }
-//            };
         tblIDF.setModel(model);
 
         final IDFCellRenderer renderer = new IDFCellRenderer();
@@ -217,18 +214,15 @@ public class IDFTablePanel extends javax.swing.JPanel {
             tcm.getColumn(i).setHeaderRenderer(renderer);
         }
         final TableHeaderExtensions leftHeader = new TableHeaderExtensions(tblIDF, spIDF, HEADER_TEXT_VERTICAL);
-        final TableHeaderExtensions topHeader = new TableHeaderExtensions(tblIDF, spIDF, HEADER_TEXT_HORIZONTAL);
-
-//        spIDF.setPreferredSize(new Dimension(tblIDF.getPreferredSize().width, h));
 
         spIDF.setRowHeaderView(leftHeader);
-        spIDF.setColumnHeaderView(new JButton("Frequence") {
+        spIDF.setColumnHeaderView(new JButton("Frequency") {
 
                 @Override
                 public Dimension getPreferredSize() {
                     return new Dimension(20, 100);
                 }
-            }); // topHeader);
+            });
 
         tblIDF.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
@@ -381,10 +375,10 @@ public class IDFTablePanel extends javax.swing.JPanel {
         @Override
         public String getColumnName(final int i) {
             if ((columns != null) && (i < columns.length)) {
-                final String frequence = String.valueOf(columns[i]);
+                final String frequency = String.valueOf(columns[i]);
 
-                final StringBuilder s = new StringBuilder(frequence);
-                if (frequence.equals("1")) {
+                final StringBuilder s = new StringBuilder(frequency);
+                if (frequency.equals("1")) { // NOI18N
                     s.append(" year");
                 } else {
                     s.append(" years");
@@ -493,8 +487,6 @@ public class IDFTablePanel extends javax.swing.JPanel {
         private JScrollPane parent;
         private Header header;
         private int position;
-//        private TableHeadersExtension headerLeft;
-//        private TableHeadersExtension headerRight;
 
         //~ Constructors -------------------------------------------------------
 
@@ -520,9 +512,8 @@ public class IDFTablePanel extends javax.swing.JPanel {
         @Override
         protected void paintComponent(final Graphics g) {
             super.paintComponent(g);
-//            final java.awt.Rectangle rec = TableRowHeader.this.getViewRect();
             if (position == HEADER_TEXT_VERTICAL) {
-                int height = 0; // table.getRowHeight(0);
+                int height = 0;
                 for (int i = 0; i < table.getRowCount(); i++) {
                     height += table.getRowHeight(i);
                 }
@@ -534,9 +525,6 @@ public class IDFTablePanel extends javax.swing.JPanel {
                 }
                 SwingUtilities.paintComponent(g, header, this, 0, 0, width, 20);
             }
-//            setPreferredSize(new Dimension(20, height));
-//            add(headerLeft);
-//            headerLeft.setPreferredSize(getPreferredSize());
         }
 
         @Override
@@ -564,7 +552,7 @@ public class IDFTablePanel extends javax.swing.JPanel {
              * @param  title     DOCUMENT ME!
              */
             public Header(final int width, final int height, final int position, final String title) {
-                setText(title); // "Duration in min");
+                setText(title);
                 this.setText("Duration");
                 this.setForeground(tblIDF.getForeground());
                 this.setBackground(tblIDF.getBackground());
@@ -581,7 +569,6 @@ public class IDFTablePanel extends javax.swing.JPanel {
                 h += tblIDF.getTableHeader().getHeight();
 
                 Font font = this.getFont();
-//                TextLayout thisTl = new TextLayout(title, font,
                 font = font.deriveFont(Font.BOLD);
                 if (position == HEADER_TEXT_VERTICAL) {
                     final AffineTransform at = new AffineTransform();
@@ -591,12 +578,6 @@ public class IDFTablePanel extends javax.swing.JPanel {
                 }
                 this.setFont(font);
                 this.setPreferredSize(new Dimension(20, 20));
-
-//                setHorizontalAlignment(CENTER);
-//                setVerticalTextPosition(CENTER);
-//                setHorizontalTextPosition(CENTER);
-//                setVerticalAlignment(CENTER);
-//                setBorder(UIManager.getBorder("TableHeader.cellBorder"));
             }
         }
     }

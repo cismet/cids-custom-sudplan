@@ -28,7 +28,6 @@ import java.awt.EventQueue;
 
 import java.text.NumberFormat;
 
-import javax.swing.*;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -75,7 +74,6 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
 
         txaDescription.setEditable(false);
         txtName.setEditable(false);
-        // chkForecast.setEnabled(false);
         txtInterval.setEditable(false);
     }
 
@@ -323,9 +321,6 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
             final DefaultCategoryDataset dataset = createDataset(data, interval);
             final JFreeChart chart = createChart(dataset, title);
             final ChartPanel chartPanel = new ChartPanel(chart, false);
-//            chartPanel.setFillZoomRectangle(true);
-//            chartPanel.setMouseWheelEnabled(true);
-//            chartPanel.setPreferredSize(new Dimension(300, 270));
             this.setLayout(new BorderLayout());
             this.add(chartPanel, BorderLayout.CENTER);
         }
@@ -416,43 +411,6 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
             renderer.setShadowVisible(false);
             chart.getCategoryPlot().setRenderer(renderer);
 
-//            final BarRenderer barrenderer = new BarRenderer() {
-//
-//                    @Override
-//                    public Paint getItemPaint(final int row, final int column) {
-//                        return (Color.blue);
-//                    }
-//                };
-//            plot.setRenderer(barrenderer);
-//            plot.setRenderer(0, barrenderer);
-////            final BarRenderer renderer = (BarRenderer)plot.getRenderer();
-//            barrenderer.setDrawBarOutline(false);
-////            renderer.setSeriesPaint(0, Color.BLUE);
-//            barrenderer.setShadowVisible(false);
-            // renderer.getItemPaint(0, 0).
-            // renderer.setBaseItemLabelPaint(Color.blue);
-            // set up gradient paints for series...
-// final GradientPaint gp0 = new GradientPaint(
-// 0.0f,
-// 0.0f,
-// Color.blue,
-// 0.0f,
-// 0.0f,
-// Color.lightGray);
-// renderer.setSeriesPaint(0, gp0);
-
-            // final CategoryItemRenderer renderer = plot.getRenderer();
-// final BarRenderer b = (BarRenderer)plot.getRenderer();
-// b.setShadowVisible(false);
-
-// final double width = b.getMaximumBarWidth();
-// // final double width = 1.0d / (double)dataset.getColumnCount();
-// b.setMaximumBarWidth(1);
-            // renderer.setSeriesPaint(0, Color.BLUE);
-// renderer.setUseFillPaint(true);
-            // renderer.setBaseFillPaint(null);
-            // chart.setAntiAlias(false);
-// renderer.setSe
             return chart;
         }
     }

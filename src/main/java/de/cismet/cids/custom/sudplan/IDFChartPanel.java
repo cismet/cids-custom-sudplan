@@ -11,19 +11,13 @@ import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import org.jfree.chart.*;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.entity.CategoryItemEntity;
-import org.jfree.chart.entity.ChartEntity;
-import org.jfree.chart.entity.XYItemEntity;
-import org.jfree.chart.event.RendererChangeEvent;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -31,7 +25,6 @@ import org.jfree.ui.RectangleInsets;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Paint;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -116,7 +109,7 @@ public class IDFChartPanel extends javax.swing.JPanel {
 
         // Create Chart
         final XYDataset dataset = createDataset(curve);
-        final String name = (String)cidsBean.getProperty("name");
+        final String name = (String)cidsBean.getProperty("name"); // NOI18N
         final String xAxisTitle = "Duration (min)";
         final String yAxisTitle = "Intensity (mm/h)";
 
@@ -137,10 +130,10 @@ public class IDFChartPanel extends javax.swing.JPanel {
      */
     private XYDataset createDataset(final IDFCurve curve) {
         final XYSeriesCollection dataset = new XYSeriesCollection();
-        for (final int frequence : curve.getFrequencies()) {
+        for (final int frequency : curve.getFrequencies()) {
             final Iterator iterator = curve.getData().keySet().iterator();
-            final StringBuilder seriesTitle = new StringBuilder(String.valueOf(frequence));
-            if (frequence <= 1) {
+            final StringBuilder seriesTitle = new StringBuilder(String.valueOf(frequency));
+            if (frequency <= 1) {
                 seriesTitle.append(" year");
             } else {
                 seriesTitle.append(" years");
@@ -149,11 +142,12 @@ public class IDFChartPanel extends javax.swing.JPanel {
             while (iterator.hasNext()) {
                 final int key = (Integer)iterator.next();
                 final double valueX = (double)key;
-                final double valueY = (double)curve.getData().get(key).get(frequence);
+                final double valueY = (double)curve.getData().get(key).get(frequency);
                 series.add(valueX, valueY);
             }
             dataset.addSeries(series);
         }
+
         return dataset;
     }
 
@@ -184,8 +178,6 @@ public class IDFChartPanel extends javax.swing.JPanel {
 
         chart.setBackgroundPaint(Color.white);
 
-//        StandardLegend legend = (StandardLegend) chart.getLegend();
-//        legend.setDisplaySeriesShapes(true);
         final XYPlot plot = chart.getXYPlot();
         plot.setBackgroundPaint(Color.lightGray);
         plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
