@@ -7,11 +7,7 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.hydrology;
 
-import Sirius.navigator.connection.SessionManager;
-import Sirius.navigator.exception.ConnectionException;
 import Sirius.navigator.ui.ComponentRegistry;
-
-import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
 
@@ -141,8 +137,11 @@ public final class DoCalibrationWizardAction extends AbstractAction {
                 // thread does it for no apparent reason, to cut a long story short: mark theworkspace for reload to
                 // ensure freshness, if it is still the selected one
                 if ((currWorkspace != null)
-                            && selectedCalInput.equals(currWorkspace.getProperty("calibration.modelinput"))) {
-                    reloadWorkspace(currWorkspace);
+                            && selectedCalInput.equals(currWorkspace.getProperty("calibration.modelinput"))) { // NOI18N
+                    HydrologyCache.getInstance().reloadCurrentWorkspace();
+                } else {
+                    final CidsBean hwBean = HydrologyCache.getInstance().getWorkspaceFromCalInput(selectedCalInput);
+                    HydrologyCache.getInstance().setCurrentWorkspace(hwBean);
                 }
 
                 SMSUtils.executeAndShowRun(runBean);
@@ -153,20 +152,5 @@ public final class DoCalibrationWizardAction extends AbstractAction {
                 throw new RuntimeException(message, ex);
             }
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   workspace  DOCUMENT ME!
-     *
-     * @throws  ConnectionException  DOCUMENT ME!
-     */
-    private void reloadWorkspace(final CidsBean workspace) throws ConnectionException {
-        final MetaObject womo = workspace.getMetaObject();
-        final String domain = SessionManager.getSession().getUser().getDomain();
-        final MetaObject newWomo = SessionManager.getProxy().getMetaObject(womo.getID(), womo.getClassID(), domain);
-
-        HydrologyCache.getInstance().setCurrentWorkspace(newWomo.getBean());
     }
 }

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 import de.cismet.cids.custom.sudplan.concurrent.ProgressWatch;
@@ -28,6 +29,7 @@ import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.tools.gui.downloadmanager.Download;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
+import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 
 /**
  * DOCUMENT ME!
@@ -130,6 +132,10 @@ public abstract class AbstractAsyncModelManager extends AbstractModelManager imp
                     JOptionPane.QUESTION_MESSAGE);
 
             if (JOptionPane.YES_OPTION == answer) {
+                final JDialog dialog = DownloadManagerDialog.instance(ComponentRegistry.getRegistry().getMainWindow());
+                dialog.setVisible(true);
+                dialog.toFront();
+
                 final Observer dlObs = new DownloadObserver(amrw);
                 amrw.addObserver(dlObs);
                 DownloadManager.instance().add(amrw);

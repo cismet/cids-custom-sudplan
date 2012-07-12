@@ -228,7 +228,7 @@ public class EmissionUploadVisualPanelEmissionScenario extends javax.swing.JPane
      *
      * @version  $Revision$, $Date$
      */
-    protected class EmissionScenarioNameFilter extends DocumentFilter {
+    public static class EmissionScenarioNameFilter extends DocumentFilter {
 
         //~ Methods ------------------------------------------------------------
 

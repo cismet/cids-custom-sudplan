@@ -16,10 +16,12 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.apache.log4j.Logger;
 
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
-import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
@@ -31,14 +33,14 @@ import java.awt.event.ActionEvent;
 
 import java.io.IOException;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import java.text.MessageFormat;
 
 import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Level;
 
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -48,7 +50,10 @@ import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+
+import de.cismet.tools.Converter;
 
 /**
  * DOCUMENT ME!
@@ -61,16 +66,39 @@ public class EmissionUploadWizardAction extends AbstractCidsBeanAction implement
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final String TABLENAME_EMISSION_DATABASE = "EMISSION_DATABASE"; // NOI18N
-
     private static final transient Logger LOG = Logger.getLogger(EmissionUploadWizardAction.class);
+    private static final transient ImageIcon ICON;
+
+    public static final transient String TABLENAME_EMISSION_DATABASE = "EMISSION_DATABASE";           // NOI18N
+    public static final transient String TABLENAME_EMISSION_DATABASE_GRID = "EMISSION_DATABASE_GRID"; // NOI18N
 
     public static final transient String PROPERTY_GRIDS = "grids";             // NOI18N
     public static final transient String PROPERTY_NAME = "name";               // NOI18N
     public static final transient String PROPERTY_DESCRIPTION = "description"; // NOI18N
     public static final transient String PROPERTY_SRS = "srs";                 // NOI18N
-    public static final transient String PROPERTY_URL = "url";                 // NOI18N
-    public static final transient String PROPERTY_SUCCESSFUL = "successful";   // NOI18N
+    public static final transient String PROPERTY_ACTION = "action";           // NOI18N
+    public static final transient String PROPERTY_ACTION_UPLOAD = "upload";    // NOI18N
+    public static final transient String PROPERTY_ACTION_SAVE = "save";        // NOI18N
+
+    static {
+        ImageIcon intermediateIcon = null;
+
+        try {
+            intermediateIcon = ImageUtilities.loadImageIcon(
+                    "de/cismet/cids/custom/sudplan/airquality/emissionupload/emissionUpload16.png", // NOI18N
+                    false);
+        } catch (final Exception ex) {
+            LOG.warn(
+                "The icon 'de/cismet/cids/custom/sudplan/airquality/emissionupload/emissionUpload16.png' can not be loaded.",
+                ex);
+        }
+
+        if (intermediateIcon != null) {
+            ICON = intermediateIcon;
+        } else {
+            ICON = new ImageIcon();
+        }
+    }
 
     //~ Instance fields --------------------------------------------------------
 
@@ -82,11 +110,7 @@ public class EmissionUploadWizardAction extends AbstractCidsBeanAction implement
      * Creates a new EmissionUploadWizardAction object.
      */
     public EmissionUploadWizardAction() {
-        super(
-            "",                                                                                 // NOI18N
-            ImageUtilities.loadImageIcon(
-                "de/cismet/cids/custom/sudplan/airquality/emissionupload/emissionUpload16.png", // NOI18N
-                false));
+        super("", ICON);
 
         putValue(
             Action.SHORT_DESCRIPTION,
@@ -141,28 +165,19 @@ public class EmissionUploadWizardAction extends AbstractCidsBeanAction implement
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        URL url = null;
-        try {
-            url = new URL("http://85.24.165.10/cgi-bin/sudplan_emscenario_add.cgi"); // NOI18N
-        } catch (final MalformedURLException ex) {
-            LOG.error("Given URL is invalid. Upload would fail.", ex);               // NOI18N
-            // TODO: User feedback.
-            return;
-        }
-
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
         wizard.putProperty(PROPERTY_GRIDS, new LinkedList<Grid>());
         wizard.putProperty(PROPERTY_NAME, "");               // NOI18N
         wizard.putProperty(PROPERTY_DESCRIPTION, "");        // NOI18N
         wizard.putProperty(PROPERTY_SRS, CismapBroker.getInstance().getSrs());
-        wizard.putProperty(PROPERTY_URL, url);
-        wizard.putProperty(PROPERTY_SUCCESSFUL, Boolean.FALSE);
+        wizard.putProperty(PROPERTY_ACTION, PROPERTY_ACTION_UPLOAD);
         wizard.setTitleFormat(new MessageFormat("{0}"));     // NOI18N
         wizard.setTitle(NbBundle.getMessage(
                 EmissionUploadWizardAction.class,
                 "EmissionUploadWizardAction.wizard.title")); // NOI18N
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
+        dialog.setIconImage(ICON.getImage());
         dialog.pack();
         dialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
         dialog.setVisible(true);
@@ -176,55 +191,131 @@ public class EmissionUploadWizardAction extends AbstractCidsBeanAction implement
                     ((Cancellable)o).cancel();
                 }
             }
-        } else if ((Boolean)wizard.getProperty(PROPERTY_SUCCESSFUL)) {
+
+            return;
+        }
+
+        final CidsBean emissionDatabase;
+
+        try {
+            emissionDatabase = createEmissionDatabase((String)wizard.getProperty(PROPERTY_NAME),
+                    (String)wizard.getProperty(PROPERTY_DESCRIPTION),
+                    ((Crs)wizard.getProperty(PROPERTY_SRS)).getCode(),
+                    null,
+                    (List<Grid>)wizard.getProperty(PROPERTY_GRIDS));
+
+            emissionDatabase.persist();
+        } catch (final Exception ex) {
+            final String errorMessage = "Can't create or persist new CidsBean for emission database '"
+                        + wizard.getProperty(PROPERTY_NAME) + "'.";
+
+            LOG.error(errorMessage, // NOI18N
+                ex);
+
             try {
-                final CidsBean emissionDatabase = createEmissionDatabase((String)wizard.getProperty(PROPERTY_NAME),
-                        (String)wizard.getProperty(PROPERTY_DESCRIPTION),
+                final ErrorInfo errorInfo = new ErrorInfo(
+                        "Error",
+                        "Couldn't save the emission database.",
+                        errorMessage,
+                        "ERROR",
+                        ex,
+                        Level.SEVERE,
                         null);
-                emissionDatabase.persist();
-            } catch (Exception ex) {
-                LOG.error("Can't create or persist new CidsBean for emission database '"
-                            + wizard.getProperty(PROPERTY_NAME) + "'.", // NOI18N
-                    ex);
-                // TODO: User feedback.
+
+                EventQueue.invokeAndWait(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            JXErrorPane.showDialog(ComponentRegistry.getRegistry().getMainWindow(), errorInfo);
+                        }
+                    });
+            } catch (final Exception ex1) {
+                LOG.error("Can't display error dialog", ex1); // NOI18N
             }
+
+            return;
+        }
+
+        if (PROPERTY_ACTION_UPLOAD.equals(wizard.getProperty(PROPERTY_ACTION))) {
+            final EmissionUploadDialog uploadDialog = new EmissionUploadDialog(ComponentRegistry.getRegistry()
+                            .getMainWindow(),
+                    emissionDatabase);
+            uploadDialog.pack();
+            uploadDialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
+            uploadDialog.setVisible(true);
+            uploadDialog.toFront();
         }
     }
 
     /**
-     * DOCUMENT ME!
+     * Creates a new CidsBean from given emission database. The returned CidsBean isn't persisted.
      *
-     * @param   name         DOCUMENT ME!
-     * @param   description  DOCUMENT ME!
-     * @param   geometry     DOCUMENT ME!
+     * @param   name         Name of emission database.
+     * @param   description  Description of emission database.
+     * @param   srs          SRS of emission database (e. g. "EPSG:3021").
+     * @param   geometry     Name of emission database.
+     * @param   grids        Emission grids.
      *
-     * @return  DOCUMENT ME!
+     * @return  A CidsBean (table "emission_database") for the given emission database.
      *
      * @throws  IOException               DOCUMENT ME!
+     * @throws  Exception                 DOCUMENT ME!
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
-    private CidsBean createEmissionDatabase(final String name, final String description, final Geometry geometry)
-            throws IOException {
+    private CidsBean createEmissionDatabase(final String name,
+            final String description,
+            final String srs,
+            final Geometry geometry,
+            final List<Grid> grids) throws IOException, Exception {
         if ((name == null) || name.trim().isEmpty()) {
             throw new IllegalArgumentException("name must not be null or empty."); // NOI18N
         }
 
-        final MetaClass metaClass = ClassCacheMultiple.getMetaClass(SessionManager.getSession().getUser().getDomain(),
-                TABLENAME_EMISSION_DATABASE);
+        final MetaClass metaClassEmissionDatabase;
+        final MetaClass metaClassEmissionDatabaseGrid;
 
         try {
-            final CidsBean cidsBean = metaClass.getEmptyInstance().getBean();
+            metaClassEmissionDatabase = ClassCacheMultiple.getMetaClass(SessionManager.getSession().getUser()
+                            .getDomain(),
+                    TABLENAME_EMISSION_DATABASE);
+            metaClassEmissionDatabaseGrid = ClassCacheMultiple.getMetaClass(SessionManager.getSession().getUser()
+                            .getDomain(),
+                    TABLENAME_EMISSION_DATABASE_GRID);
+        } catch (final Exception ex) {
+            throw new Exception("The meta classes can't be retrieved.", ex);
+        }
 
-            cidsBean.setProperty("name", name);               // NOI18N
-            cidsBean.setProperty("description", description); // NOI18N
-            cidsBean.setProperty("geometry", geometry);       // NOI18N
+        try {
+            final CidsBean cidsBean = metaClassEmissionDatabase.getEmptyInstance().getBean();
+            final List<CidsBean> emissonGrids = cidsBean.getBeanCollectionProperty("grids");
+
+            for (final Grid grid : grids) {
+                final CidsBean cidsBeanGrid = metaClassEmissionDatabaseGrid.getEmptyInstance().getBean();
+
+                cidsBeanGrid.setProperty("name", grid.getGridName());
+                cidsBeanGrid.setProperty("substance", grid.getSubstance().getRepresentationFile());
+                cidsBeanGrid.setProperty("timevariation", grid.getTimeVariation().getRepresentationFile());
+                cidsBeanGrid.setProperty("height", grid.getGridHeight().getRepresentationFile());
+                cidsBeanGrid.setProperty("grid", Converter.toString(EmissionUpload.read(grid.getEmissionGrid())));
+                cidsBeanGrid.setProperty(
+                    "customtimevariation",
+                    Converter.toString(EmissionUpload.read(grid.getCustomTimeVariation())));
+
+                emissonGrids.add(cidsBeanGrid);
+            }
+
+            cidsBean.setProperty("name", name);                                             // NOI18N
+            cidsBean.setProperty("description", description);                               // NOI18N
+            cidsBean.setProperty("srs", srs);                                               // NOI18N
+            cidsBean.setProperty("geometry", geometry);                                     // NOI18N
+            cidsBean.setProperty("uploaded", Boolean.FALSE);                                // NOI18N
+            cidsBean.setProperty("file", Converter.toString(EmissionUpload.zip(cidsBean))); // NOI18N
 
             return cidsBean;
         } catch (final Exception e) {
             final String message = "Can't create CidsBean for emission database '" + name
                         + "' (Description: '"                               // NOI18N //NOI18N
                         + description + "', Geometry: '" + geometry + "'."; // NOI18N //NOI18N
-            LOG.error(message, e);
             throw new IOException(message, e);
         }
     }

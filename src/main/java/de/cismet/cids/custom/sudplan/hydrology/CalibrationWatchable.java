@@ -96,7 +96,8 @@ public final class CalibrationWatchable extends AbstractModelRunWatchable {
                     return new ProgressEvent(
                             this,
                             ProgressEvent.State.BROKEN,
-                            "Unknown execution status for submodel creation process");
+                            "Unknown execution status for submodel creation process: "
+                                    + runinfo.getSubmodelExecutionId());
                 }
                 case DONE: {
                     try {
@@ -166,8 +167,6 @@ public final class CalibrationWatchable extends AbstractModelRunWatchable {
 
         final SudPlanHypeAPI hypeClient = HydrologyCache.getInstance().getHypeClient();
         final String tsId = "cal_result_" + System.currentTimeMillis();                                 // NOI18N
-        final String tsOfferingUnknown = tsId + "_unknown";                                             // NOI18N
-        final String tsProcedureUnknown = "urn:ogc:object:" + tsId + ":cout:unknown";                   // NOI18N
         final String tsOffering = tsId + "_" + Resolution.DAY.getPrecision();
         final String tsProcedure = "urn:ogc:object:" + tsId + ":cout:" + Resolution.DAY.getPrecision(); // NOI18N
 

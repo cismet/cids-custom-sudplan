@@ -14,8 +14,6 @@ import org.apache.log4j.Logger;
 import org.jfree.chart.JFreeChart;
 import org.jfree.util.Log;
 
-import org.openide.util.NbBundle;
-
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.EventQueue;
@@ -68,7 +66,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     private TimeSeriesVisualisation tsVis;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel pnlLoading;
+    private de.cismet.cids.custom.sudplan.LoadingLabel lblLoading;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -198,6 +196,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
         tsVis = TimeSeriesVisualisationFactory.getInstance().createVisualisation(VisualisationType.SIMPLE);
         final Controllable tsVisController = tsVis.getLookup(Controllable.class);
         tsVisController.enableSelection(false);
+        tsVisController.enableContextMenu(true);
         displayer.execute();
     }
 
@@ -275,19 +274,26 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        pnlLoading = new javax.swing.JLabel();
+        final java.awt.GridBagConstraints gridBagConstraints;
+
+        lblLoading = new de.cismet.cids.custom.sudplan.LoadingLabel();
 
         setOpaque(false);
-        setLayout(new java.awt.BorderLayout());
-
-        pnlLoading.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        pnlLoading.setText(NbBundle.getMessage(TimeseriesChartPanel.class, "TimeseriesChartPanel.pnlLoading.text")); // NOI18N
-        add(pnlLoading, java.awt.BorderLayout.CENTER);
-    }                                                                                                                // </editor-fold>//GEN-END:initComponents
+        setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 50, 0, 0);
+        add(lblLoading, gridBagConstraints);
+    } // </editor-fold>//GEN-END:initComponents
 
     @Override
     public void dispose() {
         displayer.cancel(true);
+        lblLoading.dispose();
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -379,7 +385,9 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
             try {
                 if (!cached) {
                     final JComponent comp = tsVis.getVisualisationUI();
-                    remove(pnlLoading);
+                    remove(lblLoading);
+                    lblLoading.dispose();
+                    setLayout(new BorderLayout());
                     add(comp, BorderLayout.CENTER);
 
                     Container parent = TimeseriesChartPanel.this;

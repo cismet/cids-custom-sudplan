@@ -60,4 +60,21 @@ public enum TimeVariation {
     public String getRepresentationUI() {
         return representationUI;
     }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   timeVariation  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static TimeVariation timeVariationFor(final String timeVariation) {
+        for (final TimeVariation value : values()) {
+            if (value.representationFile.equals(timeVariation) || value.representationUI.equals(timeVariation)) {
+                return value;
+            }
+        }
+
+        return null;
+    }
 }

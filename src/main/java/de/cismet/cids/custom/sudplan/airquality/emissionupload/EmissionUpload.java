@@ -9,34 +9,31 @@ package de.cismet.cids.custom.sudplan.airquality.emissionupload;
 
 import org.apache.log4j.Logger;
 
-import org.openide.util.NbBundle;
-
-import java.awt.EventQueue;
-
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.nio.charset.Charset;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import de.cismet.cismap.commons.Crs;
+import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.security.WebAccessManager;
+
+import de.cismet.tools.Converter;
 
 /**
  * DOCUMENT ME!
@@ -44,7 +41,7 @@ import de.cismet.security.WebAccessManager;
  * @author   jweintraut
  * @version  $Revision$, $Date$
  */
-public class EmissionUpload implements Runnable {
+public class EmissionUpload /*implements Runnable*/ {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -70,121 +67,50 @@ public class EmissionUpload implements Runnable {
     private static final transient String CONTENTFILE_PROPERTY_LAYER_SUBSTANCE = "substance";   // NOI18N
     private static final transient String CONTENTFILE_PROPERTY_LAYER_TIMEVARIATION = "timevar"; // NOI18N
 
-    //~ Enums ------------------------------------------------------------------
+    public static final transient URL UPLOAD_URL;
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    public enum State {
-
-        //~ Enum constants -----------------------------------------------------
-
-        WAITING, RUNNING, DONE, ERRONEOUS, ABORTED;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    public enum Action {
-
-        //~ Enum constants -----------------------------------------------------
-
-        WAITING, CREATING_EMISSIONSCENARIO, UPLOADING_EMISSIONSCENARIO;
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public String toString() {
-            return NbBundle.getMessage(Action.class, "EmissionUpload.Action." + name()); // NOI18N
-        }
-    }
-
-    //~ Instance fields --------------------------------------------------------
-
-    private EmissionUploadPanelUpload model;
-    private Grid[] grids;
-    private String emissionScenarioName;
-    private Crs srs;
-    private String description;
-    private URL url;
-
-    private Collection<Exception> exceptions;
-    private volatile State state = State.WAITING;
-    private volatile Action action = Action.WAITING;
-
-    //~ Constructors -----------------------------------------------------------
-
-    /**
-     * Creates a new EmissionUpload object.
-     *
-     * @param  model                 DOCUMENT ME!
-     * @param  grids                 DOCUMENT ME!
-     * @param  emissionScenarioName  DOCUMENT ME!
-     * @param  srs                   DOCUMENT ME!
-     * @param  description           DOCUMENT ME!
-     * @param  url                   DOCUMENT ME!
-     */
-    public EmissionUpload(final EmissionUploadPanelUpload model,
-            final Collection<Grid> grids,
-            final String emissionScenarioName,
-            final Crs srs,
-            final String description,
-            final URL url) {
-        this.model = model;
-
-        if (grids != null) {
-            this.grids = grids.toArray(new Grid[grids.size()]);
-        } else {
-            this.grids = new Grid[0];
+    static {
+        URL intermediateURL = null;
+        try {
+            intermediateURL = new URL("http://85.24.165.10/cgi-bin/sudplan_emscenario_add.cgi");
+        } catch (MalformedURLException ex) {
+            LOG.warn(
+                "Couldn't create an URL object for 'http://85.24.165.10/cgi-bin/sudplan_emscenario_add.cgi'. Emission database upload won't work.",
+                ex);
         }
 
-        this.emissionScenarioName = emissionScenarioName;
-        this.srs = srs;
-        this.description = description;
-        this.url = url;
-
-        exceptions = new LinkedList<Exception>();
+        UPLOAD_URL = intermediateURL;
     }
 
     //~ Methods ----------------------------------------------------------------
 
-    @Override
-    public void run() {
-        if (state != State.WAITING) {
-            return;
-        }
-
-        setState(State.RUNNING, Action.CREATING_EMISSIONSCENARIO);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   cidsBean  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public static byte[] zip(final CidsBean cidsBean) throws Exception {
+        final String name = (String)cidsBean.getProperty("name");
+        final String srs = (String)cidsBean.getProperty("srs");
+        final String description = (String)cidsBean.getProperty("description");
+        final List<CidsBean> grids = cidsBean.getBeanCollectionProperty("grids");
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Checking conditions for emission upload."); // NOI18N
+            LOG.debug("Zipping emission database."); // NOI18N
         }
 
-        if ((grids == null) || (grids.length == 0)) {
-            exceptions.add(new IllegalArgumentException("No grids specified."));                   // NOI18N
+        if ((grids == null) || (grids.isEmpty())) {
+            throw new Exception("No grids specified.");                  // NOI18N
         }
-        if ((emissionScenarioName == null) || (emissionScenarioName.trim().length() <= 0)) {
-            exceptions.add(new IllegalArgumentException("Name of emission scenario is invalid.")); // NOI18N
+        if ((name == null) || (name.trim().length() <= 0)) {
+            throw new Exception("No emission database name specified."); // NOI18N
         }
         if (srs == null) {
-            exceptions.add(new IllegalArgumentException("No SRS specified"));                      // NOI18N //NOI18N
-        }
-        if (url == null) {
-            exceptions.add(new IllegalArgumentException("No URL specified."));
-        }
-
-        if (Thread.currentThread().isInterrupted()) {
-            setState(State.ABORTED, Action.CREATING_EMISSIONSCENARIO);
-            return;
-        }
-
-        if (!exceptions.isEmpty()) {
-            setErroneousState();
-            return;
+            throw new Exception("No srs specified.");                    // NOI18N
         }
 
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -196,16 +122,10 @@ public class EmissionUpload implements Runnable {
 
         try {
             zipStream.putNextEntry(new ZipEntry(FILENAME_CONTENT));
-            zipStream.write(createContentFile());
+            zipStream.write(createContentFile(name, srs, grids));
             zipStream.closeEntry();
-        } catch (IOException ex) {
-            setErroneousState(zipStream, new Exception("Could not create file '" + FILENAME_CONTENT + "'.", ex)); // NOI18N
-            return;
-        }
-
-        if (Thread.currentThread().isInterrupted()) {
-            setAbortedState(zipStream, Action.CREATING_EMISSIONSCENARIO);
-            return;
+        } catch (final IOException ex) {
+            throw new Exception("Could not create file '" + FILENAME_CONTENT + "'.", ex); // NOI18N
         }
 
         if ((description != null) && (description.trim().length() > 0)) {
@@ -217,82 +137,47 @@ public class EmissionUpload implements Runnable {
                 zipStream.putNextEntry(new ZipEntry(FILENAME_DESCRIPTION));
                 zipStream.write(description.getBytes(CHARSET));
                 zipStream.closeEntry();
-            } catch (IOException ex) {
-                exceptions.add(new Exception("Could not create file '" + FILENAME_DESCRIPTION + "'.", ex)); // NOI18N
+            } catch (final IOException ex) {
+                LOG.info("Could not create file '" + FILENAME_DESCRIPTION + "'.", ex); // NOI18N
                 // The description file is not essential. So we can proceed.
             }
         }
 
-        if (Thread.currentThread().isInterrupted()) {
-            setAbortedState(zipStream, Action.CREATING_EMISSIONSCENARIO);
-            return;
-        }
-
-        for (int gridCount = 0; gridCount < grids.length; gridCount++) {
-            final Grid grid = grids[gridCount];
+        for (int gridCount = 0; gridCount < grids.size(); gridCount++) {
+            final CidsBean grid = grids.get(gridCount);
+            final TimeVariation timeVariation = TimeVariation.timeVariationFor((String)grid.getProperty(
+                        "timevariation"));
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Adding grid '" + grid.getGridName() + "' at position '" + (gridCount + 1) + "'."); // NOI18N
+                LOG.debug("Adding grid '" + grid.toString() + "' at position '" + (gridCount + 1) + "'."); // NOI18N
             }
 
             try {
-                insertZipEntry(
-                    zipStream,
-                    grid.getEmissionGrid(),
-                    FILENAME_LAYER_PREFIX
-                            + (gridCount + 1)
-                            + FILENAME_LAYER_SUFFIX_GRID,
-                    CHARSET);
-            } catch (final FileNotFoundException ex) {
-                setErroneousState(
-                    zipStream,
-                    new Exception("Could not find the emission grid file for '" + grid.getGridName() + "'.", ex)); // NOI18N
-                return;
-            } catch (final IOException ex) {
-                setErroneousState(
-                    zipStream,
-                    new Exception("Could not insert emission grid file for '" + grid.getGridName() + "'.", ex));   // NOI18N
-                return;
-            }
-
-            if (grid.getTimeVariation().equals(TimeVariation.CUSTOM)) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Adding custom time variation '" + grid.getCustomTimeVariation().getAbsolutePath()
-                                + "' for grid '" + grid.getGridName() + "'."); // NOI18N //NOI18N
-                }
-
-                try {
-                    insertZipEntry(
-                        zipStream,
-                        grid.getCustomTimeVariation(),
+                zipStream.putNextEntry(new ZipEntry(
                         FILENAME_LAYER_PREFIX
                                 + (gridCount + 1)
-                                + FILENAME_LAYER_SUFFIX_TIMEVARIATION,
-                        CHARSET);
-                } catch (final FileNotFoundException ex) {
-                    setErroneousState(
-                        zipStream,
-                        new Exception(
-                            "Could not find the custom time variation file for '"
-                                    + grid.getGridName() // NOI18N
-                                    + "'.",              // NOI18N
-                            ex));
-                    return;
-                } catch (final IOException ex) {
-                    setErroneousState(
-                        zipStream,
-                        new Exception(
-                            "Could not insert custom time variation file for '"
-                                    + grid.getGridName() // NOI18N
-                                    + "'.",              // NOI18N
-                            ex));
-                    return;
-                }
+                                + FILENAME_LAYER_SUFFIX_GRID));
+                zipStream.write(Converter.fromString((String)grid.getProperty("grid")));
+                zipStream.closeEntry();
+            } catch (final IOException ex) {
+                throw new Exception("Could not insert emission grid file for '" + grid.toString() + "'.", ex); // NOI18N
             }
 
-            if (Thread.currentThread().isInterrupted()) {
-                setAbortedState(zipStream, Action.CREATING_EMISSIONSCENARIO);
-                return;
+            if (TimeVariation.CUSTOM.equals(timeVariation)) {
+                try {
+                    zipStream.putNextEntry(new ZipEntry(
+                            FILENAME_LAYER_PREFIX
+                                    + (gridCount + 1)
+                                    + FILENAME_LAYER_SUFFIX_TIMEVARIATION));
+                    zipStream.write(Converter.fromString(((String)grid.getProperty("customtimevariation"))));
+                    zipStream.closeEntry();
+                } catch (final IOException ex) {
+                    throw new Exception(
+                        "Could not insert custom time variation file for '"
+                                + grid.toString() // NOI18N
+                                + "'.",           // NOI18N
+                        ex);
+                }
             }
         }
 
@@ -303,95 +188,24 @@ public class EmissionUpload implements Runnable {
         try {
             zipStream.close();
         } catch (IOException ex) {
-            setErroneousState(new Exception("Could not close the generated zip file.", ex)); // NOI18N
-            return;
+            throw new Exception("Could not close the generated zip file.", ex); // NOI18N
         }
 
-        setState(State.RUNNING, Action.UPLOADING_EMISSIONSCENARIO);
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Start upload of emission scenario."); // NOI18N
-        }
-
-        InputStream response = null;
-        try {
-            response = WebAccessManager.getInstance()
-                        .doRequest(
-                                url,
-                                new ByteArrayInputStream(output.toByteArray()),
-                                new HashMap<String, String>());
-        } catch (Exception ex) {
-            setErroneousState(new Exception("Could not upload the generated zip file.", ex)); // NOI18N
-            return;
-        }
-
-        BufferedReader responseReader = null;
-        final StringBuilder responseMessage = new StringBuilder();
-        try {
-            responseReader = new BufferedReader(new InputStreamReader(response));
-            String line;
-            while ((line = responseReader.readLine()) != null) {
-                responseMessage.append(line);
-            }
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Response of emission upload script: '" + responseMessage.toString() + "'."); // NOI18N
-            }
-        } catch (final Exception e) {
-        } finally {
-            try {
-                if (responseReader != null) {
-                    responseReader.close();
-                }
-            } catch (IOException ex) {
-                LOG.warn("Couldn't close response.", ex);                                               // NOI18N
-            }
-        }
-
-        if ("ok".equalsIgnoreCase(responseMessage.toString())) { // NOI18N
-            setState(State.DONE, Action.WAITING);
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Emission scenario uploaded."); // NOI18N
-            }
-        } else {
-            setErroneousState(new Exception(responseMessage.toString()));
-        }
+        return output.toByteArray();
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
-     */
-    public State getState() {
-        return state;
-    }
-
-    /**
-     * DOCUMENT ME!
+     * @param   emissionScenarioName  DOCUMENT ME!
+     * @param   srs                   DOCUMENT ME!
+     * @param   grids                 DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    public Action getAction() {
-        return action;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public Collection<Exception> getExceptions() {
-        return exceptions;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private byte[] createContentFile() {
+    private static byte[] createContentFile(final String emissionScenarioName,
+            final String srs,
+            final List<CidsBean> grids) {
         final StringBuilder result = new StringBuilder();
 
         result.append(CONTENTFILE_CATEGORY_SCENARIO);
@@ -405,11 +219,17 @@ public class EmissionUpload implements Runnable {
         result.append(CONTENTFILE_SEPARATOR_PROPERTY);
         result.append(CONTENTFILE_PROPERTY_SCENARIO_SRS);
         result.append(CONTENTFILE_SEPARATOR_KEYVALUE);
-        result.append(srs.getName());
+        result.append(srs);
         result.append(NEWLINE);
 
-        for (int gridCount = 0; gridCount < grids.length; gridCount++) {
-            final Grid grid = grids[gridCount];
+        for (int gridCount = 0; gridCount < grids.size(); gridCount++) {
+            final CidsBean grid = grids.get(gridCount);
+
+            final String gridName = (String)grid.getProperty("name");
+            final Substance substance = Substance.substanceFor((String)grid.getProperty("substance"));
+            final GridHeight gridHeight = GridHeight.gridHeightFor((String)grid.getProperty("height"));
+            final TimeVariation timeVariation = TimeVariation.timeVariationFor((String)grid.getProperty(
+                        "timevariation"));
 
             result.append(CONTENTFILE_CATEGORY_LAYER);
             result.append(CONTENTFILE_SEPARATOR_PROPERTY);
@@ -417,7 +237,7 @@ public class EmissionUpload implements Runnable {
             result.append(CONTENTFILE_SEPARATOR_PROPERTY);
             result.append(CONTENTFILE_PROPERTY_LAYER_NAME);
             result.append(CONTENTFILE_SEPARATOR_KEYVALUE);
-            result.append(grid.getGridName());
+            result.append(gridName);
             result.append(NEWLINE);
 
             result.append(CONTENTFILE_CATEGORY_LAYER);
@@ -426,7 +246,7 @@ public class EmissionUpload implements Runnable {
             result.append(CONTENTFILE_SEPARATOR_PROPERTY);
             result.append(CONTENTFILE_PROPERTY_LAYER_HEIGHT);
             result.append(CONTENTFILE_SEPARATOR_KEYVALUE);
-            result.append(grid.getGridHeight().getRepresentationFile());
+            result.append(gridHeight.getRepresentationFile());
             result.append(NEWLINE);
 
             result.append(CONTENTFILE_CATEGORY_LAYER);
@@ -435,7 +255,7 @@ public class EmissionUpload implements Runnable {
             result.append(CONTENTFILE_SEPARATOR_PROPERTY);
             result.append(CONTENTFILE_PROPERTY_LAYER_SUBSTANCE);
             result.append(CONTENTFILE_SEPARATOR_KEYVALUE);
-            result.append(grid.getSubstance().getRepresentationFile());
+            result.append(substance.getRepresentationFile());
             result.append(NEWLINE);
 
             result.append(CONTENTFILE_CATEGORY_LAYER);
@@ -444,7 +264,7 @@ public class EmissionUpload implements Runnable {
             result.append(CONTENTFILE_SEPARATOR_PROPERTY);
             result.append(CONTENTFILE_PROPERTY_LAYER_TIMEVARIATION);
             result.append(CONTENTFILE_SEPARATOR_KEYVALUE);
-            result.append(grid.getTimeVariation().getRepresentationFile());
+            result.append(timeVariation.getRepresentationFile());
             result.append(NEWLINE);
         }
 
@@ -452,117 +272,90 @@ public class EmissionUpload implements Runnable {
     }
 
     /**
-     * DOCUMENT ME!
+     * /** * DOCUMENT ME!
      *
-     * @param   zipStream  DOCUMENT ME!
-     * @param   file       DOCUMENT ME!
-     * @param   filename   DOCUMENT ME!
-     * @param   charset    buffer DOCUMENT ME!
+     * @param   cidsBean  DOCUMENT ME!
      *
-     * @throws  FileNotFoundException  DOCUMENT ME!
-     * @throws  IOException            DOCUMENT ME!
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception                 DOCUMENT ME!
+     * @throws  IllegalArgumentException  DOCUMENT ME!
      */
-    private void insertZipEntry(final ZipOutputStream zipStream,
-            final File file,
-            final String filename,
-            final Charset charset) throws FileNotFoundException, IOException {
-        final BufferedReader reader = new BufferedReader(new FileReader(file));
-
-        zipStream.putNextEntry(new ZipEntry(filename));
-
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            zipStream.write(charset.encode(line + "\n").array()); // NOI18N
+    public static String upload(final CidsBean cidsBean) throws Exception {
+        if ((cidsBean == null) || !(cidsBean.getProperty("file") instanceof String)) {
+            throw new IllegalArgumentException("Given emission database to upload is invalid.");
         }
 
-        zipStream.closeEntry();
-        reader.close();
-    }
+        final InputStream response = WebAccessManager.getInstance()
+                    .doRequest(
+                        UPLOAD_URL,
+                        new ByteArrayInputStream(Converter.fromString((String)cidsBean.getProperty("file"))),
+                        new HashMap<String, String>());
 
-    /**
-     * DOCUMENT ME!
-     */
-    private void setErroneousState() {
-        for (final Exception exception : exceptions) {
-            LOG.error("Error occurred while creating or uploading emission scenario.", exception); // NOI18N
-        }
-
-        setState(State.ERRONEOUS, Action.WAITING);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  exception  DOCUMENT ME!
-     */
-    private void setErroneousState(final Exception exception) {
-        LOG.error("Error occurred while creating or uploading emission scenario.", exception); // NOI18N
-        exceptions.add(exception);
-
-        EventQueue.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    model.setExceptions(exceptions);
-                }
-            });
-
-        setState(State.ERRONEOUS, Action.WAITING);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  outputStream  DOCUMENT ME!
-     * @param  exception     DOCUMENT ME!
-     */
-    private void setErroneousState(final OutputStream outputStream, final Exception exception) {
-        setErroneousState(exception);
+        BufferedReader responseReader = null;
+        final StringBuilder responseMessage = new StringBuilder();
 
         try {
-            outputStream.close();
-        } catch (IOException ex1) {
-            // Nothing to do here.
+            responseReader = new BufferedReader(new InputStreamReader(response));
+            String line;
+            while ((line = responseReader.readLine()) != null) {
+                responseMessage.append(line);
+            }
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Response of emission upload script: '" + responseMessage.toString() + "'."); // NOI18N
+            }
+        } catch (final Exception e) {
+            return "Emission database was uploaded, but the server didn't send a response.";
+        } finally {
+            try {
+                if (responseReader != null) {
+                    responseReader.close();
+                }
+            } catch (final IOException ex) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Couldn't close response.", ex);                                          // NOI18N
+                }
+            }
         }
+
+        return responseMessage.toString();
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  outputStream  DOCUMENT ME!
-     * @param  action        DOCUMENT ME!
+     * @param   file  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    private void setAbortedState(final OutputStream outputStream, final Action action) {
-        setState(State.ABORTED, action);
+    public static byte[] read(final File file) {
+        if ((file == null) || !file.canRead() || (file.length() == 0)) {
+            return new byte[0];
+        }
+
+        BufferedInputStream reader = null;
 
         try {
-            outputStream.close();
-        } catch (IOException ex1) {
-            // Nothing to do here.
-        }
-    }
+            final ByteArrayOutputStream result = new ByteArrayOutputStream();
+            reader = new BufferedInputStream(new FileInputStream(file));
+            final byte[] buffer = new byte[8192];
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  state   DOCUMENT ME!
-     * @param  action  DOCUMENT ME!
-     */
-    private void setState(final State state, final Action action) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Setting state to '" + state.name() + "'. Setting action to '" + action.name() + "'."); // NOI18N
-        }
+            while (reader.read(buffer) != -1) {
+                result.write(buffer);
+            }
 
-        this.state = state;
-        this.action = action;
-
-        EventQueue.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    model.setAction(action);
-                    model.setState(state);
+            return result.toByteArray();
+        } catch (final Exception ex) {
+            LOG.warn("Couldn't read file '" + file + "'.", ex);
+            return new byte[0];
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException ex) {
                 }
-            });
+            }
+        }
     }
 }

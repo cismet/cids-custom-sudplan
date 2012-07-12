@@ -180,12 +180,12 @@ public final class ShowUpstreamAreasForAreaAction extends AbstractWFSFeatureRetr
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    protected String getCapabilitiesUrl() {
+    public String getCapabilitiesUrl() {
         return ShowCatchmentAreaForPointAction.HYDRO_WFS_CAPABILITIES;
     }
 
     @Override
-    protected QualifiedName getFeatureQName() {
+    public QualifiedName getFeatureQName() {
         return new QualifiedName(
                 ShowCatchmentAreaForPointAction.HYDRO_WFS_QNAME_PREFIX,
                 "upstream_geom",
@@ -193,7 +193,7 @@ public final class ShowUpstreamAreasForAreaAction extends AbstractWFSFeatureRetr
     }
 
     @Override
-    protected String getStatusMessage() {
+    public String getStatusMessage() {
         return "Fetching Upstream Areas";
     }
 
@@ -276,7 +276,7 @@ public final class ShowUpstreamAreasForAreaAction extends AbstractWFSFeatureRetr
     }
 
     @Override
-    protected String createFeatureQuery(final FeatureType featureType) {
+    public String createFeatureQuery(final FeatureType featureType) {
         final Namespace wfsNs = Namespace.getNamespace("http://www.opengis.net/wfs");
         final Namespace ogcNs = Namespace.getNamespace("http://www.opengis.net/ogc");
 
@@ -430,19 +430,31 @@ public final class ShowUpstreamAreasForAreaAction extends AbstractWFSFeatureRetr
     }
 
     @Override
-    protected Collection<? extends Feature> createFeatures(final FeatureCollection featureCollection)
-            throws WFSRetrievalException {
+    public Collection<Feature> createFeatures(final FeatureCollection featureCollection) throws WFSRetrievalException {
         try {
             final QualifiedName renderFeatureName = new QualifiedName(
                     "SUDPLAN",
                     resultFeatureGeomName,
                     ShowCatchmentAreaForPointAction.HYDRO_WFS_QNAME_URI);
             final ArrayList<Feature> features = new ArrayList<Feature>(featureCollection.size());
-            for (int i = 0; i < featureCollection.size(); ++i) {
-                if ("upstream_geom".equals(resultFeatureGeomName)) {
-                    addSupportiveWMSLayer(featureCollection.getFeature(i), renderFeatureName);
+
+            // only one geom was fetched, the upstream geometry
+            if ("upstream_geom".equals(resultFeatureGeomName)) {
+                assert featureCollection.size() == 1 : "illegal state: not exactly one upstream geom in collection"; // NOI18N
+
+                final org.deegree.model.feature.Feature unionFeature = featureCollection.getFeature(0);
+                addSupportiveWMSLayer(unionFeature, renderFeatureName);
+                features.add(new UnionCatchmentAreaFeature(unionFeature, renderFeatureName));
+            } else {
+                for (int i = 0; i < featureCollection.size(); ++i) {
+                    features.add(new SingleCatchmentAreaFeature(
+                            featureCollection.getFeature(i),
+                            renderFeatureName,
+                            new QualifiedName(
+                                ShowCatchmentAreaForPointAction.HYDRO_WFS_QNAME_PREFIX,
+                                "upstream_subid", // NOI18N
+                                ShowCatchmentAreaForPointAction.HYDRO_WFS_QNAME_URI)));
                 }
-                features.add(new SingleCatchmentAreaFeature(featureCollection.getFeature(i), renderFeatureName));
             }
 
             return features;

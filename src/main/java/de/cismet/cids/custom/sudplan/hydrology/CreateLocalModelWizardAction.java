@@ -18,6 +18,9 @@ import org.apache.log4j.Logger;
 import org.deegree.datatypes.QualifiedName;
 import org.deegree.model.feature.Feature;
 
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 
@@ -30,11 +33,19 @@ import java.awt.event.ActionEvent;
 
 import java.text.MessageFormat;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.SMSUtils.Model;
+import de.cismet.cids.custom.sudplan.StatusPanel;
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -182,9 +193,7 @@ public final class CreateLocalModelWizardAction extends AbstractAction {
 
                 final SudPlanHypeAPI hypeClient = HydrologyCache.getInstance().getHypeClient();
 
-                final String calSimId = hypeClient.createCalibrationSimulation(HydrologyCache.getInstance()
-                                .getCalibrationScenario(),
-                        basinId);
+                final String calSimId = createLocalModel(basinId);
 
                 final CidsBean miBean = SMSUtils.createModelInput("Calibration input for catchment area " + basinId,
                         new CalibrationInput(hwBean.getMetaObject().getID()),
@@ -204,6 +213,104 @@ public final class CreateLocalModelWizardAction extends AbstractAction {
             } catch (final Exception ex) {
                 LOG.error("cannot create new hydrology workspace", ex);                                        // NOI18N
             }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   basinId  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    private String createLocalModel(final int basinId) {
+        final StatusPanel statusPanel = new StatusPanel("Please wait");
+        final JOptionPane pane = new JOptionPane(
+                statusPanel,
+                JOptionPane.INFORMATION_MESSAGE,
+                JOptionPane.CANCEL_OPTION,
+                null,
+                new Object[] { "Cancel" });
+        statusPanel.setBusy(true);
+        statusPanel.setStatusMessage("Creating Local Model...");
+
+        final JDialog dialog = pane.createDialog(ComponentRegistry.getRegistry().getMainWindow(), "Please wait");
+
+        final Future<String> task = SudplanConcurrency.getSudplanGeneralPurposePool().submit(new Callable<String>() {
+
+                    @Override
+                    public String call() {
+                        try {
+                            if (Thread.currentThread().isInterrupted()) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("local model creator was interrupted"); // NOI18N
+                                }
+
+                                return null;
+                            }
+
+                            final SudPlanHypeAPI hypeClient = HydrologyCache.getInstance().getHypeClient();
+
+                            return hypeClient.createCalibrationSimulation(
+                                    HydrologyCache.getInstance().getCalibrationScenario(),
+                                    basinId);
+                        } catch (final Exception ex) {
+                            LOG.error("cannot create local model", ex); // NOI18N
+                            try {
+                                final ErrorInfo errorInfo = new ErrorInfo(
+                                        "Hype Error",
+                                        "Error while creating Local Model",
+                                        "The Local Model could not be created because of an error",
+                                        "ERROR",
+                                        ex,
+                                        Level.SEVERE,
+                                        null);
+
+                                EventQueue.invokeAndWait(new Runnable() {
+
+                                        @Override
+                                        public void run() {
+                                            JXErrorPane.showDialog(dialog, errorInfo);
+                                        }
+                                    });
+                            } catch (final Exception ex1) {
+                                LOG.error("cannot display error dialog", ex1); // NOI18N
+                            }
+
+                            return null;
+                        } finally {
+                            EventQueue.invokeLater(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        dialog.setVisible(false);
+                                    }
+                                });
+                        }
+                    }
+                });
+
+        dialog.setVisible(true);
+
+        if (pane.getValue() == null) {
+            try {
+                return task.get();
+            } catch (final Exception ex) {
+                final String message = "cannot get calibration id"; // NOI18N
+                LOG.error(message, ex);
+                throw new IllegalStateException(message, ex);
+            }
+        } else {
+            // the cancel button has been pressed
+            if (!task.isDone()) {
+                if (!task.cancel(true)) {
+                    LOG.warn("cannot cancel local model creator task"); // NOI18N
+                }
+            }
+
+            return null;
         }
     }
 }

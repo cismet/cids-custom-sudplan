@@ -61,4 +61,21 @@ public enum GridHeight {
     public String getRepresentationUI() {
         return representationUI;
     }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   gridHeight  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static GridHeight gridHeightFor(final String gridHeight) {
+        for (final GridHeight value : values()) {
+            if (value.representationFile.equals(gridHeight) || value.representationUI.equals(gridHeight)) {
+                return value;
+            }
+        }
+
+        return null;
+    }
 }
