@@ -146,7 +146,7 @@ public final class SimulationWatchable extends AbstractModelRunWatchable {
                         new URL("http://79.125.2.136"), // NOI18N
                         tsProcedure,
                         String.valueOf(runinfo.getBasinId()),
-                        Variable.COUT.getPropertyKey(),
+                        HydrologyCache.getInstance().getVariableForVar(var).getPropertyKey(),
                         tsOffering,
                         null,
                         interval);
@@ -170,7 +170,7 @@ public final class SimulationWatchable extends AbstractModelRunWatchable {
                         new URL(TimeSeriesRemoteHelper.DAV_HOST),
                         tsProcedure,
                         String.valueOf(runinfo.getBasinId()),
-                        Variable.COUT.getPropertyKey(),
+                        HydrologyCache.getInstance().getVariableForVar(var).getPropertyKey(),
                         tsOffering,
                         null,
                         null);

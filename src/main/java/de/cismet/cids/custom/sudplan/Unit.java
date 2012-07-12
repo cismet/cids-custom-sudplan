@@ -34,7 +34,15 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
     public static final Unit KELVIN = new Unit(
             "urn:ogc:def:uom:OGC:K", // NOI18N
             NbBundle.getMessage(Unit.class, "Unit.KELVIN.localisedName")); // NOI18N
-    public static final Unit M3S = new Unit("urn:org:def:uom:OGC:m3s", "Cubic meters per second");
+    public static final Unit M3S = new Unit(
+            "urn:org:def:uom:OGC:m3s", // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.M3S.localisedName")); // NOI18N
+    public static final Unit CELSIUS = new Unit(
+            "urn:org:def:uom:OGC:Celcius", // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.CELSIUS.localisedName")); // NOI18N
+    public static final Unit METERS = new Unit(
+            "urn:org:def:uom:OGC:m", // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.METERS.localisedName")); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -66,6 +74,7 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
      */
     private Unit(final String propertyKey, final String localisedName) {
         super(localisedName);
+
         this.propertyKey = propertyKey;
     }
 
@@ -102,6 +111,6 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
      * @return  DOCUMENT ME!
      */
     public static Unit[] values() {
-        return new Unit[] { MM, PPB, PPM, KELVIN, M3S };
+        return new Unit[] { MM, PPB, PPM, KELVIN, M3S, CELSIUS, METERS };
     }
 }

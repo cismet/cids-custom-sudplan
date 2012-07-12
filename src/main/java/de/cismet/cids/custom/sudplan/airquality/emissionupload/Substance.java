@@ -57,4 +57,21 @@ public enum Substance {
     public String getRepresentationUI() {
         return representationUI;
     }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   substance  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Substance substanceFor(final String substance) {
+        for (final Substance value : values()) {
+            if (value.representationFile.equals(substance) || value.representationUI.equals(substance)) {
+                return value;
+            }
+        }
+
+        return null;
+    }
 }

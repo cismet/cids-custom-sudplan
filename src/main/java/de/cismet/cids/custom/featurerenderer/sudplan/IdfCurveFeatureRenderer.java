@@ -86,16 +86,17 @@ public class IdfCurveFeatureRenderer extends CustomCidsFeatureRenderer {
     @Override
     public void assign() {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("assign");                                                           // NOI18N
+            LOG.debug("assign"); // NOI18N
         }
         try {
-            final ObjectMapper mapper = new ObjectMapper();
-            final StringReader sr = new StringReader((String)cidsBean.getProperty("uri")); // NOI18N
-            final IDFCurve curve = mapper.readValue(sr, IDFCurve.class);
-            final IDFTablePanel panel = new IDFTablePanel(curve);
+//            final ObjectMapper mapper = new ObjectMapper();
+//            final StringReader sr = new StringReader((String)cidsBean.getProperty("uri")); // NOI18N
+//            final IDFCurve curve = mapper.readValue(sr, IDFCurve.class);
+            // final IDFTablePanel panel = new IDFTablePanel(curve);
+            final IDFTablePanel panel = new IDFTablePanel(cidsBean);
             add(panel, BorderLayout.CENTER);
         } catch (final Exception ex) {
-            final String message = "cannot create idf feature renderer component";         // NOI18N
+            final String message = "cannot create idf feature renderer component"; // NOI18N
             LOG.error(message, ex);
 //            throw new IllegalStateException(message, ex);
         }

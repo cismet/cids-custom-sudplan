@@ -135,23 +135,20 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
             jtbAdditionalResults.setDefaultRenderer(String.class, new AdditionalResultsCellRenderer());
             jtbAdditionalResults.setPreferredScrollableViewportSize(jtbAdditionalResults.getPreferredSize());
         } else {
-            final ObjectMapper mapper = new ObjectMapper();
-            final String uriInput = (String)inputTs.getProperty("uri");   // NOI18N
-            final String uriResult = (String)resultTs.getProperty("uri"); // NOI18N
-
-            final IDFCurve idfInput;
-            final IDFCurve idfResult;
-            try {
-                idfInput = mapper.readValue(uriInput, IDFCurve.class);
-                idfResult = mapper.readValue(uriResult, IDFCurve.class);
-            } catch (Exception ex) {
-                final String message = "cannot read idf data from uri"; // NOI18N
-                LOG.error(message, ex);
-                throw new IllegalStateException(message, ex);
-            }
-
-            inputPanel = new IDFTablePanel(idfInput);
-            resultPanel = new IDFTablePanel(idfResult);
+            /*
+             * final ObjectMapper mapper = new ObjectMapper(); final String uriInput =
+             * (String)inputTs.getProperty("uri");   // NOI18N final String uriResult =
+             * (String)resultTs.getProperty("uri"); // NOI18N
+             *
+             * final IDFCurve idfInput; final IDFCurve idfResult; try { idfInput = mapper.readValue(uriInput,
+             * IDFCurve.class); idfResult = mapper.readValue(uriResult, IDFCurve.class); } catch (Exception ex) { final
+             * String message = "cannot read idf data from uri"; // NOI18N LOG.error(message, ex); throw new
+             * IllegalStateException(message, ex); }
+             *
+             * inputPanel = new IDFTablePanel(idfInput); resultPanel = new IDFTablePanel(idfResult);
+             * */
+            inputPanel = new IDFTablePanel(inputTs);
+            resultPanel = new IDFTablePanel(resultTs);
 
             this.remove(pnlStatisticalResults);
         }
