@@ -12,6 +12,12 @@
 [images/webstartsmall2.gif]
 
 ~~ we have to insert this by hand afterwards since apt does not support link images, see: http://jira.codehaus.org/browse/DOXIA-71
+~~ <a href="http://sudplan.cismet.de/sudplanDist/client/sudplan/cids-custom-sudplan-1.0-SNAPSHOT-starter-3d.jnlp"><img src="images/webstartsmall2.gif"/></a>
+
+  If you experience issues (e.g. the SMS does not start up) this may occur because of too few RAM in your computer or issues with your graphics device driver. In such cases
+  you should start up the SMS without the integrated 3D component. To do so click on the button below.
+
+~~ we have to insert this by hand afterwards since apt does not support link images, see: http://jira.codehaus.org/browse/DOXIA-71
 ~~ <a href="http://sudplan.cismet.de/sudplanDist/client/sudplan/cids-custom-sudplan-1.0-SNAPSHOT-starter.jnlp"><img src="images/webstartsmall2.gif"/></a>
 
   Documentation:
@@ -31,8 +37,6 @@
   * This software is ALPHA
 
   * Username and credential are available for Sudplan partners only
-
-  * Artefacts created in a session will be deleted hourly
 
   * This software is connected to real services, so please be careful when trying to perform downscaling
 
