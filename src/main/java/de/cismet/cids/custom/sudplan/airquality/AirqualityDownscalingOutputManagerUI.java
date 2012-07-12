@@ -461,8 +461,7 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                     (Integer)model.getCidsBean().getProperty("id"),
                     (String)model.getCidsBean().getProperty("name"));
 
-            if (
-                !DownloadManagerDialog.showAskingForUserTitle(AirqualityDownscalingOutputManagerUI.this)) {
+            if (!DownloadManagerDialog.showAskingForUserTitle(AirqualityDownscalingOutputManagerUI.this)) {
                 return;
             }
 

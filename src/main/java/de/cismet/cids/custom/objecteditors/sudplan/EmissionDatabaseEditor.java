@@ -514,7 +514,7 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lstEmissionGridsValueChanged(final javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstEmissionGridsValueChanged
+    private void lstEmissionGridsValueChanged(final javax.swing.event.ListSelectionEvent evt) { //GEN-FIRST:event_lstEmissionGridsValueChanged
         if (evt.getValueIsAdjusting()) {
             return;
         }
@@ -523,8 +523,12 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
             if (pnlEmissionGrid.isDirty()) {
                 final int userDecision = JOptionPane.showConfirmDialog(
                         this,
-                        java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objecteditors/sudplan/Bundle").getString("EmissionDatabaseEditor.lstEmissionGridsValueChanged(ListSelectionEvent).JOptionPane.message"),
-                        java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objecteditors/sudplan/Bundle").getString("EmissionDatabaseEditor.lstEmissionGridsValueChanged(ListSelectionEvent).JOptionPane.title"),
+                        java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objecteditors/sudplan/Bundle")
+                                    .getString(
+                                        "EmissionDatabaseEditor.lstEmissionGridsValueChanged(ListSelectionEvent).JOptionPane.message"),
+                        java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objecteditors/sudplan/Bundle")
+                                    .getString(
+                                        "EmissionDatabaseEditor.lstEmissionGridsValueChanged(ListSelectionEvent).JOptionPane.title"),
                         JOptionPane.YES_NO_CANCEL_OPTION,
                         JOptionPane.QUESTION_MESSAGE);
 
@@ -541,7 +545,7 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
             }
 
             pnlEmissionGrid.setCidsBean((CidsBean)lstEmissionGrids.getSelectedValue(),
-                (Boolean)cidsBean.getProperty("uploaded")); //NOI18N
+                (Boolean)cidsBean.getProperty("uploaded")); // NOI18N
         } else {
             pnlEmissionGrid.setCidsBean(null);
         }
@@ -550,19 +554,19 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
 
         btnRemove.setEnabled(editable && (lstEmissionGrids.getSelectedValue() instanceof CidsBean));
         btnSave.setEnabled(editable && (lstEmissionGrids.getSelectedValue() instanceof CidsBean));
-    }//GEN-LAST:event_lstEmissionGridsValueChanged
+    } //GEN-LAST:event_lstEmissionGridsValueChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnUploadActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
+    private void btnUploadActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnUploadActionPerformed
         if (cidsBean == null) {
             return;
         }
 
-        final Object uploadedObj = cidsBean.getProperty("uploaded"); //NOI18N
+        final Object uploadedObj = cidsBean.getProperty("uploaded"); // NOI18N
 
         final Boolean uploaded;
         if (uploadedObj instanceof Boolean) {
@@ -576,10 +580,10 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
         }
 
         try {
-            cidsBean.setProperty("file", Converter.toString(EmissionUpload.zip(cidsBean))); //NOI18N
+            cidsBean.setProperty("file", Converter.toString(EmissionUpload.zip(cidsBean))); // NOI18N
             cidsBean.persist();
         } catch (final Exception ex) {
-            LOG.warn("Couldn't generate zip file for emission database.", ex); //NOI18N
+            LOG.warn("Couldn't generate zip file for emission database.", ex);              // NOI18N
             return;
         }
 
@@ -590,25 +594,33 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
         uploadDialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
         uploadDialog.setVisible(true);
         uploadDialog.toFront();
-    }//GEN-LAST:event_btnUploadActionPerformed
+    } //GEN-LAST:event_btnUploadActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
-        final List<CidsBean> grids = cidsBean.getBeanCollectionProperty("grids"); //NOI18N
+    private void btnRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnRemoveActionPerformed
+        final List<CidsBean> grids = cidsBean.getBeanCollectionProperty("grids"); // NOI18N
         grids.remove((CidsBean)lstEmissionGrids.getSelectedValue());
-    }//GEN-LAST:event_btnRemoveActionPerformed
+    }                                                                             //GEN-LAST:event_btnRemoveActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnAddActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        final String gridName = JOptionPane.showInputDialog(this, NbBundle.getMessage(EmissionDatabaseEditor.class, "EmissionDatabaseEditor.btnAddActionPerformed(ActionEvent).JOptionPane.message"), NbBundle.getMessage(EmissionDatabaseEditor.class, "EmissionDatabaseEditor.btnAddActionPerformed(ActionEvent).JOptionPane.title"), JOptionPane.QUESTION_MESSAGE);
+    private void btnAddActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnAddActionPerformed
+        final String gridName = JOptionPane.showInputDialog(
+                this,
+                NbBundle.getMessage(
+                    EmissionDatabaseEditor.class,
+                    "EmissionDatabaseEditor.btnAddActionPerformed(ActionEvent).JOptionPane.message"),
+                NbBundle.getMessage(
+                    EmissionDatabaseEditor.class,
+                    "EmissionDatabaseEditor.btnAddActionPerformed(ActionEvent).JOptionPane.title"),
+                JOptionPane.QUESTION_MESSAGE);
 
         if ((gridName == null) || gridName.trim().isEmpty()) {
             return;
@@ -621,16 +633,16 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
                             .getDomain(),
                     EmissionUploadWizardAction.TABLENAME_EMISSION_DATABASE_GRID);
         } catch (final Exception ex) {
-            final String errorMessage = "The meta classes can't be retrieved."; //NOI18N
+            final String errorMessage = "The meta classes can't be retrieved."; // NOI18N
 
             LOG.warn(errorMessage, ex);
 
             try {
                 final ErrorInfo errorInfo = new ErrorInfo(
-                        "Error", //NOI18N
-                        "Couldn't add a new emission database.", //NOI18N
+                        "Error",                                 // NOI18N
+                        "Couldn't add a new emission database.", // NOI18N
                         errorMessage,
-                        "ERROR", //NOI18N
+                        "ERROR",                                 // NOI18N
                         ex,
                         Level.SEVERE,
                         null);
@@ -651,23 +663,23 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
         try {
             final CidsBean grid = metaClassEmissionDatabaseGrid.getEmptyInstance().getBean();
 
-            grid.setProperty("name", gridName); //NOI18N
-            grid.setProperty("substance", Substance.NOX.getRepresentationFile()); //NOI18N
-            grid.setProperty("timevariation", TimeVariation.CONSTANT.getRepresentationFile()); //NOI18N
-            grid.setProperty("height", GridHeight.ZERO.getRepresentationFile()); //NOI18N
+            grid.setProperty("name", gridName);                                                // NOI18N
+            grid.setProperty("substance", Substance.NOX.getRepresentationFile());              // NOI18N
+            grid.setProperty("timevariation", TimeVariation.CONSTANT.getRepresentationFile()); // NOI18N
+            grid.setProperty("height", GridHeight.ZERO.getRepresentationFile());               // NOI18N
 
-            cidsBean.getBeanCollectionProperty("grids").add(grid); //NOI18N
+            cidsBean.getBeanCollectionProperty("grids").add(grid);                                      // NOI18N
         } catch (final Exception ex) {
-            final String errorMessage = "Something went wrong while initializing a new emission grid."; //NOI18N
+            final String errorMessage = "Something went wrong while initializing a new emission grid."; // NOI18N
 
             LOG.warn(errorMessage, ex);
 
             try {
                 final ErrorInfo errorInfo = new ErrorInfo(
-                        "Error", //NOI18N
-                        "Couldn't add a new emission database.", //NOI18N
+                        "Error",                                 // NOI18N
+                        "Couldn't add a new emission database.", // NOI18N
                         errorMessage,
-                        "ERROR", //NOI18N
+                        "ERROR",                                 // NOI18N
                         ex,
                         Level.SEVERE,
                         null);
@@ -683,113 +695,112 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
                 LOG.error("Can't display error dialog", ex1); // NOI18N
             }
         }
-    }//GEN-LAST:event_btnAddActionPerformed
+    }                                                         //GEN-LAST:event_btnAddActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnSaveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+    private void btnSaveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnSaveActionPerformed
         pnlEmissionGrid.persistDisplayedEmissionGrid();
-    }//GEN-LAST:event_btnSaveActionPerformed
+    }                                                                           //GEN-LAST:event_btnSaveActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnCopyActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCopyActionPerformed
+    private void btnCopyActionPerformed(final java.awt.event.ActionEvent evt) {                        //GEN-FIRST:event_btnCopyActionPerformed
         final String name = JOptionPane.showInputDialog(
                 this,
                 NbBundle.getMessage(
                     EmissionDatabaseEditor.class,
-                    "EmissionDatabaseEditor.btnCopyActionPerformed(ActionEvent).JOptionPane.message"), //NOI18N
+                    "EmissionDatabaseEditor.btnCopyActionPerformed(ActionEvent).JOptionPane.message"), // NOI18N
                 NbBundle.getMessage(
                     EmissionDatabaseEditor.class,
-                    "EmissionDatabaseEditor.btnCopyActionPerformed(ActionEvent).JOptionPane.title"), //NOI18N
+                    "EmissionDatabaseEditor.btnCopyActionPerformed(ActionEvent).JOptionPane.title"),   // NOI18N
                 JOptionPane.QUESTION_MESSAGE);
 
         if ((name == null) || name.trim().isEmpty()) {
-            LOG.info("User aborted creation of a new emission database."); //NOI18N
+            LOG.info("User aborted creation of a new emission database."); // NOI18N
         }
 
         final CidsBean newBean;
         try {
             newBean = cloneCidsBean(cidsBean, true);
-            newBean.setProperty("name", name); //NOI18N
-            newBean.setProperty("uploaded", Boolean.FALSE); //NOI18N
+            newBean.setProperty("name", name);                      // NOI18N
+            newBean.setProperty("uploaded", Boolean.FALSE);         // NOI18N
             newBean.persist();
         } catch (final Exception ex) {
-            final String errorMessage = "Couldn't clone CidsBean."; //NOI18N
+            final String errorMessage = "Couldn't clone CidsBean."; // NOI18N
 
             LOG.error(errorMessage, ex);
 
             try {
                 final ErrorInfo errorInfo = new ErrorInfo(
-                        "Error", //NOI18N
-                        "The emission database couldn't be copied.", //NOI18N
+                        "Error",                                     // NOI18N
+                        "The emission database couldn't be copied.", // NOI18N
                         errorMessage,
-                        "ERROR", //NOI18N
+                        "ERROR",                                     // NOI18N
                         ex,
                         Level.SEVERE,
                         null);
 
                 EventQueue.invokeAndWait(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        JXErrorPane.showDialog(EmissionDatabaseEditor.this, errorInfo);
-                    }
-                });
+                        @Override
+                        public void run() {
+                            JXErrorPane.showDialog(EmissionDatabaseEditor.this, errorInfo);
+                        }
+                    });
             } catch (final Exception ex1) {
                 LOG.error("Can't display error dialog", ex1); // NOI18N
             }
-
 
             return;
         }
 
         ComponentRegistry.getRegistry().getDescriptionPane().gotoMetaObject(newBean.getMetaObject(), ""); // NOI18N
 
-        ComponentRegistry.getRegistry().getCatalogueTree().requestRefreshNode("airquality.edb"); //NOI18N
-    }//GEN-LAST:event_btnCopyActionPerformed
+        ComponentRegistry.getRegistry().getCatalogueTree().requestRefreshNode("airquality.edb"); // NOI18N
+    }                                                                                            //GEN-LAST:event_btnCopyActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnDownloadActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownloadActionPerformed
+    private void btnDownloadActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnDownloadActionPerformed
         byte[] fileContent = null;
 
-        if ((cidsBean != null) && (cidsBean.getProperty("file") instanceof String)) { //NOI18N
-            fileContent = Converter.fromString((String)cidsBean.getProperty("file")); //NOI18N
+        if ((cidsBean != null) && (cidsBean.getProperty("file") instanceof String)) { // NOI18N
+            fileContent = Converter.fromString((String)cidsBean.getProperty("file")); // NOI18N
         } else {
             try {
                 fileContent = EmissionUpload.zip(cidsBean);
             } catch (Exception ex) {
-                final String errorMessage = "Couldn't zip emission database."; //NOI18N
+                final String errorMessage = "Couldn't zip emission database.";        // NOI18N
 
                 LOG.warn(errorMessage, ex);
 
                 try {
                     final ErrorInfo errorInfo = new ErrorInfo(
-                            "Error", //NOI18N
-                            "The emission database couldn't be downloaded.", //NOI18N
+                            "Error",                                         // NOI18N
+                            "The emission database couldn't be downloaded.", // NOI18N
                             errorMessage,
-                            "WARN", //NOI18N
+                            "WARN",                                          // NOI18N
                             ex,
                             Level.SEVERE,
                             null);
 
                     EventQueue.invokeAndWait(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            JXErrorPane.showDialog(EmissionDatabaseEditor.this, errorInfo);
-                        }
-                    });
+                            @Override
+                            public void run() {
+                                JXErrorPane.showDialog(EmissionDatabaseEditor.this, errorInfo);
+                            }
+                        });
                 } catch (final Exception ex1) {
                     LOG.error("Can't display error dialog", ex1); // NOI18N
                 }
@@ -797,7 +808,7 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
         }
 
         if ((fileContent == null) || (fileContent.length <= 0)) {
-            LOG.info("Nothing to download for emission database."); //NOI18N
+            LOG.info("Nothing to download for emission database."); // NOI18N
             // TODO: User feeedback.
         }
 
@@ -807,18 +818,18 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
 
         final String title;
         final String filename;
-        if (cidsBean.getProperty("name") instanceof String) { //NOI18N
-            title = (String)cidsBean.getProperty("name"); //NOI18N
-            filename = (String)cidsBean.getProperty("name"); //NOI18N
+        if (cidsBean.getProperty("name") instanceof String) { // NOI18N
+            title = (String)cidsBean.getProperty("name");     // NOI18N
+            filename = (String)cidsBean.getProperty("name");  // NOI18N
         } else {
-            title = "Emission database"; //NOI18N
-            filename = "emissionDatabase"; //NOI18N
+            title = "Emission database";                      // NOI18N
+            filename = "emissionDatabase";                    // NOI18N
         }
 
         DownloadManager.instance()
                 .add(
-                    new ByteArrayDownload(fileContent, title, DownloadManagerDialog.getJobname(), filename, ".zip")); //NOI18N
-    }//GEN-LAST:event_btnDownloadActionPerformed
+                    new ByteArrayDownload(fileContent, title, DownloadManagerDialog.getJobname(), filename, ".zip")); // NOI18N
+    }                                                                                                                 //GEN-LAST:event_btnDownloadActionPerformed
 
     @Override
     protected void init() {
@@ -827,9 +838,9 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
         btnUpload.setEnabled(false);
 
         if (cidsBean != null) {
-            btnUpload.setEnabled((cidsBean.getProperty("uploaded") instanceof Boolean) //NOI18N
-                        && !((Boolean)cidsBean.getProperty("uploaded"))); //NOI18N
-            lblTitle.setText((String)cidsBean.getProperty("name")); //NOI18N
+            btnUpload.setEnabled((cidsBean.getProperty("uploaded") instanceof Boolean) // NOI18N
+                        && !((Boolean)cidsBean.getProperty("uploaded"))); // NOI18N
+            lblTitle.setText((String)cidsBean.getProperty("name"));   // NOI18N
         }
 
         bindingGroup.bind();
@@ -878,7 +889,7 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
         final CidsBean clone = bean.getMetaObject().getMetaClass().getEmptyInstance().getBean();
 
         for (final String propName : bean.getPropertyNames()) {
-            if (!propName.toLowerCase().equals("id")) { //NOI18N
+            if (!propName.toLowerCase().equals("id")) { // NOI18N
                 final Object o = bean.getProperty(propName);
 
                 if (o instanceof CidsBean) {
@@ -912,7 +923,8 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
                     clone.setProperty(propName, o);
                 } else {
                     if (o != null) {
-                        LOG.error("Unknown property type '" + o.getClass().getName() + "' of property '" + propName + "'."); //NOI18N
+                        LOG.error("Unknown property type '" + o.getClass().getName() + "' of property '" + propName
+                                    + "'."); // NOI18N
                     }
                     clone.setProperty(propName, o);
                 }
