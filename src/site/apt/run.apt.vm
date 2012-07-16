@@ -1,0 +1,54 @@
+            ------
+            Run SMS
+            ------
+            Martin Scholl
+            ------
+            28/12/2010
+
+{Run the SMS from the web}
+
+  You can run the SMS from the web using Java Webstart. To do so choose one of the smiley faces that most likely describes 
+  your feeling about the power of your computer. The main criteria are your installed JVM (32/64 bit), the amount of <free>
+  RAM and the Open-GL capabilities of your system. The Globe-batch indicates whether or not the 3D component will be
+  available. When using the 3D component, it is highly recommended to run the JVM with at least 2GB of <free> RAM, which
+  means that a 64 bit JVM is recommended. The 32 bit JVM starters with 3D included will most likely work well. 
+  However, there may be performance and/or overall SMS stability issues.
+
+  E.g. your machine is a powerful notebook with 8GB of RAM, a 64 bit JVM and a decent graphics device, you may choose the
+  smiley face with the toothy grin. If your machine only has a total of 1.5GB of RAM but you don't want to set 3D
+  capabilities aside you may try the smiley face with the wavy mouth and the tear in its eye.
+
+  If you experience issues (e.g. the SMS does not start up) this may occur because of too few RAM in your computer or 
+  issues with your graphics device driver. In such cases you should start up the SMS without the integrated 3D component.
+  Please note, that some browsers may not offer the correct Java Webstart version in the "Open with"-Dialog (e.g. Mozilla
+  Firefox will always register the 32 bit Java Webstart, even though 64 bit is installed). If you start a downloaded JNLP 
+  via a double-click, you have to make sure the correct Java Webstart version is registered for JNLP files, too.
+
+%{snippet|url=file://${baseDir}/src/site/resources/run_jnlp_chooser.html|verbatim=false}
+
+  Don't hesitate to try out the happier smileys. Maybe your machine is more powerful than you think ;)
+
+
+  Documentation:
+
+  * cismap WebMap Software: {{{http://www.cismet.de/en/cismapV2ReferenceManual.pdf} Reference Manual (en)}}
+
+  * cids Navigator Software: {{{http://sudplan.cismet.de/sudplanDist/cids.Navigator%20Benutzerhandbuch%20V1.0.2.pdf} Reference Manual (de)}}
+
+  * Sudplan specific doc: {{{http://sudplanwp3.cismet.de/?cat=49} SMS Video Tutorials}}
+
+  * Issue reporting: {{{https://service.projectplace.com/pp/pp.cgi/d604965796/Sudplan_SMS_Issue_Reporting_template.ppt?save_as=1} PPT template}}
+
+  []
+
+  INFO:
+
+  * This software is ALPHA
+
+  * Username and credential are available for Sudplan partners only
+
+  * This software is connected to real services, so please be careful when trying to perform downscaling
+
+  * Please report issues and feature requests on {{{http://sudplanwp3.cismet.de/?cat=47} Sudplan WP3 Blog}} using the {{{https://service.projectplace.com/pp/pp.cgi/d604965796/Sudplan_SMS_Issue_Reporting_template.ppt?save_as=1} PPT template}}
+
+  []
