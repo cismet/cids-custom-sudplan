@@ -55,6 +55,7 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
     public static final String PROP_NAME = "__prop_name__";                   // NOI18N
     public static final String PROP_DESCRIPTION = "__prop_description__";     // NOI18N
     public static final String PROP_SPS_PROCEDURE = "__prop_sps_procedure__"; // NOI18N
+    public static final String PROP_FREQ_ADJUST = "__prop_freq_adjust__";     // NOI18N
 
     private static final transient Logger LOG = Logger.getLogger(RainfallDownscalingWizardAction.class);
 
@@ -224,6 +225,7 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
     private CidsBean createModelInput(final WizardDescriptor wizard, final MetaObject mo) throws IOException {
         final String scenario = (String)wizard.getProperty(PROP_SCENARIO);
         final Integer targetYear = (Integer)wizard.getProperty(PROP_TARGET_YEAR);
+        final boolean frequencyAdjust = (Boolean)wizard.getProperty(PROP_FREQ_ADJUST);
 
         assert scenario != null : "scenario was not set";      // NOI18N
         assert targetYear != null : "target year was not set"; // NOI18N
@@ -255,7 +257,8 @@ public final class RainfallDownscalingWizardAction extends AbstractCidsBeanActio
                 targetYear,
                 rainfallObjectId,
                 rainfallObjectName,
-                mo.getMetaClass().getTableName());
+                mo.getMetaClass().getTableName(),
+                frequencyAdjust);
 
         return SMSUtils.createModelInput(name, input, SMSUtils.Model.RF_DS);
     }
