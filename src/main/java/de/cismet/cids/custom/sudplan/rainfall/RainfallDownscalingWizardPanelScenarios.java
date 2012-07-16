@@ -98,7 +98,7 @@ public final class RainfallDownscalingWizardPanelScenarios implements WizardDesc
                         filter.put(TimeSeries.PROCEDURE, RainfallDownscalingModelManager.RF_TS_DS_PROCEDURE);
                         final Datapoint dp = dh.createDatapoint(filter, null, DataHandler.Access.READ);
                         final InputDescriptor id = (InputDescriptor)dp.getProperties()
-                                    .get("jaxb_desc:climate_scenario"); // NOI18N
+                                    .get("jaxb_desc:climate_scenario");  // NOI18N
                         final List<String> scenarioList = id.getDefinition()
                                     .getCommonData()
                                     .getCategory()
@@ -109,6 +109,7 @@ public final class RainfallDownscalingWizardPanelScenarios implements WizardDesc
                                     .getValue();
                         scenarios = scenarioList.toArray(new String[scenarioList.size()]);
                     } catch (final Exception ex) {
+                        LOG.error("error during sps communication", ex); // NOI18N
                         spsError = ex;
                     } finally {
                         EventQueue.invokeLater(new Runnable() {
