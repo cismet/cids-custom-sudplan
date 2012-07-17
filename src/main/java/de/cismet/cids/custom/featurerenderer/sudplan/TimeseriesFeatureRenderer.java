@@ -15,9 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
-
 import javax.imageio.ImageIO;
-
 
 import de.cismet.cids.featurerenderer.CustomCidsFeatureRenderer;
 
@@ -77,23 +75,15 @@ public class TimeseriesFeatureRenderer extends CustomCidsFeatureRenderer {
 
     /**
      * DOCUMENT ME!
-     *
-     * @throws  IllegalStateException  DOCUMENT ME!
      */
     @Override
     public void assign() {
-        // possible memory leak and missing preview resolution adjustment
-//        if (LOG.isDebugEnabled()) {
-//            LOG.debug("assign");                                                                              // NOI18N
-//        }
-//        try {
-//            final TimeseriesChartPanel panel = new TimeseriesChartPanel((String)cidsBean.getProperty("uri")); // NOI18N
-//            add(panel, BorderLayout.CENTER);
-//        } catch (final MalformedURLException ex) {
-//            final String message = "cidsbean contains invalid uri";                                           // NOI18N
-//            LOG.error(message, ex);
-//            throw new IllegalStateException(message, ex);
-//        }
+        // possible memory leak and missing preview resolution adjustment if (LOG.isDebugEnabled()) {
+        // LOG.debug("assign");                                                                              // NOI18N }
+        // try { final TimeseriesChartPanel panel = new TimeseriesChartPanel((String)cidsBean.getProperty("uri")); //
+        // NOI18N add(panel, BorderLayout.CENTER); } catch (final MalformedURLException ex) { final String message =
+        // "cidsbean contains invalid uri";                                           // NOI18N LOG.error(message, ex);
+        // throw new IllegalStateException(message, ex); }
     }
 
     // TODO: not necessarily only rain symbol, symbol selection must be cidsbean dependent
