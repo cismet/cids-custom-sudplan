@@ -56,7 +56,9 @@ public final class RainfallDownscalingWizardPanelTargetDate implements WizardDes
     private transient Integer targetYear;
     private transient Integer beginYear;
     private transient Integer endYear;
+    private transient Boolean frequencyAdjustment;
     private transient Exception spsError;
+    private transient boolean idfDownscaling;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -97,6 +99,7 @@ public final class RainfallDownscalingWizardPanelTargetDate implements WizardDes
         wizard = (WizardDescriptor)settings;
         targetYear = (Integer)wizard.getProperty(RainfallDownscalingWizardAction.PROP_TARGET_YEAR);
         final String procedure = (String)wizard.getProperty(RainfallDownscalingWizardAction.PROP_SPS_PROCEDURE);
+        idfDownscaling = RainfallDownscalingModelManager.RF_IDF_DS_PROCEDURE.equals(procedure);
 
         try {
             final DataHandler dh = DataHandlerCache.getInstance()
@@ -142,6 +145,7 @@ public final class RainfallDownscalingWizardPanelTargetDate implements WizardDes
 
         // we are sure that isValid() has checked the year
         wizard.putProperty(RainfallDownscalingWizardAction.PROP_TARGET_YEAR, Integer.parseInt(component.getYear()));
+        wizard.putProperty(RainfallDownscalingWizardAction.PROP_FREQ_ADJUST, frequencyAdjustment);
     }
 
     @Override
@@ -237,5 +241,32 @@ public final class RainfallDownscalingWizardPanelTargetDate implements WizardDes
      */
     public void setEndYear(final Integer endYear) {
         this.endYear = endYear;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Boolean getFrequencyAdjustment() {
+        return frequencyAdjustment;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  frequencyAdjustment  DOCUMENT ME!
+     */
+    public void setFrequencyAdjustment(final Boolean frequencyAdjustment) {
+        this.frequencyAdjustment = frequencyAdjustment;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isIdfDownscaling() {
+        return idfDownscaling;
     }
 }

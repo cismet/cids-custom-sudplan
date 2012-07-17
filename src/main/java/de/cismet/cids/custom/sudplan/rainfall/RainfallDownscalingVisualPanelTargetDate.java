@@ -10,6 +10,8 @@ package de.cismet.cids.custom.sudplan.rainfall;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -26,7 +28,10 @@ public final class RainfallDownscalingVisualPanelTargetDate extends javax.swing.
     private final transient RainfallDownscalingWizardPanelTargetDate model;
     private final transient DocumentListener docL;
 
+    private final transient ChangeListener freqL;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox chkFreqAdjust;
     private javax.swing.JLabel lblYear;
     private javax.swing.JSlider sldYears;
     private javax.swing.JTextField txtYear;
@@ -43,6 +48,7 @@ public final class RainfallDownscalingVisualPanelTargetDate extends javax.swing.
     public RainfallDownscalingVisualPanelTargetDate(final RainfallDownscalingWizardPanelTargetDate model) {
         this.model = model;
         this.docL = new DocumentListenerImpl();
+        this.freqL = new FreqAdjustChangeListener();
 
         // name of the wizard step
         this.setName(NbBundle.getMessage(
@@ -52,6 +58,7 @@ public final class RainfallDownscalingVisualPanelTargetDate extends javax.swing.
         initComponents();
 
         txtYear.getDocument().addDocumentListener(WeakListeners.document(docL, txtYear.getDocument()));
+        chkFreqAdjust.addChangeListener(WeakListeners.change(freqL, chkFreqAdjust));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -62,6 +69,10 @@ public final class RainfallDownscalingVisualPanelTargetDate extends javax.swing.
     void init() {
         sldYears.setMinimum(model.getBeginYear());
         sldYears.setMaximum(model.getEndYear());
+
+        final boolean freqAdjust = (model.getFrequencyAdjustment() == null) ? false : model.getFrequencyAdjustment();
+        chkFreqAdjust.setSelected(freqAdjust);
+        chkFreqAdjust.setEnabled(!model.isIdfDownscaling());
 
         if (model.getTargetYear() == null) {
             txtYear.setText("2050"); // NOI18N
@@ -93,7 +104,9 @@ public final class RainfallDownscalingVisualPanelTargetDate extends javax.swing.
         sldYears = new javax.swing.JSlider();
         lblYear = new javax.swing.JLabel();
         txtYear = new javax.swing.JTextField();
+        chkFreqAdjust = new javax.swing.JCheckBox();
 
+        setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
         sldYears.setMajorTickSpacing(10);
@@ -138,10 +151,40 @@ public final class RainfallDownscalingVisualPanelTargetDate extends javax.swing.
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         add(txtYear, gridBagConstraints);
 
+        chkFreqAdjust.setText(NbBundle.getMessage(
+                RainfallDownscalingVisualPanelTargetDate.class,
+                "RainfallDownscalingVisualPanelTargetDate.chkFreqAdjust.text"));        // NOI18N
+        chkFreqAdjust.setToolTipText(NbBundle.getMessage(
+                RainfallDownscalingVisualPanelTargetDate.class,
+                "RainfallDownscalingVisualPanelTargetDate.chkFreqAdjust.toolTipText")); // NOI18N
+        chkFreqAdjust.setContentAreaFilled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(20, 15, 0, 20);
+        add(chkFreqAdjust, gridBagConstraints);
+
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class FreqAdjustChangeListener implements ChangeListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void stateChanged(final ChangeEvent e) {
+            model.setFrequencyAdjustment(chkFreqAdjust.isSelected());
+        }
+    }
 
     /**
      * DOCUMENT ME!

@@ -31,6 +31,7 @@ public final class RainfallDownscalingInput {
     private Integer rainfallObjectId;
     private String rainfallObjectName;
     private String rainfallObjectTableName;
+    private boolean frequencyAdjustment;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -38,7 +39,7 @@ public final class RainfallDownscalingInput {
      * Creates a new RainfallDownscalingInput object.
      */
     public RainfallDownscalingInput() {
-        this(null, null, null, null, null, null, null, null);
+        this(null, null, null, null, null, null, null, null, false);
     }
 
     /**
@@ -52,6 +53,7 @@ public final class RainfallDownscalingInput {
      * @param  rainfallObjectId         DOCUMENT ME!
      * @param  rainfallObjectName       DOCUMENT ME!
      * @param  rainfallObjectTableName  DOCUMENT ME!
+     * @param  frequencyAdjustment      DOCUMENT ME!
      */
     public RainfallDownscalingInput(final Date created,
             final String createdBy,
@@ -60,7 +62,8 @@ public final class RainfallDownscalingInput {
             final Integer targetYear,
             final Integer rainfallObjectId,
             final String rainfallObjectName,
-            final String rainfallObjectTableName) {
+            final String rainfallObjectTableName,
+            final boolean frequencyAdjustment) {
         this.created = created;
         this.createdBy = createdBy;
         this.name = name;
@@ -69,6 +72,7 @@ public final class RainfallDownscalingInput {
         this.rainfallObjectId = rainfallObjectId;
         this.rainfallObjectName = rainfallObjectName;
         this.rainfallObjectTableName = rainfallObjectTableName;
+        this.frequencyAdjustment = frequencyAdjustment;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -224,5 +228,23 @@ public final class RainfallDownscalingInput {
      */
     public CidsBean fetchRainfallObject() {
         return SMSUtils.fetchCidsBean(rainfallObjectId, rainfallObjectTableName);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isFrequencyAdjustment() {
+        return frequencyAdjustment;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  frequencyAdjustment  DOCUMENT ME!
+     */
+    public void setFrequencyAdjustment(final boolean frequencyAdjustment) {
+        this.frequencyAdjustment = frequencyAdjustment;
     }
 }

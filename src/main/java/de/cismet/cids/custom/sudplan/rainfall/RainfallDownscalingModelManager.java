@@ -217,6 +217,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
             ts.setValue(now, "historical_year", (Integer)rfObj.getProperty("year") + "-01-01T00:00:00-00:00"); // NOI18N
             ts.setValue(now, "future_year", rfInput.getTargetYear() + "-01-01T00:00:00-00:00");                // NOI18N
             ts.setValue(now, "idf_data", convertIDF(rfObj));                                                   // NOI18N
+            ts.setValue(now, "frequency_adjust", String.valueOf(rfInput.isFrequencyAdjustment()));             // NOI18N
         } else {
             // the f***n uploaded ts only has a procedure and no offering, and on top of the s**t pile this is not the
             // input param for the sps either. we have to strip some bull****

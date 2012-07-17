@@ -12,6 +12,9 @@ import org.openide.WizardDescriptor;
 import java.awt.Component;
 
 import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
+import de.cismet.cids.custom.sudplan.SMSUtils;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 /**
  * DOCUMENT ME!
@@ -80,7 +83,21 @@ public final class DoCalibrationWizardPanelMetadata extends AbstractWizardPanel 
 
     @Override
     protected void read(final WizardDescriptor wizard) {
-        setName((String)wizard.getProperty(PROP_NAME));
+        final String currName;
+        if (wizard.getProperty(PROP_NAME) == null) {
+            final CidsBean bean = (CidsBean)wizard.getProperty(
+                    AssignTimeseriesWizardAction.PROP_SELECTED_CALIBRATION_INPUT);
+            if (bean == null) {
+                currName = null;
+            } else {
+                final CidsBean runBean = SMSUtils.loadModelManagerInstanceFromIO(bean).getCidsBean();
+                currName = (String)runBean.getProperty("name"); // NOI18N
+            }
+        } else {
+            currName = (String)wizard.getProperty(PROP_NAME);
+        }
+
+        setName(currName);
         setDescription((String)wizard.getProperty(PROP_DESC));
 
         ((DoCalibrationVisualPanelMetadata)getComponent()).init();

@@ -191,17 +191,13 @@ public final class CreateLocalModelWizardAction extends AbstractAction {
                 hwBean.setProperty("description", desc); // NOI18N
                 hwBean = hwBean.persist();
 
-                final SudPlanHypeAPI hypeClient = HydrologyCache.getInstance().getHypeClient();
-
                 final String calSimId = createLocalModel(basinId);
 
-                final CidsBean miBean = SMSUtils.createModelInput("Calibration input for catchment area " + basinId,
+                final CidsBean miBean = SMSUtils.createModelInput(name + " Calibration input",
                         new CalibrationInput(hwBean.getMetaObject().getID()),
                         Model.HY_CAL);
 
-                final CidsBean runBean = SMSUtils.createModelRun("Calibration run for catchment area " + basinId,
-                        null,
-                        miBean);
+                final CidsBean runBean = SMSUtils.createModelRun(name + " Calibration run", null, miBean);
 
                 hwBean.setProperty("local_model_id", calSimId); // NOI18N
                 hwBean.setProperty("calibration", runBean);     // NOI18N
@@ -226,13 +222,14 @@ public final class CreateLocalModelWizardAction extends AbstractAction {
      * @throws  IllegalStateException  DOCUMENT ME!
      */
     private String createLocalModel(final int basinId) {
+        final String cancelOption = "Cancel";
         final StatusPanel statusPanel = new StatusPanel("Please wait");
         final JOptionPane pane = new JOptionPane(
                 statusPanel,
                 JOptionPane.INFORMATION_MESSAGE,
                 JOptionPane.CANCEL_OPTION,
                 null,
-                new Object[] { "Cancel" });
+                new Object[] { cancelOption });
         statusPanel.setBusy(true);
         statusPanel.setStatusMessage("Creating Local Model...");
 
@@ -252,6 +249,14 @@ public final class CreateLocalModelWizardAction extends AbstractAction {
                             }
 
                             final SudPlanHypeAPI hypeClient = HydrologyCache.getInstance().getHypeClient();
+
+                            if (Thread.currentThread().isInterrupted()) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("local model creator was interrupted"); // NOI18N
+                                }
+
+                                return null;
+                            }
 
                             return hypeClient.createCalibrationSimulation(
                                     HydrologyCache.getInstance().getCalibrationScenario(),
@@ -294,15 +299,7 @@ public final class CreateLocalModelWizardAction extends AbstractAction {
 
         dialog.setVisible(true);
 
-        if (pane.getValue() == null) {
-            try {
-                return task.get();
-            } catch (final Exception ex) {
-                final String message = "cannot get calibration id"; // NOI18N
-                LOG.error(message, ex);
-                throw new IllegalStateException(message, ex);
-            }
-        } else {
+        if (cancelOption.equals(pane.getValue())) {
             // the cancel button has been pressed
             if (!task.isDone()) {
                 if (!task.cancel(true)) {
@@ -311,6 +308,14 @@ public final class CreateLocalModelWizardAction extends AbstractAction {
             }
 
             return null;
+        } else {
+            try {
+                return task.get();
+            } catch (final Exception ex) {
+                final String message = "cannot get calibration id"; // NOI18N
+                LOG.error(message, ex);
+                throw new IllegalStateException(message, ex);
+            }
         }
     }
 }
