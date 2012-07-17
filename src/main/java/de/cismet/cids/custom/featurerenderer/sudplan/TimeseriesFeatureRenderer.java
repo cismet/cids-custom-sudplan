@@ -9,18 +9,15 @@ package de.cismet.cids.custom.featurerenderer.sudplan;
 
 import org.apache.log4j.Logger;
 
-import java.awt.BorderLayout;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import java.net.MalformedURLException;
 
 import javax.imageio.ImageIO;
 
-import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
 
 import de.cismet.cids.featurerenderer.CustomCidsFeatureRenderer;
 
@@ -85,17 +82,18 @@ public class TimeseriesFeatureRenderer extends CustomCidsFeatureRenderer {
      */
     @Override
     public void assign() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("assign");                                                                              // NOI18N
-        }
-        try {
-            final TimeseriesChartPanel panel = new TimeseriesChartPanel((String)cidsBean.getProperty("uri")); // NOI18N
-            add(panel, BorderLayout.CENTER);
-        } catch (final MalformedURLException ex) {
-            final String message = "cidsbean contains invalid uri";                                           // NOI18N
-            LOG.error(message, ex);
-            throw new IllegalStateException(message, ex);
-        }
+        // possible memory leak and missing preview resolution adjustment
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("assign");                                                                              // NOI18N
+//        }
+//        try {
+//            final TimeseriesChartPanel panel = new TimeseriesChartPanel((String)cidsBean.getProperty("uri")); // NOI18N
+//            add(panel, BorderLayout.CENTER);
+//        } catch (final MalformedURLException ex) {
+//            final String message = "cidsbean contains invalid uri";                                           // NOI18N
+//            LOG.error(message, ex);
+//            throw new IllegalStateException(message, ex);
+//        }
     }
 
     // TODO: not necessarily only rain symbol, symbol selection must be cidsbean dependent
