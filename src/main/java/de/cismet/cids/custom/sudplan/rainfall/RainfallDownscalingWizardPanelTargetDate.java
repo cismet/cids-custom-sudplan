@@ -100,6 +100,7 @@ public final class RainfallDownscalingWizardPanelTargetDate implements WizardDes
         targetYear = (Integer)wizard.getProperty(RainfallDownscalingWizardAction.PROP_TARGET_YEAR);
         final String procedure = (String)wizard.getProperty(RainfallDownscalingWizardAction.PROP_SPS_PROCEDURE);
         idfDownscaling = RainfallDownscalingModelManager.RF_IDF_DS_PROCEDURE.equals(procedure);
+        frequencyAdjustment = (Boolean)wizard.getProperty(RainfallDownscalingWizardAction.PROP_FREQ_ADJUST);
 
         try {
             final DataHandler dh = DataHandlerCache.getInstance()
