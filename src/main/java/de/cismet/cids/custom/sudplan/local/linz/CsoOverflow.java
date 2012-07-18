@@ -31,8 +31,6 @@ public class CsoOverflow {
     protected transient float overflowVolume = 0.0f;
     protected transient float overflowFrequency = 0.0f;
     protected transient float overflowDuration = 0.0f;
-    protected transient float totalVolume = 0.0f;
-
     protected transient int cso = -1;
     protected transient String name;
     private int swmmProject = -1;
@@ -85,7 +83,6 @@ public class CsoOverflow {
         this.overflowVolume = overflowVolume;
         this.overflowFrequency = overflowFrequency;
         this.overflowDuration = overflowDuration;
-        this.totalVolume = totalVolume;
         this.cso = cso;
         this.swmmProject = swmmProject;
     }
@@ -180,24 +177,6 @@ public class CsoOverflow {
      */
     public void setOverflowDuration(final float overflowDuration) {
         this.overflowDuration = overflowDuration;
-    }
-
-    /**
-     * Get the value of totalVolume.
-     *
-     * @return  the value of totalVolume
-     */
-    public float getTotalVolume() {
-        return totalVolume;
-    }
-
-    /**
-     * Set the value of totalVolume.
-     *
-     * @param  totalVolume  new value of totalVolume
-     */
-    public void setTotalVolume(final float totalVolume) {
-        this.totalVolume = totalVolume;
     }
 
     /**

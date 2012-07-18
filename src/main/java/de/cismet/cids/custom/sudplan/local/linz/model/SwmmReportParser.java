@@ -126,14 +126,14 @@ public class SwmmReportParser {
             final CsoOverflow csoOverflow = new CsoOverflow();
             csoOverflow.setName(key);
             csoOverflow.setSwmmProject(swmmOutput.getSwmmProject());
-            csoOverflow.setTotalVolume(cso_totalVolume.get(key));
-            csoOverflow.setOverflowDuration((float)Math.random() * 100f);
-            csoOverflow.setOverflowFrequency((float)Math.random() * 10f);
-            csoOverflow.setOverflowVolume((float)Math.random() * 1000f);
+            csoOverflow.setOverflowVolume(cso_totalVolume.get(key));
+            // csoOverflow.setOverflowDuration((float)Math.random() * 100f);
+            // csoOverflow.setOverflowFrequency((float)Math.random() * 10f);
+            // csoOverflow.setOverflowVolume((float)Math.random() * 1000f);
             swmmOutput.getCsoOverflows().put(key, csoOverflow);
         }
 
-        swmmOutput.setVQr(VQ_r);
+        swmmOutput.setTotalRunoffVolume(VQ_r);
 
         return swmmOutput;
     }

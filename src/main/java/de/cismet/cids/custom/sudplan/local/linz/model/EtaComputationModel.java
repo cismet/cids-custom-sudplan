@@ -69,7 +69,7 @@ public class EtaComputationModel {
      */
     public EtaOutput computateEta(final EtaInput etaInput) throws Exception {
         // definitions
-        final float r720_1 = etaInput.getR720_1();
+        final float r720_1 = etaInput.getR720();
         final float wwtp_size = WWTP_SIZE;
         final float PEsep = PE_SEP;
         final float PEcombined = PE_COMBINED;
@@ -82,23 +82,24 @@ public class EtaComputationModel {
         etaOutput.setCreated(new Date());
         etaOutput.setSwmmRun(etaInput.getSwmmRun());
         etaOutput.setUser(etaInput.getUser());
-        etaOutput.setR720(etaInput.getR720_1());
+        etaOutput.setR720(etaInput.getR720());
 
-        float sum_TotalVolume = 0.0f;
+        // float sum_TotalVolume = 0.0f;
         float sum_SedAFS = 0.0f;
 
         for (final String rptKey : etaInput.getCsoOverflows().keySet()) {
             for (final EtaConfiguration eta : etaConfigurations) {
                 if (rptKey.equalsIgnoreCase(eta.getName()) && eta.isEnabled()) {
-                    final float totVol = etaInput.getCsoOverflows().get(rptKey).getTotalVolume();
+                    final float totVol = etaInput.getCsoOverflows().get(rptKey).getOverflowVolume();
                     sum_SedAFS += totVol * eta.getSedimentationEfficency();
-                    sum_TotalVolume += totVol;
+                    // sum_TotalVolume += totVol;
                 }
             }
         }
 
-        final float VQo = sum_TotalVolume;
-        final float VQr = etaInput.getVQr();
+        // final float VQo = sum_TotalVolume;
+        final float VQo = etaInput.getTotalOverflowVolume();
+        final float VQr = etaInput.getTotalRunoffVolume();
 
         final float eta_Hyd_actual = ((VQr - VQo) / VQr) * 100.0f;
         final float eta_Sed_actual = eta_Hyd_actual + (sum_SedAFS / VQr);
@@ -320,7 +321,7 @@ public class EtaComputationModel {
                 i++;
             }
 
-            etaInput.setR720_1((float)29.0232183);
+            etaInput.setR720((float)29.0232183);
 
             final EtaComputationModel etaComputationModel = new EtaComputationModel();
             final EtaOutput etaOutput = etaComputationModel.computateEta(etaInput);

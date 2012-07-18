@@ -50,9 +50,12 @@ public class SwmmOutput {
     private transient String user;
     private transient int swmmRun;
     private transient String swmmRunName;
-    private transient float r720_1;
-    private transient float VQr;
-    private transient float VQo;
+    /** Statistical rainfall intensity with a duration of 12 h and return period once per year (r720,1). */
+    private transient float r720;
+    /** Total volume of surface runoff (Wet Weather Inflow), VQr. */
+    private transient float totalRunoffVolume;
+    /** Total volume of overflow discharge. (VQo) */
+    private transient float totalOverflowVolume;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -199,59 +202,60 @@ public class SwmmOutput {
     }
 
     /**
-     * Get the value of r720_1 Niederschlagshöhe in mm bei einer Regendauer von 12 Stunden (720 Minuten) mit einer
+     * Get the value of r720 Niederschlagshöhe in mm bei einer Regendauer von 12 Stunden (720 Minuten) mit einer
      * Wiederkehrzeit von 1 Jahr.
      *
-     * @return  the value of r720_1
+     * @return  the value of r720
      */
-    public float getR720_1() {
-        return r720_1;
+    public float getR720() {
+        return r720;
     }
 
     /**
-     * Set the value of r720_1.
+     * Set the value of r720.
      *
-     * @param  r720_1  new value of r720_1
+     * @param  r720  new value of r720
      */
-    public void setR720_1(final float r720_1) {
-        this.r720_1 = r720_1;
+    public void setR720(final float r720) {
+        this.r720 = r720;
     }
 
     /**
-     * Get the value of VQr Summe der Regenabflussmengen eines Jahres (m³/a) (Total volume of surface runoff).
+     * Get the value of totalRunoffVolume Summe der Regenabflussmengen eines Jahres (m³/a) (Total volume of surface
+     * runoff).
      *
-     * @return  the value of VQr
+     * @return  the value of totalRunoffVolume
      */
-    public float getVQr() {
-        return VQr;
+    public float getTotalRunoffVolume() {
+        return totalRunoffVolume;
     }
 
     /**
-     * Set the value of VQr.
+     * Set the value of totalRunoffVolume.
      *
-     * @param  VQr  new value of VQr
+     * @param  totalRunoffVolume  new value of totalRunoffVolume
      */
-    public void setVQr(final float VQr) {
-        this.VQr = VQr;
+    public void setTotalRunoffVolume(final float totalRunoffVolume) {
+        this.totalRunoffVolume = totalRunoffVolume;
     }
 
     /**
-     * Get the value of VQo Summe der entlasteten Mischwassermengen eines Jahres (m³/a) (Total volume of overflow
-     * discharge).
+     * Get the value of totalOverflowVolume Summe der entlasteten Mischwassermengen eines Jahres (m³/a) (Total volume of
+     * overflow discharge).
      *
-     * @return  the value of VQo
+     * @return  the value of totalOverflowVolume
      */
-    public float getVQo() {
-        return VQo;
+    public float getTotalOverflowVolume() {
+        return totalOverflowVolume;
     }
 
     /**
-     * Set the value of VQo.
+     * Set the value of totalOverflowVolume.
      *
-     * @param  VQo  new value of VQo
+     * @param  totalOverflowVolume  new value of totalOverflowVolume
      */
-    public void setVQo(final float VQo) {
-        this.VQo = VQo;
+    public void setTotalOverflowVolume(final float totalOverflowVolume) {
+        this.totalOverflowVolume = totalOverflowVolume;
     }
 
     /**
@@ -280,7 +284,6 @@ public class SwmmOutput {
             LOG.warn("target cso map empty!");
         }
     }
-
 //    /**
 //     * DOCUMENT ME!
 //     *

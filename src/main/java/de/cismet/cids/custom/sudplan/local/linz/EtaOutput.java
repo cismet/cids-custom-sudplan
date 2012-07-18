@@ -34,7 +34,7 @@ public class EtaOutput {
     private transient float r720 = -1;
     /**
      * Mindestwirkungsgrad (der Weiterleitung) für gelöste Stoffe (required CSO efficiency for dissolved pollutants),
-     * definiert im ÖWAV Regelblatt 19.
+     * definiert im ÖWAV Regelblatt 19. r720_1 in SWMM Output / ETA Input
      */
     private transient float etaHydRequired = -1;
     /**
@@ -52,10 +52,10 @@ public class EtaOutput {
      * pollutants).
      */
     private transient float etaSedActual = -1;
+    /** Total overflow volume in system. (m³/a) * 10^6 VQo in SWMM Output / ETA Input */
+    private transient float totalOverflowVolume = -1;
     private transient Date created;
     private transient String user;
-    /** Total overflow volume in system. */
-    private transient float totalOverflowVolume = -1;
     private transient int swmmRun = -1;
     private transient String etaRunName;
     private transient int etaRun = -1;

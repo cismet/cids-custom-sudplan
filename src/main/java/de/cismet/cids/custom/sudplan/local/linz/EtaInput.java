@@ -53,12 +53,12 @@ public class EtaInput extends SwmmOutput {
 
         this.setCreated(swmmOutput.getCreated());
         this.setCsoOverflows(swmmOutput.getCsoOverflows());
-        this.setR720_1(swmmOutput.getR720_1());
+        this.setR720(swmmOutput.getR720());
         this.setSwmmProject(swmmOutput.getSwmmRun());
         this.setSwmmRunName(swmmOutput.getSwmmRunName());
         this.setUser(swmmOutput.getUser());
-        this.setVQo(swmmOutput.getVQo());
-        this.setVQr(swmmOutput.getVQr());
+        this.setTotalOverflowVolume(swmmOutput.getTotalOverflowVolume());
+        this.setTotalRunoffVolume(swmmOutput.getTotalRunoffVolume());
     }
 
     //~ Methods ----------------------------------------------------------------
