@@ -7,6 +7,10 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import org.apache.log4j.Logger;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -23,14 +27,15 @@ public class EtaInput extends SwmmOutput {
 
     //~ Static fields/initializers ---------------------------------------------
 
+    protected static final transient Logger LOG = Logger.getLogger(EtaInput.class);
     public static final String PROP_SWMMRUN = "swmmRun";
 
     //~ Instance fields --------------------------------------------------------
 
     protected transient List<EtaConfiguration> etaConfigurations;
-
     protected String etaFile;
-
+    /** Total volume of overflow discharge. (VQo) */
+    private transient float totalOverflowVolume = -1.0f;
     private final transient PropertyChangeSupport propertyChangeSupport;
 
     //~ Constructors -----------------------------------------------------------
@@ -50,19 +55,70 @@ public class EtaInput extends SwmmOutput {
      */
     public EtaInput(final SwmmOutput swmmOutput) {
         this();
-
-        this.setCreated(swmmOutput.getCreated());
-        this.setCsoOverflows(swmmOutput.getCsoOverflows());
-        this.setR720(swmmOutput.getR720());
-        this.setSwmmProject(swmmOutput.getSwmmRun());
-        this.setSwmmRunName(swmmOutput.getSwmmRunName());
-        this.setUser(swmmOutput.getUser());
-        this.setTotalOverflowVolume(swmmOutput.getTotalOverflowVolume());
-        this.setTotalRunoffVolume(swmmOutput.getTotalRunoffVolume());
+        this.fromSwmmOutput(swmmOutput);
     }
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  swmmOutput  DOCUMENT ME!
+     */
+    @JsonIgnore
+    public final void fromSwmmOutput(final SwmmOutput swmmOutput) {
+        this.setR720(swmmOutput.getR720());
+        this.setSwmmProject(swmmOutput.getSwmmRun());
+        this.setSwmmRunName(swmmOutput.getSwmmRunName());
+        this.setTotalRunoffVolume(swmmOutput.getTotalRunoffVolume());
+        this.setCsoOverflows(swmmOutput.getCsoOverflows());
+
+        this.computeTotalOverflowVolume();
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public final void computeTotalOverflowVolume() {
+        if ((this.csoOverflows != null) && !this.getCsoOverflows().isEmpty()
+                    && (etaConfigurations != null) && !etaConfigurations.isEmpty()) {
+        } else {
+            LOG.warn("cannot compute TotalOverflowVolume, csoOverflows or etaConfigurations are empty");
+            this.totalOverflowVolume = -1;
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("computing total overflow volume for " + etaConfigurations.size() + " CSOs");
+        }
+        if (this.csoOverflows.size() != etaConfigurations.size()) {
+            LOG.warn("CSO map size missmatch: " + this.getCsoOverflows().size()
+                        + " vs. " + etaConfigurations.size());
+        }
+
+        this.totalOverflowVolume = 0;
+        int i = 0;
+        for (final EtaConfiguration etaConfiguration : etaConfigurations) {
+            if (etaConfiguration.isEnabled()) {
+                final String name = etaConfiguration.getName();
+                if (this.csoOverflows.containsKey(name)) {
+                    final CsoOverflow csoOverflow = this.csoOverflows.get(name);
+                    totalOverflowVolume += csoOverflow.getOverflowVolume();
+                    i++;
+                } else {
+                    LOG.warn("cannot consider Overflow Volume of cso '"
+                                + etaConfiguration.getName() + "': not in result list of overflows");
+                }
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("ignoring CSO '" + etaConfiguration + "' in computation of total overflow volume");
+                }
+            }
+        }
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(i + " out of " + getEtaConfigurations().size()
+                        + " CSOs considered in total overflow volume calculation");
+        }
+    }
     /**
      * DOCUMENT ME!
      *
@@ -79,6 +135,25 @@ public class EtaInput extends SwmmOutput {
      */
     public void setEtaConfigurations(final List<EtaConfiguration> etaConfigurations) {
         this.etaConfigurations = etaConfigurations;
+    }
+
+    /**
+     * Get the value of totalOverflowVolume Summe der entlasteten Mischwassermengen eines Jahres (m³/a) (Total volume of
+     * overflow discharge).
+     *
+     * @return  the value of totalOverflowVolume
+     */
+    public float getTotalOverflowVolume() {
+        return totalOverflowVolume;
+    }
+
+    /**
+     * Set the value of totalOverflowVolume.
+     *
+     * @param  totalOverflowVolume  new value of totalOverflowVolume
+     */
+    public void setTotalOverflowVolume(final float totalOverflowVolume) {
+        this.totalOverflowVolume = totalOverflowVolume;
     }
 
     /**
@@ -124,7 +199,7 @@ public class EtaInput extends SwmmOutput {
     /**
      * DOCUMENT ME!
      *
-     * @param  args  DOCUMENT ME!
+     * @param args DOCUMENT ME!
      */
 // public static void main(final String[] args) {
 // try {

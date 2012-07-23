@@ -84,6 +84,12 @@ public class EtaComputationModel {
         etaOutput.setUser(etaInput.getUser());
         etaOutput.setR720(etaInput.getR720());
 
+        if (etaInput.getTotalOverflowVolume() < 0) {
+            etaInput.computeTotalOverflowVolume();
+        }
+
+        etaOutput.setTotalOverflowVolume(etaInput.getTotalOverflowVolume());
+
         // float sum_TotalVolume = 0.0f;
         float sum_SedAFS = 0.0f;
 
@@ -106,10 +112,10 @@ public class EtaComputationModel {
 
         // Calculate required efficiency rates
 
-        float cso_eff_r720_lower30mm = -1.0f;
-        float cso_eff_r720_higher50mm = -1.0f;
-        float eta_gel = -1.0f;
-        float eta_afs = -1.0f;
+        float cso_eff_r720_lower30mm;
+        float cso_eff_r720_higher50mm;
+        float eta_gel;
+        float eta_afs;
 
         // Table 1 - Page 12
         if (wwtp_size <= WWTP_LOW_CASE) {

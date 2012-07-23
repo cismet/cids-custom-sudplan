@@ -390,6 +390,22 @@ public abstract class AbstractModelManager implements ModelManager {
 
                     final SqlTimestampToUtilDateConverter dateConverter = new SqlTimestampToUtilDateConverter();
                     try {
+                        RunInfo runInfo = getRunInfo();
+                        if (runInfo == null) {
+                            runInfo = new DefaultRunInfo();
+                        } else {
+                            runInfo.setFinished(true);
+                        }
+
+                        try {
+                            final StringWriter writer = new StringWriter();
+                            final ObjectMapper mapper = new ObjectMapper();
+                            mapper.writeValue(writer, runInfo);
+                            cidsBean.setProperty("runinfo", writer.toString());
+                        } catch (final Exception ex) {
+                            LOG.error("could not set run info: " + ex.getMessage(), ex);
+                        }
+
                         cidsBean.setProperty(
                             "finished", // NOI18N
                             dateConverter.convertReverse(GregorianCalendar.getInstance().getTime()));

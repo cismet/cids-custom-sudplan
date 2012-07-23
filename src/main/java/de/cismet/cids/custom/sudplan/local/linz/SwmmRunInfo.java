@@ -19,7 +19,7 @@ public class SwmmRunInfo extends DefaultRunInfo {
 
     //~ Instance fields --------------------------------------------------------
 
-    private String runId = "-1";
+    private String spsTaskId = "-1";
     private String spsUrl = "http://sudplan.ait.ac.at:8082/";
 
     private String modelName = "swmm+r";
@@ -35,12 +35,12 @@ public class SwmmRunInfo extends DefaultRunInfo {
     /**
      * Creates a new GeoCPMRunInfo object.
      *
-     * @param  runId      DOCUMENT ME!
+     * @param  runId      spsTaskId DOCUMENT ME!
      * @param  spsUrl     DOCUMENT ME!
      * @param  modelName  downloaded DOCUMENT ME!
      */
     public SwmmRunInfo(final String runId, final String spsUrl, final String modelName) {
-        this.runId = runId;
+        this.spsTaskId = runId;
         this.spsUrl = spsUrl;
         this.modelName = modelName;
     }
@@ -52,8 +52,8 @@ public class SwmmRunInfo extends DefaultRunInfo {
      *
      * @return  DOCUMENT ME!
      */
-    public String getRunId() {
-        return runId;
+    public String getSpsTaskId() {
+        return spsTaskId;
     }
 
     /**
@@ -68,10 +68,10 @@ public class SwmmRunInfo extends DefaultRunInfo {
     /**
      * DOCUMENT ME!
      *
-     * @param  runId  DOCUMENT ME!
+     * @param  spsTaskId  DOCUMENT ME!
      */
-    public void setRunId(final String runId) {
-        this.runId = runId;
+    public void setSpsTaskId(final String spsTaskId) {
+        this.spsTaskId = spsTaskId;
     }
 
     /**

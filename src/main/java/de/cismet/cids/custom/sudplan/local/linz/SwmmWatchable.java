@@ -30,6 +30,7 @@ import java.util.Properties;
 
 import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
 import de.cismet.cids.custom.sudplan.ProgressEvent;
+import de.cismet.cids.custom.sudplan.ProgressListener;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -48,14 +49,23 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
 
     //~ Instance fields --------------------------------------------------------
 
-    // FIXME: remove
     private transient SudplanSPSHelper.Task spsTask;
     private transient SwmmRunInfo runInfo = null;
-    // private final transient ProgressListener progL;
-    private SwmmOutput swmmOutput;
-    private EtaOutput etaOutput;
+    private transient SwmmOutput swmmOutput;
+    private transient SwmmModelManager swmmModelManager = null;
+    // private EtaOutput etaOutput;
 
     //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new SwmmWatchable object.
+     *
+     * @param  swmmModelManager  DOCUMENT ME!
+     */
+    public SwmmWatchable(final SwmmModelManager swmmModelManager) {
+        this(swmmModelManager.getCidsBean());
+        this.swmmModelManager = swmmModelManager;
+    }
 
     /**
      * Creates a new SwmmWatchable object.
@@ -67,29 +77,31 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
         // this.spsTask = spsTask;
 
         final ObjectMapper mapper = new ObjectMapper();
-        final String info = (String)cidsBean.getProperty("runinfo"); // NOI18N
+        final String swmmRunInfo = (String)cidsBean.getProperty("runinfo"); // NOI18N
 
         try {
-            runInfo = mapper.readValue(info, SwmmRunInfo.class);
+            runInfo = mapper.readValue(swmmRunInfo, SwmmRunInfo.class);
         } catch (final Exception ex) {
             final String message = "cannot read runInfo from run: " + cidsBean; // NOI18N
             LOG.error(message, ex);
             runInfo = new SwmmRunInfo();
-            runInfo.setRunId("-1");
+            runInfo.setSpsTaskId("-1");
         }
 
-        if ((runInfo.getRunId() != null) && !runInfo.getRunId().isEmpty() && !runInfo.getRunId().equals("-1")) {
+        if ((runInfo.getSpsTaskId() != null) && !runInfo.getSpsTaskId().isEmpty()
+                    && !runInfo.getSpsTaskId().equals("-1")) {
             try {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("connecting to SWMM Model SPS: " + runInfo.getSpsUrl());
                 }
                 final SudplanSPSHelper spsHelper = new SudplanSPSHelper(runInfo.getSpsUrl());
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("looking for task '" + runInfo.getRunId() + "'");
+                    LOG.debug("looking for task '" + runInfo.getSpsTaskId() + "'");
                 }
-                this.spsTask = spsHelper.findTask(runInfo.getRunId());
+                this.spsTask = spsHelper.findTask(runInfo.getSpsTaskId());
                 if (this.spsTask != null) {
-                    // logger.info("Task {}:\n{}\n\n", taskid, DumpTools.dumpTS(task.getTimeseries(), true, true));
+                    // logger.swmmRunInfo("Task {}:\n{}\n\n", taskid, DumpTools.dumpTS(task.getTimeseries(), true,
+                    // true));
                     final String status = this.spsTask.getStatus();
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Status message from task:" + status);
@@ -106,11 +118,11 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
                 }
 
                 this.setStatus(State.WAITING);
-                LOG.info("new watcheable for swmm run '" + this.runInfo.getRunId() + "' created");
+                LOG.info("new watcheable for swmm run '" + this.runInfo.getSpsTaskId() + "' created");
             } catch (MalformedURLException ex) {
                 LOG.error("could not connect to SPS " + runInfo.getSpsUrl(), ex);
             } catch (IOException ex) {
-                LOG.error("could not restore task '" + runInfo.getRunId() + "'", ex);
+                LOG.error("could not restore task '" + runInfo.getSpsTaskId() + "'", ex);
             }
         } else {
             LOG.error("could not restore run information");
@@ -122,7 +134,7 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
 
     @Override
     public String getTitle() {
-        return "Result of SWMM run '" + this.runInfo.getRunId() + "'"; // NOI18N
+        return "Result of SWMM run '" + this.runInfo.getSpsTaskId() + "'"; // NOI18N
     }
 
     @Override
@@ -132,7 +144,8 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
                 @Override
                 public void run() {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("model run '" + runInfo.getRunId() + "' finished, start downloading result from SOS");
+                        LOG.debug("model run '" + runInfo.getSpsTaskId()
+                                    + "' finished, start downloading result from SOS");
                     }
                     setStatus(State.RUNNING);
 
@@ -157,7 +170,7 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
                                 if (resultSOSOffering.lastIndexOf("_o") != -1) {
                                     swmmOutput = downloadSwmmOutput(resultSOSEndoint, resultSOSOffering);
                                 } else if (resultSOSOffering.lastIndexOf("_e") != -1) {
-                                    etaOutput = downloadEtaOutput(resultSOSEndoint, resultSOSOffering);
+                                    downloadEtaOutput(swmmOutput, resultSOSEndoint, resultSOSOffering);
                                 } else {
                                     LOG.error("unrecognized offering type '" + resultSOSOffering + "'");
                                 }
@@ -167,25 +180,20 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
                             }
                         }
 
-                        if ((swmmOutput != null) && (etaOutput != null)) {
-                            // swmmOutput.synchronizeCsoIds();
-
+                        if ((swmmOutput != null)) {
                             final Date created = GregorianCalendar.getInstance().getTime();
                             final String user = SessionManager.getSession().getUser().getName();
 
                             swmmOutput.setCreated(created);
                             swmmOutput.setUser(user);
 
-                            etaOutput.setCreated(created);
-                            etaOutput.setUser(user);
-
                             setStatus(State.COMPLETED);
                         } else {
-                            LOG.error("could not download SWMM and/or ETA result!");
+                            LOG.error("could not download SWMM result!");
                             setStatus(State.COMPLETED_WITH_ERROR);
                         }
                     } catch (final Exception e) {
-                        LOG.error("could not download run results", e); // NOI18N
+                        LOG.error("could not download SWMM run results", e); // NOI18N
 
                         setDownloadException(e);
                         setStatus(State.COMPLETED_WITH_ERROR);
@@ -202,36 +210,40 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
     public ProgressEvent requestStatus() throws IOException {
         // final String status = this.spsTask.getStatus();
         if (LOG.isDebugEnabled()) {
-            LOG.debug("status of swmm model run '" + this.runInfo.getRunId() + "' is '"
+            LOG.debug("status of swmm model run SPS Task '" + this.runInfo.getSpsTaskId() + "' is '"
                         + spsTask.getStatus() + "'");
         }
 
         // FIXME: list of states
         if ((spsTask.getStatus() == null) || "null".equals(spsTask.getStatus())) {
-            LOG.error("status of swmm model run '" + this.runInfo.getRunId() + "' is null = broken");
+            final String message = "status of swmm model run SPS Task '" + this.runInfo.getSpsTaskId()
+                        + "' is null = broken";
+            LOG.error(message);
             if ((this.spsTask.getErros() != null) && (this.spsTask.getErros().length > 0)) {
                 for (final String error : this.spsTask.getErros()) {
                     LOG.error(error);
                 }
             }
-            return new ProgressEvent(this, ProgressEvent.State.BROKEN);
+            return new ProgressEvent(this, ProgressEvent.State.BROKEN, message);
         } else if ("finished".equals(spsTask.getStatus())) {
-            LOG.info("status of swmm model run '" + this.runInfo.getRunId() + "' is finished");
+            LOG.info("status of swmm model run SPS Task '" + this.runInfo.getSpsTaskId() + "' is finished");
             return new ProgressEvent(this, ProgressEvent.State.FINISHED);
         } else if ((this.spsTask.getErros() != null) && (this.spsTask.getErros().length > 0)) {
-            LOG.error("status of swmm model run '" + this.runInfo.getRunId() + "' is broken");
+            final String message = "status of swmm model run SPS Task '" + this.runInfo.getSpsTaskId() + "' is broken";
+            LOG.error(message);
             for (final String error : this.spsTask.getErros()) {
                 LOG.error(error);
             }
-            return new ProgressEvent(this, ProgressEvent.State.BROKEN);
+            return new ProgressEvent(this, ProgressEvent.State.BROKEN, message);
         } else if ("in operation".equals(spsTask.getStatus())) {
-            LOG.info("status of swmm model run '" + this.runInfo.getRunId() + "' is in operation");
+            LOG.info("status of swmm model run SPS Task '" + this.runInfo.getSpsTaskId() + "' is in operation");
             return new ProgressEvent(this, ProgressEvent.State.PROGRESSING);
         } else if ("not yet started".equals(spsTask.getStatus())) {
-            LOG.info("status of swmm model run '" + this.runInfo.getRunId() + "' not yet started");
+            LOG.info("status of swmm model run SPS Task '" + this.runInfo.getSpsTaskId() + "' not yet started");
             return new ProgressEvent(this, ProgressEvent.State.STARTED);
         } else {
-            LOG.warn("unknown status of swmm model run '" + this.runInfo.getRunId() + "': '" + spsTask.getStatus()
+            LOG.warn("unknown status of swmm model run SPS Task '" + this.runInfo.getSpsTaskId() + "': '"
+                        + spsTask.getStatus()
                         + "'");
             return new ProgressEvent(this, ProgressEvent.State.PROGRESSING);
         }
@@ -258,16 +270,15 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
     /**
      * DOCUMENT ME!
      *
+     * @param   swmmOutput         DOCUMENT ME!
      * @param   resultSOSEndoint   DOCUMENT ME!
      * @param   resultSOSOffering  DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
-     *
      * @throws  Exception  DOCUMENT ME!
      */
-    private EtaOutput downloadEtaOutput(final String resultSOSEndoint, final String resultSOSOffering)
-            throws Exception {
-        final EtaOutput etaResult = new EtaOutput();
+    private void downloadEtaOutput(final SwmmOutput swmmOutput,
+            final String resultSOSEndoint,
+            final String resultSOSOffering) throws Exception {
         final TimeInterval allInterval = new TimeInterval(
                 TimeInterval.Openness.OPEN,
                 TimeStamp.NEGATIVE_INFINITY,
@@ -301,21 +312,9 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
             }
 
             if (key.equals("r720_1")) {
-                etaResult.setR720((Float)value);
-            } else if (key.equals("eta_hyd_required")) {
-                etaResult.setEtaHydRequired((Float)value);
-            } else if (key.equals("eta_sed_required")) {
-                etaResult.setEtaSedRequired((Float)value);
-            } else if (key.equals("eta_hyd_actual")) {
-                etaResult.setEtaHydActual((Float)value);
-            } else if (key.equals("eta_afs_actual")) {
-                etaResult.setEtaSedActual((Float)value);
-            } else {
-                LOG.warn("unrecognized value key '" + key + "'");
+                swmmOutput.setR720((Float)value);
             }
         }
-
-        return etaResult;
     }
 
     /**
@@ -377,26 +376,29 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
 
         int i = 0;
         for (final String node : nodes) {
-            final CsoOverflow csoOverflow = new CsoOverflow(node, volumes[i], frequencys[i], 0.0f, 0.0f);
+            final CsoOverflow csoOverflow = new CsoOverflow(node, volumes[i], frequencys[i], -1.0f);
             swmmResult.getCsoOverflows().put(node, csoOverflow);
             i++;
         }
 
-        return swmmResult;
-    }
+        final float totalRunoffVolume = (Float)resultTS.getValue(timeStamp, "wwi");
+        swmmResult.setTotalRunoffVolume(totalRunoffVolume);
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public EtaOutput getEtaOutput() {
-        return this.etaOutput;
+        return swmmResult;
     }
 
     @Override
     public String toString() {
-        return (runInfo != null) ? (runInfo.getModelName() + ": " + runInfo.getRunId())
+        return (runInfo != null) ? (runInfo.getModelName() + ": " + runInfo.getSpsTaskId())
                                  : "ERROR: no run info attached to SWMM Run";
+    }
+
+    @Override
+    public ProgressListener getStatusCallback() {
+        if (this.swmmModelManager != null) {
+            return this.swmmModelManager;
+        } else {
+            return super.getStatusCallback();
+        }
     }
 }

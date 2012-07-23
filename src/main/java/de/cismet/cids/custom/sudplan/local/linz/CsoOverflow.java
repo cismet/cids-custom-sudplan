@@ -51,14 +51,12 @@ public class CsoOverflow {
      * @param  overflowVolume     DOCUMENT ME!
      * @param  overflowFrequency  DOCUMENT ME!
      * @param  overflowDuration   DOCUMENT ME!
-     * @param  totalVolume        DOCUMENT ME!
      */
     public CsoOverflow(final String name,
             final float overflowVolume,
             final float overflowFrequency,
-            final float overflowDuration,
-            final float totalVolume) {
-        this(name, overflowVolume, overflowFrequency, overflowDuration, totalVolume, -1, -1);
+            final float overflowDuration) {
+        this(name, overflowVolume, overflowFrequency, overflowDuration, -1, -1);
     }
 
     /**
@@ -68,7 +66,6 @@ public class CsoOverflow {
      * @param  overflowVolume     DOCUMENT ME!
      * @param  overflowFrequency  DOCUMENT ME!
      * @param  overflowDuration   DOCUMENT ME!
-     * @param  totalVolume        DOCUMENT ME!
      * @param  cso                DOCUMENT ME!
      * @param  swmmProject        DOCUMENT ME!
      */
@@ -76,7 +73,6 @@ public class CsoOverflow {
             final float overflowVolume,
             final float overflowFrequency,
             final float overflowDuration,
-            final float totalVolume,
             final int cso,
             final int swmmProject) {
         this.name = name;
@@ -224,5 +220,10 @@ public class CsoOverflow {
      */
     public void removePropertyChangeListener(final PropertyChangeListener listener) {
         propertyChangeSupport.removePropertyChangeListener(listener);
+    }
+
+    @Override
+    public String toString() {
+        return this.getName();
     }
 }

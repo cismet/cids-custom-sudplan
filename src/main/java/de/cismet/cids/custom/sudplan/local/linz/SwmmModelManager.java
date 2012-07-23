@@ -7,6 +7,12 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.exception.ConnectionException;
+
+import Sirius.server.middleware.types.MetaClass;
+import Sirius.server.middleware.types.MetaObject;
+
 import at.ac.ait.enviro.sudplan.clientutil.SudplanSOSHelper;
 import at.ac.ait.enviro.sudplan.clientutil.SudplanSPSHelper;
 import at.ac.ait.enviro.sudplan.util.PropertyNames;
@@ -19,6 +25,8 @@ import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import org.openide.util.NbBundle;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,13 +34,17 @@ import java.io.StringWriter;
 
 import java.text.DateFormat;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import de.cismet.cids.custom.sudplan.*;
-import de.cismet.cids.custom.sudplan.concurrent.ProgressWatch;
+import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
 
 import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 /**
  * DOCUMENT ME!
@@ -40,45 +52,162 @@ import de.cismet.cids.dynamics.CidsBean;
  * @author   pd
  * @version  $Revision$, $Date$
  */
-public class SwmmModelManager extends AbstractModelManager {
+public class SwmmModelManager extends AbstractAsyncModelManager {
 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(SwmmModelManager.class);
+    public static final String TABLENAME_CSOS = SwmmPlusEtaWizardAction.TABLENAME_CSOS;
+    public static final String TABLENAME_LINZ_SWMM_RESULT = "linz_swmm_result";
+    public static final int MAX_STEPS = 5;
 
     //~ Instance fields --------------------------------------------------------
 
     private final String modelSosEndpoint = "http://sudplan.ait.ac.at:8081/";
-
-    /** FIXME: entfernen, sobald Instanz nicht mehr benötigt wird */
     private SudplanSPSHelper.Task spsTask;
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    protected void internalExecute() throws IOException {
-        LOG.fatal("SwmmModelManager is currently not used: use eta model manager!!!!!");
+    protected CidsBean createOutputBean() throws IOException {
+        if (!isFinished()) {
+            throw new IllegalStateException("cannot create outputbean when not finished yet"); // NOI18N
+        }
+
+        if (!(getWatchable() instanceof SwmmWatchable)) {
+            throw new IllegalStateException("cannot create output if there is no valid watchable ("
+                        + getWatchable().getClass() + ")"); // NOI18N
+        }
+
+        final SwmmWatchable swmmWatchable = (SwmmWatchable)this.getWatchable();
+        final String spsRunId = swmmWatchable.getSwmmRunInfo().getSpsTaskId();
+
+        try {
+            final SwmmInput swmmInput = (SwmmInput)this.getUR();
+            final String swmmRunName = this.getCidsBean().getProperty("name").toString();
+            final int swmmRun = (Integer)this.getCidsBean().getProperty("id");
+
+            LOG.info("creating SWMMOutput Bean for SWMM RUN '" + cidsBean + "' ("
+                        + swmmRun + ")'"); // NOI18N
+
+            final SwmmOutput swmmOutput = swmmWatchable.getSwmmOutput();
+            swmmOutput.setSwmmProject(swmmInput.getSwmmProject());
+            swmmOutput.setSwmmRun(swmmRun);
+            swmmOutput.setSwmmRunName(swmmRunName);
+
+            final CidsBean swmmModelOutput = SMSUtils.createModelOutput("Modellergebnisse "
+                            + swmmOutput.getSwmmRunName(), // NOI18N
+                    swmmOutput,
+                    SMSUtils.Model.SWMM);
+
+            this.updateCSOs(swmmOutput);
+            return swmmModelOutput.persist();
+        } catch (final Exception e) {
+            final String message = "cannot get results for SPS SWMM run: " + spsRunId; // NOI18N
+            LOG.error(message, e);
+            this.fireBroken(message);
+            throw new IOException(message, e);
+        }
+    }
+
+    @Override
+    protected String getReloadId() {
+        try {
+            final SwmmInput swmmInput = (SwmmInput)getUR();
+            return "project_id" + swmmInput.getSwmmProject() + "_scenarios"; // NOI18N
+        } catch (final Exception e) {
+            LOG.warn("cannot fetch reload id", e);                           // NOI18N
+            return null;
+        }
+    }
+
+    @Override
+    public SwmmRunInfo getRunInfo() {
+        return SMSUtils.getRunInfo(cidsBean, SwmmRunInfo.class);
+    }
+
+    @Override
+    protected void prepareExecution() throws IOException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("executing SWMM"); // NOI18N
+        }
+
+        fireProgressed(
+            0,
+            MAX_STEPS,
+            NbBundle.getMessage(SwmmModelManager.class,
+                "SwmmModelManager.prepareExecution().progress.prepare"));
+
         final SwmmInput swmmInput = (SwmmInput)this.getUR();
-        final SwmmRunInfo runInfo = new SwmmRunInfo();
+        final SwmmRunInfo swmmRunInfo = new SwmmRunInfo();
+
         LOG.info("executing run for model " + swmmInput.getInpFile());
 
-        assert !swmmInput.getTimeseriesURLs().isEmpty() : "improperly configures swmm run, no timiseries configures";
-        final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromTSTBUrl(swmmInput.getTimeseriesURLs(0));
+        assert !swmmInput.getTimeseriesURLs().isEmpty() : "improperly configures swmm run, no timiseries configured";
+        final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(swmmInput.getTimeseriesURLs(0));
         LOG.info("STEP 1: retrieving timeseries from " + swmmInput.getTimeseriesURLs(0));
 
-        LOG.info("List available sensor data (In the moment only historical rain data are available)");
-        final SudplanSOSHelper sensorSOSHelper = new SudplanSOSHelper(config.getLocation().toString());
+        TimeSeries rainTS;
+        if (config.getProtocol().equals(TimeseriesRetrieverConfig.PROTOCOL_TSTB)) {
+            LOG.info("downloading timeseries from SOS: " + config);
 
-        LOG.info("Download timeseries data for offering '" + config.getOffering()
-                    + "', time intervall '" + config.getInterval() + "'");
+            fireProgressed(
+                1,
+                MAX_STEPS,
+                NbBundle.getMessage(
+                    SwmmModelManager.class,
+                    "SwmmModelManager.prepareExecution().progress.download.sos"));
 
-        final TimeSeries rainTS = sensorSOSHelper.getTimeseries(config.getOffering(), config.getInterval());
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Downloaded {} values" + rainTS.getTimeStamps().size());
+            final SudplanSOSHelper sensorSOSHelper = new SudplanSOSHelper(config.getLocation().toString());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Download timeseries data for offering '" + config.getOffering()
+                            + "', time intervall '" + config.getInterval() + "'");
+            }
+
+            rainTS = sensorSOSHelper.getTimeseries(config.getOffering(), config.getInterval());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Downloaded {} values" + rainTS.getTimeStamps().size());
+            }
+        } else if (config.getProtocol().equals(TimeseriesRetrieverConfig.PROTOCOL_DAV)) {
+            LOG.info("downloading timeseries from WEBDAV: " + config);
+
+            fireProgressed(
+                1,
+                MAX_STEPS,
+                NbBundle.getMessage(
+                    SwmmModelManager.class,
+                    "SwmmModelManager.prepareExecution().progress.download.webdav"));
+
+            try {
+                final Future<TimeSeries> rainTsFuture = TimeseriesRetriever.getInstance().retrieve(config);
+                rainTS = rainTsFuture.get();
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("finished downloading timeseries from WEBDAV");
+                }
+            } catch (Throwable t) {
+                final String message = "Could not download rain timeseries from '"
+                            + config.getProtocol() + "'";
+                LOG.error(message, t);
+                this.fireBroken(message);
+                throw new IOException(message, t);
+            }
+        } else {
+            final String message = "Unsupported timeseries protocol: '" + config.getProtocol() + "'";
+            LOG.error(message);
+            this.fireBroken(message);
+            throw new IOException(message);
         }
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("Upload rain timeseries as model input to " + modelSosEndpoint);
         }
+
+        fireProgressed(
+            2,
+            MAX_STEPS,
+            NbBundle.getMessage(SwmmModelManager.class,
+                "SwmmModelManager.prepareExecution().progress.upload"));
+
         final SudplanSOSHelper modelSOSHelper = new SudplanSOSHelper(modelSosEndpoint);
         // Creating a new timeseries datapoint on the SOS-T is a 2 step process:
         // 1. createDatapoint (needs SensorML)
@@ -111,43 +240,55 @@ public class SwmmModelManager extends AbstractModelManager {
         }
         if (!rainTS.getTSKeys().contains(PropertyNames.DESCRIPTION)) {
             rainTS.setTSProperty(PropertyNames.DESCRIPTION, "Rain as input to the Linz model");
-            LOG.warn("Inserting missing Timeseries property}" + PropertyNames.DESCRIPTION);
+            LOG.warn("Inserting missing Timeseries property '" + PropertyNames.DESCRIPTION);
         }
         if (!rainTS.getTSKeys().contains(PropertyNames.COORDINATE_SYSTEM)) {
             rainTS.setTSProperty(PropertyNames.COORDINATE_SYSTEM, "EPSG:3423");
-            LOG.warn("Inserting missing Timeseries property" + PropertyNames.COORDINATE_SYSTEM);
+            LOG.warn("Inserting missing Timeseries property '" + PropertyNames.COORDINATE_SYSTEM);
         }
         if (!rainTS.getTSKeys().contains(PropertyNames.SPATIAL_RESOLUTION)) {
             rainTS.setTSProperty(
                 PropertyNames.SPATIAL_RESOLUTION,
                 new Integer[] { 1 }); // Need to be 1 value!!
-            LOG.warn("Inserting missing Timeseries property" + PropertyNames.SPATIAL_RESOLUTION);
+            LOG.warn("Inserting missing Timeseries property '" + PropertyNames.SPATIAL_RESOLUTION);
         }
         if (!rainTS.getTSKeys().contains(PropertyNames.TEMPORAL_RESOLUTION)) {
             rainTS.setTSProperty(PropertyNames.TEMPORAL_RESOLUTION, "NONE");
-            LOG.warn("Inserting missing Timeseries property" + PropertyNames.TEMPORAL_RESOLUTION);
+            LOG.warn("Inserting missing Timeseries property '" + PropertyNames.TEMPORAL_RESOLUTION + "' = " + "NONE");
         }
         if (!rainTS.getTSKeys().contains(TimeSeries.VALUE_JAVA_CLASS_NAMES)) {
             rainTS.setTSProperty(
                 TimeSeries.VALUE_JAVA_CLASS_NAMES,
                 new String[] { Float.class.getName() });
-            LOG.warn("Inserting missing Timeseries property" + TimeSeries.VALUE_JAVA_CLASS_NAMES);
+            LOG.warn("Inserting missing Timeseries property '" + TimeSeries.VALUE_JAVA_CLASS_NAMES + "' = "
+                        + Float.class.getName());
         }
         if (!rainTS.getTSKeys().contains(TimeSeries.VALUE_TYPES)) {
             rainTS.setTSProperty(
                 TimeSeries.VALUE_TYPES,
                 new String[] { TimeSeries.VALUE_TYPE_NUMBER });
-            LOG.warn("Inserting missing Timeseries property" + TimeSeries.VALUE_TYPES);
+            LOG.warn("Inserting missing Timeseries property '" + TimeSeries.VALUE_TYPES + "'");
         }
         if (!rainTS.getTSKeys().contains(TimeSeries.VALUE_UNITS)) {
             rainTS.setTSProperty(
                 TimeSeries.VALUE_UNITS,
                 new String[] { "urn:ogc:def:uom:OGC:mm" });
-            LOG.warn("Inserting missing Timeseries property" + TimeSeries.VALUE_UNITS);
+            LOG.warn("Inserting missing Timeseries property '" + TimeSeries.VALUE_UNITS + "' = urn:ogc:def:uom:OGC:mm");
         }
         if (!rainTS.getTSKeys().contains(TimeSeries.GEOMETRY)) {
             rainTS.setTSProperty(TimeSeries.GEOMETRY, new Envelope(14.18, 14.38, 48.24, 48.34));
-            LOG.warn("Inserting missing Timeseries property" + TimeSeries.GEOMETRY);
+            LOG.warn("Inserting missing Timeseries property '" + TimeSeries.GEOMETRY
+                        + "' = 14.18, 14.38, 48.24, 48.34");
+        }
+        if (!rainTS.getTSKeys().contains(TimeSeries.AVAILABLE_DATA_MIN)) {
+            rainTS.setTSProperty(TimeSeries.AVAILABLE_DATA_MIN, rainTS.getTimeStamps().first().asDate());
+            LOG.warn("Inserting missing Timeseries property '" + TimeSeries.AVAILABLE_DATA_MIN + "' = "
+                        + rainTS.getTimeStamps().first().asDate());
+        }
+        if (!rainTS.getTSKeys().contains(TimeSeries.AVAILABLE_DATA_MAX)) {
+            rainTS.setTSProperty(TimeSeries.AVAILABLE_DATA_MAX, rainTS.getTimeStamps().last().asDate());
+            LOG.warn("Inserting missing Timeseries property '" + TimeSeries.AVAILABLE_DATA_MAX + "' = "
+                        + rainTS.getTimeStamps().last().asDate());
         }
 
         rainTS.setTSProperty(PropertyNames.DESCRIPTION, "Data from " + config.getOffering());
@@ -155,119 +296,188 @@ public class SwmmModelManager extends AbstractModelManager {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Uploaded model input");
 
-            LOG.debug("connecting to model SPS " + runInfo.getSpsUrl() + " and executing model "
-                        + runInfo.getModelName());
+            LOG.debug("connecting to model SPS " + swmmRunInfo.getSpsUrl() + " and executing model "
+                        + swmmRunInfo.getModelName());
         }
-        final SudplanSPSHelper modelSPSHelper = new SudplanSPSHelper(runInfo.getSpsUrl());
 
+        fireProgressed(
+            3,
+            MAX_STEPS,
+            NbBundle.getMessage(SwmmModelManager.class,
+                "SwmmModelManager.prepareExecution().progress.dispatch"));
+
+        final SudplanSPSHelper modelSPSHelper = new SudplanSPSHelper(swmmRunInfo.getSpsUrl());
         final DateFormat isoDf = new ISO8601DateFormat();
+        this.spsTask = modelSPSHelper.createTask(swmmRunInfo.getModelName());
 
-        this.spsTask = modelSPSHelper.createTask(runInfo.getModelName());
-        spsTask.setParameter("start", isoDf.format(swmmInput.getStartDate()));
-        spsTask.setParameter("end", isoDf.format(swmmInput.getEndDate()));
+        try {
+            spsTask.setParameter("start", isoDf.format(swmmInput.getStartDate()));
+            spsTask.setParameter("end", isoDf.format(swmmInput.getEndDate()));
+        } catch (Throwable t) {
+            LOG.error(t.getMessage());
+            this.fireBroken(t.getMessage());
+            throw new IOException(t.getMessage(), t);
+        }
+
         spsTask.setParameter("dat", modelOffering);
         spsTask.setParameter("inp", swmmInput.getInpFile());
-
-        // FIXME: eta calculation on client side
+        // eta calculation is now performed on client side, this is just used for r720,1
         spsTask.setParameter("eta", "linz_v1");
 
         // and start the task
         spsTask.start();
 
-        runInfo.setRunId(spsTask.getTaskID());
+        swmmRunInfo.setSpsTaskId(spsTask.getTaskID());
         if (LOG.isDebugEnabled()) {
-            LOG.debug("model run started with task id" + runInfo.getRunId());
+            LOG.debug("SWMM Model run started with SPS Task id" + swmmRunInfo.getSpsTaskId());
         }
+
+        fireProgressed(
+            4,
+            MAX_STEPS,
+            NbBundle.getMessage(SwmmModelManager.class,
+                "SwmmModelManager.prepareExecution().progress.save"));
 
         try {
             final ObjectMapper mapper = new ObjectMapper();
             final StringWriter writer = new StringWriter();
 
-            mapper.writeValue(writer, runInfo);
-
-            cidsBean.setProperty("runInfo", writer.toString()); // NOI18N
+            mapper.writeValue(writer, swmmRunInfo);
+            cidsBean.setProperty("runinfo", writer.toString()); // NOI18N
             cidsBean = cidsBean.persist();
-
-            // ProgressWatch.getWatch().submit(createWatchable());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("SWMM RunInfo for SPS Task '" + swmmRunInfo.getSpsTaskId() + "' of SWMM Run '"
+                            + cidsBean.getMetaObject().getName() + "' saved");
+            }
         } catch (final Exception ex) {
-            final String message = "cannot store runinfo: " + runInfo.getRunId(); // NOI18N
+            final String message = "Cannot store SWMM RunInfo for SPS Task '" + swmmRunInfo.getSpsTaskId()
+                        + "' of SWMM Run '"
+                        + cidsBean.getMetaObject().getName() + "'";
+            LOG.error(message, ex);
+            this.fireBroken(message);
+            throw new IOException(message, ex);
+        }
+
+        // now set to indeterminate
+        fireProgressed(
+            -1,
+            -1,
+            NbBundle.getMessage(
+                SwmmModelManager.class,
+                "SwmmModelManager.prepareExecution().progress.running",
+                swmmRunInfo.getSpsTaskId()));
+    }
+
+    @Override
+    public AbstractModelRunWatchable createWatchable() throws IOException {
+        if (cidsBean == null) {
+            throw new IllegalStateException("cidsBean not set"); // NOI18N
+        }
+
+        final SwmmRunInfo runInfo = this.getRunInfo();
+        if ((runInfo == null) || (runInfo.getSpsTaskId() == null)) {
+            throw new IllegalStateException("run info not set"); // NOI18N
+        }
+
+        if (runInfo.isCanceled() || runInfo.isBroken()) {
+            final String message = "SWMM Run '" + cidsBean + "' with SPS Task ID '" + runInfo.getSpsTaskId()
+                        + "' is canceled  or broken, ignoring run";
+            LOG.warn(message);
+            throw new IllegalStateException(message); // NOI18N
+        }
+
+        return new SwmmWatchable(this);
+    }
+
+    @Override
+    protected boolean needsDownload() {
+        return true;
+    }
+
+    /**
+     * updates the model results (swmm) attached to the CSO objects (in the meta data base) and sets the CSO ids of the
+     * CSO JSon objects.
+     *
+     * @param   swmmOutput  DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
+    private void updateCSOs(final SwmmOutput swmmOutput) throws IOException {
+        LOG.info("updating " + swmmOutput.getCsoOverflows().size() + " CSOs with model results for SWMM Run {"
+                    + swmmOutput.getSwmmRun() + "}");
+        final String domain = SessionManager.getSession().getUser().getDomain();
+        final MetaClass swmmResultClass = ClassCacheMultiple.getMetaClass(domain, TABLENAME_LINZ_SWMM_RESULT);
+        final int swmmProjectId = swmmOutput.getSwmmProject();
+        final MetaClass csoClass = ClassCacheMultiple.getMetaClass(domain, SwmmPlusEtaWizardAction.TABLENAME_CSOS);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("synchronizing CSO IDs with CSO objects in meta database for SWMM Project " + swmmProjectId);
+        }
+
+        if (csoClass == null) {
+            throw new IOException("cannot fetch CSO metaclass"); // NOI18N
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("SELECT ").append(csoClass.getID()).append(',').append(csoClass.getPrimaryKey()); // NOI18N
+        sb.append(" FROM ").append(csoClass.getTableName());                                        // NOI18N
+
+        assert swmmProjectId != -1 : "no suitable swmm project selected";
+        sb.append(" WHERE swmm_project = ").append(swmmProjectId);
+
+        final MetaObject[] csoMetaObjects;
+
+        try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("executing SQL statement: \n" + sb);
+            }
+            csoMetaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
+        } catch (final ConnectionException ex) {
+            final String message = "cannot get CSO meta objects from database"; // NOI18N
             LOG.error(message, ex);
             throw new IOException(message, ex);
         }
-    }
 
-    @Override
-    protected CidsBean createOutputBean() throws IOException {
-        LOG.fatal("SwmmModelManager is currently not used: use eta model manager!!!!!");
-        if (!isFinished()) {
-            throw new IllegalStateException("cannot create outputbean when not finished yet"); // NOI18N
-        }
+        if (swmmOutput.getCsoOverflows().values().size() == csoMetaObjects.length) {
+            for (final MetaObject csoMetaObject : csoMetaObjects) {
+                final String name = csoMetaObject.getName();
+                if (swmmOutput.getCsoOverflows().containsKey(name)) {
+                    try {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("adding swmm results (" + swmmOutput.getSwmmRunName() + ") to CSO '"
+                                        + name + "'");
+                        }
 
-//        if (!(getWatchable() instanceof SwmmWatchable)) {
-//            throw new IllegalStateException("cannot create output if there is no valid watchable"); // NOI18N
-//        }
-//
-//        if (LOG.isDebugEnabled()) {
-//            LOG.debug("creating output bean for run: " + cidsBean); // NOI18N
-//        }
-//
-//        final SwmmWatchable watch = (SwmmWatchable)this.getWatchable();
-//        final String runId = watch.getSwmmRunInfo().getRunId();
+                        final CsoOverflow csoOverflow = swmmOutput.getCsoOverflows().get(name);
+                        final CidsBean csoBean = csoMetaObject.getBean();
 
-        try {
-            final CidsBean swmmModelOutput = SMSUtils.createModelOutput("Output of SWMM Run: " + -1, // NOI18N
-                    new SwmmOutput(),
-                    SMSUtils.Model.SWMM);
+                        // 1st update the CSO JSON Bean with the ID of the CSO Meta Object
+                        csoOverflow.setCso(csoMetaObject.getId());
 
-            // FIXME: separate ETA Run
-// final CidsBean etaModelInput = SMSUtils.createModelInput("Input of ETA Run: " + runId, // NOI18N
-// watch.getEtaInput(),
-// SMSUtils.Model.LINZ_ETA);
-//
-// final CidsBean etaModelOutput = SMSUtils.createModelOutput("Output of ETA Run: " + runId, // NOI18N
-// watch.getEtaOutput(),
-// SMSUtils.Model.LINZ_ETA);
-//
-// // TODO: attach eta model run i/o
-// etaModelInput.persist();
-// etaModelOutput.persist();
-            return swmmModelOutput.persist();
-        } catch (final Exception e) {
-            final String message = "cannot get results for run: " + -1; // NOI18N
-            LOG.error(message, e);
-            throw new IOException(message, e);
-        }
-    }
+                        // 2nd update the CSO Meta Object with the results of the SWMM calculation
+                        final CidsBean swmmResultBean = swmmResultClass.getEmptyInstance().getBean();
+                        swmmResultBean.setProperty("name", swmmOutput.getSwmmRunName());
+                        swmmResultBean.setProperty("swmm_scenario_id", swmmOutput.getSwmmRun());
+                        swmmResultBean.setProperty("overflow_frequency", csoOverflow.getOverflowFrequency());
+                        swmmResultBean.setProperty("overflow_duration", csoOverflow.getOverflowDuration());
+                        swmmResultBean.setProperty("overflow_volume", csoOverflow.getOverflowVolume());
 
-    @Override
-    protected String getReloadId() {
-        try {
-            final SwmmInput swmmInput = (SwmmInput)getUR();
-            return "project_id" + swmmInput.getSwmmProject() + "_scenarios"; // NOI18N
-        } catch (final Exception e) {
-            LOG.warn("cannot fetch reload id", e);                           // NOI18N
-
-            return null;
+                        final Collection<CidsBean> swmmResults = (Collection)csoBean.getProperty("swmm_results"); // NOI18N
+                        swmmResults.add(swmmResultBean);
+                        csoBean.persist();
+                    } catch (Exception ex) {
+                        final String message = "could not update  CSO '" + name + "': " + ex.getMessage();
+                        LOG.error(message, ex);
+                        this.fireBroken(message);
+                        throw new IOException(message, ex);
+                    }
+                } else {
+                    LOG.error("CSO '" + name + "' with id " + csoMetaObject.getId()
+                                + " not found");
+                }
+            }
+        } else {
+            LOG.warn("CSO map size missmatch: " + swmmOutput.getCsoOverflows().values().size()
+                        + " vs. " + csoMetaObjects.length);
         }
     }
-
-    @Override
-    public SwmmRunInfo getRunInfo() {
-        return SMSUtils.getRunInfo(cidsBean, SwmmRunInfo.class);
-    }
-
-//    @Override
-//    public AbstractModelRunWatchable createWatchable() throws IOException {
-//        return new SwmmWatchable(this.cidsBean);
-//    }
-//
-//    @Override
-//    protected boolean needsDownload() {
-//        return true;
-//    }
-//
-//    @Override
-//    protected void prepareExecution() throws IOException {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
 }

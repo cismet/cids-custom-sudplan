@@ -17,12 +17,12 @@ public class DefaultRunInfo implements RunInfo {
 
     //~ Instance fields --------------------------------------------------------
 
-    private boolean broken;
-
+    private boolean broken = false;
     private String brokenMessage;
-
-    private boolean canceled;
+    private boolean canceled = false;
     private String canceledMessage;
+
+    private boolean finished = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -123,5 +123,25 @@ public class DefaultRunInfo implements RunInfo {
     @Override
     public void setCanceledMessage(final String canceledMessage) {
         this.canceledMessage = canceledMessage;
+    }
+
+    /**
+     * Get the value of finished.
+     *
+     * @return  the value of finished
+     */
+    @Override
+    public boolean isFinished() {
+        return finished;
+    }
+
+    /**
+     * Set the value of finished.
+     *
+     * @param  finished  new value of finished
+     */
+    @Override
+    public void setFinished(final boolean finished) {
+        this.finished = finished;
     }
 }

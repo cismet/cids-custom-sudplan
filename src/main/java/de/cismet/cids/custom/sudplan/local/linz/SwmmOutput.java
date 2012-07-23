@@ -40,22 +40,20 @@ public class SwmmOutput {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final transient Logger LOG = Logger.getLogger(SwmmOutput.class);
+    protected static final transient Logger LOG = Logger.getLogger(SwmmOutput.class);
     public static final String TABLENAME_LINZ_CSO = "LINZ_CSO"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
-    private transient Map<String, CsoOverflow> csoOverflows = new HashMap<String, CsoOverflow>();
-    private transient Date created;
-    private transient String user;
-    private transient int swmmRun;
-    private transient String swmmRunName;
+    protected transient Map<String, CsoOverflow> csoOverflows = new HashMap<String, CsoOverflow>();
+    protected transient Date created;
+    protected transient String user;
+    protected transient int swmmRun = -1;
+    protected transient String swmmRunName;
     /** Statistical rainfall intensity with a duration of 12 h and return period once per year (r720,1). */
-    private transient float r720;
+    protected transient float r720 = -1.0f;
     /** Total volume of surface runoff (Wet Weather Inflow), VQr. */
-    private transient float totalRunoffVolume;
-    /** Total volume of overflow discharge. (VQo) */
-    private transient float totalOverflowVolume;
+    protected transient float totalRunoffVolume = -1.0f;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -237,25 +235,6 @@ public class SwmmOutput {
      */
     public void setTotalRunoffVolume(final float totalRunoffVolume) {
         this.totalRunoffVolume = totalRunoffVolume;
-    }
-
-    /**
-     * Get the value of totalOverflowVolume Summe der entlasteten Mischwassermengen eines Jahres (m³/a) (Total volume of
-     * overflow discharge).
-     *
-     * @return  the value of totalOverflowVolume
-     */
-    public float getTotalOverflowVolume() {
-        return totalOverflowVolume;
-    }
-
-    /**
-     * Set the value of totalOverflowVolume.
-     *
-     * @param  totalOverflowVolume  new value of totalOverflowVolume
-     */
-    public void setTotalOverflowVolume(final float totalOverflowVolume) {
-        this.totalOverflowVolume = totalOverflowVolume;
     }
 
     /**

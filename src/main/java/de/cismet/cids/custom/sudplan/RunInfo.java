@@ -72,4 +72,18 @@ public interface RunInfo {
      * @param  canceledMessage  new value of canceledMessage
      */
     void setCanceledMessage(String canceledMessage);
+
+    /**
+     * Get the value of finished.
+     *
+     * @return  the value of finished
+     */
+    boolean isFinished();
+
+    /**
+     * Set the value of finished.
+     *
+     * @param  finished  new value of finished
+     */
+    void setFinished(boolean finished);
 }

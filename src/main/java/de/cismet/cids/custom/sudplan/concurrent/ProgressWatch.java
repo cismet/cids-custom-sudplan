@@ -185,7 +185,7 @@ public final class ProgressWatch {
                     }
                 } else if (ProgressEvent.State.BROKEN == status.getState()) {
                     if (LOG.isInfoEnabled()) {
-                        LOG.info("progresswatch finished for watchable because status is BROKEN: " + watchable); // NOI18N
+                        LOG.warn("progresswatch finished for watchable because status is BROKEN: " + watchable); // NOI18N
                     }
 
                     if (deregister != null) {
@@ -197,7 +197,7 @@ public final class ProgressWatch {
                 if (retryCount > MAX_RETRIES) {
                     LOG.error("error in status poll: " + watchable, e); // NOI18N
 
-                    final ProgressEvent progress = new ProgressEvent(watchable, State.BROKEN);
+                    final ProgressEvent progress = new ProgressEvent(watchable, State.BROKEN, e.getMessage());
 
                     watchable.getStatusCallback().progress(progress);
 
