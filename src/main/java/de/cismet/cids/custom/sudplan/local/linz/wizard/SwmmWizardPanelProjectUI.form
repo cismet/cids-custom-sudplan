@@ -220,12 +220,16 @@
         </Component>
         <Component class="javax.swing.JCheckBox" name="chbEta">
           <Properties>
-            <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
               <ResourceString bundle="de/cismet/cids/custom/sudplan/local/linz/wizard/Bundle.properties" key="SwmmWizardPanelProjectUI.chbEta.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
-            <Property name="enabled" type="boolean" value="false"/>
           </Properties>
+          <BindingProperties>
+            <BindingProperty name="selected" source="Form" sourcePath="${model.etaCalculationEnabled}" target="chbEta" targetPath="selected" updateStrategy="0" immediately="false">
+              <Property name="nullValue" type="boolean" value="true"/>
+              <Property name="incompletePathValue" type="boolean" value="true"/>
+            </BindingProperty>
+          </BindingProperties>
         </Component>
         <Component class="com.toedter.calendar.JDateChooser" name="jdcStartDate">
           <Properties>

@@ -54,9 +54,8 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
     private final boolean csoConfigEnabled = false;
     private final transient EtaWizardPanelEtaConfiguration model;
     private transient int lastSwmmProjectId = -1;
-    // End of variables declaration
     private CsoUpdater csoUpdater;
-    // Variables declaration - do not modify
+    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel cardPanel;
     private javax.swing.JPanel etaConfigurationPanel;
     private javax.swing.JScrollPane jScrollPaneEtaConfiguration;
@@ -64,6 +63,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
     private javax.swing.JLabel progressLabel;
     private javax.swing.JPanel progressPanel;
     private javax.swing.JTable tblEtaConfiguration;
+    // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
 
@@ -689,7 +689,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
          */
         public void stopIt() {
             run = false;
-            LOG.warn("TimeseriesUpdater stopped");
+            LOG.warn("CsoUpdater stopped");
         }
 
         /**
@@ -706,11 +706,11 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
             if (run) {
                 try {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("TimeseriesUpdater: loading results");
+                        LOG.debug("CsoUpdater: loading results");
                     }
                     etaConfigurationTableModel = initCSOs(model.getSwmmProjectId());
                 } catch (Throwable t) {
-                    LOG.error("TimeseriesUpdater: could not retrieve timeseries: " + t.getMessage(), t);
+                    LOG.error("CsoUpdater: could not retrieve timeseries: " + t.getMessage(), t);
                     run = false;
                     EventQueue.invokeLater(new Runnable() {
 
@@ -732,7 +732,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                             @Override
                             public void run() {
                                 if (LOG.isDebugEnabled()) {
-                                    LOG.debug("TimeseriesUpdater: updating loaded results");
+                                    LOG.debug("CsoUpdater: updating loaded results");
                                 }
                                 tblEtaConfiguration.setModel(etaConfigurationTableModel);
                                 ((CardLayout)cardPanel.getLayout()).show(cardPanel, "csos");
@@ -740,7 +740,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                             }
                         });
                 } else {
-                    LOG.warn("TimeseriesUpdater stopped, ignoring retrieved results");
+                    LOG.warn("CsoUpdater stopped, ignoring retrieved results");
                 }
             }
         }

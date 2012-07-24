@@ -13,13 +13,19 @@ import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
 import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
 import java.text.ParseException;
 
 import javax.swing.event.ChangeListener;
 
+import de.cismet.cids.custom.objectrenderer.sudplan.SwmmProjectRenderer;
+import de.cismet.cids.custom.sudplan.local.linz.EtaInput;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.wupp.*;
 
@@ -36,6 +42,7 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(SwmmWizardPanelProject.class);
+    public static final String PROP_ETACALCULATIONENABLED = "etaCalculationEnabled";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -46,6 +53,10 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
     /** local swmm input variable. */
     private transient SwmmInput swmmInput;
     private transient volatile SwmmWizardPanelProjectUI component;
+
+    private boolean etaCalculationEnabled;
+
+    private final transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     //~ Constructors -----------------------------------------------------------
 
@@ -89,8 +100,10 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
         assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN) != null : "swmm project bean is null";
         this.swmmProject = (CidsBean)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN);
 
-        assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN) != null : "swmm input bean is null";
+        assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT) != null : "swmm input is null";
         this.swmmInput = (SwmmInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT);
+
+        this.etaCalculationEnabled = (Boolean)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_ETA_CALCULATION_ENABLED);
 
         component.init();
     }
@@ -103,6 +116,14 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
         wizard = (WizardDescriptor)settings;
         wizard.putProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN, this.getSwmmProject());
         wizard.putProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT, this.swmmInput);
+        wizard.putProperty(SwmmPlusEtaWizardAction.PROP_ETA_CALCULATION_ENABLED, this.etaCalculationEnabled);
+
+        if (this.etaCalculationEnabled) {
+            ((EtaInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT)).setSwmmProject(this.swmmInput
+                        .getSwmmProject());
+        }
+
+        this.swmmInput.getSwmmProject();
     }
 
     @Override
@@ -111,8 +132,9 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
 
         if (this.swmmInput.getSwmmProject() == -1) {
             // FIXME: i18n
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Bitte wählen Sie ein SWMM Project aus");
+            wizard.putProperty(
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                NbBundle.getMessage(SwmmWizardPanelProject.class, "SwmmWizardPanelProject.error.noproject"));
             valid = false;
         } else if ((this.swmmInput.getInpFile() == null) || this.swmmInput.getInpFile().isEmpty()) {
             Object inpFile = this.getSwmmProject().getProperty("inp_file_name");
@@ -131,28 +153,31 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
 
             wizard.putProperty(
                 WizardDescriptor.PROP_INFO_MESSAGE,
-                "<html>Da keine INP Datei angegeben wurde, "
-                        + "wurde der Name automatich auf '"
-                        + inpFile
-                        + "' festgelegt.</html>");
+                NbBundle.getMessage(SwmmWizardPanelProject.class, "SwmmWizardPanelProject.error.noinp", inpFile));
         } else if ((this.swmmInput.getStartDate() == null)) {
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Bitte geben Sie ein Startdatum an");
+            wizard.putProperty(
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                NbBundle.getMessage(SwmmWizardPanelProject.class, "SwmmWizardPanelProject.error.noStartDate"));
             valid = false;
         } else if ((this.swmmInput.getEndDate() == null)) {
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Bitte geben Sie ein Enddatum an");
+            wizard.putProperty(
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                NbBundle.getMessage(SwmmWizardPanelProject.class, "SwmmWizardPanelProject.error.noEndDate"));
             valid = false;
         } else if (this.swmmInput.getStartDate().getTime() >= this.swmmInput.getEndDate().getTime()) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Das Startdatum muss vor dem Enddatum liegen");
+                NbBundle.getMessage(
+                    SwmmWizardPanelProject.class,
+                    "SwmmWizardPanelProject.error.endDateBeforeStartDate"));
             valid = false;
         } else if ((this.swmmInput.getEndDate().getTime()
                         - this.swmmInput.getStartDate().getTime()) < 200) {
             wizard.putProperty(
                 WizardDescriptor.PROP_INFO_MESSAGE,
-                "Bitte wählen sie einen Zeitraum von mindestens 6.5 Monaten aus");
+                NbBundle.getMessage(
+                    SwmmWizardPanelProject.class,
+                    "SwmmWizardPanelProject.error.simulationDateTooShort"));
             valid = false;
         } else {
             wizard.putProperty(
@@ -200,6 +225,47 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
      */
     public void setSwmmProject(final CidsBean swmmProject) {
         this.swmmProject = swmmProject;
+    }
+
+    /**
+     * Get the value of etaCalculationEnabled.
+     *
+     * @return  the value of etaCalculationEnabled
+     */
+    public boolean isEtaCalculationEnabled() {
+        return etaCalculationEnabled;
+    }
+
+    /**
+     * Set the value of etaCalculationEnabled.
+     *
+     * @param  etaCalculationEnabled  new value of etaCalculationEnabled
+     */
+    public void setEtaCalculationEnabled(final boolean etaCalculationEnabled) {
+        final boolean oldEtaCalculationEnabled = this.etaCalculationEnabled;
+        this.etaCalculationEnabled = etaCalculationEnabled;
+        propertyChangeSupport.firePropertyChange(
+            PROP_ETACALCULATIONENABLED,
+            oldEtaCalculationEnabled,
+            etaCalculationEnabled);
+    }
+
+    /**
+     * Add PropertyChangeListener.
+     *
+     * @param  listener  DOCUMENT ME!
+     */
+    public void addPropertyChangeListener(final PropertyChangeListener listener) {
+        propertyChangeSupport.addPropertyChangeListener(listener);
+    }
+
+    /**
+     * Remove PropertyChangeListener.
+     *
+     * @param  listener  DOCUMENT ME!
+     */
+    public void removePropertyChangeListener(final PropertyChangeListener listener) {
+        propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
     /**

@@ -68,7 +68,8 @@ public class EtaInput extends SwmmOutput {
     @JsonIgnore
     public final void fromSwmmOutput(final SwmmOutput swmmOutput) {
         this.setR720(swmmOutput.getR720());
-        this.setSwmmProject(swmmOutput.getSwmmRun());
+        this.setSwmmProject(swmmOutput.getSwmmProject());
+        this.setSwmmRun(swmmOutput.getSwmmRun());
         this.setSwmmRunName(swmmOutput.getSwmmRunName());
         this.setTotalRunoffVolume(swmmOutput.getTotalRunoffVolume());
         this.setCsoOverflows(swmmOutput.getCsoOverflows());

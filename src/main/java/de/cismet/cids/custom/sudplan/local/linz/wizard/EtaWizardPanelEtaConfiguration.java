@@ -21,7 +21,6 @@ import javax.swing.event.ChangeListener;
 
 import de.cismet.cids.custom.sudplan.local.linz.EtaConfiguration;
 import de.cismet.cids.custom.sudplan.local.linz.EtaInput;
-import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
 
 /**
@@ -38,7 +37,6 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
 
     //~ Instance fields --------------------------------------------------------
 
-    protected transient SwmmInput swmmInput;
     protected transient EtaInput etaInput;
 
     private final transient ChangeSupport changeSupport;
@@ -67,7 +65,7 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
                     try {
                         component = new EtaWizardPanelEtaConfigurationUI(this);
                     } catch (final WizardInitialisationException ex) {
-                        LOG.error("cannot create Timeseries wizard panel component", ex); // NOI18N
+                        LOG.error("cannot create EtaConfiguration Wizard panel component", ex); // NOI18N
                     }
                 }
             }
@@ -92,9 +90,6 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
         this.etaInput = (EtaInput)wizard.getProperty(
                 SwmmPlusEtaWizardAction.PROP_ETA_INPUT);
 
-        assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT) != null : "swmm input is null";
-        this.swmmInput = (SwmmInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT);
-
         component.init();
     }
 
@@ -105,7 +100,6 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
         }
         wizard = (WizardDescriptor)settings;
         wizard.putProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT, this.etaInput);
-        wizard.putProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT, this.swmmInput);
     }
 
     @Override
@@ -157,6 +151,6 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
      * @return  DOCUMENT ME!
      */
     public int getSwmmProjectId() {
-        return this.swmmInput.getSwmmProject();
+        return this.etaInput.getSwmmProject();
     }
 }

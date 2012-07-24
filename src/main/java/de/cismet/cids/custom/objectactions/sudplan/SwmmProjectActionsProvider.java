@@ -10,6 +10,7 @@ package de.cismet.cids.custom.objectactions.sudplan;
 import java.util.Arrays;
 import java.util.Collection;
 
+import de.cismet.cids.custom.sudplan.local.linz.wizard.EtaWizardAction;
 import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
 
 import de.cismet.cids.utils.interfaces.CidsBeanAction;
@@ -27,6 +28,10 @@ public final class SwmmProjectActionsProvider implements CidsBeanActionsProvider
 
     @Override
     public Collection<CidsBeanAction> getActions() {
-        return Arrays.asList(ActionProviderFactory.getCidsBeanAction(SwmmPlusEtaWizardAction.class));
+        return Arrays.asList(
+                new CidsBeanAction[] {
+                    ActionProviderFactory.getCidsBeanAction(EtaWizardAction.class),
+                    ActionProviderFactory.getCidsBeanAction(SwmmPlusEtaWizardAction.class)
+                });
     }
 }

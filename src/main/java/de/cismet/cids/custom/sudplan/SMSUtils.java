@@ -654,9 +654,7 @@ public final class SMSUtils {
     /**
      * DOCUMENT ME!
      *
-     * @param   modelRun  DOCUMENT ME!
-     *
-     * @throws  IllegalStateException  DOCUMENT ME!
+     * @param  modelRun  DOCUMENT ME!
      */
     public static void executeAndShowRun(final CidsBean modelRun) {
         final CidsBean modelInput = (CidsBean)modelRun.getProperty("modelinput");                            // NOI18N
@@ -666,6 +664,17 @@ public final class SMSUtils {
 
         ComponentRegistry.getRegistry().showComponent(ComponentRegistry.DESCRIPTION_PANE);
 
+        executeRun(modelRun);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   modelRun  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    public static void executeRun(final CidsBean modelRun) {
         final Manager runManager = SMSUtils.loadManagerFromRun(modelRun, ManagerType.MODEL);
 
         if (runManager instanceof Executable) {

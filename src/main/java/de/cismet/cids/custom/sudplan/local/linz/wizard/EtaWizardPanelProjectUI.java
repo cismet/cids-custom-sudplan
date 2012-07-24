@@ -31,6 +31,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.*;
 
@@ -46,32 +49,30 @@ import de.cismet.cids.navigator.utils.ClassCacheMultiple;
  *
  * @version  $Revision$, $Date$
  */
-public final class SwmmWizardPanelProjectUI extends JPanel {
+public final class EtaWizardPanelProjectUI extends JPanel {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final transient Logger LOG = Logger.getLogger(SwmmWizardPanelProjectUI.class);
+    private static final transient Logger LOG = Logger.getLogger(EtaWizardPanelProjectUI.class);
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient SwmmWizardPanelProject model;
+    private final transient EtaWizardPanelProject model;
     private final transient ItemListener projectListener;
-
+    private final transient ItemListener scenarioListener;
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox chbEta;
     private javax.swing.JComboBox cobProjects;
+    private javax.swing.JComboBox cobScenarios;
     private javax.swing.JPanel configurationPanel;
-    private javax.swing.JTextField fldInpFile;
-    private com.toedter.calendar.JDateChooser jdcEndDate;
-    private com.toedter.calendar.JDateChooser jdcStartDate;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblDescription;
-    private javax.swing.JLabel lblDescriptionText;
-    private javax.swing.JLabel lblEndDate;
-    private javax.swing.JLabel lblEta;
-    private javax.swing.JLabel lblInpFile;
     private javax.swing.JLabel lblProject;
-    private javax.swing.JLabel lblStartDate;
+    private javax.swing.JLabel lblScenarioDescription;
+    private javax.swing.JLabel lblScenarios;
     private javax.swing.JPanel projectPanel;
+    private javax.swing.JTextArea taProjectDescriptionText;
+    private javax.swing.JTextArea taScenarioDescriptionText;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
@@ -84,15 +85,16 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
      *
      * @throws  WizardInitialisationException  DOCUMENT ME!
      */
-    public SwmmWizardPanelProjectUI(final SwmmWizardPanelProject model) throws WizardInitialisationException {
+    public EtaWizardPanelProjectUI(final EtaWizardPanelProject model) throws WizardInitialisationException {
         this.model = model;
         this.projectListener = new ProjectListener();
+        this.scenarioListener = new ScenarioListener();
 
         initComponents();
         // name of the wizard step
         this.setName(NbBundle.getMessage(
-                SwmmWizardPanelProject.class,
-                "SwmmWizardPanelProject.this.name")); // NOI18N
+                EtaWizardPanelProject.class,
+                "EtaWizardPanelProject.this.name")); // NOI18N
 
         this.initProjectList();
     }
@@ -104,23 +106,14 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
      */
     void init() {
         this.cobProjects.setSelectedIndex(-1);
-        this.cobProjects.setSelectedItem(model.getSwmmProject());
+        this.cobProjects.setSelectedItem(model.getSelectedSwmmProject());
 
-        // set default name of inp file (not required if setSelectedItem triggers an event)
-// if ((model.getSwmmInput().getInpFile() == null) || model.getSwmmInput().getInpFile().isEmpty()) {
-// final String inpFile = (String) model.getSwmmProject().getProperty("title") + ".inp";
-// model.getSwmmInput().setInpFile(inpFile);
-// }
+        this.cobScenarios.setSelectedIndex(-1);
+        this.cobScenarios.setSelectedItem(model.getSelectedSwmmScenario());
 
         // this should perform all the updates
         this.bindingGroup.unbind();
         this.bindingGroup.bind();
-
-        // this.fldStartDate.setText(model.getSwmmInput().getStartDate());
-        // this.fldEndDate.setText(model.getSwmmInput().getEndDate());
-        // this.lblDescriptionText.setText((String)model.getSwmmProject().getProperty("description"));
-        // this.fldInpFile.setText(model.getSwmmInput().getInpFile());
-
     }
 
     /**
@@ -130,11 +123,11 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
      */
     private void initProjectList() throws WizardInitialisationException {
         final String domain = SessionManager.getSession().getUser().getDomain();
-        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SwmmPlusEtaWizardAction.TABLENAME_SWMM_PROJECT);
+        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, EtaWizardAction.TABLENAME_SWMM_PROJECT);
 
         if (mc == null) {
             throw new WizardInitialisationException("cannot fetch swmm project metaclass '"
-                        + SwmmPlusEtaWizardAction.TABLENAME_SWMM_PROJECT + "' for domain '"
+                        + EtaWizardAction.TABLENAME_SWMM_PROJECT + "' for domain '"
                         + domain + "'"); // NOI18N
         }
 
@@ -171,6 +164,25 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  swmmScenarios  DOCUMENT ME!
+     */
+    private void initScenarioList(final List<CidsBean> swmmScenarios) {
+        final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
+        for (final CidsBean swmmScenario : swmmScenarios) {
+            comboBoxModel.addElement(swmmScenario);
+        }
+
+        this.cobScenarios.setModel(comboBoxModel);
+        this.cobScenarios.setRenderer(new NameRenderer());
+        this.cobScenarios.addItemListener(WeakListeners.create(
+                ItemListener.class,
+                this.scenarioListener,
+                this.cobScenarios));
+    }
+
+    /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
      * content of this method is always regenerated by the Form Editor.
      */
@@ -182,43 +194,48 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
         lblProject = new javax.swing.JLabel();
         cobProjects = new javax.swing.JComboBox();
         lblDescription = new javax.swing.JLabel();
-        lblDescriptionText = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        taProjectDescriptionText = new javax.swing.JTextArea();
         configurationPanel = new javax.swing.JPanel();
-        lblStartDate = new javax.swing.JLabel();
-        lblEndDate = new javax.swing.JLabel();
-        lblEta = new javax.swing.JLabel();
-        lblInpFile = new javax.swing.JLabel();
-        fldInpFile = new javax.swing.JTextField();
-        chbEta = new javax.swing.JCheckBox();
-        jdcStartDate = new com.toedter.calendar.JDateChooser();
-        jdcEndDate = new com.toedter.calendar.JDateChooser();
+        lblScenarioDescription = new javax.swing.JLabel();
+        lblScenarios = new javax.swing.JLabel();
+        cobScenarios = new javax.swing.JComboBox();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        taScenarioDescriptionText = new javax.swing.JTextArea();
 
         projectPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
-                    SwmmWizardPanelProjectUI.class,
-                    "SwmmWizardPanelProjectUI.projectPanel.border.title"))); // NOI18N
+                    EtaWizardPanelProjectUI.class,
+                    "EtaWizardPanelProjectUI.projectPanel.border.title"))); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(
             lblProject,
             org.openide.util.NbBundle.getMessage(
-                SwmmWizardPanelProjectUI.class,
-                "SwmmWizardPanelProjectUI.lblProject.text")); // NOI18N
+                EtaWizardPanelProjectUI.class,
+                "EtaWizardPanelProjectUI.lblProject.text")); // NOI18N
 
         cobProjects.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "LINZ @ Workshop 09.05.2011" }));
 
         org.openide.awt.Mnemonics.setLocalizedText(
             lblDescription,
             org.openide.util.NbBundle.getMessage(
-                SwmmWizardPanelProjectUI.class,
-                "SwmmWizardPanelProjectUI.lblDescription.text")); // NOI18N
+                EtaWizardPanelProjectUI.class,
+                "EtaWizardPanelProjectUI.lblDescription.text")); // NOI18N
 
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+        taProjectDescriptionText.setColumns(20);
+        taProjectDescriptionText.setEditable(false);
+        taProjectDescriptionText.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        taProjectDescriptionText.setRows(3);
+
+        final org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
                 this,
-                org.jdesktop.beansbinding.ELProperty.create("${model.swmmProject.description}"),
-                lblDescriptionText,
+                org.jdesktop.beansbinding.ELProperty.create("${model.selectedSwmmProject.description}"),
+                taProjectDescriptionText,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
         bindingGroup.addBinding(binding);
+
+        jScrollPane1.setViewportView(taProjectDescriptionText);
 
         final javax.swing.GroupLayout projectPanelLayout = new javax.swing.GroupLayout(projectPanel);
         projectPanel.setLayout(projectPanelLayout);
@@ -228,14 +245,11 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                     projectPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(
                         lblDescription).addComponent(lblProject)).addGap(34, 34, 34).addGroup(
                     projectPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(
-                        lblDescriptionText,
-                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                        320,
-                        Short.MAX_VALUE).addComponent(
+                        jScrollPane1).addComponent(
                         cobProjects,
-                        javax.swing.GroupLayout.PREFERRED_SIZE,
-                        185,
-                        javax.swing.GroupLayout.PREFERRED_SIZE)).addContainerGap()));
+                        0,
+                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                        Short.MAX_VALUE)).addContainerGap()));
         projectPanelLayout.setVerticalGroup(
             projectPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
                 projectPanelLayout.createSequentialGroup().addContainerGap().addGroup(
@@ -246,88 +260,39 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                         javax.swing.GroupLayout.DEFAULT_SIZE,
                         javax.swing.GroupLayout.PREFERRED_SIZE)).addPreferredGap(
                     javax.swing.LayoutStyle.ComponentPlacement.UNRELATED).addGroup(
-                    projectPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE).addComponent(
+                    projectPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(
                         lblDescription).addComponent(
-                        lblDescriptionText,
+                        jScrollPane1,
                         javax.swing.GroupLayout.PREFERRED_SIZE,
-                        14,
+                        77,
                         javax.swing.GroupLayout.PREFERRED_SIZE)).addContainerGap(
                     javax.swing.GroupLayout.DEFAULT_SIZE,
                     Short.MAX_VALUE)));
 
         configurationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
-                    SwmmWizardPanelProjectUI.class,
-                    "SwmmWizardPanelProjectUI.configurationPanel.border.title"))); // NOI18N
+                    EtaWizardPanelProjectUI.class,
+                    "EtaWizardPanelProjectUI.configurationPanel.border.title"))); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(
-            lblStartDate,
+            lblScenarioDescription,
             org.openide.util.NbBundle.getMessage(
-                SwmmWizardPanelProjectUI.class,
-                "SwmmWizardPanelProjectUI.lblStartDate.text")); // NOI18N
+                EtaWizardPanelProjectUI.class,
+                "EtaWizardPanelProjectUI.lblScenarioDescription.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(
-            lblEndDate,
+            lblScenarios,
             org.openide.util.NbBundle.getMessage(
-                SwmmWizardPanelProjectUI.class,
-                "SwmmWizardPanelProjectUI.lblEndDate.text")); // NOI18N
+                EtaWizardPanelProjectUI.class,
+                "EtaWizardPanelProjectUI.lblScenarios.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(
-            lblEta,
-            org.openide.util.NbBundle.getMessage(
-                SwmmWizardPanelProjectUI.class,
-                "SwmmWizardPanelProjectUI.lblEta.text")); // NOI18N
+        cobScenarios.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Scenario #1" }));
 
-        org.openide.awt.Mnemonics.setLocalizedText(
-            lblInpFile,
-            org.openide.util.NbBundle.getMessage(
-                SwmmWizardPanelProjectUI.class,
-                "SwmmWizardPanelProjectUI.lblInpFile.text")); // NOI18N
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${model.swmmInput.inpFile}"),
-                fldInpFile,
-                org.jdesktop.beansbinding.BeanProperty.create("text_ON_ACTION_OR_FOCUS_LOST"),
-                "inpFile");
-        bindingGroup.addBinding(binding);
-
-        org.openide.awt.Mnemonics.setLocalizedText(
-            chbEta,
-            org.openide.util.NbBundle.getMessage(
-                SwmmWizardPanelProjectUI.class,
-                "SwmmWizardPanelProjectUI.chbEta.text")); // NOI18N
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${model.etaCalculationEnabled}"),
-                chbEta,
-                org.jdesktop.beansbinding.BeanProperty.create("selected"));
-        binding.setSourceNullValue(true);
-        binding.setSourceUnreadableValue(true);
-        bindingGroup.addBinding(binding);
-
-        jdcStartDate.setOpaque(false);
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${model.swmmInput.startDate}"),
-                jdcStartDate,
-                org.jdesktop.beansbinding.BeanProperty.create("date"));
-        bindingGroup.addBinding(binding);
-
-        jdcEndDate.setOpaque(false);
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${model.swmmInput.endDate}"),
-                jdcEndDate,
-                org.jdesktop.beansbinding.BeanProperty.create("date"));
-        bindingGroup.addBinding(binding);
+        taScenarioDescriptionText.setColumns(20);
+        taScenarioDescriptionText.setEditable(false);
+        taScenarioDescriptionText.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        taScenarioDescriptionText.setRows(3);
+        jScrollPane2.setViewportView(taScenarioDescriptionText);
 
         final javax.swing.GroupLayout configurationPanelLayout = new javax.swing.GroupLayout(configurationPanel);
         configurationPanel.setLayout(configurationPanelLayout);
@@ -335,62 +300,50 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
             configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
                 configurationPanelLayout.createSequentialGroup().addContainerGap().addGroup(
                     configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(lblStartDate).addComponent(lblEndDate).addComponent(lblInpFile)
-                                .addComponent(lblEta)).addGap(33, 33, 33).addGroup(
-                    configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(chbEta).addComponent(fldInpFile).addComponent(
-                        jdcStartDate,
-                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                        219,
-                        Short.MAX_VALUE).addComponent(
-                        jdcEndDate,
-                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE)).addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+                                .addComponent(lblScenarioDescription).addComponent(lblScenarios)).addGroup(
+                    configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                        configurationPanelLayout.createSequentialGroup().addPreferredGap(
+                            javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                            35,
+                            Short.MAX_VALUE).addComponent(
+                            jScrollPane2,
+                            javax.swing.GroupLayout.PREFERRED_SIZE,
+                            323,
+                            javax.swing.GroupLayout.PREFERRED_SIZE)).addGroup(
+                        configurationPanelLayout.createSequentialGroup().addGap(35, 35, 35).addComponent(
+                            cobScenarios,
+                            0,
+                            javax.swing.GroupLayout.DEFAULT_SIZE,
+                            Short.MAX_VALUE))).addContainerGap()));
         configurationPanelLayout.setVerticalGroup(
             configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
                 configurationPanelLayout.createSequentialGroup().addContainerGap().addGroup(
                     configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(
-                                    fldInpFile,
-                                    javax.swing.GroupLayout.PREFERRED_SIZE,
-                                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                                    javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(lblInpFile)).addGap(
-                    14,
-                    14,
-                    14).addGroup(
-                    configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                        configurationPanelLayout.createSequentialGroup().addComponent(lblStartDate).addGap(
-                            18,
-                            18,
-                            18).addComponent(lblEndDate)).addGroup(
-                        configurationPanelLayout.createSequentialGroup().addComponent(
-                            jdcStartDate,
-                            javax.swing.GroupLayout.PREFERRED_SIZE,
-                            javax.swing.GroupLayout.DEFAULT_SIZE,
-                            javax.swing.GroupLayout.PREFERRED_SIZE).addGap(11, 11, 11).addComponent(
-                            jdcEndDate,
-                            javax.swing.GroupLayout.PREFERRED_SIZE,
-                            javax.swing.GroupLayout.DEFAULT_SIZE,
-                            javax.swing.GroupLayout.PREFERRED_SIZE))).addGap(18, 18, 18).addGroup(
-                    configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(lblEta, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
-                                .addComponent(chbEta)).addContainerGap()));
+                                .addComponent(lblScenarios).addComponent(
+                        cobScenarios,
+                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                        javax.swing.GroupLayout.PREFERRED_SIZE)).addGap(14, 14, 14).addGroup(
+                    configurationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(lblScenarioDescription).addComponent(
+                        jScrollPane2,
+                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                        71,
+                        javax.swing.GroupLayout.PREFERRED_SIZE)).addContainerGap(
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    Short.MAX_VALUE)));
 
         final javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                javax.swing.GroupLayout.Alignment.TRAILING,
                 layout.createSequentialGroup().addContainerGap().addGroup(
-                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING).addComponent(
+                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(
                         projectPanel,
-                        javax.swing.GroupLayout.Alignment.LEADING,
                         javax.swing.GroupLayout.DEFAULT_SIZE,
                         javax.swing.GroupLayout.DEFAULT_SIZE,
                         Short.MAX_VALUE).addComponent(
                         configurationPanel,
-                        javax.swing.GroupLayout.Alignment.LEADING,
                         javax.swing.GroupLayout.DEFAULT_SIZE,
                         javax.swing.GroupLayout.DEFAULT_SIZE,
                         Short.MAX_VALUE)).addContainerGap()));
@@ -404,7 +357,9 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                     configurationPanel,
                     javax.swing.GroupLayout.PREFERRED_SIZE,
                     javax.swing.GroupLayout.DEFAULT_SIZE,
-                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(17, Short.MAX_VALUE)));
+                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    Short.MAX_VALUE)));
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
@@ -414,7 +369,7 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
      *
      * @return  DOCUMENT ME!
      */
-    public SwmmWizardPanelProject getModel() {
+    public EtaWizardPanelProject getModel() {
         return model;
     }
 
@@ -433,30 +388,36 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
         public void itemStateChanged(final ItemEvent e) {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("swmm project '" + e.getItem().toString() + "' selected, updating swmm model input");
+                    LOG.debug("SWMM Project '" + e.getItem().toString() + "' selected, updating list of SWMM Results");
                 }
 
                 final CidsBean swmmProject = (CidsBean)e.getItem();
-                model.setSwmmProject(swmmProject);
-                model.getSwmmInput().setSwmmProject((Integer)swmmProject.getProperty("id"));
+                model.setSelectedSwmmProject(swmmProject);
 
-                // um aufrufe nach getSwmmInput() zu minimieren (löst einen change event aus)
-                final SwmmInput swmmInput = model.getSwmmInput();
+                final List<CidsBean> swmmScenarios = (List)swmmProject.getProperty("swmm_scenarios"); // NOI18N
+                initScenarioList(swmmScenarios);
+            }
+        }
+    }
 
-                // set default inp file name
-                // if ((swmmInput.getInpFile() == null) || swmmInput.getInpFile().isEmpty()) {
-                if (swmmProject.getProperty("inp_file_name") != null) {
-                    swmmInput.setInpFile(swmmProject.getProperty("inp_file_name").toString());
-                } else {
-                    LOG.warn("INP File net set in swmm model configuration, setting automatically to '"
-                                + swmmProject.getProperty("title") + "'");
-                    final String inpFile = (String)swmmProject.getProperty("title") + ".inp";
-                    swmmInput.setInpFile(inpFile);
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class ScenarioListener implements ItemListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void itemStateChanged(final ItemEvent e) {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("SWMM Project '" + e.getItem().toString() + "' SWMM Scenario selected");
                 }
-                // }
 
-                // fldInpFile.setText(inpFile);
-                // lblDescriptionText.setText((String)swmmProject.getProperty("description"));
+                final CidsBean swmmScenario = (CidsBean)e.getItem();
+                model.setSelectedSwmmScenario(swmmScenario);
 
                 // dieser mist funktioniert einfach nicht
                 bindingGroup.unbind();

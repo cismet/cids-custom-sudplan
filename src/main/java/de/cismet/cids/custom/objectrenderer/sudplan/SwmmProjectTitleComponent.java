@@ -14,6 +14,7 @@ import org.openide.util.NbBundle;
 import java.awt.EventQueue;
 
 import de.cismet.cids.custom.objectactions.sudplan.ActionProviderFactory;
+import de.cismet.cids.custom.sudplan.local.linz.wizard.EtaWizardAction;
 import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -33,6 +34,7 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
     private static final transient Logger LOG = Logger.getLogger(SwmmProjectTitleComponent.class);
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnRunEta;
     private javax.swing.JButton btnRunSwmmPlusEta;
     private javax.swing.JLabel lblIcon;
     private javax.swing.JLabel lblTitle;
@@ -81,6 +83,14 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
             // trigger the action enable
             cba.isEnabled();
         }
+
+        if (btnRunEta.getAction() instanceof CidsBeanAction) {
+            final CidsBeanAction cba = (CidsBeanAction)btnRunEta.getAction();
+            cba.setCidsBean(cidsBean);
+
+            // trigger the action enable
+            cba.isEnabled();
+        }
     }
 
     /**
@@ -94,6 +104,7 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
 
         lblIcon = new javax.swing.JLabel();
         lblTitle = new javax.swing.JLabel();
+        btnRunEta = new javax.swing.JButton();
         btnRunSwmmPlusEta = new javax.swing.JButton();
 
         setOpaque(false);
@@ -122,6 +133,16 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblTitle, gridBagConstraints);
+
+        btnRunEta.setAction(ActionProviderFactory.getCidsBeanAction(EtaWizardAction.class));
+        btnRunEta.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectTitleComponent.class,
+                "SwmmProjectTitleComponent.btnRunEta.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(btnRunEta, gridBagConstraints);
 
         btnRunSwmmPlusEta.setAction(ActionProviderFactory.getCidsBeanAction(SwmmPlusEtaWizardAction.class));
         btnRunSwmmPlusEta.setText(org.openide.util.NbBundle.getMessage(

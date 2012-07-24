@@ -19,7 +19,7 @@ import javax.swing.event.ChangeListener;
 /**
  * DOCUMENT ME!
  *
- * @author   martin.scholl@cismet.de
+ * @author   pascal.dihe@cismet.de
  * @version  $Revision$, $Date$
  */
 public final class WizardPanelMetadata implements WizardDescriptor.Panel {
