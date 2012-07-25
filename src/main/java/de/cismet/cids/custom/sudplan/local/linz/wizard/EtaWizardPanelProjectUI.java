@@ -175,7 +175,6 @@ public final class EtaWizardPanelProjectUI extends JPanel {
         }
 
         this.cobScenarios.setModel(comboBoxModel);
-        this.cobScenarios.setRenderer(new NameRenderer());
         this.cobScenarios.addItemListener(WeakListeners.create(
                 ItemListener.class,
                 this.scenarioListener,
@@ -413,15 +412,15 @@ public final class EtaWizardPanelProjectUI extends JPanel {
         public void itemStateChanged(final ItemEvent e) {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("SWMM Project '" + e.getItem().toString() + "' SWMM Scenario selected");
+                    LOG.debug("SWMM Scenario '" + e.getItem().toString() + "' selected");
                 }
 
                 final CidsBean swmmScenario = (CidsBean)e.getItem();
                 model.setSelectedSwmmScenario(swmmScenario);
 
                 // dieser mist funktioniert einfach nicht
-                bindingGroup.unbind();
-                bindingGroup.bind();
+                // bindingGroup.unbind();
+                // bindingGroup.bind();
             }
         }
     }

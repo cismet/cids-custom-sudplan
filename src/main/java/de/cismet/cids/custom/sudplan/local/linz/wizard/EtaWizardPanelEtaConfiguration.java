@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
 import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
@@ -104,7 +105,19 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
 
     @Override
     public boolean isValid() {
-        return true;
+        boolean valid = true;
+
+        if ((this.getEtaConfigurations() == null) || this.getEtaConfigurations().isEmpty()) {
+            wizard.putProperty(
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                NbBundle.getMessage(SwmmPlusEtaWizardAction.class, "EtaWizardPanelEtaConfiguration.error.noEtaConfig"));
+            LOG.warn("ETA Configuration is empty");
+            valid = false;
+        } else {
+            wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, null);
+        }
+
+        return valid;
     }
 
     @Override
@@ -133,6 +146,7 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
      */
     public List<EtaConfiguration> getEtaConfigurations() {
         return this.etaInput.getEtaConfigurations();
+            // nicht schön, muss aber sein, set wird nie aufgerufen.
     }
 
     /**
@@ -142,7 +156,7 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
      */
     public void setEtaConfigurations(final List<EtaConfiguration> etaConfigurations) {
         this.etaInput.setEtaConfigurations(etaConfigurations);
-        // this.changeSupport.fireChange();
+        this.changeSupport.fireChange();
     }
 
     /**

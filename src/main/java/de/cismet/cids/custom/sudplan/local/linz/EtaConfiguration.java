@@ -17,11 +17,10 @@ public class EtaConfiguration {
 
     //~ Instance fields --------------------------------------------------------
 
-    protected transient boolean enabled;
-    protected transient float sedimentationEfficency;
+    protected transient boolean enabled = true;
+    protected transient float sedimentationEfficency = 0.0f;
     protected transient String name;
-
-    protected transient int cso;
+    protected transient int cso = -1;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -29,6 +28,17 @@ public class EtaConfiguration {
      * Creates a new EtaConfiguration object.
      */
     public EtaConfiguration() {
+    }
+
+    /**
+     * Creates a new EtaConfiguration object.
+     *
+     * @param  csoName  DOCUMENT ME!
+     * @param  csoId    DOCUMENT ME!
+     */
+    public EtaConfiguration(final String csoName, final int csoId) {
+        this.name = csoName;
+        this.cso = csoId;
     }
 
     //~ Methods ----------------------------------------------------------------

@@ -78,7 +78,6 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
 
     //~ Instance fields --------------------------------------------------------
 
-    private transient WizardDescriptor.Panel[] panels;
     private transient WizardDescriptor wizardDescriptor;
 
     //~ Constructors -----------------------------------------------------------
@@ -89,7 +88,7 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
     public SwmmPlusEtaWizardAction() {
         super("Perform SWMM + ETA calculation");
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Perform SWMM + ETA calculation");
+            LOG.debug("Perform SWMM + ETA calculation Action instanciated");
         }
     }
 

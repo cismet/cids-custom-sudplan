@@ -390,6 +390,21 @@ public abstract class AbstractModelManager implements ModelManager {
 
                     final SqlTimestampToUtilDateConverter dateConverter = new SqlTimestampToUtilDateConverter();
                     try {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("creating model output Bean");
+                        }
+
+                        cidsBean.setProperty(
+                            "finished", // NOI18N
+                            dateConverter.convertReverse(GregorianCalendar.getInstance().getTime()));
+
+                        final CidsBean modelOutput = createOutputBean();
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("model output Bean '" + modelOutput + "' succesfully created");
+                        }
+
+                        cidsBean.setProperty("modeloutput", modelOutput); // NOI18N
+
                         RunInfo runInfo = getRunInfo();
                         if (runInfo == null) {
                             runInfo = new DefaultRunInfo();
@@ -406,10 +421,6 @@ public abstract class AbstractModelManager implements ModelManager {
                             LOG.error("could not set run info: " + ex.getMessage(), ex);
                         }
 
-                        cidsBean.setProperty(
-                            "finished", // NOI18N
-                            dateConverter.convertReverse(GregorianCalendar.getInstance().getTime()));
-                        cidsBean.setProperty("modeloutput", createOutputBean()); // NOI18N
                         cidsBean = cidsBean.persist();
 
                         final MetaObject outputobject = ((CidsBean)cidsBean.getProperty("modeloutput")).getMetaObject(); // NOI18N
@@ -460,11 +471,32 @@ public abstract class AbstractModelManager implements ModelManager {
                                 JOptionPane.QUESTION_MESSAGE);
 
                         if (JOptionPane.YES_OPTION == answer) {
-                            reg.getDescriptionPane().gotoMetaObject(outputobject, ""); // NOI18N
+                            reg.getDescriptionPane().gotoMetaObject(outputobject, "");                  // NOI18N
                         }
                     } catch (final Exception ex) {
-                        final String message = "cannot save new values in runbean";    // NOI18N
+                        final String message = "cannot save new values in runbean: " + ex.getMessage(); // NOI18N
                         LOG.error(message, ex);
+
+                        RunInfo runInfo = getRunInfo();
+                        if (runInfo == null) {
+                            runInfo = new DefaultRunInfo();
+                        } else {
+                            runInfo.setFinished(false);
+                            runInfo.setBroken(true);
+                            runInfo.setBrokenMessage(message);
+                        }
+
+                        try {
+                            cidsBean.setProperty("finished", null);
+
+                            final StringWriter writer = new StringWriter();
+                            final ObjectMapper mapper = new ObjectMapper();
+                            mapper.writeValue(writer, runInfo);
+                            cidsBean.setProperty("runinfo", writer.toString());
+                        } catch (final Exception exp) {
+                            LOG.error("could not set run info: " + exp.getMessage(), exp);
+                        }
+
                         throw new IllegalStateException(message, ex);
                     }
 

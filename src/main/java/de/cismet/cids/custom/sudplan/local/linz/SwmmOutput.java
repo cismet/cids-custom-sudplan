@@ -241,7 +241,9 @@ public class SwmmOutput {
      * Synchronizes the overflow results (per cso) with the local ids of the cso objects. The id is retrieved from the
      * eta cso configuration.
      *
-     * @param  etaConfigurations  csoOverflows DOCUMENT ME!
+     * @param       etaConfigurations  csoOverflows DOCUMENT ME!
+     *
+     * @deprecated  DOCUMENT ME!
      */
     @JsonIgnore
     public void synchronizeCsoIds(final List<EtaConfiguration> etaConfigurations) {

@@ -74,6 +74,26 @@ public class EtaInput extends SwmmOutput {
         this.setTotalRunoffVolume(swmmOutput.getTotalRunoffVolume());
         this.setCsoOverflows(swmmOutput.getCsoOverflows());
 
+        if (this.etaConfigurations.isEmpty()) {
+            LOG.warn("no ETA Configurations found, creating default ETA Configurations from CSO Overflows");
+            for (final CsoOverflow csoOverflow : this.csoOverflows.values()) {
+                final EtaConfiguration etaConfiguration = new EtaConfiguration(csoOverflow.getName(),
+                        csoOverflow.getCso());
+
+                if (etaConfiguration.getName().equalsIgnoreCase("ULKS1")) {
+                    etaConfiguration.setSedimentationEfficency(20);
+                } else if (etaConfiguration.getName().equalsIgnoreCase("RKL_Ablauf")) {
+                    etaConfiguration.setEnabled(false);
+                } else if (etaConfiguration.getName().equalsIgnoreCase("AB_Plesching")) {
+                    etaConfiguration.setSedimentationEfficency(20);
+                } else if (etaConfiguration.getName().equalsIgnoreCase("RHHB_Weikerlsee3nolink")) {
+                    etaConfiguration.setSedimentationEfficency(20);
+                }
+
+                this.etaConfigurations.add(etaConfiguration);
+            }
+        }
+
         this.computeTotalOverflowVolume();
     }
 

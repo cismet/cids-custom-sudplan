@@ -35,12 +35,12 @@ public class SwmmRunInfo extends DefaultRunInfo {
     /**
      * Creates a new GeoCPMRunInfo object.
      *
-     * @param  runId      spsTaskId DOCUMENT ME!
+     * @param  spsTaskId  spsTaskId DOCUMENT ME!
      * @param  spsUrl     DOCUMENT ME!
      * @param  modelName  downloaded DOCUMENT ME!
      */
-    public SwmmRunInfo(final String runId, final String spsUrl, final String modelName) {
-        this.spsTaskId = runId;
+    public SwmmRunInfo(final String spsTaskId, final String spsUrl, final String modelName) {
+        this.spsTaskId = spsTaskId;
         this.spsUrl = spsUrl;
         this.modelName = modelName;
     }

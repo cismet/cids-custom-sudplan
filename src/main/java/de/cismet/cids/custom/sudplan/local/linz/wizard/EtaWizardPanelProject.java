@@ -54,7 +54,6 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
     private transient CidsBean selectedSwmmProject;
     private transient CidsBean selectedSwmmScenario;
     private transient volatile EtaWizardPanelProjectUI component;
-    private final transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     //~ Constructors -----------------------------------------------------------
 
@@ -120,6 +119,11 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
             final SwmmOutput swmmOutput = mapper.readValue(json, SwmmOutput.class);
             final EtaInput etaInput = new EtaInput(swmmOutput);
 
+            if (swmmOutput.getSwmmProject() == -1) {
+                LOG.warn("no suitable SWMM project selected in SWMM Output: -1");
+                etaInput.setSwmmProject(swmmOutput.getSwmmProject());
+            }
+
             wizard.putProperty(EtaWizardAction.PROP_ETA_INPUT, etaInput);
         } catch (Throwable t) {
             LOG.error("invalid SWMM Model Output, could not create valid ETA Input: " + t.getMessage(), t);
@@ -133,18 +137,21 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
         if (this.getSelectedSwmmProject() == null) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                NbBundle.getMessage(EtaWizardPanelProject.class, "SwmmWizardPanelProject.error.noproject"));
+                NbBundle.getMessage(EtaWizardPanelProject.class, "EtaWizardPanelProject.error.noproject"));
             valid = false;
+            LOG.warn("no SWMM project selected");
         } else if (this.getSelectedSwmmScenario() == null) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                NbBundle.getMessage(EtaWizardPanelProject.class, "SwmmWizardPanelProject.error.noscenario"));
+                NbBundle.getMessage(EtaWizardPanelProject.class, "EtaWizardPanelProject.error.noscenario"));
             valid = false;
+            LOG.warn("no SWMM Scenario selected");
         } else if (this.getSelectedSwmmScenario().getProperty("modeloutput") == null) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                NbBundle.getMessage(EtaWizardPanelProject.class, "SwmmWizardPanelProject.error.noresults"));
+                NbBundle.getMessage(EtaWizardPanelProject.class, "EtaWizardPanelProject.error.noresults"));
             valid = false;
+            LOG.warn("SWMM Scenario has no results");
         } else {
             try {
                 final CidsBean swmmOutputBean = (CidsBean)this.getSelectedSwmmScenario().getProperty("modeloutput");
@@ -155,9 +162,16 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
                 LOG.error("invalid SWMM Model Output: " + t.getMessage(), t);
                 wizard.putProperty(
                     WizardDescriptor.PROP_ERROR_MESSAGE,
-                    NbBundle.getMessage(EtaWizardPanelProject.class, "SwmmWizardPanelProject.error.invalidResults"));
+                    NbBundle.getMessage(EtaWizardPanelProject.class, "EtaWizardPanelProject.error.invalidResults"));
                 valid = false;
             }
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("isValid: " + valid);
+        }
+
+        if (valid) {
+            wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, null);
         }
 
         return valid;
@@ -189,6 +203,7 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
      */
     public void setSelectedSwmmProject(final CidsBean swmmProject) {
         this.selectedSwmmProject = swmmProject;
+        this.changeSupport.fireChange();
     }
 
     /**
@@ -207,24 +222,7 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
      */
     public void setSelectedSwmmScenario(final CidsBean selectedSwmmScenario) {
         this.selectedSwmmScenario = selectedSwmmScenario;
-    }
-
-    /**
-     * Add PropertyChangeListener.
-     *
-     * @param  listener  DOCUMENT ME!
-     */
-    public void addPropertyChangeListener(final PropertyChangeListener listener) {
-        propertyChangeSupport.addPropertyChangeListener(listener);
-    }
-
-    /**
-     * Remove PropertyChangeListener.
-     *
-     * @param  listener  DOCUMENT ME!
-     */
-    public void removePropertyChangeListener(final PropertyChangeListener listener) {
-        propertyChangeSupport.removePropertyChangeListener(listener);
+        this.changeSupport.fireChange();
     }
 
     /**

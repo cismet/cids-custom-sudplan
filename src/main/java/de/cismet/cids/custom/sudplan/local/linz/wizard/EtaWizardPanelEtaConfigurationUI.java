@@ -51,7 +51,6 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final boolean csoConfigEnabled = false;
     private final transient EtaWizardPanelEtaConfiguration model;
     private transient int lastSwmmProjectId = -1;
     private CsoUpdater csoUpdater;
@@ -96,9 +95,23 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
             LOG.debug("initialising user interface");
         }
         try {
-            if (this.model.getSwmmProjectId() != this.lastSwmmProjectId) {
+            if ((this.model.getEtaConfigurations() != null) && !this.model.getEtaConfigurations().isEmpty()) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("project id changed, loading CSO list");
+                    LOG.debug("ETA Configurations already available, updating Table with stored ETA Configuration");
+                }
+
+                if ((csoUpdater != null) && csoUpdater.isRunning()) {
+                    LOG.warn("A CSO update thread is running, stopping Thread");
+                    csoUpdater.stopIt();
+                }
+
+                this.tblEtaConfiguration.setModel(new EtaConfigurationTableModel(this.model.getEtaConfigurations()));
+
+                // trigger change event
+                this.model.setEtaConfigurations(this.model.getEtaConfigurations());
+            } else if (this.model.getSwmmProjectId() != this.lastSwmmProjectId) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("project id changed (" + this.model.getSwmmProjectId() + "), loading CSO list");
                 }
 
                 Mnemonics.setLocalizedText(
@@ -108,7 +121,6 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                         "EtaWizardPanelEtaConfigurationUI.progressLabel.text")); // NOI18N
                 progressBar.setIndeterminate(true);
                 ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
-                this.lastSwmmProjectId = this.model.getSwmmProjectId();
 
                 if ((csoUpdater != null) && csoUpdater.isRunning()) {
                     LOG.warn("another cso update thread is running, stopping thred");
@@ -119,7 +131,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                 SudplanConcurrency.getSudplanGeneralPurposePool().execute(csoUpdater);
             } else {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("project id did not change, using cached CSO List");
+                    LOG.debug("project id did not change (" + this.lastSwmmProjectId + "), using cached CSO List");
                 }
 
                 if ((csoUpdater != null) && csoUpdater.isRunning()) {
@@ -140,6 +152,8 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                     "EtaWizardPanelEtaConfiguration.progressLabel.error")); // NOI18N
             ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
         }
+
+        this.lastSwmmProjectId = this.model.getSwmmProjectId();
     }
 
     /**
@@ -164,7 +178,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
         sb.append("SELECT ").append(mc.getID()).append(',').append(mc.getPrimaryKey()); // NOI18N
         sb.append(" FROM ").append(mc.getTableName());                                  // NOI18N
 
-        assert swmmProjectId != -1 : "no suitable swmm project selected";
+        assert swmmProjectId != -1 : "no suitable swmm project selected: -1";
         sb.append(" WHERE swmm_project = ").append(swmmProjectId);
 
         final ClassAttribute ca = mc.getClassAttribute("sortingColumn"); // NOI18N
@@ -191,24 +205,20 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
             etaConfiguration.setName(metaObject.getName());
             etaConfiguration.setCso(metaObject.getID());
 
-            // FIXME
-            // dirty hack: set default values for V2
-            if (!csoConfigEnabled) {
-                etaConfiguration.setEnabled(true);
-                if (etaConfiguration.getName().equalsIgnoreCase("ULKS1")) {
-                    etaConfiguration.setSedimentationEfficency(20);
-                } else if (etaConfiguration.getName().equalsIgnoreCase("RKL_Ablauf")) {
-                    etaConfiguration.setEnabled(false);
-                } else if (etaConfiguration.getName().equalsIgnoreCase("AB_Plesching")) {
-                    etaConfiguration.setSedimentationEfficency(20);
-                } else if (etaConfiguration.getName().equalsIgnoreCase("RHHB_Weikerlsee3nolink")) {
-                    etaConfiguration.setSedimentationEfficency(20);
-                }
+            if (etaConfiguration.getName().equalsIgnoreCase("ULKS1")) {
+                etaConfiguration.setSedimentationEfficency(20);
+            } else if (etaConfiguration.getName().equalsIgnoreCase("RKL_Ablauf")) {
+                etaConfiguration.setEnabled(false);
+            } else if (etaConfiguration.getName().equalsIgnoreCase("AB_Plesching")) {
+                etaConfiguration.setSedimentationEfficency(20);
+            } else if (etaConfiguration.getName().equalsIgnoreCase("RHHB_Weikerlsee3nolink")) {
+                etaConfiguration.setSedimentationEfficency(20);
             }
 
             etaConfigurations.add(etaConfiguration);
         }
 
+        // trigger change event
         this.model.setEtaConfigurations(etaConfigurations);
         return new EtaConfigurationTableModel(etaConfigurations);
 
@@ -710,7 +720,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                     }
                     etaConfigurationTableModel = initCSOs(model.getSwmmProjectId());
                 } catch (Throwable t) {
-                    LOG.error("CsoUpdater: could not retrieve timeseries: " + t.getMessage(), t);
+                    LOG.error("CsoUpdater: could not retrieve CSOs: " + t.getMessage(), t);
                     run = false;
                     EventQueue.invokeLater(new Runnable() {
 

@@ -101,11 +101,12 @@ public class EtaWatchable extends AbstractModelRunWatchable {
         final SwmmModelManager swmmModelManager = (SwmmModelManager)SMSUtils.loadManagerFromRun(
                 swmmRunBean,
                 ManagerType.MODEL);
+        swmmModelManager.setCidsBean(swmmRunBean);
         final SwmmRunInfo swmmRunInfo = swmmModelManager.getRunInfo();
 
         if (swmmRunInfo == null) {
             LOG.warn("RunInfo of SWMM Run #" + this.etaRunInfo.getSwmmRunId() + " of ETA Run '" + title + "' is null, "
-                        + " probably the the SWMM Run hasan't started yet!");
+                        + " probably the the SWMM Run hasnt't started yet!");
             return new ProgressEvent(this, ProgressEvent.State.PROGRESSING);
         }
 
@@ -145,6 +146,9 @@ public class EtaWatchable extends AbstractModelRunWatchable {
         }
 
         final Manager etaInputManager = SMSUtils.loadManagerFromRun(this.getCidsBean(), ManagerType.INPUT);
+        assert swmmRunBean.getProperty("modelinput") != null : "Model Input of ETA Run '" + this.getCidsBean()
+                    + "' is null!";
+        etaInputManager.setCidsBean((CidsBean)this.getCidsBean().getProperty("modelinput"));
         final EtaInput etaInput = (EtaInput)etaInputManager.getUR();
 
         if ((etaInput.getTotalOverflowVolume() < 0) || (etaInput.getTotalRunoffVolume() < 0)
@@ -155,6 +159,9 @@ public class EtaWatchable extends AbstractModelRunWatchable {
 
             final Manager swmmOutputManager = SMSUtils.loadManagerFromRun(swmmRunBean,
                     ManagerType.OUTPUT);
+            assert swmmRunBean.getProperty("modeloutput") != null : "Model Output of SWMM Run '" + swmmRunBean
+                        + "' is null!";
+            swmmOutputManager.setCidsBean((CidsBean)swmmRunBean.getProperty("modeloutput"));
             final SwmmOutput swmmOutput = (SwmmOutput)swmmOutputManager.getUR();
 
             if (swmmOutput.getTotalRunoffVolume() < 0) {

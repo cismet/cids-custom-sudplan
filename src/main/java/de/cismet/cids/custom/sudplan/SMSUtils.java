@@ -851,11 +851,13 @@ public final class SMSUtils {
                 final T runInfo = mapper.readValue(runInfoString, runInfoclass);
                 return runInfo;
             } catch (final Exception ex) {
-                final String message = "cannot read default run info from run: " + runBean; // NOI18N
+                final String message = "cannot read default run info from run '"
+                            + runBean + "': " + ex.getMessage(); // NOI18N
                 LOG.error(message, ex);
             }
+        } else {
+            LOG.warn("could not load runInfo for runBean '" + runBean + "', runBean or runinfo is null");
         }
-
         return null;
     }
 
