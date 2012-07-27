@@ -16,6 +16,7 @@ import java.awt.EventQueue;
 import de.cismet.cids.custom.objectactions.sudplan.ActionProviderFactory;
 import de.cismet.cids.custom.sudplan.local.linz.wizard.EtaWizardAction;
 import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
+import de.cismet.cids.custom.sudplan.local.linz.wizard.UploadWizardAction;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -29,11 +30,10 @@ import de.cismet.cids.utils.interfaces.CidsBeanAction;
  */
 public class SwmmProjectTitleComponent extends javax.swing.JPanel {
 
-    //~ Static fields/initializers ---------------------------------------------
-
-    private static final transient Logger LOG = Logger.getLogger(SwmmProjectTitleComponent.class);
+    // private static final transient Logger LOG = Logger.getLogger(SwmmProjectTitleComponent.class);
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnNewSwmmProject;
     private javax.swing.JButton btnRunEta;
     private javax.swing.JButton btnRunSwmmPlusEta;
     private javax.swing.JLabel lblIcon;
@@ -91,6 +91,13 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
             // trigger the action enable
             cba.isEnabled();
         }
+        if (btnNewSwmmProject.getAction() instanceof CidsBeanAction) {
+            final CidsBeanAction cba = (CidsBeanAction)btnNewSwmmProject.getAction();
+            cba.setCidsBean(cidsBean);
+
+            // trigger the action enable
+            cba.isEnabled();
+        }
     }
 
     /**
@@ -104,6 +111,7 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
 
         lblIcon = new javax.swing.JLabel();
         lblTitle = new javax.swing.JLabel();
+        btnNewSwmmProject = new javax.swing.JButton();
         btnRunEta = new javax.swing.JButton();
         btnRunSwmmPlusEta = new javax.swing.JButton();
 
@@ -111,11 +119,8 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
         setLayout(new java.awt.GridBagLayout());
 
         lblIcon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblIcon.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/EPAlogo32ct.png"))); // NOI18N
-        lblIcon.setText(org.openide.util.NbBundle.getMessage(
-                SwmmProjectTitleComponent.class,
-                "SwmmProjectTitleComponent.lblIcon.text"));                                            // NOI18N
+        lblIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/EPAlogo32ct.png"))); // NOI18N
+        lblIcon.setText(org.openide.util.NbBundle.getMessage(SwmmProjectTitleComponent.class, "SwmmProjectTitleComponent.lblIcon.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -123,9 +128,7 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
 
         lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         lblTitle.setForeground(new java.awt.Color(255, 255, 255));
-        lblTitle.setText(NbBundle.getMessage(
-                SwmmProjectTitleComponent.class,
-                "SwmmProjectTitleComponent.lblTitle.text"));  // NOI18N
+        lblTitle.setText(NbBundle.getMessage(SwmmProjectTitleComponent.class, "SwmmProjectTitleComponent.lblTitle.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
@@ -134,10 +137,22 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblTitle, gridBagConstraints);
 
+        btnNewSwmmProject.setAction(ActionProviderFactory.getCidsBeanAction(UploadWizardAction.class));
+        btnNewSwmmProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/newSwmmProject24.png"))); // NOI18N
+        btnNewSwmmProject.setText("");
+        btnNewSwmmProject.setToolTipText(org.openide.util.NbBundle.getMessage(SwmmProjectTitleComponent.class, "SwmmProjectTitleComponent.btnNewSwmmProject.tooltip")); // NOI18N
+        btnNewSwmmProject.setMargin(new java.awt.Insets(4, 4, 4, 4));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(btnNewSwmmProject, gridBagConstraints);
+
         btnRunEta.setAction(ActionProviderFactory.getCidsBeanAction(EtaWizardAction.class));
-        btnRunEta.setText(org.openide.util.NbBundle.getMessage(
-                SwmmProjectTitleComponent.class,
-                "SwmmProjectTitleComponent.btnRunEta.text")); // NOI18N
+        btnRunEta.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/newEtaCalculation24.png"))); // NOI18N
+        btnRunEta.setText("");
+        btnRunEta.setToolTipText(org.openide.util.NbBundle.getMessage(SwmmProjectTitleComponent.class, "SwmmProjectTitleComponent.btnRunEta.toolTipText")); // NOI18N
+        btnRunEta.setMargin(new java.awt.Insets(4, 4, 4, 4));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
@@ -145,13 +160,14 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
         add(btnRunEta, gridBagConstraints);
 
         btnRunSwmmPlusEta.setAction(ActionProviderFactory.getCidsBeanAction(SwmmPlusEtaWizardAction.class));
-        btnRunSwmmPlusEta.setText(org.openide.util.NbBundle.getMessage(
-                SwmmProjectTitleComponent.class,
-                "SwmmProjectTitleComponent.btnRunSwmmPlusEta.text")); // NOI18N
+        btnRunSwmmPlusEta.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/newSwmmCalculation24.png"))); // NOI18N
+        btnRunSwmmPlusEta.setText("");
+        btnRunSwmmPlusEta.setToolTipText(org.openide.util.NbBundle.getMessage(SwmmProjectTitleComponent.class, "SwmmProjectTitleComponent.btnRunSwmmPlusEta.tooltip")); // NOI18N
+        btnRunSwmmPlusEta.setMargin(new java.awt.Insets(4, 4, 4, 4));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(btnRunSwmmPlusEta, gridBagConstraints);
-    }                                                                 // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
 }
