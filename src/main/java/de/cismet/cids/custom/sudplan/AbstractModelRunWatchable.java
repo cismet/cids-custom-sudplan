@@ -26,6 +26,7 @@ import de.cismet.cids.dynamics.CidsBean;
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 import de.cismet.tools.gui.downloadmanager.Download;
+import javax.swing.JPanel;
 
 /**
  * DOCUMENT ME!
@@ -198,6 +199,13 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
     public State getStatus() {
         return currentState;
     }
+
+    @Override
+    public JPanel getExceptionPanel(Exception exception) {
+        return null;
+    }
+
+
 
     /**
      * DOCUMENT ME!
