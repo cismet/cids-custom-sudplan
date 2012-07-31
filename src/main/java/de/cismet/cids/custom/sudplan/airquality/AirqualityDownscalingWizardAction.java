@@ -263,7 +263,7 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
                 gridcellCountX,
                 gridcellCountY,
                 database,
-                "EPSG:3021"); // NOI18N
+                CismapBroker.getInstance().getSrs().getCode());
 
         return SMSUtils.createModelInput(name, input, SMSUtils.Model.AQ_DS);
     }
@@ -313,7 +313,7 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
 
         final Crs srs = CismapBroker.getInstance().getSrs();
         // TODO: Dynamic SRID?!
-        active = (srs != null) && (srs.getName() != null) && srs.getName().endsWith(":3021"); // NOI18N
+        active = (srs != null) && (srs.isMetric());
 
         if (!active) {
             return active;
@@ -339,6 +339,7 @@ public final class AirqualityDownscalingWizardAction extends AbstractAction impl
                 final double width = lowerleftAndUpperright[1].x - lowerleftAndUpperright[0].x;
                 final double height = lowerleftAndUpperright[1].y - lowerleftAndUpperright[0].y;
 
+                // TODO: Rethink epsilon usage.
                 if (((Math.abs(width) - 1000D) < 0.0001) || ((Math.abs(height) - 1000D) < 0.0001)) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(

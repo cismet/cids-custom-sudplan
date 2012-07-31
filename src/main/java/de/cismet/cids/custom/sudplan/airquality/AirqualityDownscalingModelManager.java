@@ -247,28 +247,6 @@ public final class AirqualityDownscalingModelManager extends AbstractAsyncModelM
     /**
      * DOCUMENT ME!
      *
-     * @param   outputBean  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  IOException            DOCUMENT ME!
-     * @throws  IllegalStateException  DOCUMENT ME!
-     */
-    public static AirqualityDownscalingInput inputFromOutput(final CidsBean outputBean) throws IOException {
-        final Manager manager = SMSUtils.loadManagerFromRun(outputBean, ManagerType.INPUT);
-        manager.setCidsBean((CidsBean)outputBean.getProperty("modelinput")); // NOI18N
-
-        final Object resource = manager.getUR();
-        if (!(resource instanceof AirqualityDownscalingInput)) {
-            throw new IllegalStateException("Manager resource is not suited for airquality downscaling"); // NOI18N
-        }
-
-        return (AirqualityDownscalingInput)resource;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @return  DOCUMENT ME!
      *
      * @throws  IOException  DOCUMENT ME!
@@ -301,7 +279,7 @@ public final class AirqualityDownscalingModelManager extends AbstractAsyncModelM
 
         timeseries.setValue(now, PARAM_CLIMATE_SCENARIO, input.getScenario());
         // TODO: Make dynamic?!
-        timeseries.setValue(now, PARAM_COORDINATE_SYSTEM, "EPSG:3021"); // NOI18N
+        timeseries.setValue(now, PARAM_COORDINATE_SYSTEM, input.getSrs()); // NOI18N
         timeseries.setValue(now, PARAM_EMISSION_SCENARIO, input.getDatabase());
         timeseries.setValue(now, PARAM_END_TIME, dateFormat.format(input.getEndDate()));
         timeseries.setValue(now, PARAM_N_X, input.getGridcellCountX().toString());

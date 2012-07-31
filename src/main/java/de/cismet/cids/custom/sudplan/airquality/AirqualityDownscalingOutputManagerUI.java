@@ -21,6 +21,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import java.io.IOException;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -32,16 +34,17 @@ import de.cismet.cids.client.tools.DevelopmentTools;
 import de.cismet.cids.custom.sudplan.Available;
 import de.cismet.cids.custom.sudplan.LocalisedEnumComboBox;
 import de.cismet.cids.custom.sudplan.Resolution;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.Variable;
 import de.cismet.cids.custom.sudplan.airquality.AirqualityDownscalingOutput.Result;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 import de.cismet.cids.dynamics.Disposable;
 
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 
-import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 
@@ -72,6 +75,7 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
 
     private final transient AirqualityDownscalingOutputManager model;
     private final transient Collection<Result> results;
+    private transient AirqualityDownscalingInput input;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JButton btnExport = new javax.swing.JButton();
@@ -82,15 +86,22 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
     private final transient javax.swing.JComboBox cboVariable = new LocalisedEnumComboBox<Variable>(
             Variable.class,
             variableAvailable);
+    private final transient javax.swing.Box.Filler gluControls = new javax.swing.Box.Filler(new java.awt.Dimension(
+                0,
+                0),
+            new java.awt.Dimension(0, 0),
+            new java.awt.Dimension(32767, 0));
+    private final transient javax.swing.Box.Filler gluMain = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+            new java.awt.Dimension(0, 0),
+            new java.awt.Dimension(0, 32767));
     private final transient javax.swing.JProgressBar jpbDownload = new javax.swing.JProgressBar();
     private final transient javax.swing.JLabel lblDownload = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblResolution = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblVariable = new javax.swing.JLabel();
+    private final transient javax.swing.JPanel pnlControls = new javax.swing.JPanel();
     private final transient javax.swing.JPanel pnlDownloadAndShow = new javax.swing.JPanel();
     private final transient javax.swing.JPanel pnlProgess = new javax.swing.JPanel();
     private final transient javax.swing.JPanel pnlVariableAndResolution = new javax.swing.JPanel();
-    private final transient javax.swing.JScrollPane scpOfferings = new javax.swing.JScrollPane();
-    private final transient javax.swing.JTextArea txaOfferings = new javax.swing.JTextArea();
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -117,6 +128,15 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
         btnExport.addActionListener(WeakListeners.create(ActionListener.class, exportCSVListener, btnExport));
         cboVariable.addItemListener(WeakListeners.create(ItemListener.class, variableListener, cboVariable));
         cboResolution.addItemListener(WeakListeners.create(ItemListener.class, resolutionListener, cboResolution));
+
+        try {
+            input = AirqualityDownscalingModelManager.inputFromRun(
+                    SMSUtils.fetchCidsBean(model.getUR().getModelRunId(), SMSUtils.TABLENAME_MODELRUN));
+        } catch (final IOException ex) {
+            input = null;
+            // TODO: User feedback.
+            // TODO: Disable all elements.
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -131,29 +151,15 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
 
         try {
             results.addAll(model.getUR().getResults());
+
+            for (final Result result : results) {
+                resolutions.add(result.getResolution());
+                variables.add(result.getVariable());
+            }
         } catch (Exception ex) {
             LOG.error("Couldn't get output bean.", ex); // NOI18N
             return;
         }
-
-        final StringBuilder resultsAsText = new StringBuilder();
-
-        for (final Result result : results) {
-            resolutions.add(result.getResolution());
-            variables.add(result.getVariable());
-
-            resultsAsText.append("URL: '");            // NOI18N
-            resultsAsText.append(result.getUrl());
-            resultsAsText.append("'; Type: '");        // NOI18N
-            resultsAsText.append(result.getType());
-            resultsAsText.append("'; Description: '"); // NOI18N
-            resultsAsText.append(result.getDescription());
-            resultsAsText.append("'; Offering: '");    // NOI18N
-            resultsAsText.append(result.getOffering());
-            resultsAsText.append("'\n");               // NOI18N
-        }
-
-        txaOfferings.setText(resultsAsText.toString());
     }
 
     /**
@@ -181,7 +187,7 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         pnlVariableAndResolution.add(lblVariable, gridBagConstraints);
@@ -200,7 +206,7 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         pnlVariableAndResolution.add(lblResolution, gridBagConstraints);
@@ -215,24 +221,12 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(6, 6, 6, 6);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(pnlVariableAndResolution, gridBagConstraints);
 
         pnlDownloadAndShow.setBorder(javax.swing.BorderFactory.createTitledBorder("Download and Show"));
         pnlDownloadAndShow.setOpaque(false);
         pnlDownloadAndShow.setLayout(new java.awt.GridBagLayout());
-
-        btnShowInMap.setText(NbBundle.getMessage(
-                AirqualityDownscalingOutputManagerUI.class,
-                "AirqualityDownscalingOutputManagerUI.btnShowInMap.text")); // NOI18N
-        btnShowInMap.setEnabled(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlDownloadAndShow.add(btnShowInMap, gridBagConstraints);
 
         pnlProgess.setOpaque(false);
         pnlProgess.setLayout(new java.awt.GridBagLayout());
@@ -259,41 +253,65 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         pnlDownloadAndShow.add(pnlProgess, gridBagConstraints);
+
+        pnlControls.setOpaque(false);
+        pnlControls.setLayout(new java.awt.GridBagLayout());
 
         btnExport.setText(org.openide.util.NbBundle.getMessage(
                 AirqualityDownscalingOutputManagerUI.class,
                 "AirqualityDownscalingOutputManagerUI.btnExport.text")); // NOI18N
         btnExport.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlControls.add(btnExport, gridBagConstraints);
+
+        btnShowInMap.setText(NbBundle.getMessage(
+                AirqualityDownscalingOutputManagerUI.class,
+                "AirqualityDownscalingOutputManagerUI.btnShowInMap.text")); // NOI18N
+        btnShowInMap.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlControls.add(btnShowInMap, gridBagConstraints);
+
+        gluControls.setMaximumSize(new java.awt.Dimension(32767, 0));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.1;
+        pnlControls.add(gluControls, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlDownloadAndShow.add(btnExport, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        pnlDownloadAndShow.add(pnlControls, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(6, 6, 6, 6);
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(pnlDownloadAndShow, gridBagConstraints);
 
-        txaOfferings.setColumns(20);
-        txaOfferings.setRows(5);
-        scpOfferings.setViewportView(txaOfferings);
-
+        gluMain.setMaximumSize(new java.awt.Dimension(0, 32767));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(scpOfferings, gridBagConstraints);
+        add(gluMain, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
     @Override
@@ -391,10 +409,17 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                 return;
             }
 
+            final Crs srs = CismapBroker.getInstance().crsFromCode(input.getSrs());
+            if (srs == null) {
+                LOG.error("Couldn't get a Crs object from SRS code '" + input.getSrs() + "'.");
+                return;
+            }
+
             final AirqualityDownscalingResultManager manager = new AirqualityDownscalingResultManager(
                     resultToShow,
                     (Integer)model.getCidsBean().getProperty("id"),
-                    (String)model.getCidsBean().getProperty("name"));
+                    (String)model.getCidsBean().getProperty("name"),
+                    srs);
             final Future<SlidableWMSServiceLayerGroup> managerFuture = SudplanConcurrency.getSudplanGeneralPurposePool()
                         .submit(manager);
 
@@ -456,10 +481,17 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                 return;
             }
 
+            final Crs srs = CismapBroker.getInstance().crsFromCode(input.getSrs());
+            if (srs == null) {
+                LOG.error("Couldn't get a Crs object from SRS code '" + input.getSrs() + "'.");
+                return;
+            }
+
             final AirqualityDownscalingResultManager manager = new AirqualityDownscalingResultManager(
                     resultToShow,
                     (Integer)model.getCidsBean().getProperty("id"),
-                    (String)model.getCidsBean().getProperty("name"));
+                    (String)model.getCidsBean().getProperty("name"),
+                    srs);
 
             if (!DownloadManagerDialog.showAskingForUserTitle(AirqualityDownscalingOutputManagerUI.this)) {
                 return;

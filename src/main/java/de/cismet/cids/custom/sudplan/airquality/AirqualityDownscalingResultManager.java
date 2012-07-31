@@ -41,9 +41,8 @@ import java.sql.Statement;
 import java.text.MessageFormat;
 
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.GregorianCalendar;
-import java.util.LinkedList;
+import java.util.NavigableSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -56,11 +55,14 @@ import de.cismet.cids.custom.sudplan.geoserver.AttributesAwareGSFeatureTypeEncod
 import de.cismet.cids.custom.sudplan.geoserver.GSAttributeEncoder;
 import de.cismet.cids.custom.sudplan.geoserver.GSPathAwareLayerEncoder;
 
+import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
-import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilitiesFactory;
+
+import de.cismet.tools.PropertyReader;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
@@ -76,85 +78,97 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(AirqualityDownscalingResultManager.class);
-    private static final transient int MAX_BUFFER_SIZE = 1024;
 
-    private static final transient String DB_URL = "jdbc:postgresql://sudplan.cismet.de:5433/sudplan"; // NOI18N
-    private static final transient String DB_USER = "postgres";                                        // NOI18N
-    private static final transient String DB_PASSWORD = "cismetz12";                                   // NOI18N
-    private static final transient String DB_TABLE = "downscaled_airquality";                          // NOI18N
-    private static final transient String DB_VIEW_SEPARATOR = "_";                                     // NOI18N
+    private static final PropertyReader propertyReader;
+    private static final String FILE_PROPERTY = "/de/cismet/cids/custom/sudplan/airquality/airquality.properties";
+
+    private static final transient String DB_URL;
+    private static final transient String DB_USER;
+    private static final transient String DB_PASSWORD;
+    private static final transient String DB_TABLE;
+
+    private static final transient String GEOSERVER_REST_URL;
+    private static final transient String GEOSERVER_REST_USER;
+    private static final transient String GEOSERVER_REST_PASSWORD;
+    private static final transient String GEOSERVER_WORKSPACE;
+    private static final transient String GEOSERVER_DATASTORE;
+
+    private static final transient String GEOSERVER_CAPABILITIES_URL;
+    private static final transient String GEOSERVER_SLD;
+
+    static {
+        propertyReader = new PropertyReader(FILE_PROPERTY);
+
+        DB_URL = propertyReader.getProperty("DB_URL");
+        DB_USER = propertyReader.getProperty("DB_USER");
+        DB_PASSWORD = propertyReader.getProperty("DB_PASSWORD");
+        DB_TABLE = propertyReader.getProperty("DB_TABLE");
+
+        GEOSERVER_REST_URL = propertyReader.getProperty("GEOSERVER_REST_URL");
+        GEOSERVER_REST_USER = propertyReader.getProperty("GEOSERVER_REST_USER");
+        GEOSERVER_REST_PASSWORD = propertyReader.getProperty("GEOSERVER_REST_PASSWORD");
+        GEOSERVER_WORKSPACE = propertyReader.getProperty("GEOSERVER_WORKSPACE");
+        GEOSERVER_DATASTORE = propertyReader.getProperty("GEOSERVER_DATASTORE");
+        GEOSERVER_CAPABILITIES_URL = MessageFormat.format(propertyReader.getProperty("GEOSERVER_CAPABILITIES_URL"),
+                GEOSERVER_REST_URL);
+        GEOSERVER_SLD = propertyReader.getProperty("GEOSERVER_SLD");
+    }
+
+    private static final transient String DB_VIEW_SEPARATOR = "_"; // NOI18N
     private static final transient String DB_VIEW_NAME_PATTERN = "aqds" + DB_VIEW_SEPARATOR
-                + "view" + DB_VIEW_SEPARATOR                                                           // NOI18N
-                + "{0}" + DB_VIEW_SEPARATOR                                                            // NOI18N
-                + "{1}" + DB_VIEW_SEPARATOR                                                            // NOI18N
-                + "{2}" + DB_VIEW_SEPARATOR                                                            // NOI18N
-                + "{3}";                                                                               // NOI18N
+                + "view" + DB_VIEW_SEPARATOR                       // NOI18N
+                + "{0}" + DB_VIEW_SEPARATOR                        // NOI18N
+                + "{1}" + DB_VIEW_SEPARATOR                        // NOI18N
+                + "{2}" + DB_VIEW_SEPARATOR                        // NOI18N
+                + "{3}";                                           // NOI18N
     private static final transient String DB_STMT_CREATE_VIEW = " CREATE VIEW "
-                + "{0} AS "                                                                            // NOI18N
-                + " SELECT modeloutput_id, variable, resolution, \"timestamp\", geometry, value, unit, offering "
-                + " FROM "                                                                             // NOI18N
+                + "{0} AS "                                        // NOI18N
+                + " SELECT modeloutput_id, variable, resolution, \"timestamp\", geometry, value, unit, offering"
+                + " ,(SELECT max(value) FROM downscaled_airquality"
+                // + "    WHERE modeloutput_id = {1} "
+                + "    WHERE variable ILIKE ''{2}'' " // NOI18N
+
+
+//                + "      AND resolution ILIKE ''{3}''"
+//                + "      AND \"timestamp\" = {4}"
+                + ") AS maxValue,"
+                + " (SELECT min(value) FROM downscaled_airquality"
+                // + "    WHERE modeloutput_id = {1} "
+                + "    WHERE variable ILIKE ''{2}'' " // NOI18N
+
+
+//                + "      AND resolution ILIKE ''{3}''"
+//                + "      AND \"timestamp\" = {4}"
+                + ") AS minValue"
+                + " FROM "                       // NOI18N
                 + DB_TABLE
                 + " WHERE modeloutput_id = {1} "
-                + " AND variable ILIKE ''{2}'' "                                                       // NOI18N
+                + " AND variable ILIKE ''{2}'' " // NOI18N
                 + " AND resolution ILIKE ''{3}''"
-                + " AND \"timestamp\" = {4}";                                                          // NOI18N
-    // TODO: Dynymic SRS?
+                + " AND \"timestamp\" = {4}";    // NOI18N
+
+    private static final transient String DB_QUERY_BOUNDINGBOX_TOKEN_SRS = "<aqds:srs>";
     private static final transient String DB_QUERY_BOUNDINGBOX = "SELECT "
-                + " ST_XMIN(st_extent(geometry)) AS native_xmin,"                                     // NOI18N
+                + " ST_XMIN(st_extent(geometry)) AS native_xmin," // NOI18N
                 + " ST_YMIN(st_extent(geometry)) AS native_ymin,"
-                + " ST_XMAX(st_extent(geometry)) AS native_xmax,"                                     // NOI18N
+                + " ST_XMAX(st_extent(geometry)) AS native_xmax," // NOI18N
                 + " ST_YMAX(st_extent(geometry)) AS native_ymax,"
-                + " ST_XMIN(TRANSFORM(ST_SetSRID(st_extent(geometry), 3021), 4326)) AS lat_lon_xmin," // NOI18N
-                + " ST_YMIN(TRANSFORM(ST_SetSRID(st_extent(geometry), 3021), 4326)) AS lat_lon_ymin,"
-                + " ST_XMAX(TRANSFORM(ST_SetSRID(st_extent(geometry), 3021), 4326)) AS lat_lon_xmax," // NOI18N
-                + " ST_YMAX(TRANSFORM(ST_SetSRID(st_extent(geometry), 3021), 4326)) AS lat_lon_ymax"
-                + " FROM ";                                                                           // NOI18N
-
-    private static final transient String GEOSERVER_CRS = "PROJCS[\"RT90 2.5 gon V\","
-                + "    GEOGCS[\"RT90\","                                          // NOI18N
-                + "        DATUM[\"Rikets_koordinatsystem_1990\","
-                + "            SPHEROID[\"Bessel 1841\",6377397.155,299.1528128," // NOI18N
-                + "                AUTHORITY[\"EPSG\",\"7004\"]],"
-                + "            AUTHORITY[\"EPSG\",\"6124\"]],"                    // NOI18N
-                + "        PRIMEM[\"Greenwich\",0,"
-                + "            AUTHORITY[\"EPSG\",\"8901\"]],"                    // NOI18N
-                + "        UNIT[\"degree\",0.01745329251994328,"
-                + "            AUTHORITY[\"EPSG\",\"9122\"]],"                    // NOI18N
-                + "        AUTHORITY[\"EPSG\",\"4124\"]],"
-                + "    UNIT[\"metre\",1,"                                         // NOI18N
-                + "        AUTHORITY[\"EPSG\",\"9001\"]],"
-                + "    PROJECTION[\"Transverse_Mercator\"],"                      // NOI18N
-                + "    PARAMETER[\"latitude_of_origin\",0],"
-                + "    PARAMETER[\"central_meridian\",15.80827777777778],"        // NOI18N
-                + "    PARAMETER[\"scale_factor\",1],"
-                + "    PARAMETER[\"false_easting\",1500000],"                     // NOI18N
-                + "    PARAMETER[\"false_northing\",0],"
-                + "    AUTHORITY[\"EPSG\",\"3021\"],"                             // NOI18N
-                + "    AXIS[\"Y\",EAST],"
-                + "    AXIS[\"X\",NORTH]]";                                       // NOI18N
-//    private static final transient String GEOSERVER_REST_URL = "http://sudplanwp6.cismet.de/geoserver"; // NOI18N
-//    private static final transient String GEOSERVER_REST_USER = "admin";          // NOI18N
-//    private static final transient String GEOSERVER_REST_PASSWORD = "cismetz12";                        // NOI18N
-//    private static final transient String GEOSERVER_WORKSPACE = "sudplan";        // NOI18N
-//    private static final transient String GEOSERVER_DATASTORE = "airquality";     // NOI18N
-    private static final transient String GEOSERVER_REST_URL = "http://localhost:8080/geoserver"; // NOI18N
-    private static final transient String GEOSERVER_REST_USER = "admin";                          // NOI18N
-    private static final transient String GEOSERVER_REST_PASSWORD = "geoserver";                  // NOI18N
-    private static final transient String GEOSERVER_WORKSPACE = "sudplantest";                    // NOI18N
-    private static final transient String GEOSERVER_DATASTORE = "sudplandb";                      // NOI18N
-
-    private static final transient String GEOSERVER_CAPABILITIES_URL = GEOSERVER_REST_URL
-                + "/wms?service=wms&version=1.1.1&request=GetCapabilities"; // NOI18N
-    private static final transient String GEOSERVER_SLD = "aqds";           // NOI18N
-
-    // TODO: Make dynamic?!
-    private static final transient String GEOSERVER_SRS = "EPSG:3021"; // NOI18N
+                + " ST_XMIN(TRANSFORM(ST_SetSRID(st_extent(geometry), " + DB_QUERY_BOUNDINGBOX_TOKEN_SRS
+                + "), 4326)) AS lat_lon_xmin,"                    // NOI18N
+                + " ST_YMIN(TRANSFORM(ST_SetSRID(st_extent(geometry), " + DB_QUERY_BOUNDINGBOX_TOKEN_SRS
+                + "), 4326)) AS lat_lon_ymin,"
+                + " ST_XMAX(TRANSFORM(ST_SetSRID(st_extent(geometry), " + DB_QUERY_BOUNDINGBOX_TOKEN_SRS
+                + "), 4326)) AS lat_lon_xmax,"                    // NOI18N
+                + " ST_YMAX(TRANSFORM(ST_SetSRID(st_extent(geometry), " + DB_QUERY_BOUNDINGBOX_TOKEN_SRS
+                + "), 4326)) AS lat_lon_ymax"
+                + " FROM ";                                       // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
     private final AirqualityDownscalingOutput.Result result;
     private final Integer modelId;
     private final String name;
+    private final Crs srs;
 
     private transient Exception exception;
 
@@ -166,13 +180,16 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
      * @param  result   DOCUMENT ME!
      * @param  modelId  DOCUMENT ME!
      * @param  name     DOCUMENT ME!
+     * @param  srs      DOCUMENT ME!
      */
     public AirqualityDownscalingResultManager(final AirqualityDownscalingOutput.Result result,
             final Integer modelId,
-            final String name) {
+            final String name,
+            final Crs srs) {
         this.result = result;
         this.modelId = modelId;
         this.name = name;
+        this.srs = srs;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -241,7 +258,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
         final Object envelopeObject = timeseries.getTSProperty(TimeSeries.GEOMETRY);
         // TODO: Make SRS dynamic?!
         final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                3021);
+                CrsTransformer.extractSridFromCrs(srs.getCode()));
 
         if (envelopeObject instanceof Envelope) {
             envelope = (Envelope)envelopeObject;
@@ -308,11 +325,9 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
      * @param   unit        DOCUMENT ME!
      * @param   viewName    createViewStatement DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
-     *
      * @throws  SQLException  DOCUMENT ME!
      */
-    private Double[][] writeValuesToDatabase(
+    private void writeValuesToDatabase(
             final Connection connection,
             final Float[][] floatData,
             final String variable,
@@ -321,7 +336,6 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             final String unit,
             final String viewName) throws SQLException {
         final Statement insertStatement = connection.createStatement();
-        final Statement boundingBoxQuery = connection.createStatement();
 
         // TODO: Drop values if already inserted by a (broken) previous download.
         final StringBuilder insertStatementBuilder = new StringBuilder(
@@ -344,12 +358,13 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 insertValueBuilder.append("setSrid('"); // NOI18N
                 insertValueBuilder.append(geometries[i][j].toText());
                 // TODO: Dynamic SRID?
-                insertValueBuilder.append("'::geometry, 3021)"); // NOI18N
-                insertValueBuilder.append(",");                  // NOI18N
+                insertValueBuilder.append("'::geometry, "); // NOI18N
+                insertValueBuilder.append(CrsTransformer.extractSridFromCrs(srs.getCode()));
+                insertValueBuilder.append("),");            // NOI18N
                 insertValueBuilder.append(Float.toString(floatData[i][j]));
-                insertValueBuilder.append(",'");                 // NOI18N
+                insertValueBuilder.append(",'");            // NOI18N
                 insertValueBuilder.append(unit);
-                insertValueBuilder.append("');");                // NOI18N
+                insertValueBuilder.append("');");           // NOI18N
 
                 insertStatement.addBatch(insertValueBuilder.toString());
             }
@@ -365,15 +380,29 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
         insertStatement.executeBatch();
 
         insertStatement.close();
+    }
 
-        final ResultSet resultSet = boundingBoxQuery.executeQuery(DB_QUERY_BOUNDINGBOX + viewName);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   connection  DOCUMENT ME!
+     * @param   viewName    DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  SQLException  DOCUMENT ME!
+     */
+    private Double[][] selectBoundaries(final Connection connection, final String viewName) throws SQLException {
+        final Statement boundingBoxQuery = connection.createStatement();
+        final ResultSet resultSet = boundingBoxQuery.executeQuery(DB_QUERY_BOUNDINGBOX.replaceAll(
+                    DB_QUERY_BOUNDINGBOX_TOKEN_SRS,
+                    String.valueOf(CrsTransformer.extractSridFromCrs(srs.getCode()))) + viewName);
 
         if (!resultSet.next()) {
             // TODO!!!
         }
 
         final Double[][] result = new Double[2][4];
-
         result[0][0] = resultSet.getDouble("native_xmin");  // NOI18N
         result[0][1] = resultSet.getDouble("native_ymin");  // NOI18N
         result[0][2] = resultSet.getDouble("native_xmax");  // NOI18N
@@ -384,8 +413,6 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
         result[1][3] = resultSet.getDouble("lat_lon_ymax"); // NOI18N
 
         boundingBoxQuery.close();
-
-        connection.commit();
 
         return result;
     }
@@ -403,7 +430,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
         final AttributesAwareGSFeatureTypeEncoder featureType = new AttributesAwareGSFeatureTypeEncoder();
         featureType.setName(name);
         featureType.setEnabled(true);
-        featureType.setSRS(GEOSERVER_SRS);
+        featureType.setSRS(srs.getCode());
         featureType.setProjectionPolicy(GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED);
 
         final StringBuilder title = new StringBuilder();
@@ -505,6 +532,22 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
         attribute.addEntry("binding", "java.lang.String"); // NOI18N
         featureType.addAttribute(attribute);
 
+        attribute = new GSAttributeEncoder();
+        attribute.addEntry("name", "maxvalue");           // NOI18N
+        attribute.addEntry("minOccurs", "1");             // NOI18N
+        attribute.addEntry("maxOccurs", "1");             // NOI18N
+        attribute.addEntry("nillable", "false");          // NOI18N
+        attribute.addEntry("binding", "java.lang.Float"); // NOI18N
+        featureType.addAttribute(attribute);
+
+        attribute = new GSAttributeEncoder();
+        attribute.addEntry("name", "minvalue");           // NOI18N
+        attribute.addEntry("minOccurs", "1");             // NOI18N
+        attribute.addEntry("maxOccurs", "1");             // NOI18N
+        attribute.addEntry("nillable", "false");          // NOI18N
+        attribute.addEntry("binding", "java.lang.Float"); // NOI18N
+        featureType.addAttribute(attribute);
+
         return featureType;
     }
 
@@ -513,7 +556,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    private void doIt() throws Exception {
+    private void visualize() throws Exception {
         final TimeSeries timeseries = retrieveTimeSeries();
         if (timeseries == null) {
             final String message = "Error retrieving timeseries."; // NOI18N
@@ -563,9 +606,45 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             throw new Exception(message, ex);
         }
 
+        float min = Float.MAX_VALUE;
+        float max = Float.MIN_VALUE;
+        float mean = 0F;
         try {
-            // TODO: for demo purposes assume it is a yearly grid
+            final NavigableSet<TimeStamp> timeStamps = timeseries.getTimeStamps();
+
+            for (final TimeStamp stamp : timeStamps) {
+                final Float[][] grid = (Float[][])timeseries.getValue(stamp, valueKey);
+                float sumGrid = 0F;
+
+                for (final Float[] values : grid) {
+                    float sumValues = 0F;
+                    for (final Float value : values) {
+                        if (min > value) {
+                            min = value;
+                        }
+                        if (max < value) {
+                            max = value;
+                        }
+
+                        sumValues += value;
+                    }
+
+                    sumGrid += (sumValues / values.length);
+                }
+
+                mean += (sumGrid / grid.length);
+            }
+
+            mean /= timeStamps.size();
+        } catch (final Exception ex) {
+            final String message = "Something went wrong while downloading results."; // NOI18N
+            LOG.error(message, ex);
+            throw new Exception(message, ex);
+        }
+
+        try {
             for (final TimeStamp stamp : timeseries.getTimeStamps()) {
+                final Float[][] values = (Float[][])timeseries.getValue(stamp, valueKey);
                 final String viewName = MessageFormat.format(
                             DB_VIEW_NAME_PATTERN,
                             modelId,
@@ -574,14 +653,18 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                             Long.toString(stamp.asMilis()))
                             .toLowerCase();
 
-                final Double[][] boundaries = writeValuesToDatabase(
-                        connection,
-                        (Float[][])timeseries.getValue(stamp, valueKey),
-                        variable,
-                        stamp.asMilis(),
-                        geometries,
-                        unit,
-                        viewName);
+                writeValuesToDatabase(
+                    connection,
+                    values,
+                    variable,
+                    stamp.asMilis(),
+                    geometries,
+                    unit,
+                    viewName);
+
+                final Double[][] boundaries = selectBoundaries(connection, viewName);
+
+                connection.commit();
 
                 final AttributesAwareGSFeatureTypeEncoder featureType = createFeatureType(
                         viewName,
@@ -593,14 +676,20 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                     boundaries[0][1],
                     boundaries[0][2],
                     boundaries[0][3],
-                    GEOSERVER_CRS);
+                    srs.getCode());
+//                    GEOSERVER_CRS);
 
                 featureType.setLatLonBoundingBox(
                     boundaries[1][0],
                     boundaries[1][1],
                     boundaries[1][2],
                     boundaries[1][3],
-                    GEOSERVER_CRS);
+                    "EPSG:4326");
+//                    GEOSERVER_CRS);
+
+                featureType.addKeyword("min:" + min);
+                featureType.addKeyword("max:" + max);
+                featureType.addKeyword("mean:" + mean);
 
                 final GSPathAwareLayerEncoder layer = new GSPathAwareLayerEncoder();
                 layer.setEnabled(true);
@@ -636,7 +725,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
         SlidableWMSServiceLayerGroup result = null;
 
         try {
-            doIt();
+            visualize();
 
             final WMSCapabilities wmsCapabilities =
                 new WMSCapabilitiesFactory().createCapabilities(GEOSERVER_CAPABILITIES_URL);
@@ -691,7 +780,8 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                     completePath,
                     Arrays.asList(variableLayer.getChildren()),
                     wmsCapabilities,
-                    GEOSERVER_CAPABILITIES_URL);
+                    GEOSERVER_CAPABILITIES_URL,
+                    srs);
         } catch (Exception ex) {
             exception = ex;
             return result;
