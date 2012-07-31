@@ -19,6 +19,8 @@ import java.io.File;
 
 import java.util.Observable;
 
+import javax.swing.JPanel;
+
 import de.cismet.cids.custom.sudplan.concurrent.Watchable;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -26,7 +28,6 @@ import de.cismet.cids.dynamics.CidsBean;
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 import de.cismet.tools.gui.downloadmanager.Download;
-import javax.swing.JPanel;
 
 /**
  * DOCUMENT ME!
@@ -201,11 +202,9 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
     }
 
     @Override
-    public JPanel getExceptionPanel(Exception exception) {
+    public JPanel getExceptionPanel(final Exception exception) {
         return null;
     }
-
-
 
     /**
      * DOCUMENT ME!

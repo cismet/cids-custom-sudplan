@@ -30,6 +30,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.swing.JMenu;
+
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MapPopupAction;
@@ -204,5 +206,10 @@ public final class ShowCatchmentAreaForPointAction extends AbstractWFSFeatureRet
     @Override
     public int compareTo(final MapPopupAction other) {
         return getPosition() - other.getPosition();
+    }
+
+    @Override
+    public JMenu getSubmenu() {
+        return null;
     }
 }
