@@ -203,6 +203,7 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
 
     @Override
     public JPanel getExceptionPanel(final Exception exception) {
+        LOG.warn("getExceptionPanel not supported yet by AbstractModelRunWatchable", exception);
         return null;
     }
 

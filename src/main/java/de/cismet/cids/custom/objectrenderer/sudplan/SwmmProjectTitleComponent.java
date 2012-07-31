@@ -119,8 +119,11 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
         setLayout(new java.awt.GridBagLayout());
 
         lblIcon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/EPAlogo32ct.png"))); // NOI18N
-        lblIcon.setText(org.openide.util.NbBundle.getMessage(SwmmProjectTitleComponent.class, "SwmmProjectTitleComponent.lblIcon.text")); // NOI18N
+        lblIcon.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/EPAlogo32ct.png"))); // NOI18N
+        lblIcon.setText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectTitleComponent.class,
+                "SwmmProjectTitleComponent.lblIcon.text"));                                            // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -128,7 +131,9 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
 
         lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         lblTitle.setForeground(new java.awt.Color(255, 255, 255));
-        lblTitle.setText(NbBundle.getMessage(SwmmProjectTitleComponent.class, "SwmmProjectTitleComponent.lblTitle.text")); // NOI18N
+        lblTitle.setText(NbBundle.getMessage(
+                SwmmProjectTitleComponent.class,
+                "SwmmProjectTitleComponent.lblTitle.text"));  // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
@@ -138,9 +143,12 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
         add(lblTitle, gridBagConstraints);
 
         btnNewSwmmProject.setAction(ActionProviderFactory.getCidsBeanAction(UploadWizardAction.class));
-        btnNewSwmmProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/newSwmmProject24.png"))); // NOI18N
+        btnNewSwmmProject.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/newSwmmProject24.png"))); // NOI18N
         btnNewSwmmProject.setText("");
-        btnNewSwmmProject.setToolTipText(org.openide.util.NbBundle.getMessage(SwmmProjectTitleComponent.class, "SwmmProjectTitleComponent.btnNewSwmmProject.tooltip")); // NOI18N
+        btnNewSwmmProject.setToolTipText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectTitleComponent.class,
+                "SwmmProjectTitleComponent.btnNewSwmmProject.tooltip"));                                    // NOI18N
         btnNewSwmmProject.setMargin(new java.awt.Insets(4, 4, 4, 4));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 0;
@@ -149,9 +157,12 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
         add(btnNewSwmmProject, gridBagConstraints);
 
         btnRunEta.setAction(ActionProviderFactory.getCidsBeanAction(EtaWizardAction.class));
-        btnRunEta.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/newEtaCalculation24.png"))); // NOI18N
+        btnRunEta.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/newEtaCalculation24.png"))); // NOI18N
         btnRunEta.setText("");
-        btnRunEta.setToolTipText(org.openide.util.NbBundle.getMessage(SwmmProjectTitleComponent.class, "SwmmProjectTitleComponent.btnRunEta.toolTipText")); // NOI18N
+        btnRunEta.setToolTipText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectTitleComponent.class,
+                "SwmmProjectTitleComponent.btnRunEta.toolTipText"));                                           // NOI18N
         btnRunEta.setMargin(new java.awt.Insets(4, 4, 4, 4));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 0;
@@ -160,14 +171,17 @@ public class SwmmProjectTitleComponent extends javax.swing.JPanel {
         add(btnRunEta, gridBagConstraints);
 
         btnRunSwmmPlusEta.setAction(ActionProviderFactory.getCidsBeanAction(SwmmPlusEtaWizardAction.class));
-        btnRunSwmmPlusEta.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/newSwmmCalculation24.png"))); // NOI18N
+        btnRunSwmmPlusEta.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/newSwmmCalculation24.png"))); // NOI18N
         btnRunSwmmPlusEta.setText("");
-        btnRunSwmmPlusEta.setToolTipText(org.openide.util.NbBundle.getMessage(SwmmProjectTitleComponent.class, "SwmmProjectTitleComponent.btnRunSwmmPlusEta.tooltip")); // NOI18N
+        btnRunSwmmPlusEta.setToolTipText(org.openide.util.NbBundle.getMessage(
+                SwmmProjectTitleComponent.class,
+                "SwmmProjectTitleComponent.btnRunSwmmPlusEta.tooltip"));                                        // NOI18N
         btnRunSwmmPlusEta.setMargin(new java.awt.Insets(4, 4, 4, 4));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(btnRunSwmmPlusEta, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
+    }                                                                                                           // </editor-fold>//GEN-END:initComponents
 }

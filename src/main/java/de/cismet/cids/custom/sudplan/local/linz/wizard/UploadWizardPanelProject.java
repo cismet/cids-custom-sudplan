@@ -80,7 +80,8 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
 //        this.setInpFile(swmmProject.getProperty("inp_file_name") != null
 //                ? swmmProject.getProperty("inp_file_name").toString() : "");
 
-        this.setInpFile(wizard.getProperty(UploadWizardAction.PROP_SWMM_INP_FILE).toString());
+        this.setInpFile((wizard.getProperty(UploadWizardAction.PROP_SWMM_INP_FILE) != null)
+                ? wizard.getProperty(UploadWizardAction.PROP_SWMM_INP_FILE).toString() : "");
 
         component.init();
     }
@@ -94,9 +95,16 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
         try {
             swmmProject.setProperty("title", this.getTitle());
             swmmProject.setProperty("description", this.getDescription());
-            swmmProject.setProperty(
-                "inp_file_name",
-                this.inpFile.substring(this.inpFile.lastIndexOf(File.pathSeparator)));
+
+            if ((this.inpFile != null) && !this.inpFile.isEmpty()
+                        && (this.inpFile.lastIndexOf(File.pathSeparator) != -1)) {
+                swmmProject.setProperty(
+                    "inp_file_name",
+                    this.inpFile.substring(this.inpFile.lastIndexOf(File.pathSeparator)));
+            } else {
+                LOG.warn("Input file path '" + this.inpFile
+                            + "' is not set or does not contain path separator '" + File.pathSeparator + "'");
+            }
 
             wizard.putProperty(UploadWizardAction.PROP_SWMM_INP_FILE,
                 this.getInpFile());
@@ -108,7 +116,6 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
     @Override
     public boolean isValid() {
         boolean valid = true;
-
         if ((this.title == null) || this.title.isEmpty()) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
@@ -118,13 +125,13 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
             valid = false;
         } else if ((this.description == null) || this.description.isEmpty()) {
             wizard.putProperty(
-                WizardDescriptor.PROP_INFO_MESSAGE,
+                WizardDescriptor.PROP_WARNING_MESSAGE,
                 NbBundle.getMessage(
                     UploadWizardPanelProject.class,
                     "UploadWizardPanelProject.isValid().emptyDescription")); // NOI18N
         } else if ((this.inpFile == null) || this.inpFile.isEmpty()) {
             wizard.putProperty(
-                WizardDescriptor.PROP_INFO_MESSAGE,
+                WizardDescriptor.PROP_WARNING_MESSAGE,
                 NbBundle.getMessage(
                     UploadWizardPanelProject.class,
                     "UploadWizardPanelProject.isValid().emptyFile"));        // NOI18N

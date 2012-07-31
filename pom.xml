@@ -16,7 +16,10 @@
 
     <name>cids Custom Sudplan</name>
     <description>cids Navigator customisation for the SUDPLAN FP7 project</description>
-    
+    <ciManagement>
+        <system>hudson</system>
+        <url>http://kif:8080/hudson/job/cids-custom-sudplan/</url>
+    </ciManagement>
     <developers>
         <developer>
             <id>thell</id>

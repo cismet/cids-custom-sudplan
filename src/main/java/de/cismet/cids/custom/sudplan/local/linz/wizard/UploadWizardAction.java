@@ -46,6 +46,13 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
 
     //~ Static fields/initializers ---------------------------------------------
 
+    public static final String SWMM_WEBDAV_HOST = "http://sudplan.cismet.de/tsDav";
+    // public static final String SWMM_WEBDAV_HOST = "https://sudplan.ait.ac.at/model/config/"
+    public static final String SWMM_WEBDAV_USER = "tsDav";
+    // public static final String SWMM_WEBDAV_USER = "SMS";
+    public static final String SWMM_WEBDAV_PASSWORD = "RHfio2l4wrsklfghj";
+    // public static final String SWMM_WEBDAV_PASSWORD = "cismet42";
+
     public static final String TABLENAME_SWMM_PROJECT = SwmmInput.TABLENAME_SWMM_PROJECT;
     public static final String PROP_SWMM_PROJECT_BEAN = "__prop_swmm_project_bean__"; // NOI18N
     public static final String PROP_SWMM_INP_FILE = "__prop_swmm_inp_file__";         // NOI18N
@@ -79,7 +86,8 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
         assert EventQueue.isDispatchThread() : "can only be called from EDT"; // NOI18N
 
         if (panels == null) {
-            panels = new WizardDescriptor.Panel[] { new UploadWizardPanelProject(), };
+            panels = new WizardDescriptor.Panel[] { new UploadWizardPanelProject(), new UploadWizardPanelUpload() };
+
             final String[] steps = new String[panels.length];
             for (int i = 0; i < panels.length; i++) {
                 final Component c = panels[i].getComponent();
@@ -146,19 +154,19 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
                 LOG.info("wizard closed (not cancelled), saving new SWMM Model");
             }
 
-            try {
-                newSwmmBean.persist();
-            } catch (final Exception ex) {
-                final String message = "Cannot save new SWMM Model '"
-                            + newSwmmBean + "'";
-                LOG.error(message, ex);
-                JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
-                    message,
-                    NbBundle.getMessage(
-                        UploadWizardAction.class,
-                        "UploadWizardAction.actionPerformed(ActionEvent).wizard.error"),
-                    JOptionPane.ERROR_MESSAGE);
-            }
+//            try {
+//                newSwmmBean.persist();
+//            } catch (final Exception ex) {
+//                final String message = "Cannot save new SWMM Model '"
+//                            + newSwmmBean + "'";
+//                LOG.error(message, ex);
+//                JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
+//                    message,
+//                    NbBundle.getMessage(
+//                        UploadWizardAction.class,
+//                        "UploadWizardAction.actionPerformed(ActionEvent).wizard.error"),
+//                    JOptionPane.ERROR_MESSAGE);
+//            }
         }
     }
 }

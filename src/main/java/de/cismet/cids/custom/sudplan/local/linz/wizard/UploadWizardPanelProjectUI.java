@@ -169,7 +169,10 @@ public final class UploadWizardPanelProjectUI extends javax.swing.JPanel {
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${model.inpFile}"),
                 txtFile,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
+                org.jdesktop.beansbinding.BeanProperty.create("text"),
+                "infFile");
+        binding.setSourceNullValue("");
+        binding.setSourceUnreadableValue("");
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();

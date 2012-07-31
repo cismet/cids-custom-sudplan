@@ -96,6 +96,9 @@
       <BindingProperties>
         <BindingProperty name="text" source="Form" sourcePath="${model.inpFile}" target="txtFile" targetPath="text" updateStrategy="0" immediately="false">
           <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
+          <Property name="nullValue" type="java.lang.String" value=""/>
+          <Property name="incompletePathValue" type="java.lang.String" value=""/>
+          <Property name="name" type="java.lang.String" value="infFile"/>
         </BindingProperty>
       </BindingProperties>
       <Constraints>

@@ -149,7 +149,6 @@ public final class TimeseriesTransmitter {
 
             try {
                 put.setRequestEntity(requestEntity);
-
                 client.executeMethod(put);
                 final int statusCode = put.getStatusCode();
                 if (LOG.isDebugEnabled()) {
