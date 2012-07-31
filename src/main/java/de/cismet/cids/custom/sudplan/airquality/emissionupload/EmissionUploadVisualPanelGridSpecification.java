@@ -749,7 +749,7 @@ public class EmissionUploadVisualPanelGridSpecification extends javax.swing.JPan
                 setText(substance.getRepresentationUI());
             } else {
                 // TODO: I18N
-                setText("Unknown substance"); // NOI18N
+                setText("Unknown substance");
             }
 
             return this;

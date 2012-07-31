@@ -142,6 +142,7 @@ public class EmissionUploadDialog extends javax.swing.JDialog {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(6, 6, 3, 6);
         getContentPane().add(lblMessage, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -186,6 +187,7 @@ public class EmissionUploadDialog extends javax.swing.JDialog {
                 @Override
                 public void run() {
                     prgUploading.setIndeterminate(true);
+                    prgUploading.setVisible(true);
                     lblMessage.setText(
                         NbBundle.getMessage(EmissionUploadDialog.class, "EmissionUploadDialog.lblMessage.waiting"));
                     btnOK.setText(NbBundle.getMessage(EmissionUploadDialog.class, "EmissionUploadDialog.btnOK.text"));
@@ -195,6 +197,7 @@ public class EmissionUploadDialog extends javax.swing.JDialog {
                                 || !(cidsBean.getProperty("file") instanceof String)) {
                         LOG.info("CidsBean is invalid.");
                         prgUploading.setIndeterminate(false);
+                        prgUploading.setVisible(false);
                         lblMessage.setText(
                             NbBundle.getMessage(
                                 EmissionUploadDialog.class,
@@ -208,6 +211,7 @@ public class EmissionUploadDialog extends javax.swing.JDialog {
                     if ((Boolean)cidsBean.getProperty("uploaded")) {
                         LOG.info("CidsBean is already uploaded.");
                         prgUploading.setIndeterminate(false);
+                        prgUploading.setVisible(false);
                         lblMessage.setText(
                             NbBundle.getMessage(
                                 EmissionUploadDialog.class,
@@ -262,6 +266,7 @@ public class EmissionUploadDialog extends javax.swing.JDialog {
             }
 
             prgUploading.setIndeterminate(false);
+            prgUploading.setVisible(false);
             btnOK.setText(NbBundle.getMessage(EmissionUploadDialog.class, "EmissionUploadDialog.btnOK"));
             btnOK.setEnabled(true);
 

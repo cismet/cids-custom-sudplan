@@ -335,17 +335,16 @@ public class EmissionUpload /*implements Runnable*/ {
         }
 
         BufferedInputStream reader = null;
+        final ByteArrayOutputStream result = new ByteArrayOutputStream();
+        final byte[] buffer = new byte[8192];
 
         try {
-            final ByteArrayOutputStream result = new ByteArrayOutputStream();
             reader = new BufferedInputStream(new FileInputStream(file));
-            final byte[] buffer = new byte[8192];
+            int length = -1;
 
-            while (reader.read(buffer) != -1) {
-                result.write(buffer);
+            while ((length = reader.read(buffer)) != -1) {
+                result.write(buffer, 0, length);
             }
-
-            return result.toByteArray();
         } catch (final Exception ex) {
             LOG.warn("Couldn't read file '" + file + "'.", ex);
             return new byte[0];
@@ -357,5 +356,7 @@ public class EmissionUpload /*implements Runnable*/ {
                 }
             }
         }
+
+        return result.toByteArray();
     }
 }
