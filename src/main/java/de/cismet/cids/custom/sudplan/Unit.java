@@ -22,6 +22,8 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
 
     //~ Static fields/initializers ---------------------------------------------
 
+    public static final Unit M = new Unit("urn:ogc:def:uom:OGC:m", "Meter");
+    public static final Unit CM = new Unit("urn:ogc:def:uom:OGC:cm", "Centimeter");
     public static final Unit MM = new Unit(
             "urn:ogc:def:uom:OGC:mm", // NOI18N
             NbBundle.getMessage(Unit.class, "Unit.MILLIMETERS.localisedName")); // NOI18N
