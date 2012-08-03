@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
+import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
@@ -53,8 +54,6 @@ public final class EtaWizardPanelProjectUI extends JPanel {
     private final transient EtaWizardPanelProject model;
     private final transient ItemListener projectListener;
     private final transient ItemListener scenarioListener;
-    private transient CidsBean lastSelectedSwmmProject = null;
-    private transient CidsBean lastSelectedSwmmScenario = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cobProjects;
     private javax.swing.JComboBox cobScenarios;
@@ -91,18 +90,7 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 EtaWizardPanelProject.class,
                 "EtaWizardPanelProject.this.name")); // NOI18N
 
-        this.cobProjects.setRenderer(new NameRenderer());
-        this.cobProjects.addItemListener(WeakListeners.create(
-                ItemListener.class,
-                this.projectListener,
-                this.cobProjects));
-
         this.initProjectList();
-
-        this.cobScenarios.addItemListener(WeakListeners.create(
-                ItemListener.class,
-                this.scenarioListener,
-                this.cobScenarios));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -111,22 +99,15 @@ public final class EtaWizardPanelProjectUI extends JPanel {
      * DOCUMENT ME!
      */
     void init() {
-        if (model.getSelectedSwmmProject() != lastSelectedSwmmProject) {
-            lastSelectedSwmmProject = model.getSelectedSwmmProject();
-            this.cobProjects.setSelectedItem(lastSelectedSwmmProject);
-        }
+        this.cobProjects.setSelectedIndex(-1);
+        this.cobProjects.setSelectedItem(model.getSelectedSwmmProject());
 
-        if (model.getSelectedSwmmScenario() != lastSelectedSwmmScenario) {
-            lastSelectedSwmmScenario = model.getSelectedSwmmScenario();
-            this.cobScenarios.setSelectedItem(lastSelectedSwmmScenario);
-        }
-
-        // this.cobProjects.setSelectedIndex(-1);
-        // this.cobScenarios.setSelectedIndex(-1);
+        this.cobScenarios.setSelectedIndex(-1);
+        this.cobScenarios.setSelectedItem(model.getSelectedSwmmScenario());
 
         // this should perform all the updates
-        // this.bindingGroup.unbind();
-        // this.bindingGroup.bind();
+        this.bindingGroup.unbind();
+        this.bindingGroup.bind();
     }
 
     /**
@@ -169,6 +150,11 @@ public final class EtaWizardPanelProjectUI extends JPanel {
         }
 
         this.cobProjects.setModel(comboBoxModel);
+        this.cobProjects.setRenderer(new NameRenderer());
+        this.cobProjects.addItemListener(WeakListeners.create(
+                ItemListener.class,
+                this.projectListener,
+                this.cobProjects));
     }
 
     /**
@@ -178,18 +164,15 @@ public final class EtaWizardPanelProjectUI extends JPanel {
      */
     private void initScenarioList(final List<CidsBean> swmmScenarios) {
         final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
-
-        if (!swmmScenarios.isEmpty()) {
-            for (final CidsBean swmmScenario : swmmScenarios) {
-                comboBoxModel.addElement(swmmScenario);
-            }
-            this.cobScenarios.setModel(comboBoxModel);
-            this.cobScenarios.setSelectedIndex(0);
-        } else {
-            LOG.warn("no SWMM Scenarios found for SWMM Project '" + this.model.getSelectedSwmmProject() + "'");
-            this.cobScenarios.setModel(comboBoxModel);
-            this.cobScenarios.setSelectedIndex(-1);
+        for (final CidsBean swmmScenario : swmmScenarios) {
+            comboBoxModel.addElement(swmmScenario);
         }
+
+        this.cobScenarios.setModel(comboBoxModel);
+        this.cobScenarios.addItemListener(WeakListeners.create(
+                ItemListener.class,
+                this.scenarioListener,
+                this.cobScenarios));
     }
 
     /**
@@ -392,10 +375,6 @@ public final class EtaWizardPanelProjectUI extends JPanel {
      */
     private class ProjectListener implements ItemListener {
 
-        //~ Instance fields ----------------------------------------------------
-
-        private final transient Logger LOG = Logger.getLogger(ProjectListener.class);
-
         //~ Methods ------------------------------------------------------------
 
         @Override
@@ -407,10 +386,6 @@ public final class EtaWizardPanelProjectUI extends JPanel {
 
                 final CidsBean swmmProject = (CidsBean)e.getItem();
                 model.setSelectedSwmmProject(swmmProject);
-
-                taProjectDescriptionText.setText(
-                    (swmmProject.getProperty("description") != null) ? swmmProject.getProperty("description")
-                                .toString() : null);
 
                 final List<CidsBean> swmmScenarios = (List)swmmProject.getProperty("swmm_scenarios"); // NOI18N
                 initScenarioList(swmmScenarios);
@@ -425,10 +400,6 @@ public final class EtaWizardPanelProjectUI extends JPanel {
      */
     private class ScenarioListener implements ItemListener {
 
-        //~ Instance fields ----------------------------------------------------
-
-        private final transient Logger LOG = Logger.getLogger(ScenarioListener.class);
-
         //~ Methods ------------------------------------------------------------
 
         @Override
@@ -440,10 +411,6 @@ public final class EtaWizardPanelProjectUI extends JPanel {
 
                 final CidsBean swmmScenario = (CidsBean)e.getItem();
                 model.setSelectedSwmmScenario(swmmScenario);
-
-                taScenarioDescriptionText.setText(
-                    (swmmScenario.getProperty("description") != null)
-                        ? swmmScenario.getProperty("description").toString() : null);
 
                 // dieser mist funktioniert einfach nicht
                 // bindingGroup.unbind();

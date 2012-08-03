@@ -27,7 +27,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileFilter;
 
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
 import de.cismet.cids.custom.sudplan.server.search.LightwightSwmmProjectsSearch;
@@ -102,12 +101,20 @@ public final class UploadWizardPanelProjectUI extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     void init() {
-        // txtName.setText(model.getTitle());
-        // this.txaDescription.setText(model.getDescription());
+        txtName.setText(model.getTitle());
+        this.txaDescription.setText(model.getDescription());
         this.txtFile.setText(model.getInpFile());
 
         txtName.setSelectionStart(0);
         txtName.setSelectionEnd(txtName.getText().length());
+
+        EventQueue.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    txtName.requestFocus();
+                }
+            });
 
         this.btnFile.setEnabled(model.isFormEnabled());
         this.cobProjects.setEnabled(model.isFormEnabled());
@@ -138,17 +145,6 @@ public final class UploadWizardPanelProjectUI extends javax.swing.JPanel {
         }
 
         model.fireChangeEvent();
-
-        bindingGroup.unbind();
-        bindingGroup.bind();
-
-        EventQueue.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    txtName.requestFocus();
-                }
-            });
     }
 
     /**
@@ -316,15 +312,13 @@ public final class UploadWizardPanelProjectUI extends javax.swing.JPanel {
      */
     private void btnFileActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnFileActionPerformed
         final JFileChooser jfc = new JFileChooser();
-        jfc.addChoosableFileFilter(new InpFilter());
-
         jfc.setSelectedFile(new File(UploadWizardPanelProjectUI.this.txtFile.getText()));
         final int answer = jfc.showOpenDialog(UploadWizardPanelProjectUI.this);
         if (JFileChooser.APPROVE_OPTION == answer) {
             txtFile.setText(jfc.getSelectedFile().getAbsolutePath());
             model.fireChangeEvent();
         }
-    } //GEN-LAST:event_btnFileActionPerformed
+    }                                                                           //GEN-LAST:event_btnFileActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -403,7 +397,7 @@ public final class UploadWizardPanelProjectUI extends javax.swing.JPanel {
      *
      * @version  $Revision$, $Date$
      */
-    private final class ProjectListener implements ItemListener {
+    private class ProjectListener implements ItemListener {
 
         //~ Methods ------------------------------------------------------------
 
@@ -417,26 +411,6 @@ public final class UploadWizardPanelProjectUI extends javax.swing.JPanel {
                 final LightwightSwmmProject swmmProject = (LightwightSwmmProject)e.getItem();
                 model.setSelectedSwmmProject(swmmProject.getId());
             }
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private final class InpFilter extends javax.swing.filechooser.FileFilter {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public boolean accept(final File file) {
-            final String filename = file.getName();
-            return file.isDirectory() || filename.endsWith(".inp");
-        }
-        @Override
-        public String getDescription() {
-            return "SWMM Input File";
         }
     }
 }

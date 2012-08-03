@@ -8,32 +8,14 @@
 package de.cismet.cids.custom.sudplan.local.linz.wizard;
 
 import Sirius.navigator.connection.SessionManager;
-import Sirius.navigator.exception.ConnectionException;
 import Sirius.navigator.ui.ComponentRegistry;
 
 import Sirius.server.middleware.types.MetaClass;
-import Sirius.server.middleware.types.MetaObject;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SingleClientConnManager;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.Component;
@@ -41,18 +23,11 @@ import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
-import java.net.URL;
-
-import java.security.cert.CertificateException;
-
 import java.text.MessageFormat;
-
-import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
-import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -77,6 +52,7 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
     // public static final String SWMM_WEBDAV_USER = "SMS";
     public static final String SWMM_WEBDAV_PASSWORD = "RHfio2l4wrsklfghj";
     // public static final String SWMM_WEBDAV_PASSWORD = "cismet42";
+
     public static final String TABLENAME_SWMM_PROJECT = SwmmInput.TABLENAME_SWMM_PROJECT;
     public static final String PROP_NEW_SWMM_PROJECT_BEAN = "__prop_new_swmm_project_bean__";       // NOI18N
     public static final String PROP_SELECTED_SWMM_PROJECT_ID = "__prop_selected_swmm_project_id__"; // NOI18N
@@ -87,7 +63,7 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
     public static final String PROP_COPY_CSOS_COMPLETE = "__prop_copy_csos_complete__";             // NOI18N
     public static final String PROP_COPY_CSOS_ERRORNEOUS = "__prop_copy_csos_erroneous__";          // NOI18N
     public static final String PROP_COPY_CSOS_IN_PROGRESS = "__prop_copy_csos_in_progress__";       // NOI18N
-    public static final String PROP_COPIED_CSOS = "__prop_copied_csos__";                           // NOI18N
+
     private static final transient Logger LOG = Logger.getLogger(UploadWizardAction.class);
 
     //~ Instance fields --------------------------------------------------------
@@ -200,7 +176,7 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
 
         if (!cancelled) {
             if (LOG.isDebugEnabled()) {
-                LOG.info("wizard closed (not cancelled), new SWMM Model saved");
+                LOG.info("wizard closed (not cancelled), saving new SWMM Model");
             }
 
 //            try {
@@ -217,198 +193,7 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
 //                    JOptionPane.ERROR_MESSAGE);
 //            }
         } else {
-            final boolean uploadComplete = (Boolean)wizardDescriptor.getProperty(PROP_UPLOAD_COMPLETE);
-            final boolean copyCSOsComplete = (Boolean)wizardDescriptor.getProperty(PROP_COPY_CSOS_COMPLETE);
-
-            if (uploadComplete || copyCSOsComplete) {
-                LOG.warn("Wizard cancelled :o(! Trying to remove created meta objects");
-                final CleanUpThread cleanUpThread = new CleanUpThread(uploadComplete, copyCSOsComplete);
-                SudplanConcurrency.getSudplanGeneralPurposePool().execute(cleanUpThread);
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Wizard cancelled: nothing to remove :o)");
-                }
-            }
-        }
-    }
-
-    //~ Inner Classes ----------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private final class CleanUpThread implements Runnable {
-
-        //~ Instance fields ----------------------------------------------------
-
-        final boolean uploadComplete;
-        final boolean copyCSOsComplete;
-
-        private final transient Logger LOG = Logger.getLogger(CleanUpThread.class);
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new CleanUpThread object.
-         *
-         * @param  uploadComplete    DOCUMENT ME!
-         * @param  copyCSOsComplete  DOCUMENT ME!
-         */
-        private CleanUpThread(final boolean uploadComplete, final boolean copyCSOsComplete) {
-            this.uploadComplete = uploadComplete;
-            this.copyCSOsComplete = copyCSOsComplete;
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public void run() {
-            assert wizardDescriptor.getProperty(PROP_NEW_SWMM_PROJECT_BEAN) != null : "SWMM Project Bean must not be null";
-            final CidsBean newSwmmBean = (CidsBean)wizardDescriptor.getProperty(PROP_NEW_SWMM_PROJECT_BEAN);
-            final String domain = SessionManager.getSession().getUser().getDomain();
-
-            if (((Integer)newSwmmBean.getProperty("id")) != -1) {
-                LOG.warn("deleting new SWMM Bean #" + newSwmmBean.getProperty("id"));
-
-                try {
-                    SessionManager.getProxy().deleteMetaObject(newSwmmBean.getMetaObject(), domain);
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("new SWMM Bean #" + newSwmmBean.getProperty("id") + " deleted successfully");
-                    }
-                } catch (Throwable t) {
-                    LOG.error("removal of new SWMM Bean #" + newSwmmBean.getProperty("id") + " failed: "
-                                + t.getLocalizedMessage(),
-                        t);
-                }
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("new SWMM Bean not stored yet, no need to delete it");
-                }
-            }
-
-            if (this.uploadComplete) {
-                final String inpFile = newSwmmBean.getProperty("inp_file_name").toString();
-                LOG.warn("deleting upload file '" + inpFile + "' from " + UploadWizardAction.SWMM_WEBDAV_HOST);
-
-                final UsernamePasswordCredentials defaultcreds = new UsernamePasswordCredentials(
-                        UploadWizardAction.SWMM_WEBDAV_USER,
-                        UploadWizardAction.SWMM_WEBDAV_PASSWORD);
-
-                try {
-                    final SSLSocketFactory sslsf = new SSLSocketFactory(new TrustStrategy() {
-
-                                @Override
-                                public boolean isTrusted(final java.security.cert.X509Certificate[] chain,
-                                        final String authType) throws CertificateException {
-                                    return true;
-                                }
-                            });
-                    final Scheme httpScheme = new Scheme("http", 80, PlainSocketFactory.getSocketFactory());
-                    final Scheme httpsScheme = new Scheme("https", 443, sslsf);
-                    final SchemeRegistry schemeRegistry = new SchemeRegistry();
-                    schemeRegistry.register(httpScheme);
-                    schemeRegistry.register(httpsScheme);
-
-                    final ClientConnectionManager cm = new SingleClientConnManager(schemeRegistry);
-
-                    final HttpContext localContext = new BasicHttpContext();
-                    final DefaultHttpClient httpClient = new DefaultHttpClient(cm);
-
-                    httpClient.getCredentialsProvider().setCredentials(
-                        new AuthScope(AuthScope.ANY),
-                        defaultcreds);
-
-                    final URL targetLocation = new URL(
-                            UploadWizardAction.SWMM_WEBDAV_HOST
-                                    + inpFile);
-
-                    final HttpGet getMethod = new HttpGet(new URL(UploadWizardAction.SWMM_WEBDAV_HOST)
-                                    .toExternalForm());
-
-                    HttpResponse response = httpClient.execute(getMethod, localContext);
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("pre-put authentication with GET returned '"
-                                    + response.getStatusLine() + "'");
-                    }
-
-                    if ((response.getStatusLine().getStatusCode() != 200)) {
-                        LOG.warn("pre-put authentication with GET failed with status code: "
-                                    + response.getStatusLine().getStatusCode());
-                    }
-
-                    getMethod.abort();
-
-                    final HttpDelete deleteMethod = new HttpDelete(targetLocation.toExternalForm());
-
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("deleting uploaded file '" + inpFile + "'");
-                    }
-                    response = httpClient.execute(deleteMethod, localContext);
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("deleting '" + inpFile + "' completed");
-                    }
-
-                    final int statusCode = response.getStatusLine().getStatusCode();
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Leaving delete '" + inpFile + "' with status code: " + statusCode);
-                    }
-
-                    if ((statusCode != 200) && (statusCode != 202) && (statusCode != 204)) {
-                        final String message = "Deletion of file '"
-                                    + inpFile + "' not successful, server returned status '"
-                                    + response.getStatusLine() + "'";
-                        throw new Exception(message);
-                    }
-
-                    try {
-                        httpClient.getConnectionManager().shutdown();
-                    } catch (Throwable t) {
-                        LOG.warn("could not close httpClient connection", t);
-                    }
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("uploaded file '" + inpFile + "' successfully deleted from "
-                                    + UploadWizardAction.SWMM_WEBDAV_HOST);
-                    }
-                } catch (Throwable t) {
-                    LOG.error("removal of uploaded file '" + inpFile + "' from "
-                                + UploadWizardAction.SWMM_WEBDAV_HOST + " failed: "
-                                + t.getLocalizedMessage(),
-                        t);
-                }
-            }
-
-            if (copyCSOsComplete) {
-                if (wizardDescriptor.getProperty(UploadWizardAction.PROP_COPIED_CSOS) != null) {
-                    final List<MetaObject> copiedCSOs = (List<MetaObject>)wizardDescriptor.getProperty(
-                            UploadWizardAction.PROP_COPIED_CSOS);
-                    LOG.warn("removing " + copiedCSOs.size() + " copied CSOs from " + domain);
-
-                    int i = 0;
-                    for (final MetaObject cso : copiedCSOs) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("removing CSO '" + cso + "' from " + domain);
-                        }
-                        try {
-                            SessionManager.getProxy().deleteMetaObject(cso, domain);
-                            i++;
-                        } catch (Exception ex) {
-                            LOG.error("could not remove CSO '" + cso + "' from " + domain + ": "
-                                        + ex.getMessage(), ex);
-                        }
-                    }
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("successfully removed " + i + " out of " + copiedCSOs.size() + " CSOs from "
-                                    + domain);
-                    }
-                } else {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(
-                            "could not remove copied CSOs: copyCSOsComplete is true, but list of CSOs is empty?!");
-                    }
-                }
-            }
+            LOG.warn("Wizard cancelld! Uploaded SWMM INF File and copied CSOs will not be removed!");
         }
     }
 }

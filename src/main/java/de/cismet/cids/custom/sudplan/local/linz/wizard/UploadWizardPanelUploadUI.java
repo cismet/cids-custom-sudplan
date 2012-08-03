@@ -273,10 +273,6 @@ public final class UploadWizardPanelUploadUI extends javax.swing.JPanel {
      */
     private final class UploadProgressListener implements PropertyChangeListener {
 
-        //~ Instance fields ----------------------------------------------------
-
-        private final transient Logger LOG = Logger.getLogger(UploadProgressListener.class);
-
         //~ Methods ------------------------------------------------------------
 
         @Override
@@ -310,7 +306,6 @@ public final class UploadWizardPanelUploadUI extends javax.swing.JPanel {
 
         //~ Instance fields ----------------------------------------------------
 
-        private final transient Logger LOG = Logger.getLogger(SwmmUploader.class);
         private final File inpFile;
 
         //~ Constructors -------------------------------------------------------
