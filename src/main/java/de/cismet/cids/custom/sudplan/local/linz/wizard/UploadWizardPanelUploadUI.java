@@ -7,13 +7,22 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz.wizard;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.contrib.ssl.EasySSLProtocolSocketFactory;
-import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
-import org.apache.commons.httpclient.methods.PutMethod;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -23,13 +32,15 @@ import java.beans.PropertyChangeListener;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.net.Authenticator;
-import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
 import java.net.URL;
+
+import java.security.cert.CertificateException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -38,8 +49,6 @@ import javax.net.ssl.X509TrustManager;
 
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-
-import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
 
 import de.cismet.tools.CismetThreadPool;
 
@@ -59,7 +68,6 @@ public final class UploadWizardPanelUploadUI extends javax.swing.JPanel {
 
     private final transient UploadWizardPanelUpload model;
     private SwmmUploader swmmUploader = null;
-    private boolean running = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JProgressBar progressBar = new javax.swing.JProgressBar();
     private final transient javax.swing.JButton uploadButton = new javax.swing.JButton();
@@ -93,6 +101,7 @@ public final class UploadWizardPanelUploadUI extends javax.swing.JPanel {
             LOG.warn("model run is still in progress");
         } else {
             this.uploadButton.setEnabled(!model.isUploadComplete() || model.isUploadErroneous());
+            this.progressBar.setValue(model.isUploadComplete() ? 100 : 0);
         }
     }
 
@@ -160,7 +169,7 @@ public final class UploadWizardPanelUploadUI extends javax.swing.JPanel {
 
         try {
             final File inpFile = new File(model.getInpFile());
-            progressBar.setMaximum((int)inpFile.length());
+            // progressBar.setMaximum((int)inpFile.length());
 
             swmmUploader = new SwmmUploader(inpFile);
             swmmUploader.addPropertyChangeListener(new UploadProgressListener());
@@ -181,14 +190,15 @@ public final class UploadWizardPanelUploadUI extends javax.swing.JPanel {
     public UploadWizardPanelUpload getModel() {
         return this.model;
     }
+
     /**
      * DOCUMENT ME!
      *
-     * @return   DOCUMENT ME!
+     * @return      DOCUMENT ME!
      *
-     * @throws   Exception  DOCUMENT ME!
+     * @throws      Exception  DOCUMENT ME!
      *
-     * @version  $Revision$, $Date$
+     * @deprecated  DOCUMENT ME!
      */
     public OutputStream getInpFileOutputStream() throws Exception {
         if (LOG.isDebugEnabled()) {
@@ -276,11 +286,11 @@ public final class UploadWizardPanelUploadUI extends javax.swing.JPanel {
                 uploadButton.setEnabled(false);
             } else if ("state".equals(evt.getPropertyName())
                         && (SwingWorker.StateValue.DONE == evt.getNewValue())) {
+                // model.setUploadComplete(true);
+                // uploadButton.setEnabled(false);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("SWMM Upload worker started");
+                    LOG.debug("SWMM Upload worker completed");
                 }
-                model.setUploadComplete(true);
-                uploadButton.setEnabled(false);
             } else if ("progress".equals(evt.getPropertyName())) {
                 progressBar.setValue((Integer)evt.getNewValue());
             }
@@ -309,57 +319,160 @@ public final class UploadWizardPanelUploadUI extends javax.swing.JPanel {
          */
         SwmmUploader(final File inpFile) throws Exception {
             this.inpFile = inpFile;
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("SWMM Uploader for Input File '"
+                            + inpFile.getCanonicalPath() + "' created");
+            }
         }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
         protected Void doInBackground() throws Exception {
-            final HttpClient httpClient = TimeSeriesRemoteHelper.createHttpClient(
-                    UploadWizardAction.SWMM_WEBDAV_HOST,
-                    new UsernamePasswordCredentials(
-                        UploadWizardAction.SWMM_WEBDAV_USER,
-                        UploadWizardAction.SWMM_WEBDAV_PASSWORD));
+            final UsernamePasswordCredentials defaultcreds = new UsernamePasswordCredentials(
+                    UploadWizardAction.SWMM_WEBDAV_USER,
+                    UploadWizardAction.SWMM_WEBDAV_PASSWORD);
+
+            final SSLSocketFactory sslsf = new SSLSocketFactory(new TrustStrategy() {
+
+                        @Override
+                        public boolean isTrusted(final java.security.cert.X509Certificate[] chain,
+                                final String authType) throws CertificateException {
+                            return true;
+                        }
+                    });
+            final Scheme httpScheme = new Scheme("http", 80, PlainSocketFactory.getSocketFactory());
+            final Scheme httpsScheme = new Scheme("https", 443, sslsf);
+            final SchemeRegistry schemeRegistry = new SchemeRegistry();
+            schemeRegistry.register(httpScheme);
+            schemeRegistry.register(httpsScheme);
+
+            final ClientConnectionManager cm = new SingleClientConnManager(schemeRegistry);
+
+            final HttpContext localContext = new BasicHttpContext();
+            final DefaultHttpClient httpClient = new DefaultHttpClient(cm);
+
+            httpClient.getCredentialsProvider().setCredentials(
+                new AuthScope(AuthScope.ANY),
+                defaultcreds);
 
             final URL targetLocation = new URL(
                     UploadWizardAction.SWMM_WEBDAV_HOST
                             + inpFile.getName());
 
-            final PutMethod putMethod = new PutMethod(targetLocation.toExternalForm());
+            // unglaublich aber wahr: Wenn der HTTP Client ein PUT (z.B. Upload auf ein WebDAV) mit authentication
+            // macht, so wird auch für den ersten autentication request der komplette request body  mitgeschickt. Nach
+            // erfolgreicher authentifizierung wird der request body nochmal gesendet. 3 Probleme: 1) doppelter traffic!
+            // 2) verwendet man eine unbuffered request entity (z.B. in dem man die content-lenght setzt) schlägt der
+            // eigentlich upload nach der authentifizierung fehl, da kein buffer vorhanden ist, der gelsen werden kann
+            // Verwendet man eine buffered request entity z.B. in dem man die content-lenght auf auto setzt), wird das
+            // file vor dem upload komplett in den speicher geladen. Workaround: Vor dem PUT ein GET ausführen, dass die
+            // Authentifizierung macht
+            final HttpGet getMethod = new HttpGet(new URL(UploadWizardAction.SWMM_WEBDAV_HOST).toExternalForm());
 
-            final InputStreamRequestEntity inputStreamRequestEntity = new InputStreamRequestEntity(
-                    new FileInputStream(inpFile),
+            HttpResponse response = httpClient.execute(getMethod, localContext);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("pre-put authentication with GET returned '"
+                            + response.getStatusLine() + "'");
+            }
+
+            if ((response.getStatusLine().getStatusCode() != 200)) {
+                LOG.warn("pre-put authentication with GET failed with status code: "
+                            + response.getStatusLine().getStatusCode());
+            }
+
+            getMethod.abort();
+
+            final HttpPut putMethod = new HttpPut(targetLocation.toExternalForm());
+            final InputStream fileInputStream = new FileInputStream(inpFile);
+
+            final InputStreamEntity inputStreamRequestEntity = new InputStreamEntity(
+                    fileInputStream,
                     inpFile.length()) {
+
+                    @Override
+                    public void writeTo(final OutputStream out) throws IOException {
+                        if (this.getContent() != null) {
+                            final double length = inpFile.length();
+                            final byte[] tmp = new byte[4096];
+                            double totalBytes = 0;
+                            int i = 0;
+                            while (!isCancelled() && ((i = this.getContent().read(tmp)) >= 0)) {
+                                out.write(tmp, 0, i);
+                                totalBytes += i;
+
+                                final int progress = (int)Math.round((totalBytes / length) * 100);
+                                setProgress((progress <= 100) ? progress : 100);
+                            }
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug(totalBytes + " bytes written to '" + inpFile.getName()
+                                            + "' (" + inpFile.length() + " bytes expected)");
+                            }
+                        } else {
+                            throw new IllegalStateException("Content must be set before entity is written");
+                        }
+                    }
                 };
 
-            putMethod.setRequestEntity(inputStreamRequestEntity);
+            // unglaublich aber wahr, wir dürfen die content lenght nicht angeben, sonst wird nicht gebuffert. der
+            // buffer ist aber notwendig, weil der client alles 2x hochlädt !1!!!!!!!111111 final InputStreamEntity
+            // inputStreamRequestEntity = new InputStreamEntity(fileInputStream, inpFile.length());
+            putMethod.setEntity(inputStreamRequestEntity);
 
-            final byte[] buf = new byte[4096];
-            final int len;
-//            while (!this.isCancelled() && ((len = inpFileInputStream.read(buf)) > 0)) {
-//                inpFileOutputStream.write(buf, 0, len);
-//            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("starting upload of file '" + inpFile.getName() + "'");
+            }
+            response = httpClient.execute(putMethod, localContext);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("upload of file '" + inpFile.getName() + "' completed");
+            }
 
             if (this.isCancelled()) {
-                model.setUploadCanceled(true);
+                LOG.warn("SwmmUploader cancelled");
+                // model.setUploadCanceled(true);
                 SwingUtilities.invokeLater(new Runnable() {
 
                         @Override
                         public void run() {
                             uploadButton.setEnabled(true);
+                            // progressBar.setIndeterminate(false);
                             progressBar.setValue(0);
                         }
                     });
             }
 
+            final int statusCode = response.getStatusLine().getStatusCode();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Leaving upload '" + inpFile.getName() + "' with status code: " + statusCode);
+            }
+
+            if ((statusCode != 201) && (statusCode != 202)) {
+                final String message = "Upload of file '"
+                            + inpFile.getName() + "' not successful, server returned status '"
+                            + response.getStatusLine() + "'";
+                throw new Exception(message);
+            }
+
+            try {
+                fileInputStream.close();
+                httpClient.getConnectionManager().shutdown();
+            } catch (Throwable t) {
+                LOG.warn("could not close input stream of file '" + inpFile.getName() + "'", t);
+            }
+
+            setProgress(100);
             return null;
         }
 
         @Override
         protected void done() {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("done()");
+            }
             try {
                 get();
-                // model.setUploadComplete(true);
+                model.setUploadComplete(true);
+                uploadButton.setEnabled(false);
             } catch (Exception ex) {
                 LOG.error("error during executing upload of SWMM INP File '" + model.getInpFile() + "' to WebDAV at "
                             + "'" + UploadWizardAction.SWMM_WEBDAV_HOST + "': " + ex.getMessage(),
@@ -370,6 +483,7 @@ public final class UploadWizardPanelUploadUI extends javax.swing.JPanel {
 
                         @Override
                         public void run() {
+                            // progressBar.setIndeterminate(false);
                             progressBar.setValue(0);
                             uploadButton.setEnabled(true);
                         }

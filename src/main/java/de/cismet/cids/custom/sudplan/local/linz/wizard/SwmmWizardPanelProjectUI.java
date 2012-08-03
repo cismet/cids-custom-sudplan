@@ -13,7 +13,6 @@ package de.cismet.cids.custom.sudplan.local.linz.wizard;
 
 import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.exception.ConnectionException;
-import Sirius.navigator.ui.dialog.DateChooser;
 
 import Sirius.server.localserver.attribute.ClassAttribute;
 import Sirius.server.middleware.types.MetaClass;
@@ -25,12 +24,8 @@ import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-
-import java.util.Date;
 
 import javax.swing.*;
 
@@ -56,7 +51,6 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
 
     private final transient SwmmWizardPanelProject model;
     private final transient ItemListener projectListener;
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chbEta;
     private javax.swing.JComboBox cobProjects;
@@ -95,6 +89,11 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                 "SwmmWizardPanelProject.this.name")); // NOI18N
 
         this.initProjectList();
+
+        this.cobProjects.addItemListener(WeakListeners.create(
+                ItemListener.class,
+                this.projectListener,
+                this.cobProjects));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -164,10 +163,6 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
 
         this.cobProjects.setModel(comboBoxModel);
         this.cobProjects.setRenderer(new NameRenderer());
-        this.cobProjects.addItemListener(WeakListeners.create(
-                ItemListener.class,
-                this.projectListener,
-                this.cobProjects));
     }
 
     /**
@@ -470,7 +465,7 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
      *
      * @version  $Revision$, $Date$
      */
-    private static final class NameRenderer extends DefaultListCellRenderer {
+    public static final class NameRenderer extends DefaultListCellRenderer {
 
         //~ Methods ------------------------------------------------------------
 

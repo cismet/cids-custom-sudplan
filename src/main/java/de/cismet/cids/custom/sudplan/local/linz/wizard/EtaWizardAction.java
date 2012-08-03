@@ -81,7 +81,7 @@ public final class EtaWizardAction extends AbstractCidsBeanAction {
     public EtaWizardAction() {
         super("Perform ETA Calculation");
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Perform ETA Calculation");
+            LOG.debug("Perform ETA Calculation Action instanciated");
         }
     }
 

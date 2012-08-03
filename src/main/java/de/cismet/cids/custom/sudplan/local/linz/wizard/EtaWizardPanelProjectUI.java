@@ -13,7 +13,6 @@ package de.cismet.cids.custom.sudplan.local.linz.wizard;
 
 import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.exception.ConnectionException;
-import Sirius.navigator.ui.dialog.DateChooser;
 
 import Sirius.server.localserver.attribute.ClassAttribute;
 import Sirius.server.middleware.types.MetaClass;
@@ -25,19 +24,14 @@ import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.*;
 
-import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
+import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmWizardPanelProjectUI.NameRenderer;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -422,34 +416,6 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 // bindingGroup.unbind();
                 // bindingGroup.bind();
             }
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private static final class NameRenderer extends DefaultListCellRenderer {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public Component getListCellRendererComponent(final JList list,
-                final Object value,
-                final int index,
-                final boolean isSelected,
-                final boolean cellHasFocus) {
-            final Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-            if ((comp instanceof JLabel) && (value instanceof CidsBean)) {
-                final JLabel label = (JLabel)comp;
-                final CidsBean obj = (CidsBean)value;
-                final String name = (String)obj.getProperty("title"); // NOI18N
-                label.setText(name);
-            }
-
-            return comp;
         }
     }
 }

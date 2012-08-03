@@ -46,16 +46,24 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String SWMM_WEBDAV_HOST = "http://sudplan.cismet.de/tsDav";
     // public static final String SWMM_WEBDAV_HOST = "https://sudplan.ait.ac.at/model/config/"
+    public static final String SWMM_WEBDAV_HOST = "http://sudplan.cismet.de/tsDav/";
     public static final String SWMM_WEBDAV_USER = "tsDav";
     // public static final String SWMM_WEBDAV_USER = "SMS";
     public static final String SWMM_WEBDAV_PASSWORD = "RHfio2l4wrsklfghj";
     // public static final String SWMM_WEBDAV_PASSWORD = "cismet42";
 
     public static final String TABLENAME_SWMM_PROJECT = SwmmInput.TABLENAME_SWMM_PROJECT;
-    public static final String PROP_SWMM_PROJECT_BEAN = "__prop_swmm_project_bean__"; // NOI18N
-    public static final String PROP_SWMM_INP_FILE = "__prop_swmm_inp_file__";         // NOI18N
+    public static final String PROP_NEW_SWMM_PROJECT_BEAN = "__prop_new_swmm_project_bean__";       // NOI18N
+    public static final String PROP_SELECTED_SWMM_PROJECT_ID = "__prop_selected_swmm_project_id__"; // NOI18N
+    public static final String PROP_SWMM_INP_FILE = "__prop_swmm_inp_file__";                       // NOI18N
+    public static final String PROP_UPLOAD_COMPLETE = "__prop_upload_complete__";                   // NOI18N
+    public static final String PROP_UPLOAD_ERRORNEOUS = "__prop_upload_erroneous__";                // NOI18N
+    public static final String PROP_UPLOAD_IN_PROGRESS = "__prop_upload_in_progress__";             // NOI18N
+    public static final String PROP_COPY_CSOS_COMPLETE = "__prop_copy_csos_complete__";             // NOI18N
+    public static final String PROP_COPY_CSOS_ERRORNEOUS = "__prop_copy_csos_erroneous__";          // NOI18N
+    public static final String PROP_COPY_CSOS_IN_PROGRESS = "__prop_copy_csos_in_progress__";       // NOI18N
+
     private static final transient Logger LOG = Logger.getLogger(UploadWizardAction.class);
 
     //~ Instance fields --------------------------------------------------------
@@ -71,7 +79,7 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
     public UploadWizardAction() {
         super("Perform SWMM Project Upload");
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Perform SWMM Project Upload");
+            LOG.debug("Perform SWMM Project Upload Action instanciated");
         }
     }
 
@@ -86,7 +94,11 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
         assert EventQueue.isDispatchThread() : "can only be called from EDT"; // NOI18N
 
         if (panels == null) {
-            panels = new WizardDescriptor.Panel[] { new UploadWizardPanelProject(), new UploadWizardPanelUpload() };
+            panels = new WizardDescriptor.Panel[] {
+                    new UploadWizardPanelProject(),
+                    new UploadWizardPanelUpload(),
+                    new UploadWizardPanelCSOs()
+                };
 
             final String[] steps = new String[panels.length];
             for (int i = 0; i < panels.length; i++) {
@@ -137,8 +149,21 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
                 UploadWizardAction.class,
                 "UploadWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
 
-        wizardDescriptor.putProperty(PROP_SWMM_PROJECT_BEAN, newSwmmBean);
+        if (this.getCidsBean() != null) {
+            wizardDescriptor.putProperty(PROP_SELECTED_SWMM_PROJECT_ID,
+                this.getCidsBean().getProperty("id"));
+        } else {
+            wizardDescriptor.putProperty(PROP_SELECTED_SWMM_PROJECT_ID, "-1");
+        }
+
+        wizardDescriptor.putProperty(PROP_NEW_SWMM_PROJECT_BEAN, newSwmmBean);
         wizardDescriptor.putProperty(PROP_SWMM_INP_FILE, "");
+        wizardDescriptor.putProperty(PROP_UPLOAD_COMPLETE, false);
+        wizardDescriptor.putProperty(PROP_UPLOAD_ERRORNEOUS, false);
+        wizardDescriptor.putProperty(PROP_UPLOAD_IN_PROGRESS, false);
+        wizardDescriptor.putProperty(PROP_COPY_CSOS_COMPLETE, false);
+        wizardDescriptor.putProperty(PROP_COPY_CSOS_ERRORNEOUS, false);
+        wizardDescriptor.putProperty(PROP_COPY_CSOS_IN_PROGRESS, false);
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizardDescriptor);
 
@@ -167,6 +192,8 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
 //                        "UploadWizardAction.actionPerformed(ActionEvent).wizard.error"),
 //                    JOptionPane.ERROR_MESSAGE);
 //            }
+        } else {
+            LOG.warn("Wizard cancelld! Uploaded SWMM INF File and copied CSOs will not be removed!");
         }
     }
 }

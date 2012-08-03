@@ -108,7 +108,8 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                 this.tblEtaConfiguration.setModel(new EtaConfigurationTableModel(this.model.getEtaConfigurations()));
 
                 // trigger change event
-                this.model.setEtaConfigurations(this.model.getEtaConfigurations());
+                // this.model.setEtaConfigurations(this.model.getEtaConfigurations());
+                this.model.fireChangeEvent();
             } else if (this.model.getSwmmProjectId() != this.lastSwmmProjectId) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("project id changed (" + this.model.getSwmmProjectId() + "), loading CSO list");

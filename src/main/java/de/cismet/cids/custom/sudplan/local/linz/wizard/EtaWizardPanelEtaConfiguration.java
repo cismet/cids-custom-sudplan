@@ -167,4 +167,11 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
     public int getSwmmProjectId() {
         return this.etaInput.getSwmmProject();
     }
+
+    /**
+     * DOCUMENT ME!
+     */
+    protected void fireChangeEvent() {
+        changeSupport.fireChange();
+    }
 }
