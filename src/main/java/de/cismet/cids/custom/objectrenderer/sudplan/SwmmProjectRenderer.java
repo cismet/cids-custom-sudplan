@@ -164,10 +164,12 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
             gridBagConstraints.gridy++;
         }
 
-        this.lblTitleText.setText(cidsBean.getProperty("title").toString());
-        this.lblDescriptionText.setText(cidsBean.getProperty("description").toString());
-
-        this.configurationArea.setText(cidsBean.getProperty("options").toString());
+        this.lblTitleText.setText((cidsBean.getProperty("title") != null) ? cidsBean.getProperty("title").toString()
+                                                                          : null);
+        this.lblDescriptionText.setText((cidsBean.getProperty("description") != null)
+                ? cidsBean.getProperty("description").toString() : null);
+        this.configurationArea.setText((cidsBean.getProperty("options") != null)
+                ? cidsBean.getProperty("options").toString() : null);
         this.cbSwmmRuns.setModel(comboBoxModel);
         this.titleComponent.setCidsBean(cidsBean);
         this.bntSwmmSearch.setEnabled(!swmmScenarios.isEmpty());

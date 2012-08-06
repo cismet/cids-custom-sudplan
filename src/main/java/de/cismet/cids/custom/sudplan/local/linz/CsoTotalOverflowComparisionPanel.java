@@ -86,6 +86,11 @@ public class CsoTotalOverflowComparisionPanel extends javax.swing.JPanel {
             LOG.debug("setSwmmResults: " + swmmResults.size());
         }
 
+        if (swmmResults.isEmpty()) {
+            LOG.warn("empty SWMM results list");
+            return;
+        }
+
         final GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;

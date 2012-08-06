@@ -81,7 +81,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
 
         // name of the wizard step
         this.setName(NbBundle.getMessage(
-                EtaWizardPanelEtaConfiguration.class,
+                EtaWizardPanelEtaConfigurationUI.class,
                 "EtaWizardPanelEtaConfiguration.this.name")); // NOI18N
     }
 
@@ -118,7 +118,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                 Mnemonics.setLocalizedText(
                     progressLabel,
                     NbBundle.getMessage(
-                        SwmmWizardPanelTimeseriesUI.class,
+                        EtaWizardPanelEtaConfigurationUI.class,
                         "EtaWizardPanelEtaConfigurationUI.progressLabel.text")); // NOI18N
                 progressBar.setIndeterminate(true);
                 ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
@@ -149,7 +149,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
             org.openide.awt.Mnemonics.setLocalizedText(
                 progressLabel,
                 org.openide.util.NbBundle.getMessage(
-                    SwmmWizardPanelTimeseriesUI.class,
+                    EtaWizardPanelEtaConfigurationUI.class,
                     "EtaWizardPanelEtaConfiguration.progressLabel.error")); // NOI18N
             ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
         }
@@ -247,7 +247,6 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
         progressBar = new javax.swing.JProgressBar();
         progressLabel = new javax.swing.JLabel();
 
-        setPreferredSize(null);
         setLayout(new java.awt.GridBagLayout());
 
         etaConfigurationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
@@ -319,7 +318,9 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
      * Just to show a list of fixed eta confiurations (available at server side) , since the SPS does not support eta
      * configurations in V2.
      *
-     * @return  DOCUMENT ME!
+     * @return      DOCUMENT ME!
+     *
+     * @deprecated  DOCUMENT ME!
      */
     private List<EtaConfiguration> createFixedEtaConfigurations() {
         final List<EtaConfiguration> etaConfigurationList = new java.util.ArrayList<EtaConfiguration>();
@@ -731,7 +732,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                                 org.openide.awt.Mnemonics.setLocalizedText(
                                     progressLabel,
                                     org.openide.util.NbBundle.getMessage(
-                                        SwmmWizardPanelTimeseriesUI.class,
+                                        EtaWizardPanelEtaConfigurationUI.class,
                                         "EtaWizardPanelEtaConfigurationUI.progressLabel.error")); // NOI18N
                             }
                         });

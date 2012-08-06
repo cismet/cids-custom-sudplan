@@ -101,8 +101,8 @@ public final class UploadWizardPanelProjectUI extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     void init() {
-        txtName.setText(model.getTitle());
-        this.txaDescription.setText(model.getDescription());
+        // txtName.setText(model.getTitle());
+        // this.txaDescription.setText(model.getDescription());
         this.txtFile.setText(model.getInpFile());
 
         txtName.setSelectionStart(0);
