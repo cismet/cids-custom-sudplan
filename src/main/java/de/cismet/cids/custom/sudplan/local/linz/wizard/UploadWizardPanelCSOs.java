@@ -108,9 +108,9 @@ public final class UploadWizardPanelCSOs implements WizardDescriptor.Panel {
         this.copyCSOsErroneous = (Boolean)wizardDescriptor.getProperty(UploadWizardAction.PROP_COPY_CSOS_ERRORNEOUS);
         this.copyCSOsInProgress = (Boolean)wizardDescriptor.getProperty(UploadWizardAction.PROP_COPY_CSOS_IN_PROGRESS);
 
-        this.fireChangeEvent();
-
         component.init();
+
+        this.fireChangeEvent();
     }
 
     @Override
@@ -129,7 +129,7 @@ public final class UploadWizardPanelCSOs implements WizardDescriptor.Panel {
                 WizardDescriptor.PROP_ERROR_MESSAGE,
                 NbBundle.getMessage(
                     UploadWizardPanelCSOs.class,
-                    "UploadWizardPanelCSOs.isValid().error",
+                    "UploadWizardPanelCSOs.isValid().erroneous",
                     NbBundle.getMessage(
                         UploadWizardPanelCSOs.class,
                         "UploadWizardPanelCSOs.isValid().connectionError")));

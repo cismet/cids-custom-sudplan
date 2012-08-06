@@ -12,6 +12,11 @@
 package de.cismet.cids.custom.sudplan.local.linz.wizard;
 
 import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.exception.ConnectionException;
+
+import Sirius.server.localserver.attribute.ClassAttribute;
+import Sirius.server.middleware.types.MetaClass;
+import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
 
@@ -22,7 +27,6 @@ import java.awt.CardLayout;
 import java.awt.EventQueue;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -31,8 +35,8 @@ import javax.swing.table.AbstractTableModel;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.local.linz.EtaConfiguration;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
-import de.cismet.cids.custom.sudplan.server.search.LightwightCsoSearch;
-import de.cismet.cids.custom.sudplan.server.search.LightwightCsoSearch.LightwightCso;
+
+import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 /**
  * DOCUMENT ME!
@@ -87,12 +91,10 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
      * DOCUMENT ME!
      */
     void init() {
-//        if (LOG.isDebugEnabled()) {
-//            LOG.debug("initialising user interface");
-//        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("initialising user interface");
+        }
         try {
-            assert this.model.getSwmmProjectId() != -1 : "SWMM Project id cannot be -1!";
-
             if ((this.model.getEtaConfigurations() != null) && !this.model.getEtaConfigurations().isEmpty()) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("ETA Configurations already available, updating Table with stored ETA Configuration");
@@ -166,92 +168,60 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
      */
     private EtaConfigurationTableModel initCSOs(final int swmmProjectId) throws WizardInitialisationException {
         final String domain = SessionManager.getSession().getUser().getDomain();
-//        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SwmmPlusEtaWizardAction.TABLENAME_CSOS);
-//
-//        if (mc == null) {
-//            throw new WizardInitialisationException("cannot fetch CSO metaclass"); // NOI18N
-//        }
-//
-//        final StringBuilder sb = new StringBuilder();
-//
-//        sb.append("SELECT ").append(mc.getID()).append(',').append(mc.getPrimaryKey()); // NOI18N
-//        sb.append(" FROM ").append(mc.getTableName());                                  // NOI18N
-//
-//        assert swmmProjectId != -1 : "no suitable swmm project selected: -1";
-//        sb.append(" WHERE swmm_project = ").append(swmmProjectId);
-//
-//        final ClassAttribute ca = mc.getClassAttribute("sortingColumn"); // NOI18N
-//        if (ca != null) {
-//            sb.append(" ORDER BY ").append(ca.getValue());               // NOI18N
-//        }
-//
-//        final MetaObject[] metaObjects;
-//        try {
-//            if (LOG.isDebugEnabled()) {
-//                LOG.debug("executing SQL statement: \n" + sb);
-//            }
-//            metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
-//        } catch (final ConnectionException ex) {
-//            final String message = "cannot get CSO meta objects from database"; // NOI18N
-//            LOG.error(message, ex);
-//            throw new WizardInitialisationException(message, ex);
-//        }
-//
-//        final List<EtaConfiguration> etaConfigurations = new ArrayList<EtaConfiguration>(metaObjects.length);
-//
-//        for (final MetaObject metaObject : metaObjects) {
-//            final EtaConfiguration etaConfiguration = new EtaConfiguration();
-//            etaConfiguration.setName(metaObject.getName());
-//            etaConfiguration.setCso(metaObject.getID());
-//
-//            if (etaConfiguration.getName().equalsIgnoreCase("ULKS1")) {
-//                etaConfiguration.setSedimentationEfficency(20);
-//            } else if (etaConfiguration.getName().equalsIgnoreCase("RKL_Ablauf")) {
-//                etaConfiguration.setEnabled(false);
-//            } else if (etaConfiguration.getName().equalsIgnoreCase("AB_Plesching")) {
-//                etaConfiguration.setSedimentationEfficency(20);
-//            } else if (etaConfiguration.getName().equalsIgnoreCase("RHHB_Weikerlsee3nolink")) {
-//                etaConfiguration.setSedimentationEfficency(20);
-//            }
-//
-//            etaConfigurations.add(etaConfiguration);
-//        }
-//
-        final LightwightCsoSearch csoSearch = new LightwightCsoSearch(
-                domain,
-                swmmProjectId);
+        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SwmmPlusEtaWizardAction.TABLENAME_CSOS);
 
-        final Collection<LightwightCso> lightwightCsos;
+        if (mc == null) {
+            throw new WizardInitialisationException("cannot fetch CSO metaclass"); // NOI18N
+        }
+
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append("SELECT ").append(mc.getID()).append(',').append(mc.getPrimaryKey()); // NOI18N
+        sb.append(" FROM ").append(mc.getTableName());                                  // NOI18N
+
+        assert swmmProjectId != -1 : "no suitable swmm project selected: -1";
+        sb.append(" WHERE swmm_project = ").append(swmmProjectId);
+
+        final ClassAttribute ca = mc.getClassAttribute("sortingColumn"); // NOI18N
+        if (ca != null) {
+            sb.append(" ORDER BY ").append(ca.getValue());               // NOI18N
+        }
+
+        final MetaObject[] metaObjects;
         try {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("performing custom search for CSOs for SWMM project #" + swmmProjectId
-                            + " from domain '" + domain + "'");
+                LOG.debug("executing SQL statement: \n" + sb);
             }
-            lightwightCsos = SessionManager.getProxy().customServerSearch(csoSearch);
-        } catch (Exception ex) {
-            final String message = "could not get CSO for SWMM Project #" + swmmProjectId + " from localserver '"
-                        + SessionManager.getSession().getUser().getDomain() + "'";
+            metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
+        } catch (final ConnectionException ex) {
+            final String message = "cannot get CSO meta objects from database"; // NOI18N
             LOG.error(message, ex);
             throw new WizardInitialisationException(message, ex);
         }
 
-        List<EtaConfiguration> etaConfigurations = new ArrayList(0);
-        if ((lightwightCsos != null) && !lightwightCsos.isEmpty()) {
-            etaConfigurations = new ArrayList<EtaConfiguration>(lightwightCsos.size());
+        final List<EtaConfiguration> etaConfigurations = new ArrayList<EtaConfiguration>(metaObjects.length);
 
-            for (final LightwightCso lightwightCso : lightwightCsos) {
-                final EtaConfiguration etaConfiguration = new EtaConfiguration();
-                etaConfiguration.setName(lightwightCso.getName());
-                etaConfiguration.setCso(lightwightCso.getId());
-                etaConfigurations.add(etaConfiguration);
+        for (final MetaObject metaObject : metaObjects) {
+            final EtaConfiguration etaConfiguration = new EtaConfiguration();
+            etaConfiguration.setName(metaObject.getName());
+            etaConfiguration.setCso(metaObject.getID());
+
+            if (etaConfiguration.getName().equalsIgnoreCase("ULKS1")) {
+                etaConfiguration.setSedimentationEfficency(20);
+            } else if (etaConfiguration.getName().equalsIgnoreCase("RKL_Ablauf")) {
+                etaConfiguration.setEnabled(false);
+            } else if (etaConfiguration.getName().equalsIgnoreCase("AB_Plesching")) {
+                etaConfiguration.setSedimentationEfficency(20);
+            } else if (etaConfiguration.getName().equalsIgnoreCase("RHHB_Weikerlsee3nolink")) {
+                etaConfiguration.setSedimentationEfficency(20);
             }
-        } else {
-            LOG.error("search for CSOs for SWMM Project #" + swmmProjectId + " from localserver '"
-                        + SessionManager.getSession().getUser().getDomain() + "' did not return any results");
+
+            etaConfigurations.add(etaConfiguration);
         }
+
         // trigger change event
         this.model.setEtaConfigurations(etaConfigurations);
-        return new EtaConfigurationTableModel(model.getEtaConfigurations());
+        return new EtaConfigurationTableModel(etaConfigurations);
 
 //        {
 //            LOG.warn("eta configuration disabled, creating fixed configurations available at server side");
@@ -290,6 +260,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
         tblEtaConfiguration.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
                 new String[] {}));
+        tblEtaConfiguration.setEnabled(false);
         jScrollPaneEtaConfiguration.setViewportView(tblEtaConfiguration);
 
         cardPanel.add(jScrollPaneEtaConfiguration, "csos");
@@ -343,292 +314,292 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
         return model;
     }
 
-    //~ Inner Classes ----------------------------------------------------------
+    /**
+     * Just to show a list of fixed eta confiurations (available at server side) , since the SPS does not support eta
+     * configurations in V2.
+     *
+     * @return      DOCUMENT ME!
+     *
+     * @deprecated  DOCUMENT ME!
+     */
+    private List<EtaConfiguration> createFixedEtaConfigurations() {
+        final List<EtaConfiguration> etaConfigurationList = new java.util.ArrayList<EtaConfiguration>();
+        EtaConfiguration etaConfiguration;
 
-// /**
-// * Just to show a list of fixed eta confiurations (available at server side) , since the SPS does not support eta
-// * configurations in V2.
-// *
-// * @return      DOCUMENT ME!
-// *
-// * @deprecated  DOCUMENT ME!
-// */
-// private List<EtaConfiguration> createFixedEtaConfigurations() {
-// final List<EtaConfiguration> etaConfigurationList = new java.util.ArrayList<EtaConfiguration>();
-// EtaConfiguration etaConfiguration;
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("RDSRUE51");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("ULKS1");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(20);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("FUEAusl");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("RKL_Ablauf");
-// etaConfiguration.setEnabled(false);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("AB_Plesching");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(20);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("HSU12_1S5b");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("HSU1_1RUE2");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("ALBSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("ALKSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("ANFSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("EDBSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("ENNSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("ENNSP2nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("RUEB_Traunnolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("EWDSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("FKDSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("GLWSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("GRSSP2nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("HEMSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("HHSSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("HOESP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("HOESP2nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("HZDSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("KRTSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("KSSSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("LTBSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("LTBSP2nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("LTBSP2nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("RUEB_Lunzerstr2nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("NNKSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("OFTSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("OTHSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("RUEB_Pleschingnolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("PNASP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("PUKSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("RDS20_1S48Anolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("SMMSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("STFSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("STMSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("STYSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("RHHB_Weikerlsee3nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("HSMSEntlnolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("WLDSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("WLDSP2nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setName("WLGSP1nolink");
-// etaConfiguration.setEnabled(true);
-// etaConfiguration.setSedimentationEfficency(0);
-// etaConfigurationList.add(etaConfiguration);
-//
-// return etaConfigurationList;
-// }
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("RDSRUE51");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("ULKS1");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(20);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("FUEAusl");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("RKL_Ablauf");
+        etaConfiguration.setEnabled(false);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("AB_Plesching");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(20);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("HSU12_1S5b");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("HSU1_1RUE2");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("ALBSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("ALKSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("ANFSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("EDBSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("ENNSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("ENNSP2nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("RUEB_Traunnolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("EWDSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("FKDSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("GLWSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("GRSSP2nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("HEMSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("HHSSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("HOESP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("HOESP2nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("HZDSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("KRTSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("KSSSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("LTBSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("LTBSP2nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("LTBSP2nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("RUEB_Lunzerstr2nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("NNKSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("OFTSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("OTHSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("RUEB_Pleschingnolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("PNASP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("PUKSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("RDS20_1S48Anolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("SMMSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("STFSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("STMSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("STYSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("RHHB_Weikerlsee3nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("HSMSEntlnolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("WLDSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("WLDSP2nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        etaConfiguration = new EtaConfiguration();
+        etaConfiguration.setName("WLGSP1nolink");
+        etaConfiguration.setEnabled(true);
+        etaConfiguration.setSedimentationEfficency(0);
+        etaConfigurationList.add(etaConfiguration);
+
+        return etaConfigurationList;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
 
     /**
      * DOCUMENT ME!
@@ -639,16 +610,9 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
 
         //~ Instance fields ----------------------------------------------------
 
-        private final transient Logger LOG = Logger.getLogger(EtaConfigurationTableModel.class);
-
         private final List<EtaConfiguration> etaConfigurations;
-
-        private final String[] columnNames = {
-                NbBundle.getMessage(EtaWizardPanelEtaConfigurationUI.class, "EtaConfigurationTableModel.column.cso"),
-                NbBundle.getMessage(EtaWizardPanelEtaConfigurationUI.class, "EtaConfigurationTableModel.column.active"),
-                NbBundle.getMessage(EtaWizardPanelEtaConfigurationUI.class, "EtaConfigurationTableModel.column.eta_sed"),
-            };
-
+        // FIXME: i18n
+        private final String[] columnNames = { "CSO", "Aktiv", "η Sedimentation" };
         private final Class[] columnClasses = { String.class, Boolean.class, Float.class };
 
         //~ Constructors -------------------------------------------------------
@@ -693,15 +657,8 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
 
         @Override
         public void setValueAt(final Object value, final int row, final int col) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("updating CSO configuration at " + row + "/" + col + " to '" + value + "'");
-            }
             if (col == 1) {
                 etaConfigurations.get(row).setEnabled((Boolean)value);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("configurations of CSO '" + etaConfigurations.get(row) + "' changed: considered=" + value
-                                + ", need to re-compute total overflow volume!");
-                }
             } else if (col == 2) {
                 etaConfigurations.get(row).setSedimentationEfficency((Float)value);
             }
@@ -734,8 +691,6 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
 
         //~ Instance fields ----------------------------------------------------
 
-        private final transient Logger LOG = Logger.getLogger(CsoUpdater.class);
-
         private transient boolean run = true;
         private EtaConfigurationTableModel etaConfigurationTableModel;
 
@@ -763,7 +718,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
             if (run) {
                 try {
                     if (LOG.isDebugEnabled()) {
-                        LOG.info("CsoUpdater: retrieving CSOs for SWMM project #" + model.getSwmmProjectId());
+                        LOG.debug("CsoUpdater: loading results");
                     }
                     etaConfigurationTableModel = initCSOs(model.getSwmmProjectId());
                 } catch (Throwable t) {

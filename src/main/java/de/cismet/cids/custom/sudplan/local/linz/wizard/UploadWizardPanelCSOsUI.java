@@ -12,10 +12,7 @@
 package de.cismet.cids.custom.sudplan.local.linz.wizard;
 
 import Sirius.navigator.connection.SessionManager;
-import Sirius.navigator.exception.ConnectionException;
 
-import Sirius.server.localserver.attribute.ClassAttribute;
-import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
@@ -26,17 +23,18 @@ import org.openide.util.NbBundle;
 import java.awt.CardLayout;
 import java.awt.EventQueue;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.table.AbstractTableModel;
 
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
-import de.cismet.cids.custom.sudplan.local.linz.EtaConfiguration;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
+import de.cismet.cids.custom.sudplan.server.actions.CopyCSOsAction;
 
-import de.cismet.cids.navigator.utils.ClassCacheMultiple;
+import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.cids.server.actions.ServerActionParameter;
 
 /**
  * DOCUMENT ME!
@@ -52,7 +50,6 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
     //~ Instance fields --------------------------------------------------------
 
     private final transient UploadWizardPanelCSOs model;
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel cardPanel;
     private javax.swing.JPanel csoConfigurationPanel;
@@ -79,7 +76,7 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
 
         // name of the wizard step
         this.setName(NbBundle.getMessage(
-                UploadWizardPanelCSOs.class,
+                UploadWizardPanelCSOsUI.class,
                 "UploadWizardPanelCSOs.this.name")); // NOI18N
     }
 
@@ -105,24 +102,32 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
             }
         } else if (this.model.isCopyCSOsErroneous()) {
             LOG.warn("CSO copy process was erroneous");
+            progressBar.setIndeterminate(false);
+            org.openide.awt.Mnemonics.setLocalizedText(
+                progressLabel,
+                org.openide.util.NbBundle.getMessage(
+                    UploadWizardPanelCSOsUI.class,
+                    "UploadWizardPanelCSOsUI.progressLabel.error"));   // NOI18N
+            ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
         } else if (this.model.getSelectedSwmmProject() != -1) {
             Mnemonics.setLocalizedText(
                 progressLabel,
                 NbBundle.getMessage(
-                    SwmmWizardPanelTimeseriesUI.class,
-                    "UploadWizardPanelCSOsUI.progressLabel.text")); // NOI18N
+                    UploadWizardPanelCSOsUI.class,
+                    "UploadWizardPanelCSOsUI.progressLabel.loading")); // NOI18N
             progressBar.setIndeterminate(true);
             ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
 
             final CsoCopyThread csoCopyThread = new CsoCopyThread();
-            SudplanConcurrency.getSudplanGeneralPurposePool().execute(csoCopyThread);
+            // SudplanConcurrency.getSudplanGeneralPurposePool().execute(csoCopyThread);
+            new Thread(csoCopyThread).start();
         } else {
             progressBar.setIndeterminate(false);
             org.openide.awt.Mnemonics.setLocalizedText(
                 progressLabel,
                 org.openide.util.NbBundle.getMessage(
-                    SwmmWizardPanelTimeseriesUI.class,
-                    "UploadWizardPanelCSOs.progressLabel.error")); // NOI18N
+                    UploadWizardPanelCSOsUI.class,
+                    "UploadWizardPanelCSOsUI.progressLabel.error")); // NOI18N
             ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
         }
     }
@@ -130,68 +135,48 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
     /**
      * DOCUMENT ME!
      *
-     * @param   swmmProjectId  DOCUMENT ME!
-     *
      * @return  DOCUMENT ME!
      *
-     * @throws  WizardInitialisationException  DOCUMENT ME!
+     * @throws  Exception              WizardInitialisationException DOCUMENT ME!
+     * @throws  IllegalStateException  DOCUMENT ME!
      */
-    private CsoConfigurationTableModel initCSOs(final int swmmProjectId) throws WizardInitialisationException {
+    private CsoConfigurationTableModel copyCSOs() throws Exception {
+        // before we can copy the CSOs we have to perstis the new swmm bean ot obain an ID
+        CidsBean newSwmmProject = model.getNewSwmmProjectBean();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("saving new SWMM Project '" + newSwmmProject.getProperty("title") + "'");
+        }
+        newSwmmProject = newSwmmProject.persist();
+        model.setNewSwmmProjectBean(newSwmmProject);
+
         final String domain = SessionManager.getSession().getUser().getDomain();
-        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SwmmPlusEtaWizardAction.TABLENAME_CSOS);
 
-        if (mc == null) {
-            throw new WizardInitialisationException("cannot fetch CSO metaclass"); // NOI18N
+        final ServerActionParameter oldProjectparameter = new ServerActionParameter(
+                CopyCSOsAction.PARAMETER_OLD_PROJECT,
+                String.valueOf(model.getSelectedSwmmProject()));
+        final ServerActionParameter newProjectparameter = new ServerActionParameter(
+                CopyCSOsAction.PARAMETER_NEW_PROJECT,
+                newSwmmProject.getProperty("id").toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("copying CSOs of SWMM Project #" + oldProjectparameter.getValue()
+                        + " to new SWMM Project #" + newProjectparameter.getValue());
         }
+        final Object object = SessionManager.getProxy()
+                    .executeTask(
+                        CopyCSOsAction.CSO_SERVER_ACTION,
+                        domain,
+                        null,
+                        oldProjectparameter,
+                        newProjectparameter);
 
-        final StringBuilder sb = new StringBuilder();
-
-        sb.append("SELECT ").append(mc.getID()).append(',').append(mc.getPrimaryKey()); // NOI18N
-        sb.append(" FROM ").append(mc.getTableName());                                  // NOI18N
-
-        assert swmmProjectId != -1 : "no suitable swmm project selected: -1";
-        sb.append(" WHERE swmm_project = ").append(swmmProjectId);
-
-        final ClassAttribute ca = mc.getClassAttribute("sortingColumn"); // NOI18N
-        if (ca != null) {
-            sb.append(" ORDER BY ").append(ca.getValue());               // NOI18N
+        if ((object != null) && List.class.isAssignableFrom(object.getClass())) {
+            final List<MetaObject> copiedCSOs = (List<MetaObject>)object;
+            LOG.info(copiedCSOs.size() + " CSOs copied to SWMM Project #" + newProjectparameter.getValue());
+            model.setCopiedCSOs(copiedCSOs);
+            return new CsoConfigurationTableModel(copiedCSOs);
+        } else {
+            throw new IllegalStateException("copied CSOs list is either null or not of type java.util.List: " + object);
         }
-
-        final MetaObject[] metaObjects;
-        try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("executing SQL statement: \n" + sb);
-            }
-            metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
-        } catch (final ConnectionException ex) {
-            final String message = "cannot get CSO meta objects from database"; // NOI18N
-            LOG.error(message, ex);
-            throw new WizardInitialisationException(message, ex);
-        }
-
-        final List<EtaConfiguration> etaConfigurations = new ArrayList<EtaConfiguration>(metaObjects.length);
-
-        for (final MetaObject metaObject : metaObjects) {
-            final EtaConfiguration etaConfiguration = new EtaConfiguration();
-            etaConfiguration.setName(metaObject.getName());
-            etaConfiguration.setCso(metaObject.getID());
-
-            if (etaConfiguration.getName().equalsIgnoreCase("ULKS1")) {
-                etaConfiguration.setSedimentationEfficency(20);
-            } else if (etaConfiguration.getName().equalsIgnoreCase("RKL_Ablauf")) {
-                etaConfiguration.setEnabled(false);
-            } else if (etaConfiguration.getName().equalsIgnoreCase("AB_Plesching")) {
-                etaConfiguration.setSedimentationEfficency(20);
-            } else if (etaConfiguration.getName().equalsIgnoreCase("RHHB_Weikerlsee3nolink")) {
-                etaConfiguration.setSedimentationEfficency(20);
-            }
-
-            etaConfigurations.add(etaConfiguration);
-        }
-
-        // trigger change event
-        // this.model.setEtaConfigurations(etaConfigurations);
-        return new CsoConfigurationTableModel(etaConfigurations);
     }
 
     /**
@@ -241,7 +226,7 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
             progressLabel,
             org.openide.util.NbBundle.getMessage(
                 UploadWizardPanelCSOsUI.class,
-                "UploadWizardPanelCSOsUI.progressLabel.text_1")); // NOI18N
+                "UploadWizardPanelCSOsUI.progressLabel.loading")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 1;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -288,27 +273,27 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
 
         //~ Instance fields ----------------------------------------------------
 
-        private final List<EtaConfiguration> etaConfigurations;
+        private final List<MetaObject> csoConfigurations;
         // FIXME: i18n
-        private final String[] columnNames = { "CSO", "Aktiv", "η Sedimentation" };
-        private final Class[] columnClasses = { String.class, Boolean.class, Float.class };
+        private final String[] columnNames = { "Name", "Volume", "Outfall", "Storage Unit", "max. throttle Discharge" };
+        // private final Class[] columnClasses = { String.class, String.class, String.class,String.class,String.class };
 
         //~ Constructors -------------------------------------------------------
 
         /**
          * Creates a new CsoConfigurationTableModel object.
          *
-         * @param  etaConfigurations  metaObjects DOCUMENT ME!
+         * @param  csoConfigurations  metaObjects DOCUMENT ME!
          */
-        private CsoConfigurationTableModel(final List<EtaConfiguration> etaConfigurations) {
-            this.etaConfigurations = etaConfigurations;
+        private CsoConfigurationTableModel(final List<MetaObject> csoConfigurations) {
+            this.csoConfigurations = csoConfigurations;
         }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
         public int getRowCount() {
-            return etaConfigurations.size();
+            return csoConfigurations.size();
         }
 
         @Override
@@ -318,30 +303,36 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
 
         @Override
         public Object getValueAt(final int rowIndex, final int columnIndex) {
+            final CidsBean csoBean = csoConfigurations.get(rowIndex).getBean();
+            assert csoBean != null : "CSO Bean must not be null";
+
             switch (columnIndex) {
                 case 0: {
-                    return etaConfigurations.get(rowIndex).getName();
+                    return (csoBean.getProperty("name") != null) ? csoBean.getProperty("name").toString() : "";
                 }
                 case 1: {
-                    return etaConfigurations.get(rowIndex).isEnabled();
+                    return (csoBean.getProperty("outfall") != null)
+                        ? ((CidsBean)csoBean.getProperty("outfall")).getProperty("name").toString() : "";
                 }
                 case 2: {
-                    return etaConfigurations.get(rowIndex).getSedimentationEfficency();
+                    return (csoBean.getProperty("storage_unit") != null)
+                        ? ((CidsBean)csoBean.getProperty("storage_unit")).getProperty("name").toString() : "";
+                }
+                case 3: {
+                    return (csoBean.getProperty("volume") != null) ? csoBean.getProperty("volume").toString() : "";
+                }
+                case 4: {
+                    return (csoBean.getProperty("max_throttle_discharge") != null)
+                        ? csoBean.getProperty("max_throttle_discharge").toString() : "";
                 }
             }
 
-            return null;
+            return "";
         }
 
         @Override
         public void setValueAt(final Object value, final int row, final int col) {
-            if (col == 1) {
-                etaConfigurations.get(row).setEnabled((Boolean)value);
-            } else if (col == 2) {
-                etaConfigurations.get(row).setSedimentationEfficency((Float)value);
-            }
-
-            fireTableCellUpdated(row, col);
+            LOG.warn("changing of CSO configurations not supported!");
         }
 
         @Override
@@ -351,12 +342,13 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
 
         @Override
         public Class getColumnClass(final int col) {
-            return columnClasses[col];
+            // return columnClasses[col];
+            return String.class;
         }
 
         @Override
         public boolean isCellEditable(final int row, final int col) {
-            return (col == 1) || (col == 2);
+            return false;
         }
     }
 
@@ -365,11 +357,12 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
      *
      * @version  $Revision$, $Date$
      */
-    private class CsoCopyThread implements Runnable {
+    private final class CsoCopyThread implements Runnable {
 
         //~ Instance fields ----------------------------------------------------
 
-        private CsoConfigurationTableModel csoConfigurationTableModel;
+        private final transient Logger LOG = Logger.getLogger(CsoCopyThread.class);
+        private transient CsoConfigurationTableModel csoConfigurationTableModel;
 
         //~ Methods ------------------------------------------------------------
 
@@ -382,21 +375,27 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
                                 + model.getSelectedSwmmProject());
                 }
 
-                csoConfigurationTableModel = initCSOs(model.getSelectedSwmmProject());
+                csoConfigurationTableModel = copyCSOs();
                 model.setCopyCSOsComplete(true);
+
                 EventQueue.invokeLater(new Runnable() {
 
                         @Override
                         public void run() {
                             if (LOG.isDebugEnabled()) {
-                                LOG.debug("CsoUpdater: updating loaded results");
+                                LOG.debug(
+                                    "CsoUpdater: updating table with "
+                                            + csoConfigurationTableModel.getRowCount()
+                                            + " copied CSOs");
                             }
+
+                            progressBar.setIndeterminate(false);
                             tblCsoConfiguration.setModel(csoConfigurationTableModel);
                             ((CardLayout)cardPanel.getLayout()).show(cardPanel, "csos");
                         }
                     });
             } catch (Throwable t) {
-                LOG.error("CsoUpdater: could not retrieve CSOs: " + t.getMessage(), t);
+                LOG.error("CsoCopyThread: could not copy CSOs: " + t.getMessage(), t);
                 model.setCopyCSOsErroneous(true);
                 EventQueue.invokeLater(new Runnable() {
 
@@ -406,7 +405,7 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
                             org.openide.awt.Mnemonics.setLocalizedText(
                                 progressLabel,
                                 org.openide.util.NbBundle.getMessage(
-                                    SwmmWizardPanelTimeseriesUI.class,
+                                    UploadWizardPanelCSOsUI.class,
                                     "UploadWizardPanelCSOsUI.progressLabel.error")); // NOI18N
                         }
                     });
