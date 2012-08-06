@@ -121,7 +121,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 + "{1}" + DB_VIEW_SEPARATOR                        // NOI18N
                 + "{2}" + DB_VIEW_SEPARATOR                        // NOI18N
                 + "{3}";                                           // NOI18N
-    private static final transient String DB_STMT_CREATE_VIEW = " CREATE VIEW "
+    private static final transient String DB_STMT_CREATE_VIEW = " CREATE OR REPLACE VIEW "
                 + "{0} AS "                                        // NOI18N
                 + " SELECT modeloutput_id, variable, resolution, \"timestamp\", geometry, value, unit, offering"
                 + " ,(SELECT max(value) FROM downscaled_airquality"

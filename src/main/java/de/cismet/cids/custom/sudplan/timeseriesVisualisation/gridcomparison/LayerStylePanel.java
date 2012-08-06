@@ -313,52 +313,6 @@ public class LayerStylePanel extends javax.swing.JPanel {
      *
      * @version  $Revision$, $Date$
      */
-    protected class EntryRenderer extends JLabel implements ListCellRenderer {
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new EntryRenderer object.
-         */
-        public EntryRenderer() {
-            setOpaque(true);
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public Component getListCellRendererComponent(final JList list,
-                final Object value,
-                final int index,
-                final boolean isSelected,
-                final boolean cellHasFocus) {
-            if (isSelected) {
-                setBackground(UIManager.getDefaults().getColor("ComboBox.selectionBackground")); // NOI18N
-                setForeground(UIManager.getDefaults().getColor("ComboBox.selectionForeground")); // NOI18N
-            } else {
-                setBackground(UIManager.getDefaults().getColor("ComboBox.background"));          // NOI18N
-                setForeground(UIManager.getDefaults().getColor("ComboBox.foreground"));          // NOI18N
-            }
-
-            if (value instanceof Entry) {
-                final Entry entry = (Entry)value;
-                setText(Double.toString(entry.getValue()));
-                setIcon(new ColorIcon(entry.getColor(), getHeight(), 16));
-            } else {
-                // TODO: I18N
-                setText("Unknown entry");
-                setIcon(null);
-            }
-
-            return this;
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
     protected class ChangeModelListener implements DocumentListener {
 
         //~ Methods ------------------------------------------------------------
