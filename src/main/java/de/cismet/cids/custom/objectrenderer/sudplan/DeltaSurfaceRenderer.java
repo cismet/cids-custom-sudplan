@@ -281,6 +281,7 @@ public class DeltaSurfaceRenderer extends AbstractCidsBeanRenderer {
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.sea_type}"),
                 txtSurfaceType,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding.setConverter(new TypePropertyConverter());
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -562,12 +563,19 @@ public class DeltaSurfaceRenderer extends AbstractCidsBeanRenderer {
 
         @Override
         public String convertForward(final Boolean s) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            if (s == null) {
+                return null;
+            }
+            if (s.booleanValue()) {
+                return "Modification to sea level";
+            } else {
+                return "Modification to adjacent surface";
+            }
         }
 
         @Override
         public Boolean convertReverse(final String t) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return null;
         }
     }
 }

@@ -184,6 +184,9 @@
           <BindingProperties>
             <BindingProperty name="text" source="Form" sourcePath="${cidsBean.sea_type}" target="txtSurfaceType" targetPath="text" updateStrategy="0" immediately="false">
               <BindingParameter name="javax.swing.binding.ParameterKeys.TEXT_CHANGE_STRATEGY" value="javax.swing.binding.TextChangeStrategy.ON_TYPE"/>
+              <Property name="converter" type="org.jdesktop.beansbinding.Converter" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                <Connection code="new TypePropertyConverter()" type="code"/>
+              </Property>
             </BindingProperty>
           </BindingProperties>
           <Constraints>
