@@ -12,18 +12,20 @@ import Sirius.navigator.exception.ConnectionException;
 import Sirius.server.middleware.types.MetaObject;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Paint;
+import java.awt.image.BufferedImage;
 
 import java.math.BigDecimal;
 
-import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.Unit;
 import de.cismet.cids.custom.tostringconverter.sudplan.DeltaConfigurationToStringConverter;
 
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.featurerenderer.CustomCidsFeatureRenderer;
+
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 
 import de.cismet.cismap.navigatorplugin.CidsFeature;
 
@@ -211,7 +213,6 @@ public class DeltaSurfaceFeatureRenderer extends CustomCidsFeatureRenderer {
             Color.RGBtoHSB(255, 0, 0, floats);
             return Color.getHSBColor(floats[0], floats[1], floats[2]);
         }
-        final Graphics g = getGraphics();
 
         return null;
     }
@@ -239,5 +240,16 @@ public class DeltaSurfaceFeatureRenderer extends CustomCidsFeatureRenderer {
     @Override
     public float getTransparency(final CidsFeature subFeature) {
         return 1f;
+    }
+
+    @Override
+    public FeatureAnnotationSymbol getPointSymbol() {
+        final Double height = ((BigDecimal)cidsBean.getProperty("height")).doubleValue();
+        final BufferedImage bi = new BufferedImage(WIDTH, WIDTH, BufferedImage.TYPE_INT_ARGB);
+        // Graphics2D graphics = (Graphics2D) bi.getGraphics();
+        final FeatureAnnotationSymbol symb = new FeatureAnnotationSymbol(bi);
+        symb.setSweetSpotX(0.5);
+        symb.setSweetSpotY(0.5);
+        return symb;
     }
 }

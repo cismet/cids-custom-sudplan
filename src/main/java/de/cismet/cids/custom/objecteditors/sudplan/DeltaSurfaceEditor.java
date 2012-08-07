@@ -7,6 +7,28 @@
 ****************************************************/
 package de.cismet.cids.custom.objecteditors.sudplan;
 
+import org.apache.log4j.Logger;
+
+import org.jdesktop.beansbinding.Converter;
+import org.jdesktop.beansbinding.Validator;
+
+import org.openide.util.WeakListeners;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import java.math.BigDecimal;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+
+import java.util.Locale;
+
+import javax.swing.JFormattedTextField;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.text.InternationalFormatter;
+
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 
 import de.cismet.cids.editors.EditorClosedEvent;
@@ -20,14 +42,31 @@ import de.cismet.cids.editors.EditorSaveListener;
  */
 public class DeltaSurfaceEditor extends AbstractCidsBeanRenderer implements EditorSaveListener {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final Logger LOG = Logger.getLogger(DeltaSurfaceEditor.class);
+
+    private static final String NUMBER_FORMAT = "#,##0.00";
+    private static final double SPINNER_STEPS = 0.50d;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup btgType;
+    private javax.swing.Box.Filler filler2;
+    private javax.swing.Box.Filler filler3;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JLabel lblDescription;
+    private javax.swing.JLabel lblHeight;
+    private javax.swing.JLabel lblName;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JPanel pnlTitle;
+    private javax.swing.JRadioButton rbAdjacent;
+    private javax.swing.JRadioButton rbSealevel;
+    private javax.swing.JScrollPane spDescription;
+    private javax.swing.JSpinner spnHeight;
     private javax.swing.Box.Filler strFooter;
+    private javax.swing.JTextArea txaDescription;
+    private javax.swing.JTextField txtName;
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -37,6 +76,24 @@ public class DeltaSurfaceEditor extends AbstractCidsBeanRenderer implements Edit
      */
     public DeltaSurfaceEditor() {
         initComponents();
+
+        spnHeight.setModel(new SpinnerNumberModel(0, -Double.MAX_VALUE, Double.MAX_VALUE, SPINNER_STEPS));
+
+        final JSpinner.DefaultEditor defEditor = (JSpinner.DefaultEditor)spnHeight.getEditor();
+        final JFormattedTextField ftf = defEditor.getTextField();
+        final InternationalFormatter intFormatter = (InternationalFormatter)ftf.getFormatter();
+        final DecimalFormat decimalFormat = (DecimalFormat)intFormatter.getFormat();
+        decimalFormat.applyPattern(NUMBER_FORMAT);
+
+        final DecimalFormatSymbols frSymbols = new DecimalFormatSymbols(Locale.FRENCH); // 2 345 678.5
+        frSymbols.setDecimalSeparator('.');
+        decimalFormat.setDecimalFormatSymbols(frSymbols);
+
+//        spnHeight.setEditor(new JSpinner.NumberEditor(spnHeight, NUMBER_FORMAT));
+
+//        chL = new SurfaceManipulationVisualPanelHeight.ChangeListenerImpl();
+//        spnHeight.addChangeListener(WeakListeners.change(chL, spnHeight));
+        spnHeight.setToolTipText("Red color for reducing / Blue color for increasing the Surface");
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -49,16 +106,30 @@ public class DeltaSurfaceEditor extends AbstractCidsBeanRenderer implements Edit
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
+        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         pnlTitle = new javax.swing.JPanel();
         lblTitle = new javax.swing.JLabel();
         strFooter = new javax.swing.Box.Filler(new java.awt.Dimension(0, 22),
                 new java.awt.Dimension(0, 22),
                 new java.awt.Dimension(32767, 22));
+        btgType = new javax.swing.ButtonGroup();
+        lblDescription = new javax.swing.JLabel();
+        spDescription = new javax.swing.JScrollPane();
+        txaDescription = new javax.swing.JTextArea();
+        lblHeight = new javax.swing.JLabel();
+        lblName = new javax.swing.JLabel();
+        txtName = new javax.swing.JTextField();
+        spnHeight = new javax.swing.JSpinner();
+        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 32767));
+        filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 0));
+        rbAdjacent = new javax.swing.JRadioButton();
+        rbSealevel = new javax.swing.JRadioButton();
         jLabel1 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jLabel2 = new javax.swing.JLabel();
 
         pnlTitle.setOpaque(false);
         pnlTitle.setLayout(new java.awt.GridBagLayout());
@@ -74,46 +145,210 @@ public class DeltaSurfaceEditor extends AbstractCidsBeanRenderer implements Edit
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(
+        lblDescription.setText(org.openide.util.NbBundle.getMessage(
                 DeltaSurfaceEditor.class,
-                "DeltaSurfaceEditor.jLabel1.text")); // NOI18N
+                "DeltaSurfaceEditor.lblDescription.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jLabel1, gridBagConstraints);
+        add(lblDescription, gridBagConstraints);
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        txaDescription.setColumns(20);
+        txaDescription.setRows(5);
+
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
+                txaDescription,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
+        spDescription.setViewportView(txaDescription);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weightx = 0.6;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(spDescription, gridBagConstraints);
+
+        lblHeight.setText(org.openide.util.NbBundle.getMessage(
+                DeltaSurfaceEditor.class,
+                "DeltaSurfaceEditor.lblHeight.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblHeight, gridBagConstraints);
+
+        lblName.setText(org.openide.util.NbBundle.getMessage(
+                DeltaSurfaceEditor.class,
+                "DeltaSurfaceEditor.lblName.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblName, gridBagConstraints);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.name}"),
+                txtName,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weightx = 0.6;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jScrollPane1, gridBagConstraints);
+        add(txtName, gridBagConstraints);
 
-        jLabel2.setText(org.openide.util.NbBundle.getMessage(
-                DeltaSurfaceEditor.class,
-                "DeltaSurfaceEditor.jLabel2.text")); // NOI18N
+        spnHeight.setMinimumSize(new java.awt.Dimension(200, 28));
+        spnHeight.setPreferredSize(new java.awt.Dimension(140, 28));
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.height}"),
+                spnHeight,
+                org.jdesktop.beansbinding.BeanProperty.create("value"));
+        binding.setConverter(new HeightConverter());
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(spnHeight, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        add(jLabel2, gridBagConstraints);
-    }                                                // </editor-fold>//GEN-END:initComponents
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(filler2, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 6;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weightx = 0.4;
+        add(filler3, gridBagConstraints);
+
+        btgType.add(rbAdjacent);
+        rbAdjacent.setText(org.openide.util.NbBundle.getMessage(
+                DeltaSurfaceEditor.class,
+                "DeltaSurfaceEditor.rbAdjacent.text")); // NOI18N
+        rbAdjacent.setContentAreaFilled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(rbAdjacent, gridBagConstraints);
+
+        btgType.add(rbSealevel);
+        rbSealevel.setText(org.openide.util.NbBundle.getMessage(
+                DeltaSurfaceEditor.class,
+                "DeltaSurfaceEditor.rbSealevel.text")); // NOI18N
+        rbSealevel.setContentAreaFilled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(rbSealevel, gridBagConstraints);
+
+        jLabel1.setText(org.openide.util.NbBundle.getMessage(
+                DeltaSurfaceEditor.class,
+                "DeltaSurfaceEditor.jLabel1.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(jLabel1, gridBagConstraints);
+
+        bindingGroup.bind();
+    } // </editor-fold>//GEN-END:initComponents
 
     @Override
     protected void init() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        bindingGroup.unbind();
+
+        if (cidsBean == null) {
+            txtName.setText(null);
+            txaDescription.setText(null);
+            spnHeight.setValue(0.0d);
+            btgType.clearSelection();
+        } else {
+            final Boolean seaLevel = (Boolean)cidsBean.getProperty("sea_type");
+            rbAdjacent.setSelected(!seaLevel.booleanValue());
+            rbSealevel.setSelected(seaLevel.booleanValue());
+            bindingGroup.bind();
+        }
     }
 
     @Override
     public void editorClosed(final EditorClosedEvent event) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public boolean prepareForSave() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            if (rbAdjacent.isSelected()) {
+                cidsBean.setProperty("sea_type", false);
+            } else if (rbSealevel.isSelected()) {
+                cidsBean.setProperty("sea_type", true);
+            }
+        } catch (Exception e) {
+            LOG.error("Cannot save DeltaSurface", e);
+            return false;
+        }
+        return true;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class HeightConverter extends Converter<BigDecimal, Double> {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public Double convertForward(final BigDecimal s) {
+            return s.doubleValue();
+        }
+
+        @Override
+        public BigDecimal convertReverse(final Double t) {
+            return BigDecimal.valueOf(t);
+        }
     }
 }
