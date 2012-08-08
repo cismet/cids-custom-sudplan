@@ -10,15 +10,6 @@ package de.cismet.cids.custom.sudplan.local.linz;
 import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.map.ObjectMapper;
-
-import org.openide.util.Exceptions;
-
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
-import java.io.IOException;
-import java.io.StringWriter;
 
 import java.util.*;
 import java.util.ArrayList;
@@ -49,6 +40,7 @@ public class SwmmOutput {
     protected transient Date created;
     protected transient String user;
     protected transient int swmmRun = -1;
+    protected transient int swmmProject = -1;
     protected transient String swmmRunName;
     /** Statistical rainfall intensity with a duration of 12 h and return period once per year (r720,1). */
     protected transient float r720 = -1.0f;
@@ -176,13 +168,8 @@ public class SwmmOutput {
      *
      * @param  projectId  DOCUMENT ME!
      */
-    @JsonIgnore
     public void setSwmmProject(final int projectId) {
-        if ((this.csoOverflows != null) && !this.csoOverflows.isEmpty()) {
-            for (final CsoOverflow csoOverflow : this.csoOverflows.values()) {
-                csoOverflow.setSwmmProject(projectId);
-            }
-        }
+        this.swmmProject = projectId;
     }
 
     /**
@@ -190,13 +177,8 @@ public class SwmmOutput {
      *
      * @return  DOCUMENT ME!
      */
-    @JsonIgnore
     public int getSwmmProject() {
-        if ((this.csoOverflows != null) && !this.csoOverflows.isEmpty()) {
-            return this.csoOverflows.values().iterator().next().getSwmmProject();
-        }
-
-        return -1;
+        return this.swmmProject;
     }
 
     /**
@@ -235,6 +217,12 @@ public class SwmmOutput {
      */
     public void setTotalRunoffVolume(final float totalRunoffVolume) {
         this.totalRunoffVolume = totalRunoffVolume;
+    }
+
+    @JsonIgnore
+    @Override
+    public String toString() {
+        return "SWMM Output for SWMM Run '" + this.getSwmmRunName() + "'";
     }
 
     /**

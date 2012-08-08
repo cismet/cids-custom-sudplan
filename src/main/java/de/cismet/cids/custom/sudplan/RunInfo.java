@@ -7,12 +7,15 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 /**
  * Holds common properties for run info objects.
  *
  * @author   Pascal Dihé
  * @version  $Revision$, $Date$
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public interface RunInfo {
 
     //~ Methods ----------------------------------------------------------------

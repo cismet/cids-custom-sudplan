@@ -119,8 +119,7 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
             ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
 
             final CsoCopyThread csoCopyThread = new CsoCopyThread();
-            // SudplanConcurrency.getSudplanGeneralPurposePool().execute(csoCopyThread);
-            new Thread(csoCopyThread).start();
+            SudplanConcurrency.getSudplanGeneralPurposePool().execute(csoCopyThread);
         } else {
             progressBar.setIndeterminate(false);
             org.openide.awt.Mnemonics.setLocalizedText(
@@ -208,7 +207,6 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
         tblCsoConfiguration.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
                 new String[] {}));
-        tblCsoConfiguration.setEnabled(false);
         jScrollPaneCsoConfiguration.setViewportView(tblCsoConfiguration);
 
         cardPanel.add(jScrollPaneCsoConfiguration, "csos");
@@ -273,10 +271,18 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
 
         //~ Instance fields ----------------------------------------------------
 
+        private final transient Logger LOG = Logger.getLogger(CsoConfigurationTableModel.class);
         private final List<MetaObject> csoConfigurations;
-        // FIXME: i18n
-        private final String[] columnNames = { "Name", "Volume", "Outfall", "Storage Unit", "max. throttle Discharge" };
         // private final Class[] columnClasses = { String.class, String.class, String.class,String.class,String.class };
+
+        private final String[] columnNames = {
+                NbBundle.getMessage(UploadWizardPanelCSOsUI.class, "CsoConfigurationTableModel.column.name"),
+                NbBundle.getMessage(UploadWizardPanelCSOsUI.class, "CsoConfigurationTableModel.column.outfall"),
+                NbBundle.getMessage(UploadWizardPanelCSOsUI.class, "CsoConfigurationTableModel.column.storage_unit"),
+                NbBundle.getMessage(
+                    UploadWizardPanelCSOsUI.class,
+                    "CsoConfigurationTableModel.column.max_throttle_discharge")
+            };
 
         //~ Constructors -------------------------------------------------------
 

@@ -9,7 +9,6 @@ package de.cismet.cids.custom.objectrenderer.sudplan;
 
 import Sirius.navigator.search.CidsSearchExecutor;
 import Sirius.navigator.ui.ComponentRegistry;
-import Sirius.navigator.ui.RequestsFullSizeComponent;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -26,7 +25,6 @@ import java.awt.event.ActionListener;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import javax.swing.*;
 import javax.swing.DefaultComboBoxModel;
@@ -37,8 +35,6 @@ import javax.swing.JTextField;
 import de.cismet.cids.client.tools.DevelopmentTools;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
-import de.cismet.cids.custom.sudplan.local.linz.SwmmOutputManager;
-import de.cismet.cids.custom.sudplan.local.linz.SwmmOutputManagerUI;
 import de.cismet.cids.custom.sudplan.server.search.CsoByOverflowSearch;
 import de.cismet.cids.custom.sudplan.server.search.EtaResultSearch;
 
@@ -143,13 +139,19 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
                     ActionListener.class,
                     scenarioListener,
                     hyperLink));
+
+            if (gridBagConstraints.gridy == (swmmScenarios.size() - 1)) {
+                gridBagConstraints.weighty = 1.0;
+            }
+
             this.swmmRunPanel.add(hyperLink, gridBagConstraints);
             gridBagConstraints.gridy++;
 
             comboBoxModel.addElement(swmmBean);
         }
 
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.weighty = 0.0;
         for (final CidsBean etaBean : etaScenarios) {
             final String key = "ETA::" + etaBean.getProperty("id");
             beansMap.put(key, etaBean);
@@ -160,6 +162,11 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
                     ActionListener.class,
                     scenarioListener,
                     hyperLink));
+
+            if (gridBagConstraints.gridy == (etaScenarios.size() - 1)) {
+                gridBagConstraints.weighty = 1.0;
+            }
+
             this.etaRunPanel.add(hyperLink, gridBagConstraints);
             gridBagConstraints.gridy++;
         }
@@ -575,7 +582,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         try {
             BasicConfigurator.configure();
             final CidsBean swmmProject = DevelopmentTools.createCidsBeanFromRMIConnectionOnLocalhost(
-                    "SUDPLAN",
+                    "SUDPLAN-LINZ",
                     "Administratoren",
                     "admin",
                     "cismetz12",

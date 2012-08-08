@@ -14,30 +14,22 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
-import org.jfree.chart.labels.StandardPieToolTipGenerator;
 import org.jfree.chart.plot.MultiplePiePlot;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.util.TableOrder;
 
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.*;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridLayout;
 
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import de.cismet.cids.client.tools.DevelopmentTools;

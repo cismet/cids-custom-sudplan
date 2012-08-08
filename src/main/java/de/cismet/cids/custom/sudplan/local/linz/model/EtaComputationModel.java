@@ -7,11 +7,13 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz.model;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -32,7 +34,6 @@ public class EtaComputationModel {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(EtaComputationModel.class);
-
     private static final float WWTP_SIZE = 500000f;
     private static final float PE_SEP = 10000f;
     private static final float PE_COMBINED = 300000f;
@@ -84,37 +85,74 @@ public class EtaComputationModel {
         etaOutput.setUser(etaInput.getUser());
         etaOutput.setR720(etaInput.getR720());
 
-        if (etaInput.getTotalOverflowVolume() < 0) {
+        if (etaInput.getTotalOverflowVolume() <= 0) {
+            LOG.warn("TotalOverflowVolume not set in ETA inout, trying to compute ....");
             etaInput.computeTotalOverflowVolume();
         }
 
         etaOutput.setTotalOverflowVolume(etaInput.getTotalOverflowVolume());
 
-        // float sum_TotalVolume = 0.0f;
+        float sum_TotalVolume = 0.0f;
         float sum_SedAFS = 0.0f;
 
         for (final String rptKey : etaInput.getCsoOverflows().keySet()) {
             for (final EtaConfiguration eta : etaConfigurations) {
-                if (rptKey.equalsIgnoreCase(eta.getName()) && eta.isEnabled()) {
-                    final float totVol = etaInput.getCsoOverflows().get(rptKey).getOverflowVolume();
-                    sum_SedAFS += totVol * eta.getSedimentationEfficency();
-                    // sum_TotalVolume += totVol;
+                if (rptKey.equalsIgnoreCase(eta.getName())) {
+                    if (eta.isEnabled()) {
+                        final float totVol = etaInput.getCsoOverflows().get(rptKey).getOverflowVolume();
+                        sum_SedAFS += totVol * eta.getSedimentationEfficency();
+                        sum_TotalVolume += totVol;
+                    } else {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("ignoring CSO '" + eta + "' in ETA computation");
+                        }
+                    }
                 }
             }
         }
 
-        // final float VQo = sum_TotalVolume;
+        if (sum_TotalVolume != etaInput.getTotalOverflowVolume()) {
+            LOG.warn("computed TotalOverflowVolume (" + sum_TotalVolume + ") "
+                        + "!= stored TotalOverflowVolume (" + etaInput.getTotalOverflowVolume() + ")");
+        }
+
         final float VQo = etaInput.getTotalOverflowVolume();
-        final float VQr = etaInput.getTotalRunoffVolume();
+        float VQr;
+
+        if (etaInput.getTotalRunoffVolume() > 1E6f) {
+            VQr = etaInput.getTotalRunoffVolume() / 1E6f;
+            LOG.warn("TotalRunoffVolume changed from " + etaInput.getTotalRunoffVolume()
+                        + " to " + VQr);
+        } else {
+            VQr = etaInput.getTotalRunoffVolume();
+        }
 
         final float eta_Hyd_actual = ((VQr - VQo) / VQr) * 100.0f;
         final float eta_Sed_actual = eta_Hyd_actual + (sum_SedAFS / VQr);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("r720,1=" + etaInput.getR720() + ", \nVQo=" + etaInput.getTotalOverflowVolume()
+                        + "*10^6 ltr, \nVQr=" + etaInput.getTotalRunoffVolume() + "*10^6 ltr");
+            LOG.debug("eta_Hyd_actual=" + eta_Hyd_actual
+                        + ", \neta_Sed_actual=" + eta_Sed_actual);
+        }
 
         // Calculate required efficiency rates
 
+        /**
+         * todo comment
+         */
         float cso_eff_r720_lower30mm;
+        /**
+         * todo comment
+         */
         float cso_eff_r720_higher50mm;
+        /**
+         * todo comment
+         */
         float eta_gel;
+        /**
+         * todo comment
+         */
         float eta_afs;
 
         // Table 1 - Page 12
@@ -163,6 +201,10 @@ public class EtaComputationModel {
                 eta_afs = eta_afs + seperateSYS;
             }
         }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("eta_Hyd_required=" + eta_gel
+                        + ", \neta_Sed_required=" + eta_afs);
+        }
 
         etaOutput.setEtaHydActual(eta_Hyd_actual);
         etaOutput.setEtaSedActual(eta_Sed_actual);
@@ -179,8 +221,12 @@ public class EtaComputationModel {
      */
     public static void main(final String[] args) {
         try {
+            BasicConfigurator.configure();
+
             final SwmmReportParser swmmReportParser = new SwmmReportParser();
-            final InputStream swmmReportFile = new FileInputStream("c:\\linz_v1_2011-08-29_neu.rpt");
+            // final InputStream swmmReportFile = new FileInputStream("c:\\linz_v1_2011-08-29_neu.rpt");
+            final InputStream swmmReportFile = new FileInputStream(
+                    "P:\\SUDPLAN\\WP7 - Linz Pilot\\Workshop_2011-05-09\\linz_v1_2011-08-29.rpt");
 
             SwmmOutput swmmOutput = new SwmmOutput();
             swmmOutput.setSwmmProject(2);
@@ -188,8 +234,9 @@ public class EtaComputationModel {
             swmmOutput.setCreated(new Date());
 
             swmmOutput = swmmReportParser.parseRPT(swmmOutput, swmmReportFile);
-
+            EtaComputationModel.LOG.info(swmmOutput.getCsoOverflows().size() + " CSO overflows parsed from RPT");
             final EtaInput etaInput = new EtaInput(swmmOutput);
+            EtaComputationModel.LOG.info(etaInput.getCsoOverflows().size() + " CSO overflows in ETA Input");
 
             final String[] csoNames = new String[] {
                     "RDSRUE51",
@@ -287,9 +334,11 @@ public class EtaComputationModel {
                 };
 
             int i = 0;
+            final List<EtaConfiguration> etaConfigurations = new ArrayList<EtaConfiguration>(csoNames.length);
             for (final String csoName : csoNames) {
                 final EtaConfiguration etaConfiguration = new EtaConfiguration();
                 etaConfiguration.setEnabled(true);
+
                 if (csoName.equals("RKL_Ablauf")) {
                     etaConfiguration.setEnabled(false);
                 }
@@ -323,11 +372,17 @@ public class EtaComputationModel {
                 } else {
                     etaConfiguration.setSedimentationEfficency(0.0f);
                 }
-                etaInput.getEtaConfigurations().add(etaConfiguration);
+
+                etaConfigurations.add(etaConfiguration);
+                // etaInput.getEtaConfigurations().add(etaConfiguration);
+
                 i++;
             }
 
-            etaInput.setR720((float)29.0232183);
+            etaInput.setEtaConfigurations(etaConfigurations);
+
+            // etaInput.setR720((float)29.0232183);
+            etaInput.setR720(35.1297126666468f);
 
             final EtaComputationModel etaComputationModel = new EtaComputationModel();
             final EtaOutput etaOutput = etaComputationModel.computateEta(etaInput);
@@ -337,7 +392,7 @@ public class EtaComputationModel {
             System.out.println("EtaSedActual: " + etaOutput.getEtaSedActual());
             System.out.println("EtaSedRequired: " + etaOutput.getEtaSedRequired());
         } catch (Exception e) {
-            e.printStackTrace();
+            EtaComputationModel.LOG.fatal(e.getMessage(), e);
             System.exit(1);
         }
     }

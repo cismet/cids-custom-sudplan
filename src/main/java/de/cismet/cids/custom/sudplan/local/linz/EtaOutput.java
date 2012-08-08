@@ -7,6 +7,7 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import org.openide.util.Exceptions;
@@ -260,30 +261,36 @@ public class EtaOutput {
         this.user = user;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        try {
-            final ObjectMapper mapper = new ObjectMapper();
-            final StringWriter writer = new StringWriter();
-
-            final EtaOutput etaOutput = new EtaOutput();
-            etaOutput.setCreated(new Date());
-            etaOutput.setUser("Pascal Dihé");
-            etaOutput.setEtaHydActual((float)Math.random() * 100f);
-            etaOutput.setEtaHydRequired((float)Math.random() * 100f);
-            etaOutput.setEtaSedActual((float)Math.random() * 100f);
-            etaOutput.setEtaSedRequired((float)Math.random() * 100f);
-            etaOutput.setR720((float)Math.random() * 10f);
-            etaOutput.setTotalOverflowVolume((float)Math.random() * 10f);
-
-            mapper.writeValue(writer, etaOutput);
-            System.out.println(writer.toString());
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+    @JsonIgnore
+    @Override
+    public String toString() {
+        return "ETA Output for ETA Run '" + this.getEtaRunName() + "'";
     }
+
+//    /**
+//     * DOCUMENT ME!
+//     *
+//     * @param  args  DOCUMENT ME!
+//     */
+//    public static void main(final String[] args) {
+//        try {
+//            final ObjectMapper mapper = new ObjectMapper();
+//            final StringWriter writer = new StringWriter();
+//
+//            final EtaOutput etaOutput = new EtaOutput();
+//            etaOutput.setCreated(new Date());
+//            etaOutput.setUser("Pascal Dihé");
+//            etaOutput.setEtaHydActual((float)Math.random() * 100f);
+//            etaOutput.setEtaHydRequired((float)Math.random() * 100f);
+//            etaOutput.setEtaSedActual((float)Math.random() * 100f);
+//            etaOutput.setEtaSedRequired((float)Math.random() * 100f);
+//            etaOutput.setR720((float)Math.random() * 10f);
+//            etaOutput.setTotalOverflowVolume((float)Math.random() * 10f);
+//
+//            mapper.writeValue(writer, etaOutput);
+//            System.out.println(writer.toString());
+//        } catch (IOException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
+//    }
 }

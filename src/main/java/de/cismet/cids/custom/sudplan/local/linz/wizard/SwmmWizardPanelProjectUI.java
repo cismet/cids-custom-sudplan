@@ -422,6 +422,10 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
      */
     private class ProjectListener implements ItemListener {
 
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient Logger LOG = Logger.getLogger(ProjectListener.class);
+
         //~ Methods ------------------------------------------------------------
 
         @Override
@@ -443,7 +447,7 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                 if (swmmProject.getProperty("inp_file_name") != null) {
                     swmmInput.setInpFile(swmmProject.getProperty("inp_file_name").toString());
                 } else {
-                    LOG.warn("INP File net set in swmm model configuration, setting automatically to '"
+                    LOG.warn("INP File not set in swmm model configuration, setting automatically to '"
                                 + swmmProject.getProperty("title") + "'");
                     final String inpFile = (String)swmmProject.getProperty("title") + ".inp";
                     swmmInput.setInpFile(inpFile);

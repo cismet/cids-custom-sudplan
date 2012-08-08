@@ -55,7 +55,9 @@ public abstract class AbstractAsyncModelManager extends AbstractModelManager imp
             throw new IllegalArgumentException("progressevent must not be null"); // NOI18N
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug("progress: " + event);
+            LOG.debug("progress: '" + event.getMessage() + "' (" + event.getStep()
+                        + "/" + event.getMaxSteps() + ") = " + event.getState()
+                        + ", source = '" + event.getSource() + "' (" + this + ")");
         }
         if (event.getSource() instanceof AbstractModelRunWatchable) {
             final AbstractModelRunWatchable amrw = (AbstractModelRunWatchable)event.getSource();

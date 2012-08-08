@@ -19,9 +19,7 @@ import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.NbBundle;
 
-import java.awt.Component;
 import java.awt.Dialog;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
 import java.io.IOException;
@@ -33,7 +31,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
@@ -194,6 +191,10 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
                             SwmmPlusEtaWizardAction.class,
                             "SwmmPlusEtaWizardAction.actionPerformed(ActionEvent).wizard.error"),
                         JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Wizard cancelled, don't do anything");
                 }
             }
         } else {
