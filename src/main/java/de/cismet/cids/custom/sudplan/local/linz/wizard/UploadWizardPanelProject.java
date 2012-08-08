@@ -122,7 +122,7 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
                         && (this.inpFile.lastIndexOf(File.separator) != -1)) {
                 this.newSwmmProjectBean.setProperty(
                     "inp_file_name",
-                    this.inpFile.substring(this.inpFile.lastIndexOf(File.separator)));
+                    this.inpFile.substring(this.inpFile.lastIndexOf(File.separator) + 1));
             } else {
                 LOG.warn("Input file path '" + this.inpFile
                             + "' is not set or does not contain separator '" + File.separator + "'");

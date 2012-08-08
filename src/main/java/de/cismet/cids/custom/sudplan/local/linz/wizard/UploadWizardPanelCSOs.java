@@ -107,6 +107,9 @@ public final class UploadWizardPanelCSOs implements WizardDescriptor.Panel {
         this.copyCSOsComplete = (Boolean)wizardDescriptor.getProperty(UploadWizardAction.PROP_COPY_CSOS_COMPLETE);
         this.copyCSOsErroneous = (Boolean)wizardDescriptor.getProperty(UploadWizardAction.PROP_COPY_CSOS_ERRORNEOUS);
         this.copyCSOsInProgress = (Boolean)wizardDescriptor.getProperty(UploadWizardAction.PROP_COPY_CSOS_IN_PROGRESS);
+        if (wizardDescriptor.getProperty(UploadWizardAction.PROP_COPIED_CSOS) != null) {
+            this.copiedCSOs = (List<MetaObject>)wizardDescriptor.getProperty(UploadWizardAction.PROP_COPIED_CSOS);
+        }
 
         component.init();
 
@@ -119,6 +122,7 @@ public final class UploadWizardPanelCSOs implements WizardDescriptor.Panel {
         wizardDescriptor.putProperty(UploadWizardAction.PROP_COPY_CSOS_ERRORNEOUS, this.copyCSOsErroneous);
         wizardDescriptor.putProperty(UploadWizardAction.PROP_COPY_CSOS_IN_PROGRESS, this.copyCSOsInProgress);
         wizardDescriptor.putProperty(UploadWizardAction.PROP_NEW_SWMM_PROJECT_BEAN, this.newSwmmProjectBean);
+        wizardDescriptor.putProperty(UploadWizardAction.PROP_COPIED_CSOS, this.getCopiedCSOs());
     }
 
     @Override
