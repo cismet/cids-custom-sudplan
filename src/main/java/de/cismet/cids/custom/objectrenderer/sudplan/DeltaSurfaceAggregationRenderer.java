@@ -9,24 +9,53 @@ package de.cismet.cids.custom.objectrenderer.sudplan;
 
 import Sirius.navigator.ui.RequestsFullSizeComponent;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
+
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
+
 import org.apache.log4j.Logger;
 
+import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.table.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import de.cismet.cids.custom.sudplan.SMSUtils;
+
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.tools.metaobjectrenderer.CidsBeanAggregationRenderer;
+
+import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
+import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
+
+import de.cismet.cismap.navigatorplugin.CidsFeature;
 
 import de.cismet.tools.gui.jtable.sorting.AlphanumComparator;
 
@@ -43,6 +72,8 @@ public class DeltaSurfaceAggregationRenderer extends javax.swing.JPanel implemen
 
     private static final Logger LOG = Logger.getLogger(DeltaSurfaceAggregationRenderer.class);
 
+    public static final String ORTHO_URL =
+        "http://geoportal.wuppertal.de:8083/deegree/wms?VERSION=1.1.1&SERVICE=WMS&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:luftbild2010&STYLES=default";
     // Spaltenueberschriften
     private static final String[] AGR_COMLUMN_NAMES = new String[] {
             "Name",
@@ -64,6 +95,8 @@ public class DeltaSurfaceAggregationRenderer extends javax.swing.JPanel implemen
 
     private transient List<CidsBean> cidsBeans;
     private transient DeltaSurfaceTableModel tableModel;
+    private Map<CidsBean, CidsFeature> features;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private de.cismet.cismap.commons.gui.MappingComponent mappingComponent;
     private javax.swing.JScrollPane spDeltaSurfaces;
@@ -77,19 +110,6 @@ public class DeltaSurfaceAggregationRenderer extends javax.swing.JPanel implemen
      */
     public DeltaSurfaceAggregationRenderer() {
         initComponents();
-
-        final List<Object[]> tableData = new ArrayList<Object[]>();
-        for (final CidsBean punktBean : cidsBeans) {
-            tableData.add(cidsBean2Row(punktBean));
-        }
-
-        tableModel = new DeltaSurfaceTableModel(tableData.toArray(new Object[tableData.size()][]), AGR_COMLUMN_NAMES);
-        tblDeltaSurfaces.setModel(tableModel);
-        final TableColumnModel cModel = tblDeltaSurfaces.getColumnModel();
-        for (int i = 0; i < cModel.getColumnCount(); ++i) {
-            cModel.getColumn(i).setPreferredWidth(AGR_COMLUMN_WIDTH[i]);
-        }
-        decorateTableWithSorter(tblDeltaSurfaces);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -142,7 +162,158 @@ public class DeltaSurfaceAggregationRenderer extends javax.swing.JPanel implemen
 
     @Override
     public void setCidsBeans(final Collection<CidsBean> beans) {
-        this.cidsBeans = (List<CidsBean>)beans;
+        if (beans instanceof List) {
+            this.cidsBeans = (List<CidsBean>)beans;
+            features = new HashMap<CidsBean, CidsFeature>(beans.size());
+
+            initMap();
+
+            final List<Object[]> tableData = new ArrayList<Object[]>();
+            for (final CidsBean deltaSurfaceBean : cidsBeans) {
+                tableData.add(cidsBean2Row(deltaSurfaceBean));
+            }
+
+            tableModel = new DeltaSurfaceTableModel(tableData.toArray(new Object[tableData.size()][]),
+                    AGR_COMLUMN_NAMES);
+            tblDeltaSurfaces.setModel(tableModel);
+            final TableColumnModel cModel = tblDeltaSurfaces.getColumnModel();
+            for (int i = 0; i < cModel.getColumnCount(); ++i) {
+                cModel.getColumn(i).setPreferredWidth(AGR_COMLUMN_WIDTH[i]);
+            }
+            decorateTableWithSorter(tblDeltaSurfaces);
+//            tblDeltaSurfaces.
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void initMap() {
+        try {
+            final XBoundingBox box = boundingBoxFromPointList(cidsBeans);
+//            final Geometry geom31466 = CrsTransformer.transformToGivenCrs(box.getEnvelope(), SMSUtils.EPSG_WUPP)
+//                        .buffer(60);
+            // geom31466 = geom31466.buffer(50);
+//            final XBoundingBox bbox = new XBoundingBox(geom31466, SMSUtils.EPSG_WUPP, true);
+
+            final ActiveLayerModel mappingModel = new ActiveLayerModel();
+            mappingModel.setSrs(new Crs(SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, true, true));
+
+//            mappingModel.addHome(bbox);
+            mappingModel.addHome(new XBoundingBox(
+                    box.getX1(),
+                    box.getY1(),
+                    box.getX2(),
+                    box.getY2(),
+                    SMSUtils.EPSG_WUPP,
+                    true));
+
+            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(ORTHO_URL));
+
+            ortho.setName("Wuppertal Ortophoto"); // NOI18N
+
+            final RetrievalListener rl = new RetrievalListener() {
+
+//                    private final transient String text = lblMapHeader.getText();
+
+                    @Override
+                    public void retrievalStarted(final RetrievalEvent e) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+//                                    lblMapHeader.setText(text + "( Loading... )");
+                                }
+                            });
+                    }
+
+                    @Override
+                    public void retrievalProgress(final RetrievalEvent e) {
+                    }
+
+                    @Override
+                    public void retrievalComplete(final RetrievalEvent e) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+//                                    lblMapHeader.setText(text + "( Double click preview to add )");
+                                }
+                            });
+                    }
+
+                    @Override
+                    public void retrievalAborted(final RetrievalEvent e) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+//                                    lblMapHeader.setText(text + "( Retrieval Aborted )");
+                                }
+                            });
+                    }
+
+                    @Override
+                    public void retrievalError(final RetrievalEvent e) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+//                                    lblMapHeader.setText(text + "( Retrieval Error )");
+                                }
+                            });
+                    }
+                };
+
+            ortho.addRetrievalListener(rl);
+
+            mappingModel.addLayer(ortho);
+
+            mappingComponent.setMappingModel(mappingModel);
+
+            mappingComponent.gotoInitialBoundingBox();
+
+            mappingComponent.setInteractionMode(MappingComponent.ZOOM);
+            mappingComponent.unlock();
+
+//            final Collection<CidsFeature> cidsFeatures = new ArrayList<CidsFeature>();
+//            cidsFeatures.add(new CidsFeature(cidsBean.getMetaObject()));
+            for (final CidsBean cidsBean : cidsBeans) {
+                final CidsFeature feature = new CidsFeature(cidsBean.getMetaObject());
+                features.put(cidsBean, feature);
+            }
+            mappingComponent.getFeatureCollection().addFeatures(features.values());
+        } catch (Exception e) {
+            LOG.error("cannot initialise mapping component", e);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   deltaSurfaces  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected XBoundingBox boundingBoxFromPointList(final Collection<CidsBean> deltaSurfaces) {
+        final List<Geometry> geometries = new ArrayList<Geometry>();
+
+        for (final CidsBean deltaSurface : deltaSurfaces) {
+            try {
+                final Geometry geom = (Geometry)deltaSurface.getProperty("geom.geo_field");
+                final Geometry geom31466 = CrsTransformer.transformToGivenCrs(geom.getEnvelope(), SMSUtils.EPSG_WUPP);
+                geometries.add(geom31466);
+            } catch (Exception ex) {
+                LOG.warn(ex, ex);
+            }
+        }
+
+        final GeometryCollection geoCollection = new GeometryCollection(geometries.toArray(
+                    new Geometry[geometries.size()]),
+                new GeometryFactory());
+
+        // TODO Buffer sollte nicht konstant sein!
+        return new XBoundingBox(geoCollection.getEnvelope().buffer(20.0d));
     }
 
     @Override
@@ -177,9 +348,13 @@ public class DeltaSurfaceAggregationRenderer extends javax.swing.JPanel implemen
 
             for (int i = 0; i < AGR_PROPERTY_NAMES.length; ++i) {
                 final Object property = deltaSurface.getProperty(AGR_PROPERTY_NAMES[i]);
-                final String propertyString;
-                propertyString = propertyPrettyPrint(property);
-                result[i] = propertyString;
+                if (property instanceof Boolean) {
+                    result[i] = (Boolean)property;
+                } else {
+                    final String propertyString;
+                    propertyString = propertyPrettyPrint(property);
+                    result[i] = propertyString;
+                }
             }
             return result;
         }
@@ -260,6 +435,9 @@ public class DeltaSurfaceAggregationRenderer extends javax.swing.JPanel implemen
 
         @Override
         public Class<?> getColumnClass(final int columnIndex) {
+            if (columnIndex == 3) {
+                return Boolean.class;
+            }
             return super.getColumnClass(columnIndex);
         }
     }

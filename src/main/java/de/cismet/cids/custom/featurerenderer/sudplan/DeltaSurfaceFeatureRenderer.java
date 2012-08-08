@@ -11,12 +11,16 @@ import Sirius.navigator.exception.ConnectionException;
 
 import Sirius.server.middleware.types.MetaObject;
 
+import java.awt.*;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Paint;
 import java.awt.image.BufferedImage;
 
 import java.math.BigDecimal;
+
+import javax.swing.JLabel;
 
 import de.cismet.cids.custom.sudplan.Unit;
 import de.cismet.cids.custom.tostringconverter.sudplan.DeltaConfigurationToStringConverter;
@@ -26,6 +30,7 @@ import de.cismet.cids.dynamics.CidsBean;
 import de.cismet.cids.featurerenderer.CustomCidsFeatureRenderer;
 
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import de.cismet.cismap.commons.gui.piccolo.ShowAlsoOnPolygons;
 
 import de.cismet.cismap.navigatorplugin.CidsFeature;
 
@@ -41,6 +46,13 @@ public class DeltaSurfaceFeatureRenderer extends CustomCidsFeatureRenderer {
 
     private static final DeltaConfigurationToStringConverter deltaConfigToString =
         new DeltaConfigurationToStringConverter();
+
+    private static final Color NEGATIV_HEIGHT_COLOR = Color.getHSBColor(0.0f, 1.0f, 1.0f);
+    private static final Color POSITIV_HEIGHT_COLOR = Color.getHSBColor(0.564f, 0.52f, 0.98f);
+
+    //~ Instance fields --------------------------------------------------------
+
+    private transient boolean isNegativHeight;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
@@ -61,6 +73,10 @@ public class DeltaSurfaceFeatureRenderer extends CustomCidsFeatureRenderer {
      * Creates new form DeltaSurfaceFeatureRenderer.
      */
     public DeltaSurfaceFeatureRenderer() {
+//        final float[] floats = new float[3];
+//        Color.RGBtoHSB(255, 0, 0, floats);
+//        NEGATIV_HEIGHT_COLOR = Color.getHSBColor(floats[0], floats[1], floats[2]);
+
         initComponents();
         lblUnit.setText(Unit.M.getLocalisedName());
     }
@@ -99,10 +115,11 @@ public class DeltaSurfaceFeatureRenderer extends CustomCidsFeatureRenderer {
         add(lblHeight, gridBagConstraints);
 
         txtHeight.setEditable(false);
+        txtHeight.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtHeight.setText(org.openide.util.NbBundle.getMessage(
                 DeltaSurfaceFeatureRenderer.class,
                 "DeltaSurfaceFeatureRenderer.txtHeight.text")); // NOI18N
-        txtHeight.setPreferredSize(new java.awt.Dimension(40, 27));
+        txtHeight.setPreferredSize(new java.awt.Dimension(100, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -205,13 +222,16 @@ public class DeltaSurfaceFeatureRenderer extends CustomCidsFeatureRenderer {
     public Paint getFillingStyle() {
         final BigDecimal height = (BigDecimal)cidsBean.getProperty("height");
         final float[] floats = new float[3];
-        if (height.doubleValue() > 0) {
-            Color.RGBtoHSB(120, 200, 250, floats);
-            return Color.getHSBColor(floats[0], floats[1], floats[2]);
-        } else if (height.doubleValue() < 0) {
+        isNegativHeight = height.doubleValue() < 0;
+        if (!isNegativHeight) {
+//            Color.RGBtoHSB(120, 200, 250, floats);
+//            return Color.getHSBColor(floats[0], floats[1], floats[2]);
+            return POSITIV_HEIGHT_COLOR;
+        } else if (isNegativHeight) {
 //            Color.RGBtoHSB(255, 80, 100, floats);
-            Color.RGBtoHSB(255, 0, 0, floats);
-            return Color.getHSBColor(floats[0], floats[1], floats[2]);
+//            Color.RGBtoHSB(255, 0, 0, floats);
+//            return Color.getHSBColor(floats[0], floats[1], floats[2]);
+            return NEGATIV_HEIGHT_COLOR;
         }
 
         return null;
@@ -229,7 +249,8 @@ public class DeltaSurfaceFeatureRenderer extends CustomCidsFeatureRenderer {
         txtHeight.setText(height.toString());
         txtType.setText(type.toString());
         txaDescription.setText(desc);
-        txtConfig.setText(deltaConfigToString.convert(config.getMetaObject()));
+//        txtConfig.setText(deltaConfigToString.convert(config.getMetaObject()));
+        txtConfig.setText((String)config.getProperty("name"));
     }
 
     @Override
@@ -238,18 +259,57 @@ public class DeltaSurfaceFeatureRenderer extends CustomCidsFeatureRenderer {
     }
 
     @Override
-    public float getTransparency(final CidsFeature subFeature) {
-        return 1f;
+    public float getTransparency() {
+        return 0.9F;
     }
 
     @Override
     public FeatureAnnotationSymbol getPointSymbol() {
         final Double height = ((BigDecimal)cidsBean.getProperty("height")).doubleValue();
-        final BufferedImage bi = new BufferedImage(WIDTH, WIDTH, BufferedImage.TYPE_INT_ARGB);
-        // Graphics2D graphics = (Graphics2D) bi.getGraphics();
-        final FeatureAnnotationSymbol symb = new FeatureAnnotationSymbol(bi);
-        symb.setSweetSpotX(0.5);
-        symb.setSweetSpotY(0.5);
+        final String s = "Höhe: " + height.toString();
+        Font font = this.getFont();
+        font = font.deriveFont(Font.BOLD);
+        final JLabel l = new JLabel();
+        final FontMetrics fm = l.getFontMetrics(font);
+        final int stringWidth = fm.stringWidth(s);
+        final int stringHeight = fm.getHeight();
+
+        final BufferedImage bi = new BufferedImage(stringWidth, stringHeight, BufferedImage.TYPE_INT_ARGB);
+        final Graphics2D graphics = (Graphics2D)bi.getGraphics();
+        if (isNegativHeight) {
+            graphics.setColor(Color.black);
+        } else {
+            graphics.setColor(NEGATIV_HEIGHT_COLOR);
+        }
+        graphics.setFont(font);
+//        final int x = (int)(getSize().width - stringWidth) / 2;
+//        final int y = ((int)(getSize().height - stringHeight) / 2) + fm.getAscent();
+
+        graphics.drawString(s, 0, stringHeight);
+        final FeatureAnnotationSymbol symb = new HeigthSymbol(bi);
+        symb.setSweetSpotX(1.0d);
+        symb.setSweetSpotY(0.0d);
         return symb;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class HeigthSymbol extends FeatureAnnotationSymbol implements ShowAlsoOnPolygons {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new HeigthSymbol object.
+         *
+         * @param  newImage  DOCUMENT ME!
+         */
+        public HeigthSymbol(final Image newImage) {
+            super(newImage);
+        }
     }
 }
