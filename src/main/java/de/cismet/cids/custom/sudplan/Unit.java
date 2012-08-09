@@ -33,8 +33,30 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
             NbBundle.getMessage(Unit.class, "Unit.PARTS_PER_BILLION.localisedName")); // NOI18N
     public static final Unit KELVIN = new Unit(
             "urn:ogc:def:uom:OGC:K", // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.KELVIN.localisedName")); // NOI18N
-    public static final Unit M3S = new Unit("urn:org:def:uom:OGC:m3s", "Cubic meters per second");
+            NbBundle.getMessage(
+                Unit.class,
+                "Unit.KELVIN.localisedName")); // NOI18N
+    public static final Unit M3S = new Unit(
+            "urn:org:def:uom:OGC:m3s",
+            NbBundle.getMessage(Unit.class, "Unit.M3S.localisedName"));
+    public static final Unit LS = new Unit(
+            "l/s", // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.LS.localisedName")); // NOI18N
+    public static final Unit M3 = new Unit(
+            "m^3", // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.M3.localisedName")); // NOI18N
+    public static final Unit MM_MIN = new Unit(
+            "mm/min", // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.MM_MIN.localisedName")); // NOI18N
+    public static final Unit MG_L = new Unit(
+            "mg/l", // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.MG_L.localisedName")); // NOI18N
+    public static final Unit METERS = new Unit(
+            "m", // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.METERS.localisedName")); // NOI18N
+    public static final Unit KG = new Unit(
+            "kg", // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.KG.localisedName")); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -102,6 +124,9 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
      * @return  DOCUMENT ME!
      */
     public static Unit[] values() {
-        return new Unit[] { MM, PPB, PPM, KELVIN, M3S };
+        return new Unit[] {
+                MM, PPB, PPM, KELVIN,
+                M3S, LS, M3, MM_MIN, MG_L, METERS, KG
+            };
     }
 }

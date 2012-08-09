@@ -279,6 +279,7 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
                 NbBundle.getMessage(UploadWizardPanelCSOsUI.class, "CsoConfigurationTableModel.column.name"),
                 NbBundle.getMessage(UploadWizardPanelCSOsUI.class, "CsoConfigurationTableModel.column.outfall"),
                 NbBundle.getMessage(UploadWizardPanelCSOsUI.class, "CsoConfigurationTableModel.column.storage_unit"),
+                NbBundle.getMessage(UploadWizardPanelCSOsUI.class, "CsoConfigurationTableModel.column.volume"),
                 NbBundle.getMessage(
                     UploadWizardPanelCSOsUI.class,
                     "CsoConfigurationTableModel.column.max_throttle_discharge")

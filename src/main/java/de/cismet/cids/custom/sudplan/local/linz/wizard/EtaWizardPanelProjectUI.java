@@ -91,7 +91,18 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 EtaWizardPanelProject.class,
                 "EtaWizardPanelProject.this.name")); // NOI18N
 
+        this.cobProjects.setRenderer(new NameRenderer());
+        this.cobProjects.addItemListener(WeakListeners.create(
+                ItemListener.class,
+                this.projectListener,
+                this.cobProjects));
+
         this.initProjectList();
+
+        this.cobScenarios.addItemListener(WeakListeners.create(
+                ItemListener.class,
+                this.scenarioListener,
+                this.cobScenarios));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -158,11 +169,6 @@ public final class EtaWizardPanelProjectUI extends JPanel {
         }
 
         this.cobProjects.setModel(comboBoxModel);
-        this.cobProjects.setRenderer(new NameRenderer());
-        this.cobProjects.addItemListener(WeakListeners.create(
-                ItemListener.class,
-                this.projectListener,
-                this.cobProjects));
     }
 
     /**
@@ -172,17 +178,18 @@ public final class EtaWizardPanelProjectUI extends JPanel {
      */
     private void initScenarioList(final List<CidsBean> swmmScenarios) {
         final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
-        for (final CidsBean swmmScenario : swmmScenarios) {
-            comboBoxModel.addElement(swmmScenario);
+
+        if (!swmmScenarios.isEmpty()) {
+            for (final CidsBean swmmScenario : swmmScenarios) {
+                comboBoxModel.addElement(swmmScenario);
+            }
+            this.cobScenarios.setModel(comboBoxModel);
+            this.cobScenarios.setSelectedIndex(0);
+        } else {
+            LOG.warn("no SWMM Scenarios found for SWMM Project '" + this.model.getSelectedSwmmProject() + "'");
+            this.cobScenarios.setModel(comboBoxModel);
+            this.cobScenarios.setSelectedIndex(-1);
         }
-
-        this.cobScenarios.setModel(comboBoxModel);
-        this.cobScenarios.addItemListener(WeakListeners.create(
-                ItemListener.class,
-                this.scenarioListener,
-                this.cobScenarios));
-
-        this.cobScenarios.setSelectedIndex(0);
     }
 
     /**

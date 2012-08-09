@@ -218,11 +218,15 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
 //        }
 //
         final LightwightCsoSearch csoSearch = new LightwightCsoSearch(
-                SessionManager.getSession().getUser().getDomain(),
+                domain,
                 swmmProjectId);
 
         final Collection<LightwightCso> lightwightCsos;
         try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("performing custom search for CSOs for SWMM project #" + swmmProjectId
+                            + " from domain '" + domain + "'");
+            }
             lightwightCsos = SessionManager.getProxy().customServerSearch(csoSearch);
         } catch (Exception ex) {
             final String message = "could not get CSO for SWMM Project #" + swmmProjectId + " from localserver '"
@@ -232,7 +236,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
         }
 
         List<EtaConfiguration> etaConfigurations = new ArrayList(0);
-        if ((lightwightCsos != null) && lightwightCsos.isEmpty()) {
+        if ((lightwightCsos != null) && !lightwightCsos.isEmpty()) {
             etaConfigurations = new ArrayList<EtaConfiguration>(lightwightCsos.size());
 
             for (final LightwightCso lightwightCso : lightwightCsos) {
@@ -759,7 +763,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
             if (run) {
                 try {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("CsoUpdater: loading results");
+                        LOG.info("CsoUpdater: retrieving CSOs for SWMM project #" + model.getSwmmProjectId());
                     }
                     etaConfigurationTableModel = initCSOs(model.getSwmmProjectId());
                 } catch (Throwable t) {

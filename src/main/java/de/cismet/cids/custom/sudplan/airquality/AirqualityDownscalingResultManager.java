@@ -46,6 +46,8 @@ import java.util.NavigableSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import javax.swing.JPanel;
+
 import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
@@ -121,7 +123,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 + "{1}" + DB_VIEW_SEPARATOR                        // NOI18N
                 + "{2}" + DB_VIEW_SEPARATOR                        // NOI18N
                 + "{3}";                                           // NOI18N
-    private static final transient String DB_STMT_CREATE_VIEW = " CREATE VIEW "
+    private static final transient String DB_STMT_CREATE_VIEW = " CREATE OR REPLACE VIEW "
                 + "{0} AS "                                        // NOI18N
                 + " SELECT modeloutput_id, variable, resolution, \"timestamp\", geometry, value, unit, offering"
                 + " ,(SELECT max(value) FROM downscaled_airquality"
@@ -955,6 +957,11 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             hash = (43 * hash) + ((this.fileToSaveTo != null) ? this.fileToSaveTo.hashCode() : 0);
 
             return hash;
+        }
+
+        @Override
+        public JPanel getExceptionPanel(final Exception exception) {
+            return null;
         }
     }
 }
