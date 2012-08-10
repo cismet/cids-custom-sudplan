@@ -95,14 +95,16 @@ public class EtaInput extends SwmmOutput {
      */
     @JsonIgnore
     public final void computeTotalOverflowVolume() {
-        if ((this.csoOverflows != null) && !this.getCsoOverflows().isEmpty()
+        if ((this.csoOverflows != null) && !csoOverflows.isEmpty()
                     && (etaConfigurations != null) && !etaConfigurations.isEmpty()) {
         } else {
             LOG.warn("cannot compute TotalOverflowVolume, csoOverflows or etaConfigurations are empty");
             this.totalOverflowVolume = -1;
+            return;
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug("computing total overflow volume for " + etaConfigurations.size() + " CSOs");
+            LOG.debug("computing total overflow volume for " + csoOverflows.size() + " CSOs "
+                    + "and "+etaConfigurations.size() + " ETA Configurations");
         }
         if (this.csoOverflows.size() != etaConfigurations.size()) {
             LOG.warn("CSO map size missmatch: " + this.getCsoOverflows().size()

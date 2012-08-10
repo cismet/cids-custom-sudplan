@@ -60,6 +60,7 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
         initComponents();
 
         init();
+        LOG.debug("DefaultModelManagerUI for '"+model.getCidsBean()+"' initialized");
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -323,7 +324,7 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
          */
         private void handleProgress(final ProgressEvent event) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("handleProgress: '" + event.getMessage() + "' (" + event.getStep()
+                LOG.debug(model.getCidsBean()+" handleProgress: '" + event.getMessage() + "' (" + event.getStep()
                             + "/" + event.getMaxSteps() + ") = " + event.getState()
                             + ", source = " + event.getSource());
             }
@@ -421,5 +422,11 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
                 LOG.warn("unknown progress state: " + event.getState());
             }
         }
+    }
+    
+    @Override
+    public String toString()
+    {
+        return model.getCidsBean()+" Execution Listener";
     }
 }
