@@ -22,11 +22,13 @@ import org.apache.log4j.Logger;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
+import org.openide.util.WeakListeners;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import java.math.BigDecimal;
 
@@ -35,6 +37,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.concurrent.Future;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
@@ -42,7 +45,10 @@ import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import de.cismet.cids.custom.sudplan.DeltaSurfaceConflictDialog;
+import de.cismet.cids.custom.sudplan.DeltaSurfacePrepareDialog;
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -58,6 +64,8 @@ import de.cismet.cismap.commons.gui.featureinfowidget.InitialisationException;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.cismap.navigatorplugin.CidsFeature;
+
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -93,9 +101,29 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
 
     private transient MetaObject[] geoCPMConfigurations;
 
+    private transient MetaObject[] overlappingSurfaces;
+
+    private transient MetaObject[] geoCPMBreakingEdges;
+
     private transient CidsBean deltaSurfaceToAdd;
 
     private transient boolean addToConfiguration = false;
+
+    private final transient Object lock;
+
+    private transient Future exportTask;
+
+    private final transient ActionListener cancelAL;
+
+    private final transient ActionListener showConflictsAL;
+
+    private final transient ActionListener wizardAL;
+
+    private transient boolean isSurfaceConflict;
+
+    private transient boolean isBreakingedgeConflict;
+
+    private transient DeltaSurfaceConflictDialog conflictDialog;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -104,6 +132,10 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
      */
     public SurfaceManipulationWizardAction() {
         super("Manipulate Surface");
+        cancelAL = new CancelButtonAction();
+        showConflictsAL = new ShowConflictsButtonAction();
+        wizardAL = new WizardButtonAction();
+        this.lock = new Object();
     }
 
     /**
@@ -171,17 +203,17 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
 
     @Override
     public boolean isActive() {
-        // TODO Suche nach MetaObjekten (InitModel, BreakingEdge, DeltaSurface) im Hintergrund ausführen
-        // Dem User vor dem Wizard klarmachen, das noch gesucht wird (z.B. WartePanel vor dem Wizard)
-        // => die Action sollte schon möglich sein, kein enabled=false
-        // Falls was gefunden -> Meldung + Option zu Anzeige der gefundenen Objekte auf der Karte
+        // TODO Suche nach MetaObjekten (InitModel, BreakingEdge, DeltaSurface) im Hintergrund ausführen Dem User vor
+        // dem Wizard klarmachen, das noch gesucht wird (z.B. WartePanel vor dem Wizard) => die Action sollte schon
+        // möglich sein, kein enabled=false Falls was gefunden -> Meldung + Option zur Anzeige der gefundenen Objekte
+        // auf der Karte
 
         assert source != null : "source must be set before requesting isActive";
         final boolean active;
-        boolean isContexMenuEnabled = true;
+        final boolean isContexMenuEnabled = true;
         final Crs srs = CismapBroker.getInstance().getSrs();
         final StringBuilder toolTipMessages = new StringBuilder("<html>");
-        boolean isToolTipSet = false;
+        final boolean isToolTipSet = false;
 
         putValue(AbstractAction.SHORT_DESCRIPTION, "");
 
@@ -203,48 +235,72 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
 
         // 2. Step: search for configurations under the polygon -> 'true' go ahead
         // final Geometry defaultGeometry = CrsTransformer.transformToDefaultCrs(source.getGeometry());
-        geoCPMConfigurations = searchGeometry(source.getGeometry(), SMSUtils.TABLENAME_GEOCPM_CONFIGURATION);
-        if ((geoCPMConfigurations == null) || (geoCPMConfigurations.length <= 0)) {
-            toolTipMessages.append("There is not a Digital Surface Model defined");
-            isToolTipSet = true;
-            isContexMenuEnabled = false;
-        } else if (geoCPMConfigurations.length > 1) {
-            toolTipMessages.append("There are several Digital Surface Model available");
-            isToolTipSet = true;
-            isContexMenuEnabled = false;
-        }
 
-        // 3. Step: search for other surfaces who overlaps with this area
-        final MetaObject[] overlappingSurfaces = searchGeometry(source.getGeometry(), SMSUtils.TABLENAME_DELTA_SURFACE);
-        if ((overlappingSurfaces != null) && (overlappingSurfaces.length > 0)) {
-            addFeaturesToMap(overlappingSurfaces);
-            if (isToolTipSet) {
-                toolTipMessages.append("<br>");
-            } else {
-                isToolTipSet = true;
-            }
-            toolTipMessages.append("There are overlapping manipulations");
-            isContexMenuEnabled = false;
-        }
-
-        // 4. Step: search for breakpoints under the polygon -> 'false' go ahead
-        final MetaObject[] geoCPMBreakingEdges = searchGeometry(source.getGeometry(),
-                SMSUtils.TABLENAME_GEOCPM_BREAKING_EDGE);
-        if ((geoCPMBreakingEdges != null) && (geoCPMBreakingEdges.length > 0)) {
-            addFeaturesToMap(geoCPMBreakingEdges);
-            if (isToolTipSet) {
-                toolTipMessages.append("<br>");
-            } else {
-                isToolTipSet = true;
-            }
-            toolTipMessages.append("There are Breaking Edges under the encircled Area");
-            isContexMenuEnabled = false;
-        }
-        toolTipMessages.append("</html>");
-        if (isToolTipSet) {
-            putValue(AbstractAction.SHORT_DESCRIPTION, toolTipMessages.toString());
-        }
-        setEnabled(isContexMenuEnabled);
+// wait.pack();
+// wait.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
+// wait.setVisible(true);
+// wait.toFront();
+// EventQueue.invokeLater(new Runnable() {
+//
+// @Override
+// public void run() {
+// wait.setProgressText("Search for initial configuration...");
+// geoCPMConfigurations = searchGeometry(
+// source.getGeometry(),
+// SMSUtils.TABLENAME_GEOCPM_CONFIGURATION);
+// if ((geoCPMConfigurations == null) || (geoCPMConfigurations.length <= 0)) {
+// toolTipMessages.append("There is not a Digital Surface Model defined");
+////            isToolTipSet = true;
+////            isContexMenuEnabled = false;
+//                    } else if (geoCPMConfigurations.length > 1) {
+//                        toolTipMessages.append("There are several Digital Surface Model available");
+////            isToolTipSet = true;
+////            isContexMenuEnabled = false;
+//                    }
+//                    wait.setProgressValue(1);
+//                    wait.setProgressText("Search for overlapping surfaces...");
+//
+//                    // 3. Step: search for other surfaces who overlaps with this area
+//                    final MetaObject[] overlappingSurfaces = searchGeometry(
+//                            source.getGeometry(),
+//                            SMSUtils.TABLENAME_DELTA_SURFACE);
+//                    if ((overlappingSurfaces != null) && (overlappingSurfaces.length > 0)) {
+//                        addFeaturesToMap(overlappingSurfaces);
+////            if (isToolTipSet) {
+////                toolTipMessages.append("<br>");
+////            } else {
+////                isToolTipSet = true;
+////            }
+////            toolTipMessages.append("There are overlapping manipulations");
+////            isContexMenuEnabled = false;
+//                    }
+//                    wait.setProgressValue(2);
+//                    wait.setProgressText("Search for overlapping breakingedges...");
+//
+//                    // 4. Step: search for breakpoints under the polygon -> 'false' go ahead
+//                    final MetaObject[] geoCPMBreakingEdges = searchGeometry(
+//                            source.getGeometry(),
+//                            SMSUtils.TABLENAME_GEOCPM_BREAKING_EDGE);
+//                    if ((geoCPMBreakingEdges != null) && (geoCPMBreakingEdges.length > 0)) {
+////            addFeaturesToMap(geoCPMBreakingEdges);
+////            if (isToolTipSet) {
+////                toolTipMessages.append("<br>");
+////            } else {
+////                isToolTipSet = true;
+////            }
+////            toolTipMessages.append("There are Breaking Edges under the encircled Area");
+////            isContexMenuEnabled = false;
+//                    }
+//                    toolTipMessages.append("</html>");
+//                    wait.setProgressValue(3);
+//                    wait.setProgressText("Search done");
+////        if (isToolTipSet) {
+////            putValue(AbstractAction.SHORT_DESCRIPTION, toolTipMessages.toString());
+////        }
+////        setEnabled(isContexMenuEnabled);
+//                }
+//            });
+//        wait.setVisible(false);
         return true;
     }
 
@@ -271,19 +327,151 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
         if (!addToConfiguration) {
             assert source != null : "cannot perform action on empty source"; // NOI18N
         }
+        synchronized (lock) {
+            exportTask = SudplanConcurrency.getSudplanGeneralPurposePool().submit(new Runnable() {
 
+                        @Override
+                        public void run() {
+                            exportTask.cancel(!startPreparingDialog());
+
+                            if ((geoCPMConfigurations == null) || (geoCPMConfigurations.length <= 0)) {
+                                JOptionPane.showMessageDialog(
+                                    CismapBroker.getInstance().getMappingComponent(),
+                                    "There is no Digital Surface Model",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                                exportTask.cancel(true);
+                            } else if (geoCPMConfigurations.length > 1) {
+                                JOptionPane.showMessageDialog(
+                                    CismapBroker.getInstance().getMappingComponent(),
+                                    "There are several Digital Surface Model available",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                                exportTask.cancel(true);
+                            }
+
+                            isSurfaceConflict = false;
+                            if ((overlappingSurfaces != null) && (overlappingSurfaces.length > 0)) {
+                                isSurfaceConflict = true;
+                            }
+
+                            isBreakingedgeConflict = false;
+                            if ((geoCPMBreakingEdges != null) && (geoCPMBreakingEdges.length > 0)) {
+                                isBreakingedgeConflict = true;
+                            }
+
+                            if (isSurfaceConflict || isBreakingedgeConflict) {
+                                exportTask.cancel(!startConflictDialog());
+                            }
+                        }
+                    });
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean startPreparingDialog() {
+        final DeltaSurfacePrepareDialog waitDialog = new DeltaSurfacePrepareDialog(StaticSwingTools.getParentFrame(
+                    CismapBroker.getInstance().getMappingComponent()),
+                false,
+                3);
+        try {
+            waitDialog.addCancelButtonActionListener(WeakListeners.create(ActionListener.class, cancelAL, null));
+            StaticSwingTools.showDialog(waitDialog);
+            waitDialog.setProgressText("Search for initial configuration...");
+            geoCPMConfigurations = searchGeometry(
+                    source.getGeometry(),
+                    SMSUtils.TABLENAME_GEOCPM_CONFIGURATION);
+            waitDialog.setProgressValue(1);
+            waitDialog.setProgressText("Search for overlapping surfaces...");
+            overlappingSurfaces = searchGeometry(
+                    source.getGeometry(),
+                    SMSUtils.TABLENAME_DELTA_SURFACE);
+            waitDialog.setProgressValue(2);
+            waitDialog.setProgressText("Search for overlapping breakingedges...");
+            geoCPMBreakingEdges = searchGeometry(
+                    source.getGeometry(),
+                    SMSUtils.TABLENAME_GEOCPM_BREAKING_EDGE);
+            waitDialog.setProgressValue(3);
+            waitDialog.setProgressText("Search done");
+        } catch (final Exception e) {
+            JOptionPane.showMessageDialog(
+                CismapBroker.getInstance().getMappingComponent(),
+                "Cannot prepare the wizard",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            LOG.error("Cannot prepare the wizard", e);
+            return false;
+        } finally {
+            if (waitDialog != null) {
+                waitDialog.setVisible(false);
+                waitDialog.dispose();
+            }
+            return true;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean startConflictDialog() {
+        conflictDialog = new DeltaSurfaceConflictDialog(StaticSwingTools.getParentFrame(
+                    CismapBroker.getInstance().getMappingComponent()),
+                true,
+                isSurfaceConflict,
+                isBreakingedgeConflict);
+
+        try {
+            conflictDialog.addCancelButtonActionListener(WeakListeners.create(ActionListener.class, cancelAL, null));
+            conflictDialog.addShowConflictsButtonActionListener(WeakListeners.create(
+                    ActionListener.class,
+                    showConflictsAL,
+                    null));
+            conflictDialog.addWizardButtonActionListener(WeakListeners.create(ActionListener.class, wizardAL, null));
+            StaticSwingTools.showDialog(conflictDialog);
+        } catch (final Exception e) {
+            JOptionPane.showMessageDialog(
+                CismapBroker.getInstance().getMappingComponent(),
+                "Cannot start the conflict dialog",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            LOG.error("Cannot start the conflict dialog", e);
+            return false;
+        } finally {
+            if (conflictDialog != null) {
+                conflictDialog.setVisible(false);
+                conflictDialog.dispose();
+            }
+            return true;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void startWizardDialog() {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
         wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
         wizard.setTitle("Digital Surface Model manipulation");
         if (addToConfiguration) {
-            final CidsBean initConfig = (CidsBean)deltaSurfaceToAdd.getProperty("delta_configuration.original_object");
+            final CidsBean initConfig = (CidsBean)deltaSurfaceToAdd.getProperty(
+                    "delta_configuration.original_object");
             wizard.putProperty(PROP_INITIAL_CONFIG, initConfig);
             wizard.putProperty(PROP_DELTA_SURFACE_NAME, (String)deltaSurfaceToAdd.getProperty("name"));
-            wizard.putProperty(PROP_DELTA_SURFACE_DESCRIPTION, (String)deltaSurfaceToAdd.getProperty("description"));
+            wizard.putProperty(
+                PROP_DELTA_SURFACE_DESCRIPTION,
+                (String)deltaSurfaceToAdd.getProperty("description"));
             wizard.putProperty(
                 PROP_DELTA_SURFACE_HEIGHT,
                 ((BigDecimal)deltaSurfaceToAdd.getProperty("height")).doubleValue());
-            wizard.putProperty(PROP_DELTA_SURFACE_TYPE, (Boolean)deltaSurfaceToAdd.getProperty("sea_type"));
+            wizard.putProperty(
+                PROP_DELTA_SURFACE_TYPE,
+                (Boolean)deltaSurfaceToAdd.getProperty("sea_type"));
             wizard.putProperty(PROP_ADD_DELTA_SURFACE, deltaSurfaceToAdd);
         } else {
             wizard.putProperty(PROP_INITIAL_CONFIG, geoCPMConfigurations[0].getBean());
@@ -316,18 +504,20 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                 // Step 4: show result in DescriptionPane
                 final ComponentRegistry reg = ComponentRegistry.getRegistry();
                 reg.getDescriptionPane().gotoMetaObject(newDeltaSurface.getMetaObject(), null);
-
-                // SMSUtils.executeAndShowRun(modelRun);
             } catch (final Exception ex) {
                 final String message = "Cannot save the surface manipulation."; // NOI18N
                 LOG.error(message, ex);
-                JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
+                JOptionPane.showMessageDialog(
+                    ComponentRegistry.getRegistry().getMainWindow(),
                     message,
                     "Error",                                                    // NOI18N
                     JOptionPane.ERROR_MESSAGE);
             } finally {
                 addToConfiguration = false;
             }
+        }
+        synchronized (lock) {
+            SurfaceManipulationWizardAction.this.exportTask = null;
         }
     }
 
@@ -479,41 +669,6 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
         }
     }
 
-//    /**
-//     * DOCUMENT ME!
-//     *
-//     * @param   geometry  DOCUMENT ME!
-//     *
-//     * @return  DOCUMENT ME!
-//     */
-//    private boolean searchOverlappingSurfaces(final Geometry geometry) {
-//        final MetaClass MC = ClassCacheMultiple.getMetaClass(
-//                SMSUtils.DOMAIN_SUDPLAN_WUPP,
-//                SMSUtils.TABLENAME_DELTA_SURFACE);
-//
-//        final String geostring = PostGisGeometryFactory.getPostGisCompliantDbString(geometry);
-//
-//        String query = "select " + MC.getID() + ", m." + MC.getPrimaryKey() + " from " + MC.getTableName();
-//        query += " m, geom";                                                     // NOI18N
-//        query += " WHERE m.geom = geom.id";
-//        query += " AND geom.geo_field && GeometryFromText('" + geostring + "')"; // + "'";
-//        query += " AND st_intersects(geom.geo_field,GeometryFromText('"
-//                    + geostring
-//                    + "'))";
-//        // '" + originalGeometry + "')";
-//
-//        try {
-//            final MetaObject[] metaObjects = SessionManager.getProxy()
-//                        .getMetaObjectByQuery(SessionManager.getSession().getUser(),
-//                            query,
-//                            SMSUtils.DOMAIN_SUDPLAN_WUPP);
-//            return ((metaObjects != null) && (metaObjects.length > 0));
-//        } catch (ConnectionException ex) {
-//            LOG.error("Can't connect to domain " + SMSUtils.DOMAIN_SUDPLAN_WUPP, ex);
-//            return true;
-//        }
-//    }
-
     /**
      * DOCUMENT ME!
      */
@@ -557,5 +712,78 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
         final MappingComponent mappingComponent = CismapBroker.getInstance().getMappingComponent();
         mappingComponent.getFeatureCollection().removeFeature(source);
         mappingComponent.getFeatureCollection().addFeature(new CidsFeature(deltaSurface.getMetaObject()));
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class CancelButtonAction implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent ae) {
+            synchronized (lock) {
+                if (exportTask != null) {
+                    if (!exportTask.cancel(true)) {
+                        if (exportTask.isDone()) {
+                            // do nothing, its too late
+                        } else {
+                            LOG.warn("export task could not be cancelled"); // NOI18N
+                        }
+                        if (conflictDialog != null) {
+                            conflictDialog.setVisible(false);
+                            conflictDialog.dispose();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class ShowConflictsButtonAction implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent ae) {
+            if (conflictDialog != null) {
+//                final DeltaSurfaceConflictDialog cd = (DeltaSurfaceConflictDialog)ae.getSource();
+                if (conflictDialog.isSurfaceConflictSelected()) {
+                    addFeaturesToMap(overlappingSurfaces);
+                }
+                if (conflictDialog.isBreakingedgeConflictSelected()) {
+                    addFeaturesToMap(geoCPMBreakingEdges);
+                }
+                conflictDialog.setVisible(false);
+                conflictDialog.dispose();
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class WizardButtonAction implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent ae) {
+            conflictDialog.setVisible(false);
+            conflictDialog.dispose();
+            startWizardDialog();
+        }
     }
 }
