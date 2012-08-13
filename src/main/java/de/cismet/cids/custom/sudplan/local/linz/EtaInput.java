@@ -104,7 +104,7 @@ public class EtaInput extends SwmmOutput {
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug("computing total overflow volume for " + csoOverflows.size() + " CSOs "
-                    + "and "+etaConfigurations.size() + " ETA Configurations");
+                        + "and " + etaConfigurations.size() + " ETA Configurations");
         }
         if (this.csoOverflows.size() != etaConfigurations.size()) {
             LOG.warn("CSO map size missmatch: " + this.getCsoOverflows().size()
