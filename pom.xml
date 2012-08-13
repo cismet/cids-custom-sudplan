@@ -88,6 +88,12 @@
             <groupId>de.cismet.cismap</groupId>
             <artifactId>cismap-plugin</artifactId>
             <version>2.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>de.cismet.commons</groupId>
@@ -173,12 +179,12 @@
         <dependency>
             <groupId>de.cismet.cids.navigator.plugin</groupId>
             <artifactId>rm-plugin</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>de.cismet.cids.custom.sudplan</groupId>
             <artifactId>geocpm-rest</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>2.0-SNAPSHOT</version>
              <!-- exclude slf to prevent version conflicts -->
             <exclusions>
                 <exclusion>
@@ -287,21 +293,14 @@
 
     <build>
         <plugins>
-            <!-- overwritten because the artifact has to be renamed du to
-                 compatibility reasons to the cidsDistribution -->
+            <!-- disabled because sudplan makes use of automatic generation -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>copy-installed</id>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <destFileName>cidsCustom.jar</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
+                        <phase>none</phase>
                     </execution>
                 </executions>
             </plugin>
@@ -362,10 +361,3 @@
         </profile>
     </profiles>
 </project>
-
-
-
-
-
-
-
