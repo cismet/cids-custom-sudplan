@@ -22,8 +22,6 @@ import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
 
 import org.apache.log4j.Logger;
 
-import scala.actors.threadpool.Arrays;
-
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -68,6 +66,7 @@ import de.cismet.tools.PropertyReader;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
+import java.util.Arrays;
 
 /**
  * DOCUMENT ME!
