@@ -38,6 +38,7 @@ import java.sql.Statement;
 
 import java.text.MessageFormat;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.NavigableSet;
@@ -64,7 +65,6 @@ import de.cismet.tools.PropertyReader;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
-import java.util.Arrays;
 
 /**
  * DOCUMENT ME!
