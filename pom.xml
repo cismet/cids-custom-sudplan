@@ -6,19 +6,30 @@
     <parent>
         <groupId>de.cismet.cids</groupId>
         <artifactId>cids-parent</artifactId>
-        <version>1.0.5</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
 
     <groupId>de.cismet.cids.custom.sudplan</groupId>
     <artifactId>cids-custom-sudplan</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>cids Custom Sudplan</name>
     <description>cids Navigator customisation for the SUDPLAN FP7 project</description>
+
+    <prerequisites>
+        <maven>3</maven>
+    </prerequisites>
+
+    <scm>
+        <connection>https://github.com/cismet/cids-custom-sudplan.git</connection>
+        <developerConnection>scm:git:git@github.com:cismet/cids-custom-sudplan.git</developerConnection>
+        <url>https://github.com/cismet/cids-custom-sudplan</url>
+    </scm>
+
     <ciManagement>
         <system>hudson</system>
-        <url>http://kif:8080/hudson/job/cids-custom-sudplan/</url>
+        <url>http://ci.cismet.de/job/cids-custom-sudplan/</url>
     </ciManagement>
     <developers>
         <developer>
@@ -71,17 +82,17 @@
         <dependency>
             <groupId>de.cismet.cids.custom.sudplan</groupId>
             <artifactId>cids-custom-sudplan-server</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>de.cismet.cismap</groupId>
             <artifactId>cismap-plugin</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>de.cismet.commons</groupId>
             <artifactId>cismet-commons</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.swinglabs</groupId>
@@ -91,8 +102,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.4</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>at.ac.ait.enviro.sudplan</groupId>
@@ -261,15 +270,18 @@
 
     <repositories>
         <repository>
-            <id>flexo</id>
-            <name>flexo-public-artifactory</name>
+            <id>cismet-repo</id>
+            <url>https://repo.cismet.de/repo</url>
             <releases>
                 <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+                <updatePolicy>daily</updatePolicy>
             </releases>
             <snapshots>
                 <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+                <updatePolicy>interval:60</updatePolicy>
             </snapshots>
-            <url>http://flexo.cismet.de:8081/artifactory/repo</url>
         </repository>
     </repositories>
 
@@ -296,6 +308,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
                 <executions>
                     <execution>
                         <goals>
@@ -320,7 +333,7 @@
             <plugin>
                 <groupId>de.cismet.cids</groupId>
                 <artifactId>cids-maven-plugin</artifactId>
-                <version>1.5-SNAPSHOT</version>
+                <version>2.0-SNAPSHOT</version>
             </plugin>
         </plugins>
     </build>
