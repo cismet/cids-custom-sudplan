@@ -120,6 +120,17 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+        <!-- 
+            This is a dependency of the ts-api sos client. We have to put it in here to force maven to create a runtime
+            classpath where this artifact comes before the other schema artifacts or the schemas cannot be loaded. This
+            may be a jaxb bug or an error of schema generation.
+         -->
+        <dependency>
+            <groupId>at.ac.ait.enviro</groupId>
+            <artifactId>ogc-gml-schemas-v3.1.1</artifactId>
+            <version>3.1-SNAPSHOT</version>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>at.ac.ait.enviro.sudplan</groupId>
             <artifactId>SOSClient</artifactId>
