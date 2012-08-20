@@ -382,9 +382,6 @@
                     <systemPath>${java.home}/../lib/tools.jar</systemPath>
                 </dependency>
             </dependencies>
-            <properties> 
-                <maven.test.skip>true</maven.test.skip>
-            </properties>
         </profile>
     </profiles>
 </project>

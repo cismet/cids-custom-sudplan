@@ -15,7 +15,6 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 
-import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -31,15 +30,11 @@ import org.junit.Test;
 
 import org.openide.util.Exceptions;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import java.net.MalformedURLException;
 
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -223,7 +218,7 @@ public class TimeseriesChartPanelStressTest {
                               LOG.info("URL: " + url);
                     
                               final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(url);
-                              final TimeseriesChartPanel panel = new TimeseriesChartPanel(config);
+                              final TimeseriesChartPanel panel = new TimeseriesChartPanel(config,false);
                               
                               final JFrame frame = new JFrame();
                               frame.add(panel);
