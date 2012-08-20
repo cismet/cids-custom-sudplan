@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
-
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;

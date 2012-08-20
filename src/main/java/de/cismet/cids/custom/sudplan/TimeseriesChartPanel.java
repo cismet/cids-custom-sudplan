@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 import org.jfree.chart.JFreeChart;
 import org.jfree.util.Log;
 
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
