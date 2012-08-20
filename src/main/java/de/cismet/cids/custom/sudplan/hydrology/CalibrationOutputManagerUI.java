@@ -88,7 +88,7 @@ public class CalibrationOutputManagerUI extends javax.swing.JPanel {
 
                     @Override
                     public void run() {
-                        final TimeseriesChartPanel tcp = new TimeseriesChartPanel(configs, false, null);
+                        final TimeseriesChartPanel tcp = new TimeseriesChartPanel(configs, false, null, false);
                         remove(lblLoading);
                         lblLoading.dispose();
                         setLayout(new BorderLayout());

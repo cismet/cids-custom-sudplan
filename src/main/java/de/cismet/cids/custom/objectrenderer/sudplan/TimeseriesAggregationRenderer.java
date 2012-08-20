@@ -23,7 +23,6 @@ import java.util.HashMap;
 
 import javax.swing.JPanel;
 
-import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
@@ -92,16 +91,17 @@ public class TimeseriesAggregationRenderer extends JPanel implements CidsBeanAgg
                 final TimeseriesConverter converter = SMSUtils.loadConverter(cidsBean);
 
                 final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
-                final Resolution previewResolution = TimeSeriesRendererUtil.getPreviewResolution(config);
+//                final Resolution previewResolution = TimeSeriesRendererUtil.getPreviewResolution(config);
 
-                beanConfigs.put(config.changeResolution(previewResolution), converter);
+//                beanConfigs.put(config.changeResolution(previewResolution), converter);
+                beanConfigs.put(config, converter);
             } catch (MalformedURLException ex) {
                 final String message = "cidsbean contains invalid uri"; // NOI18N
                 LOG.error(message, ex);
                 throw new IllegalStateException(message, ex);
             }
         }
-        panel = new TimeseriesChartPanel(beanConfigs, false, null);
+        panel = new TimeseriesChartPanel(beanConfigs, false, null, true);
         add(panel, BorderLayout.CENTER);
     }
 
