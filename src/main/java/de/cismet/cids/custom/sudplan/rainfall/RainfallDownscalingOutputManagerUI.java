@@ -14,7 +14,6 @@ import Sirius.server.middleware.types.MetaClass;
 
 import org.apache.log4j.Logger;
 
-import org.codehaus.jackson.map.ObjectMapper;
 
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
@@ -35,10 +34,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import de.cismet.cids.custom.objectrenderer.sudplan.TimeSeriesRendererUtil;
-import de.cismet.cids.custom.sudplan.IDFCurve;
 import de.cismet.cids.custom.sudplan.IDFTablePanel;
-import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
@@ -122,17 +118,17 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
             try {
                 resultCfg = TimeseriesRetrieverConfig.fromUrl((String)resultTs.getProperty("uri")); // NOI18N
                 inputCfg = TimeseriesRetrieverConfig.fromUrl((String)inputTs.getProperty("uri"));   // NOI18N
-                final Resolution inputRes = TimeSeriesRendererUtil.getPreviewResolution(inputCfg);
-                final Resolution resultRes = TimeSeriesRendererUtil.getPreviewResolution(resultCfg);
+//                final Resolution inputRes = TimeSeriesRendererUtil.getPreviewResolution(inputCfg);
+//                final Resolution resultRes = TimeSeriesRendererUtil.getPreviewResolution(resultCfg);
 
                 resultPanel = new JPanel();
                 resultPanel.setOpaque(false);
                 resultPanel.setLayout(new BorderLayout());
-                resultPanel.add(new TimeseriesChartPanel(resultCfg.changeResolution(resultRes)), BorderLayout.CENTER);
+                resultPanel.add(new TimeseriesChartPanel(resultCfg, true), BorderLayout.CENTER);
                 inputPanel = new JPanel();
                 inputPanel.setOpaque(false);
                 inputPanel.setLayout(new BorderLayout());
-                inputPanel.add(new TimeseriesChartPanel(inputCfg.changeResolution(inputRes)), BorderLayout.CENTER);
+                inputPanel.add(new TimeseriesChartPanel(inputCfg, true), BorderLayout.CENTER);
             } catch (final MalformedURLException ex) {
                 final String message = "illegal ts uri"; // NOI18N
                 LOG.error(message, ex);

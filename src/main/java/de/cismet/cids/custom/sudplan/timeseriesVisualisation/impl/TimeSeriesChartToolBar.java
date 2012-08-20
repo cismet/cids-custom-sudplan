@@ -40,7 +40,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import de.cismet.cids.custom.objectrenderer.sudplan.TimeseriesRenderer;
-import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
 import de.cismet.cids.custom.sudplan.dataExport.TimeSeriesExportWizardAction;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.Controllable;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
@@ -70,7 +69,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     private JMenu operationsMenu;
     private CustomChartPanel chartPanel;
     public Action selectAll = new AbstractAction() {
-
+        
         @Override
         public void actionPerformed(final ActionEvent e) {
             final TimeSeriesSelectionNotification notifyier = tsVis.getLookup(
@@ -91,7 +90,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         }
     };
     public Action deselectAll = new AbstractAction() {
-
+        
         @Override
         public void actionPerformed(final ActionEvent e) {
             final TimeSeriesSelectionNotification notifyier = tsVis.getLookup(
@@ -113,20 +112,20 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     };
     private TimeSeriesVisualisation tsVis;
     private Action resetZoom = new AbstractAction() {
-
+        
         @Override
         public void actionPerformed(final ActionEvent e) {
             chartPanel.restoreAutoBounds();
         }
     };
     private Action removeAllSelectedTimeseries = new AbstractAction() {
-
+        
         @Override
         public void actionPerformed(final ActionEvent e) {
             final XYPlot plot = chartPanel.getChart().getXYPlot();
             final HashMap<Integer, TimeSeriesDatasetAdapter> selectedTS =
                     new HashMap<Integer, TimeSeriesDatasetAdapter>();
-
+            
             for (int i = 0; i < plot.getDatasetCount(); i++) {
                 if ((plot.getDataset(i) != null) && (plot.getDataset(i) instanceof TimeSeriesDatasetAdapter)
                         && (plot.getRenderer(i) instanceof SelectionXYLineRenderer)) {
@@ -142,7 +141,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
                     plot,
                     tsVis);
             SwingUtilities.invokeLater(new Runnable() {
-
+                
                 @Override
                 public void run() {
                     removeAction.actionPerformed(e);
@@ -151,7 +150,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         }
     };
     private Action saveAsimage = new AbstractAction() {
-
+        
         @Override
         public void actionPerformed(final ActionEvent e) {
             try {
@@ -162,7 +161,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         }
     };
     private Action removeAllFromMap = new AbstractAction() {
-
+        
         @Override
         public void actionPerformed(final ActionEvent e) {
             final CismapPlugin cismapPl = (CismapPlugin) PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
@@ -172,7 +171,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     };
     private TimeSeriesExportWizardAction exportAction = new TimeSeriesExportWizardAction();
     private Action showOrigTSAction = new AbstractAction() {
-
+        
         @Override
         public void actionPerformed(final ActionEvent e) {
             if (originTS != null) {
@@ -184,7 +183,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
                         "TimeSeriesRenderer.btnOriginalTSActionPerformed(ActionEvent).title"),
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.WARNING_MESSAGE);
-
+                
                 if (answer == JOptionPane.YES_OPTION) {
                     fireShowOrigTSEvent(originTS);
                 }
@@ -326,6 +325,9 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         btnShowOriginTS.setText(org.openide.util.NbBundle.getMessage(
                 TimeseriesRenderer.class,
                 "TimeseriesRenderer.btnOriginalTS.text"));
+        btnShowOriginTS.setToolTipText(org.openide.util.NbBundle.getMessage(
+                TimeSeriesChartToolBar.class,
+                "TimeSeriesChartToolBar.btnShowOriginTS.toolTipText"));
         return btnShowOriginTS;
     }
 
@@ -421,7 +423,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         btnMapRemoveAll.setSize(16, 16);
         return btnMapRemoveAll;
     }
-
+    
     @Override
     public void timeSeriesOperationChanged(final TimeSeriesOperationChangedEvent evt) {
         final TimeSeriesOperation tsOp = (TimeSeriesOperation) evt.getSource();
@@ -445,7 +447,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         this.invalidate();
         this.validate();
     }
-
+    
     @Override
     public void selectionChanged(final TimeSeriesSelectionEvent evt) {
         if (evt.getSelectedTs().size() >= 1) {
@@ -510,7 +512,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         }
         updateUI();
     }
-
+    
     @Override
     public void timeSeriesListChanged(final TimeSeriesListChangedEvent evt) {
         if (tsVis.getTimeSeriesCollection().size() > 1) {

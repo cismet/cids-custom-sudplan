@@ -87,7 +87,7 @@ public class SimulationOutputManagerUI extends javax.swing.JPanel {
 
                                 @Override
                                 public void run() {
-                                    final TimeseriesChartPanel tcp = new TimeseriesChartPanel(cfgs, false, null);
+                                    final TimeseriesChartPanel tcp = new TimeseriesChartPanel(cfgs, false, null, false);
                                     remove(lblLoading);
                                     lblLoading.dispose();
                                     setLayout(new BorderLayout());
