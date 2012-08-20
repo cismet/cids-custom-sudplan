@@ -25,10 +25,8 @@ import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 
-
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.ImageUtil;
-
 
 import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
 
@@ -575,16 +573,16 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblBackMouseClicked(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblBackMouseClicked
+    private void lblBackMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblBackMouseClicked
         btnBackActionPerformed(null);
-    }//GEN-LAST:event_lblBackMouseClicked
+    }                                                                       //GEN-LAST:event_lblBackMouseClicked
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnBackActionPerformed
         cardLayout.show(this, CARD_1);
         firstPageShowing = true;
         timer.restart();
@@ -592,14 +590,14 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         btnForward.setEnabled(true);
         lblBack.setEnabled(false);
         lblForw.setEnabled(true);
-    }//GEN-LAST:event_btnBackActionPerformed
+    }                                                                           //GEN-LAST:event_btnBackActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnForwardActionPerformed
+    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnForwardActionPerformed
         cardLayout.show(this, CARD_2);
         firstPageShowing = false;
         timer.restart();
@@ -607,36 +605,36 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
         btnForward.setEnabled(false);
         lblBack.setEnabled(true);
         lblForw.setEnabled(false);
-    }//GEN-LAST:event_btnForwardActionPerformed
+    }                                                                              //GEN-LAST:event_btnForwardActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblForwMouseClicked(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblForwMouseClicked
+    private void lblForwMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblForwMouseClicked
         btnForwardActionPerformed(null);
-    }//GEN-LAST:event_lblForwMouseClicked
+    }                                                                       //GEN-LAST:event_lblForwMouseClicked
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jTextField1ActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_jTextField1ActionPerformed
-    {//GEN-HEADEREND:event_jTextField1ActionPerformed
+    private void jTextField1ActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_jTextField1ActionPerformed
+    {                                                                             //GEN-HEADEREND:event_jTextField1ActionPerformed
                                                                                   // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+    }                                                                             //GEN-LAST:event_jTextField1ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jTextField2ActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_jTextField2ActionPerformed
-    {//GEN-HEADEREND:event_jTextField2ActionPerformed
+    private void jTextField2ActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_jTextField2ActionPerformed
+    {                                                                             //GEN-HEADEREND:event_jTextField2ActionPerformed
                                                                                   // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField2ActionPerformed
+    }                                                                             //GEN-LAST:event_jTextField2ActionPerformed
 
     @Override
     public Border getCenterrBorder() {

@@ -28,7 +28,6 @@ import java.util.Collection;
 
 import javax.swing.border.EmptyBorder;
 
-
 import de.cismet.cids.dynamics.CidsBean;
 
 /**

@@ -28,7 +28,6 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-
 import de.cismet.cids.custom.sudplan.Available;
 import de.cismet.cids.custom.sudplan.LocalisedEnumComboBox;
 import de.cismet.cids.custom.sudplan.Resolution;

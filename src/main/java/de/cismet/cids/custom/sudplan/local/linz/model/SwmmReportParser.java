@@ -15,7 +15,6 @@ import java.io.*;
 
 import java.io.InputStream;
 
-
 import java.util.*;
 
 import de.cismet.cids.custom.sudplan.ProgressListener;

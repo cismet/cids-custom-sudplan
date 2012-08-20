@@ -281,5 +281,4 @@ public class EtaInput extends SwmmOutput {
             LOG.warn("could not reset ETA Configurations of '" + this + "' to defaults, no ETA Configurations found!");
         }
     }
-
 }

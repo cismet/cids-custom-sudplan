@@ -29,9 +29,7 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
-
 import de.cismet.cids.custom.sudplan.server.trigger.SwmmResultGeoserverUpdater;
-
 
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -184,7 +182,7 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void showInMapButtonActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showInMapButtonActionPerformed
+    private void showInMapButtonActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_showInMapButtonActionPerformed
         try {
             // TODO add your handling code here:
             final SwmmOutput swmmOutput = outputManager.getUR();
@@ -219,7 +217,7 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
                     "SwmmOutputManagerUI.msgError.title"),
                 JOptionPane.ERROR_MESSAGE);
         }
-    }//GEN-LAST:event_showInMapButtonActionPerformed
+    } //GEN-LAST:event_showInMapButtonActionPerformed
 
     //~ Inner Classes ----------------------------------------------------------
 

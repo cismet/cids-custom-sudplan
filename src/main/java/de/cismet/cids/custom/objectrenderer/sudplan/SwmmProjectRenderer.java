@@ -29,7 +29,6 @@ import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
 
-
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.server.search.CsoByOverflowSearch;
 import de.cismet.cids.custom.sudplan.server.search.EtaResultSearch;
@@ -512,7 +511,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void bntSwmmSearchActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bntSwmmSearchActionPerformed
+    private void bntSwmmSearchActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_bntSwmmSearchActionPerformed
         if (this.cbSwmmRuns.getSelectedItem() != null) {
             final int swmmRun = (Integer)((CidsBean)this.cbSwmmRuns.getSelectedItem()).getProperty("id");
             float overflowVolume = 0f;
@@ -532,14 +531,14 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         } else {
             LOG.warn("no SWMM runs available to perform search");
         }
-    }//GEN-LAST:event_bntSwmmSearchActionPerformed
+    } //GEN-LAST:event_bntSwmmSearchActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void bntEtaSearchActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bntEtaSearchActionPerformed
+    private void bntEtaSearchActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_bntEtaSearchActionPerformed
 
         final int swmmProjectId = (Integer)this.getCidsBean().getProperty("id");
         int parameter = EtaResultSearch.NONE;
@@ -556,7 +555,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
                     + " and parameter " + parameter);
 
         CidsSearchExecutor.searchAndDisplayResultsWithDialog(etaResultSearch);
-    }//GEN-LAST:event_bntEtaSearchActionPerformed
+    } //GEN-LAST:event_bntEtaSearchActionPerformed
 
     @Override
     public JComponent getTitleComponent() {
