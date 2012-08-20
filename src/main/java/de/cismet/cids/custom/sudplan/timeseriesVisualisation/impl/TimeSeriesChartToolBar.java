@@ -433,7 +433,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         btnMapRemoveAll.setSize(16, 16);
         return btnMapRemoveAll;
     }
-    
+
     @Override
     public void timeSeriesOperationChanged(final TimeSeriesOperationChangedEvent evt) {
         final TimeSeriesOperation tsOp = (TimeSeriesOperation)evt.getSource();
@@ -457,7 +457,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         this.invalidate();
         this.validate();
     }
-    
+
     @Override
     public void selectionChanged(final TimeSeriesSelectionEvent evt) {
         if (evt.getSelectedTs().size() >= 1) {
@@ -522,7 +522,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
         }
         updateUI();
     }
-    
+
     @Override
     public void timeSeriesListChanged(final TimeSeriesListChangedEvent evt) {
         if (tsVis.getTimeSeriesCollection().size() > 1) {
@@ -537,14 +537,14 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
                 TimeSeries ts = null;
                 for (int i = 0; i < plot.getDatasetCount(); i++) {
                     if ((plot.getDataset(i) != null) && (plot.getDataset(i) instanceof TimeSeriesDatasetAdapter)
-                            && (plot.getRenderer(i) instanceof SelectionXYLineRenderer)) {
-                        final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer) plot.getRenderer(i);
+                                && (plot.getRenderer(i) instanceof SelectionXYLineRenderer)) {
+                        final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer)plot.getRenderer(i);
                         if (renderer.isSelected()) {
                             if (ts != null) {
                                 ts = null;
                                 break;
                             } else {
-                                final TimeSeriesDatasetAdapter tsc = (TimeSeriesDatasetAdapter) plot.getDataset(i);
+                                final TimeSeriesDatasetAdapter tsc = (TimeSeriesDatasetAdapter)plot.getDataset(i);
                                 ts = tsc.getOriginTimeSeries();
                             }
                         }
@@ -561,15 +561,6 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
             }
         }
         btnExportTimeSeries.setEnabled(true);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  aThis  DOCUMENT ME!
-     */
-    public void setTimeseriesChartPanel(final TimeseriesChartPanel aThis) {
-        this.chartpnl = aThis;
     }
 
     /**
@@ -604,7 +595,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @param b DOCUMENT ME!
+     * @param  b  DOCUMENT ME!
      */
     public void setShowOrigButtonEnabled(final boolean b) {
         if (b) {
