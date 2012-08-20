@@ -77,6 +77,7 @@ import de.cismet.cids.custom.sudplan.dataExport.TimeSeriesExportWizardAction;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSignature;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.TimeSeriesChartToolBar;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.TimeSeriesVisualisationFactory;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.VisualisationType;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesListChangedEvent;
@@ -1208,6 +1209,9 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
                 }
                 if (toolbar == null) {
                     toolbar = tsVis.getToolbar();
+                    if (toolbar instanceof TimeSeriesChartToolBar) {
+                        ((TimeSeriesChartToolBar)toolbar).setShowOrigButtonEnabled(false);
+                    }
                     pnlToolbar.add(toolbar, BorderLayout.CENTER);
                     pnlToolbar.invalidate();
                     pnlToolbar.revalidate();

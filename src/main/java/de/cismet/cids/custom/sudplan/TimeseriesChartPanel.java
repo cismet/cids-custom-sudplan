@@ -434,12 +434,9 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                     toolbar.setOpaque(false);
 
                     toolbar.addShowOrigTSListener(TimeseriesChartPanel.this);
-                    toolbar.setTimeseriesChartPanel(TimeseriesChartPanel.this);
                     pnlToolbar.add(toolbar, BorderLayout.WEST);
-//                    pnlToolbar.add(tsVis.getToolbar(), BorderLayout.WEST);
 
                     final Controllable tsVisController = tsVis.getLookup(Controllable.class);
-//                    tsVisController.enableSelection(true);
                     tsVisController.enableContextMenu(true);
                     tsVisController.enableToolTips(true);
 
