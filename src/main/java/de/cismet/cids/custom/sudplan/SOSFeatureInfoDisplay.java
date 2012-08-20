@@ -77,6 +77,7 @@ import de.cismet.cids.custom.sudplan.dataExport.TimeSeriesExportWizardAction;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSignature;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.TimeSeriesChartToolBar;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.TimeSeriesVisualisationFactory;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.VisualisationType;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesListChangedEvent;
@@ -166,7 +167,6 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
     private transient Resolution currentItem;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JButton btnAggregateTimeSeriesVisualisations = new javax.swing.JButton();
-    private final transient javax.swing.JButton btnExport = new javax.swing.JButton();
     private final transient javax.swing.JComboBox cboResolution =
         new de.cismet.cids.custom.sudplan.LocalisedEnumComboBox(Resolution.class, available);
     private final transient javax.swing.JPanel contentPanel = new javax.swing.JPanel();
@@ -320,13 +320,6 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
         toolBarModelOverview.setBorder(null);
         toolBarModelOverview.setFloatable(false);
         toolBarModelOverview.setRollover(true);
-
-        btnExport.setAction(new TimeSeriesExportWizardAction());
-        btnExport.setText(NbBundle.getMessage(SOSFeatureInfoDisplay.class, "SOSFeatureInfoDisplay.btnExport.text")); // NOI18N
-        btnExport.setFocusable(false);
-        btnExport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnExport.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        toolBarModelOverview.add(btnExport);
 
         btnAggregateTimeSeriesVisualisations.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cids/custom/sudplan/chart_line_link.png"))); // NOI18N
@@ -980,13 +973,13 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
         public void selectionChanged(final TimeSeriesSelectionEvent evt) {
             final Collection<TimeSeries> selectedTS = evt.getSelectedTs();
 
-            if (selectedTS.size() == 1) {
-                ((TimeSeriesExportWizardAction)btnExport.getAction()).setTimeSeries(selectedTS.iterator().next());
-                btnExport.setEnabled(true);
-            } else {
-                ((TimeSeriesExportWizardAction)btnExport.getAction()).setTimeSeries(null);
-                btnExport.setEnabled(false);
-            }
+//            if (selectedTS.size() == 1) {
+//                ((TimeSeriesExportWizardAction)btnExport.getAction()).setTimeSeries(selectedTS.iterator().next());
+//                btnExport.setEnabled(true);
+//            } else {
+//                ((TimeSeriesExportWizardAction)btnExport.getAction()).setTimeSeries(null);
+//                btnExport.setEnabled(false);
+//            }
 
             final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
             mc.getRubberBandLayer().removeAllChildren();
@@ -1216,6 +1209,9 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
                 }
                 if (toolbar == null) {
                     toolbar = tsVis.getToolbar();
+                    if (toolbar instanceof TimeSeriesChartToolBar) {
+                        ((TimeSeriesChartToolBar)toolbar).setShowOrigButtonEnabled(false);
+                    }
                     pnlToolbar.add(toolbar, BorderLayout.CENTER);
                     pnlToolbar.invalidate();
                     pnlToolbar.revalidate();

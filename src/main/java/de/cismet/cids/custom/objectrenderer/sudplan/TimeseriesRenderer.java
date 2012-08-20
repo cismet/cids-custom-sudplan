@@ -50,8 +50,6 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
     private transient TimeseriesChartPanel panel;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnExport;
-    private javax.swing.JButton btnOriginalTS;
     private javax.swing.JCheckBox chkforecast;
     private javax.swing.JPanel pnlFiller;
     private javax.swing.JPanel pnlNorth;
@@ -140,13 +138,13 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
             final String uri = (String)cidsBean.getProperty("uri"); // NOI18N
             final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
 
-            final TimeSeriesExportWizardAction action = (TimeSeriesExportWizardAction)btnExport.getAction();
-            action.setTimeseriesRetrieverConfig(config);
-            btnExport.setEnabled(true);
+//            final TimeSeriesExportWizardAction action = (TimeSeriesExportWizardAction)btnExport.getAction();
+//            action.setTimeseriesRetrieverConfig(config);
+//            btnExport.setEnabled(true);
 
             this.setTimeSeriesPanel(TimeSeriesRendererUtil.getPreviewResolution(config));
         } catch (final MalformedURLException ex) {
-            btnExport.setEnabled(false);
+//            btnExport.setEnabled(false);
 
             final String message = "cidsbean contains invalid uri"; // NOI18N
             LOG.error(message, ex);
@@ -173,9 +171,7 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
 
         pnlNorth = new javax.swing.JPanel();
         chkforecast = new javax.swing.JCheckBox();
-        btnOriginalTS = new javax.swing.JButton();
         pnlFiller = new javax.swing.JPanel();
-        btnExport = new javax.swing.JButton();
 
         setOpaque(false);
         setLayout(new java.awt.BorderLayout());
@@ -202,21 +198,6 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints.insets = new java.awt.Insets(8, 8, 8, 8);
         pnlNorth.add(chkforecast, gridBagConstraints);
 
-        btnOriginalTS.setText(org.openide.util.NbBundle.getMessage(
-                TimeseriesRenderer.class,
-                "TimeseriesRenderer.btnOriginalTS.text")); // NOI18N
-        btnOriginalTS.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    btnOriginalTSActionPerformed(evt);
-                }
-            });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        pnlNorth.add(btnOriginalTS, gridBagConstraints);
-
         pnlFiller.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -225,36 +206,8 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints.weightx = 1.0;
         pnlNorth.add(pnlFiller, gridBagConstraints);
 
-        btnExport.setAction(new TimeSeriesExportWizardAction());
-        btnExport.setText(NbBundle.getMessage(TimeseriesRenderer.class, "TimeseriesRenderer.btnExport.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        pnlNorth.add(btnExport, gridBagConstraints);
-
         add(pnlNorth, java.awt.BorderLayout.PAGE_START);
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void btnOriginalTSActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOriginalTSActionPerformed
-
-        final int answer = JOptionPane.showConfirmDialog(
-                ComponentRegistry.getRegistry().getMainWindow(),
-                java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle").getString(
-                    "TimeSeriesRenderer.btnOriginalTSActionPerformed(ActionEvent).message"),
-                java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle").getString(
-                    "TimeSeriesRenderer.btnOriginalTSActionPerformed(ActionEvent).title"),
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE);
-
-        if (answer == JOptionPane.YES_OPTION) {
-            this.setTimeSeriesPanel(null);
-        }
-    } //GEN-LAST:event_btnOriginalTSActionPerformed
 }

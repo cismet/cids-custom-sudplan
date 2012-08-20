@@ -14,7 +14,10 @@ import org.apache.log4j.Logger;
 import org.jfree.chart.JFreeChart;
 import org.jfree.util.Log;
 
+import org.openide.util.WeakListeners;
+
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Graphics;
@@ -30,14 +33,18 @@ import java.util.concurrent.Future;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingWorker;
+import javax.swing.border.LineBorder;
 
 import de.cismet.cids.custom.sudplan.converter.TimeSeriesSerializer;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.Controllable;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.TimeSeriesChartToolBar;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.TimeSeriesVisualisationFactory;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl.VisualisationType;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.ShowOrigTimeseriesListener;
 
 import de.cismet.cids.dynamics.Disposable;
 
@@ -49,7 +56,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  *
  * @version  $Revision$, $Date$
  */
-public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposable {
+public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposable, ShowOrigTimeseriesListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -58,13 +65,15 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     //~ Instance fields --------------------------------------------------------
 
     private final transient HashMap<TimeseriesRetrieverConfig, TimeseriesConverter> configs;
+    private final transient HashMap<TimeSeries, TimeseriesRetrieverConfig> tsMap =
+        new HashMap<TimeSeries, TimeseriesRetrieverConfig>();
     private transient JFreeChart chart;
     private transient BufferedImage image;
     private transient volatile Boolean cached;
     private final transient Refreshable refreshable;
     private final transient TimeseriesDisplayer displayer;
     private TimeSeriesVisualisation tsVis;
-
+    private JPanel pnlToolbar = new JPanel();
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private de.cismet.cids.custom.sudplan.LoadingLabel lblLoading;
     // End of variables declaration//GEN-END:variables
@@ -154,7 +163,6 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
         this.cached = cacheImmedialtely;
         this.refreshable = refreshable;
         this.displayer = new TimeseriesDisplayer();
-
         initComponents();
         initTimeSeriesChart();
     }
@@ -195,7 +203,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     private void initTimeSeriesChart() {
         tsVis = TimeSeriesVisualisationFactory.getInstance().createVisualisation(VisualisationType.SIMPLE);
         final Controllable tsVisController = tsVis.getLookup(Controllable.class);
-        tsVisController.enableSelection(false);
+//        tsVisController.enableSelection(false);
         tsVisController.enableContextMenu(true);
         displayer.execute();
     }
@@ -282,7 +290,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
         setLayout(new java.awt.GridBagLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
@@ -294,6 +302,15 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     public void dispose() {
         displayer.cancel(true);
         lblLoading.dispose();
+    }
+
+    @Override
+    public void showOrigTS(final TimeSeries ts) {
+        final TimeseriesRetrieverConfig cfg = tsMap.get(ts);
+        this.removeAll();
+        initComponents();
+        initTimeSeriesChart();
+        displayer.execute();
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -345,7 +362,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("retrieved timeseries"); // NOI18N
                     }
-
+                    tsMap.put(timeseries, config);
                     tsVis.addTimeSeries(timeseries);
                     count++;
                 }
@@ -385,10 +402,43 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
             try {
                 if (!cached) {
                     final JComponent comp = tsVis.getVisualisationUI();
+                    comp.setBorder(new LineBorder(Color.black, 1));
                     remove(lblLoading);
                     lblLoading.dispose();
-                    setLayout(new BorderLayout());
-                    add(comp, BorderLayout.CENTER);
+                    final java.awt.GridBagConstraints gridBagConstraints;
+                    gridBagConstraints = new java.awt.GridBagConstraints();
+                    gridBagConstraints.gridx = 0;
+                    gridBagConstraints.gridy = 1;
+                    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+                    gridBagConstraints.weightx = 1.0;
+                    gridBagConstraints.weighty = 1.0;
+                    gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
+                    add(comp, gridBagConstraints);
+
+                    pnlToolbar.setMinimumSize(new java.awt.Dimension(10, 32));
+                    pnlToolbar.setOpaque(false);
+                    pnlToolbar.setPreferredSize(new java.awt.Dimension(10, 32));
+                    pnlToolbar.setLayout(new java.awt.BorderLayout());
+                    gridBagConstraints.gridx = 0;
+                    gridBagConstraints.gridy = 0;
+                    gridBagConstraints.weightx = 0;
+                    gridBagConstraints.weighty = 0;
+                    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+                    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+                    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+                    gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
+                    add(pnlToolbar, gridBagConstraints);
+                    final TimeSeriesChartToolBar toolbar = (TimeSeriesChartToolBar)tsVis.getToolbar();
+                    toolbar.enableMapButton(false);
+                    toolbar.enableOperationsMenue(false);
+                    toolbar.setOpaque(false);
+
+                    toolbar.addShowOrigTSListener(TimeseriesChartPanel.this);
+                    pnlToolbar.add(toolbar, BorderLayout.WEST);
+
+                    final Controllable tsVisController = tsVis.getLookup(Controllable.class);
+                    tsVisController.enableContextMenu(true);
+                    tsVisController.enableToolTips(true);
 
                     Container parent = TimeseriesChartPanel.this;
                     Container current = getParent();
@@ -403,6 +453,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
             } catch (final Exception e) {
                 final String message = "cannot create chart";  // NOI18N
                 LOG.error(message, e);
+                setLayout(new BorderLayout());
                 add(new JLabel("ERROR"), BorderLayout.CENTER); // NOI18N
             }
         }

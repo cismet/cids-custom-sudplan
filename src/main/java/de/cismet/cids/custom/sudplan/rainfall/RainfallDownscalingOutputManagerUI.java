@@ -20,6 +20,7 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -124,8 +125,14 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
                 final Resolution inputRes = TimeSeriesRendererUtil.getPreviewResolution(inputCfg);
                 final Resolution resultRes = TimeSeriesRendererUtil.getPreviewResolution(resultCfg);
 
-                resultPanel = new TimeseriesChartPanel(resultCfg.changeResolution(resultRes));
-                inputPanel = new TimeseriesChartPanel(inputCfg.changeResolution(inputRes));
+                resultPanel = new JPanel();
+                resultPanel.setOpaque(false);
+                resultPanel.setLayout(new BorderLayout());
+                resultPanel.add(new TimeseriesChartPanel(resultCfg.changeResolution(resultRes)), BorderLayout.CENTER);
+                inputPanel = new JPanel();
+                inputPanel.setOpaque(false);
+                inputPanel.setLayout(new BorderLayout());
+                inputPanel.add(new TimeseriesChartPanel(inputCfg.changeResolution(inputRes)), BorderLayout.CENTER);
             } catch (final MalformedURLException ex) {
                 final String message = "illegal ts uri"; // NOI18N
                 LOG.error(message, ex);
@@ -235,6 +242,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
                 NbBundle.getMessage(
                     RainfallDownscalingOutputManagerUI.class,
                     "RainfallDownscalingOutputManagerUI.pnlStatisticalResults.border.title"))); // NOI18N
+        pnlStatisticalResults.setMinimumSize(new java.awt.Dimension(296, 150));
         pnlStatisticalResults.setOpaque(false);
         pnlStatisticalResults.setLayout(new java.awt.GridBagLayout());
 
@@ -250,7 +258,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         pnlStatisticalResults.add(lblStatisticalCaption, gridBagConstraints);
 
-        jScrollPane1.setMinimumSize(new java.awt.Dimension(100, 50));
+        jScrollPane1.setMinimumSize(new java.awt.Dimension(100, 120));
 
         jtbAdditionalResults.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {
@@ -285,8 +293,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
                 }
             });
         jtbAdditionalResults.setMinimumSize(new java.awt.Dimension(250, 60));
-        jtbAdditionalResults.setPreferredSize(new java.awt.Dimension(500, 62));
-        jtbAdditionalResults.setShowGrid(true);
+        jtbAdditionalResults.setPreferredSize(new java.awt.Dimension(500, 60));
         jScrollPane1.setViewportView(jtbAdditionalResults);
 
         gridBagConstraints = new java.awt.GridBagConstraints();

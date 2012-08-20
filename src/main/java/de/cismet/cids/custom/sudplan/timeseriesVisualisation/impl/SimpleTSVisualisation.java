@@ -24,7 +24,6 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.LineBorder;
-import org.jfree.chart.labels.StandardXYSeriesLabelGenerator;
 import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 import org.jfree.chart.plot.XYPlot;
@@ -76,13 +75,7 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesEventNoti
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSignature;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesEvent;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesEventListener;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesListChangedEvent;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesOperationChangedEvent;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesOperationListChangedListener;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionEvent;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesSelectionListener;
+import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.*;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.TimeSeriesOperation;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.operationFrameWork.TimeSeriesOperationResultListener;
 
@@ -209,6 +202,10 @@ public class SimpleTSVisualisation extends AbstractTimeSeriesVisualisation imple
                         this));
                 this.addTimeSeriesSelectionListener(WeakListeners.create(
                         TimeSeriesSelectionListener.class,
+                        toolbar,
+                        this));
+                this.addTimeSeriesListChangeListener(WeakListeners.create(
+                        TimeSeriesListChangedListener.class,
                         toolbar,
                         this));
                 for (final TimeSeriesOperation op : operationList) {
