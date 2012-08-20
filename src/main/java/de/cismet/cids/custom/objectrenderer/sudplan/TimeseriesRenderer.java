@@ -182,7 +182,12 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         chkforecast.setText(NbBundle.getMessage(TimeseriesRenderer.class, "TimeseriesRenderer.chkforecast.text")); // NOI18N
         chkforecast.setContentAreaFilled(false);
 
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, this, org.jdesktop.beansbinding.ELProperty.create("${cidsBean.forecast}"), chkforecast, org.jdesktop.beansbinding.BeanProperty.create("selected"));
+        final org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.forecast}"),
+                chkforecast,
+                org.jdesktop.beansbinding.BeanProperty.create("selected"));
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -204,6 +209,5 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         add(pnlNorth, java.awt.BorderLayout.PAGE_START);
 
         bindingGroup.bind();
-    }// </editor-fold>//GEN-END:initComponents
-
+    } // </editor-fold>//GEN-END:initComponents
 }
