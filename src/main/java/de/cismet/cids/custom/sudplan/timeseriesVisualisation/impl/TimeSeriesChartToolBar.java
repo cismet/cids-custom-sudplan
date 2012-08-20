@@ -1,12 +1,10 @@
-/**
- * *************************************************
- *
- * cismet GmbH, Saarbruecken, Germany
- * 
-* ... and it just works.
- * 
-***************************************************
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cids.custom.sudplan.timeseriesVisualisation.impl;
 
 import Sirius.navigator.plugin.PluginRegistry;
@@ -28,13 +26,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.swing.*;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
@@ -52,144 +50,155 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.navigatorplugin.CismapPlugin;
 
 /**
- * Offers interaction functionality for
- * <code>SimpleTimeSeriesVisualisation.</code>
+ * Offers interaction functionality for <code>SimpleTimeSeriesVisualisation.</code>
  *
- * @author dmeiers
- * @version $Revision$, $Date$
+ * @author   dmeiers
+ * @version  $Revision$, $Date$
  */
 public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperationListChangedListener,
-        TimeSeriesSelectionListener,
-        TimeSeriesListChangedListener {
+    TimeSeriesSelectionListener,
+    TimeSeriesListChangedListener {
 
     //~ Static fields/initializers ---------------------------------------------
+
     private static final transient Logger LOG = Logger.getLogger(TimeSeriesChartToolBar.class);
+
     //~ Instance fields --------------------------------------------------------
+
     private final HashMap<Action, JMenuItem> operationMenuItemSet = new HashMap<Action, JMenuItem>();
     private JMenu operationsMenu;
     private CustomChartPanel chartPanel;
     public Action selectAll = new AbstractAction() {
-        
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            final TimeSeriesSelectionNotification notifyier = tsVis.getLookup(
-                    TimeSeriesSelectionNotification.class);
-            final XYPlot plot = (XYPlot) chartPanel.getChart().getPlot();
-            for (int i = 0; i < plot.getRendererCount(); i++) {
-                if (plot.getRenderer(i) instanceof SelectionXYLineRenderer) {
-                    final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer) plot.getRenderer(i);
-                    renderer.setSelected(true);
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final TimeSeriesSelectionNotification notifyier = tsVis.getLookup(
+                        TimeSeriesSelectionNotification.class);
+                final XYPlot plot = (XYPlot)chartPanel.getChart().getPlot();
+                for (int i = 0; i < plot.getRendererCount(); i++) {
+                    if (plot.getRenderer(i) instanceof SelectionXYLineRenderer) {
+                        final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer)plot.getRenderer(i);
+                        renderer.setSelected(true);
+                    }
+                }
+                if (notifyier != null) {
+                    ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(new TimeSeriesSelectionEvent(
+                            tsVis,
+                            TimeSeriesSelectionEvent.TS_SELECTED,
+                            tsVis.getTimeSeriesCollection()));
                 }
             }
-            if (notifyier != null) {
-                ((SimpleTSVisualisation) tsVis).fireTimeSeriesSelectionChanged(new TimeSeriesSelectionEvent(
-                        tsVis,
-                        TimeSeriesSelectionEvent.TS_SELECTED,
-                        tsVis.getTimeSeriesCollection()));
-            }
-        }
-    };
+        };
+
     public Action deselectAll = new AbstractAction() {
-        
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            final TimeSeriesSelectionNotification notifyier = tsVis.getLookup(
-                    TimeSeriesSelectionNotification.class);
-            final XYPlot plot = (XYPlot) chartPanel.getChart().getPlot();
-            for (int i = 0; i < plot.getRendererCount(); i++) {
-                if (plot.getRenderer(i) instanceof SelectionXYLineRenderer) {
-                    final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer) plot.getRenderer(i);
-                    renderer.setSelected(false);
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final TimeSeriesSelectionNotification notifyier = tsVis.getLookup(
+                        TimeSeriesSelectionNotification.class);
+                final XYPlot plot = (XYPlot)chartPanel.getChart().getPlot();
+                for (int i = 0; i < plot.getRendererCount(); i++) {
+                    if (plot.getRenderer(i) instanceof SelectionXYLineRenderer) {
+                        final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer)plot.getRenderer(i);
+                        renderer.setSelected(false);
+                    }
+                }
+                if (notifyier != null) {
+                    ((SimpleTSVisualisation)tsVis).fireTimeSeriesSelectionChanged(new TimeSeriesSelectionEvent(
+                            tsVis,
+                            TimeSeriesSelectionEvent.TS_DESELECTED,
+                            new ArrayList<TimeSeries>()));
                 }
             }
-            if (notifyier != null) {
-                ((SimpleTSVisualisation) tsVis).fireTimeSeriesSelectionChanged(new TimeSeriesSelectionEvent(
-                        tsVis,
-                        TimeSeriesSelectionEvent.TS_DESELECTED,
-                        new ArrayList<TimeSeries>()));
-            }
-        }
-    };
+        };
+
     private TimeSeriesVisualisation tsVis;
     private Action resetZoom = new AbstractAction() {
-        
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            chartPanel.restoreAutoBounds();
-        }
-    };
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                chartPanel.restoreAutoBounds();
+            }
+        };
+
     private Action removeAllSelectedTimeseries = new AbstractAction() {
-        
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            final XYPlot plot = chartPanel.getChart().getXYPlot();
-            final HashMap<Integer, TimeSeriesDatasetAdapter> selectedTS =
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final XYPlot plot = chartPanel.getChart().getXYPlot();
+                final HashMap<Integer, TimeSeriesDatasetAdapter> selectedTS =
                     new HashMap<Integer, TimeSeriesDatasetAdapter>();
-            
-            for (int i = 0; i < plot.getDatasetCount(); i++) {
-                if ((plot.getDataset(i) != null) && (plot.getDataset(i) instanceof TimeSeriesDatasetAdapter)
-                        && (plot.getRenderer(i) instanceof SelectionXYLineRenderer)) {
-                    final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer) plot.getRenderer(i);
-                    if (renderer.isSelected()) {
-                        final TimeSeriesDatasetAdapter tsc = (TimeSeriesDatasetAdapter) plot.getDataset(i);
-                        selectedTS.put(i, tsc);
+
+                for (int i = 0; i < plot.getDatasetCount(); i++) {
+                    if ((plot.getDataset(i) != null) && (plot.getDataset(i) instanceof TimeSeriesDatasetAdapter)
+                                && (plot.getRenderer(i) instanceof SelectionXYLineRenderer)) {
+                        final SelectionXYLineRenderer renderer = (SelectionXYLineRenderer)plot.getRenderer(i);
+                        if (renderer.isSelected()) {
+                            final TimeSeriesDatasetAdapter tsc = (TimeSeriesDatasetAdapter)plot.getDataset(i);
+                            selectedTS.put(i, tsc);
+                        }
+                    }
+                }
+                final RemoveTimeSeriesAction removeAction = new RemoveTimeSeriesAction(
+                        selectedTS,
+                        plot,
+                        tsVis);
+                SwingUtilities.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            removeAction.actionPerformed(e);
+                        }
+                    });
+            }
+        };
+
+    private Action saveAsimage = new AbstractAction() {
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                try {
+                    chartPanel.doSaveAs();
+                } catch (IOException ex) {
+                    LOG.warn("Can not save as image", ex); // NOI18N
+                }
+            }
+        };
+
+    private Action removeAllFromMap = new AbstractAction() {
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final CismapPlugin cismapPl = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
+                final MappingComponent mc = cismapPl.getMappingComponent();
+                mc.getTmpFeatureLayer().removeAllChildren();
+            }
+        };
+
+    private TimeSeriesExportWizardAction exportAction = new TimeSeriesExportWizardAction();
+    private Action showOrigTSAction = new AbstractAction() {
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (originTS != null) {
+                    final int answer = JOptionPane.showConfirmDialog(
+                            ComponentRegistry.getRegistry().getMainWindow(),
+                            java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle")
+                                        .getString(
+                                            "TimeSeriesRenderer.btnOriginalTSActionPerformed(ActionEvent).message"),
+                            java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle")
+                                        .getString(
+                                            "TimeSeriesRenderer.btnOriginalTSActionPerformed(ActionEvent).title"),
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE);
+
+                    if (answer == JOptionPane.YES_OPTION) {
+                        fireShowOrigTSEvent(originTS);
                     }
                 }
             }
-            final RemoveTimeSeriesAction removeAction = new RemoveTimeSeriesAction(
-                    selectedTS,
-                    plot,
-                    tsVis);
-            SwingUtilities.invokeLater(new Runnable() {
-                
-                @Override
-                public void run() {
-                    removeAction.actionPerformed(e);
-                }
-            });
-        }
-    };
-    private Action saveAsimage = new AbstractAction() {
-        
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            try {
-                chartPanel.doSaveAs();
-            } catch (IOException ex) {
-                LOG.warn("Can not save as image", ex); // NOI18N
-            }
-        }
-    };
-    private Action removeAllFromMap = new AbstractAction() {
-        
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            final CismapPlugin cismapPl = (CismapPlugin) PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
-            final MappingComponent mc = cismapPl.getMappingComponent();
-            mc.getTmpFeatureLayer().removeAllChildren();
-        }
-    };
-    private TimeSeriesExportWizardAction exportAction = new TimeSeriesExportWizardAction();
-    private Action showOrigTSAction = new AbstractAction() {
-        
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            if (originTS != null) {
-                final int answer = JOptionPane.showConfirmDialog(
-                        ComponentRegistry.getRegistry().getMainWindow(),
-                        java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle").getString(
-                        "TimeSeriesRenderer.btnOriginalTSActionPerformed(ActionEvent).message"),
-                        java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle").getString(
-                        "TimeSeriesRenderer.btnOriginalTSActionPerformed(ActionEvent).title"),
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE);
-                
-                if (answer == JOptionPane.YES_OPTION) {
-                    fireShowOrigTSEvent(originTS);
-                }
-            }
-        }
-    };
+        };
+
     private JButton btnSelectAll;
     private JButton btnDeselectAll;
     private JButton btnRemove;
@@ -203,6 +212,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     private ArrayList<ShowOrigTimeseriesListener> showOrigListeners;
 
     //~ Constructors -----------------------------------------------------------
+
     /**
      * Creates a new TimeSeriesChartToolBar object.
      */
@@ -213,9 +223,8 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * Creates a new TimeSeriesChartToolBar object.
      *
-     * @param p the ChartPanel that this tool bar correspond to
-     * @param tsVis the
-     * <code>TimeSeriesVisualisation</code> that this tool bar corresponds to
+     * @param  p      the ChartPanel that this tool bar correspond to
+     * @param  tsVis  the <code>TimeSeriesVisualisation</code> that this tool bar corresponds to
      */
     public TimeSeriesChartToolBar(final CustomChartPanel p, final TimeSeriesVisualisation tsVis) {
         super(NbBundle.getMessage(
@@ -253,6 +262,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     }
 
     //~ Methods ----------------------------------------------------------------
+
     /**
      * adds the configured buttons to the tool bar.
      */
@@ -278,7 +288,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @param chartPanel DOCUMENT ME!
+     * @param  chartPanel  DOCUMENT ME!
      */
     public void setChartPanel(final CustomChartPanel chartPanel) {
         this.chartPanel = chartPanel;
@@ -287,7 +297,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private JButton createExportTimeSeriesButton() {
         btnExportTimeSeries = new JButton(exportAction);
@@ -298,7 +308,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private JButton createSelectAllButton() {
         btnSelectAll = new JButton(selectAll);
@@ -317,7 +327,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private JButton createShowOriginalTSBUtton() {
         btnShowOriginTS = new JButton(showOrigTSAction);
@@ -334,7 +344,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private JButton createDeselectAllButton() {
         btnDeselectAll = new JButton(deselectAll);
@@ -353,7 +363,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private JButton createRemoveActionButton() {
         btnRemove = new JButton(removeAllSelectedTimeseries);
@@ -372,7 +382,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private JButton createResetZoomButton() {
         btnResetZoom = new JButton(resetZoom);
@@ -390,7 +400,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private JButton createSaveAsActionButton() {
         btnSaveAs = new JButton(saveAsimage);
@@ -407,7 +417,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private JButton createRemoveAllFromMapButton() {
         btnMapRemoveAll = new JButton(removeAllFromMap);
@@ -426,7 +436,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     
     @Override
     public void timeSeriesOperationChanged(final TimeSeriesOperationChangedEvent evt) {
-        final TimeSeriesOperation tsOp = (TimeSeriesOperation) evt.getSource();
+        final TimeSeriesOperation tsOp = (TimeSeriesOperation)evt.getSource();
         if (evt.getID() == TimeSeriesOperationChangedEvent.OPERATION_ADD) {
             final JMenuItem newOp = new JMenuItem(tsOp);
             operationMenuItemSet.put(tsOp, newOp);
@@ -462,11 +472,11 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
                 btnShowOriginTS.setEnabled(false);
                 originTS = null;
             }
-            final TimeSeriesVisualisation tsVis = (TimeSeriesVisualisation) evt.getSource();
-            if (evt.getSelectedTs().size() == tsVis.getTimeSeriesCollection().size()) {
+            final TimeSeriesVisualisation srcTsVis = (TimeSeriesVisualisation)evt.getSource();
+            if (evt.getSelectedTs().size() == srcTsVis.getTimeSeriesCollection().size()) {
                 btnRemove.setEnabled(false);
                 return;
-            } else if (tsVis.getTimeSeriesCollection().size() > 1) {
+            } else if (srcTsVis.getTimeSeriesCollection().size() > 1) {
                 btnRemove.setEnabled(true);
                 return;
             }
@@ -488,7 +498,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @param aFlag DOCUMENT ME!
+     * @param  aFlag  DOCUMENT ME!
      */
     public void enableOperationsMenue(final boolean aFlag) {
         if (aFlag) {
@@ -502,7 +512,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @param aFlag DOCUMENT ME!
+     * @param  aFlag  DOCUMENT ME!
      */
     public void enableMapButton(final boolean aFlag) {
         if (aFlag) {
@@ -556,7 +566,16 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @param listener DOCUMENT ME!
+     * @param  aThis  DOCUMENT ME!
+     */
+    public void setTimeseriesChartPanel(final TimeseriesChartPanel aThis) {
+        this.chartpnl = aThis;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  listener  DOCUMENT ME!
      */
     public void addShowOrigTSListener(final ShowOrigTimeseriesListener listener) {
         showOrigListeners.add(listener);
@@ -565,7 +584,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @param listener DOCUMENT ME!
+     * @param  listener  DOCUMENT ME!
      */
     public void removeShowOrigTSListener(final ShowOrigTimeseriesListener listener) {
         showOrigListeners.remove(listener);
@@ -574,7 +593,7 @@ public class TimeSeriesChartToolBar extends JToolBar implements TimeSeriesOperat
     /**
      * DOCUMENT ME!
      *
-     * @param ts DOCUMENT ME!
+     * @param  ts  DOCUMENT ME!
      */
     private void fireShowOrigTSEvent(final TimeSeries ts) {
         for (final ShowOrigTimeseriesListener l : showOrigListeners) {
