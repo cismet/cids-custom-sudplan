@@ -13,12 +13,10 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
 import net.opengis.sps.v_1_0_0.InputDescriptor;
 
-import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.NbBundle;
 
 import java.awt.Component;
-import java.awt.Dialog;
 import java.awt.EventQueue;
 
 import java.util.List;
@@ -44,29 +42,6 @@ public final class AirqualityDownscalingWizardPanelScenario extends AbstractWiza
     private transient Exception spsError;
 
     //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    final AirqualityDownscalingWizardPanelScenario panel =
-                        new AirqualityDownscalingWizardPanelScenario();
-                    panel.createComponent();
-                    final WizardDescriptor wizard = new WizardDescriptor(new WizardDescriptor.Panel[] { panel });
-                    final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
-                    dialog.pack();
-                    dialog.setLocationRelativeTo(null);
-                    dialog.setVisible(true);
-                    dialog.toFront();
-                }
-            });
-    }
 
     @Override
     protected Component createComponent() {

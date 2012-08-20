@@ -11,13 +11,10 @@ import com.vividsolutions.jts.geom.Coordinate;
 
 import org.apache.log4j.Logger;
 
-import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.NbBundle;
 
 import java.awt.Component;
-import java.awt.Dialog;
-import java.awt.EventQueue;
 
 import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
 
@@ -43,34 +40,6 @@ public final class AirqualityDownscalingWizardPanelGrid extends AbstractWizardPa
     private transient Long gridcellCountY = new Long(3);
 
     //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    final AirqualityDownscalingWizardPanelGrid panel = new AirqualityDownscalingWizardPanelGrid();
-                    panel.createComponent();
-                    final WizardDescriptor wizard = new WizardDescriptor(new WizardDescriptor.Panel[] { panel });
-                    wizard.putProperty(AirqualityDownscalingWizardAction.PROP_GRID_LOWERLEFT, new Coordinate(0, 0));
-                    wizard.putProperty(
-                        AirqualityDownscalingWizardAction.PROP_GRID_UPPERRIGHT,
-                        new Coordinate(3000, 5000));
-                    wizard.putProperty(AirqualityDownscalingWizardAction.PROP_GRIDCELL_SIZE, Integer.valueOf(1000));
-
-                    final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
-                    dialog.pack();
-                    dialog.setLocationRelativeTo(null);
-                    dialog.setVisible(true);
-                    dialog.toFront();
-                }
-            });
-    }
 
     @Override
     protected Component createComponent() {
