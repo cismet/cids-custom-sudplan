@@ -20,6 +20,7 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,7 +46,6 @@ import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
-import java.awt.BorderLayout;
 
 /**
  * DOCUMENT ME!
@@ -125,16 +125,14 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
                 final Resolution inputRes = TimeSeriesRendererUtil.getPreviewResolution(inputCfg);
                 final Resolution resultRes = TimeSeriesRendererUtil.getPreviewResolution(resultCfg);
 
-                resultPanel =new JPanel();
+                resultPanel = new JPanel();
                 resultPanel.setOpaque(false);
                 resultPanel.setLayout(new BorderLayout());
-                resultPanel.add(new TimeseriesChartPanel(resultCfg.changeResolution(resultRes)),BorderLayout.CENTER);
+                resultPanel.add(new TimeseriesChartPanel(resultCfg.changeResolution(resultRes)), BorderLayout.CENTER);
                 inputPanel = new JPanel();
                 inputPanel.setOpaque(false);
                 inputPanel.setLayout(new BorderLayout());
                 inputPanel.add(new TimeseriesChartPanel(inputCfg.changeResolution(inputRes)), BorderLayout.CENTER);
-                
-                
             } catch (final MalformedURLException ex) {
                 final String message = "illegal ts uri"; // NOI18N
                 LOG.error(message, ex);
@@ -197,7 +195,9 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         add(jtpResults, gridBagConstraints);
 
-        lblRun.setText(NbBundle.getMessage(RainfallDownscalingOutputManagerUI.class, "RainfallDownscalingOutputManagerUI.lblRun.text")); // NOI18N
+        lblRun.setText(NbBundle.getMessage(
+                RainfallDownscalingOutputManagerUI.class,
+                "RainfallDownscalingOutputManagerUI.lblRun.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -205,7 +205,9 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         add(lblRun, gridBagConstraints);
 
-        hypRun.setText(NbBundle.getMessage(RainfallDownscalingOutputManagerUI.class, "RainfallDownscalingOutputManagerUI.hypRun.text")); // NOI18N
+        hypRun.setText(NbBundle.getMessage(
+                RainfallDownscalingOutputManagerUI.class,
+                "RainfallDownscalingOutputManagerUI.hypRun.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -215,7 +217,9 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         add(hypRun, gridBagConstraints);
 
-        lblInput.setText(NbBundle.getMessage(RainfallDownscalingOutputManagerUI.class, "RainfallDownscalingOutputManagerUI.lblInput.text")); // NOI18N
+        lblInput.setText(NbBundle.getMessage(
+                RainfallDownscalingOutputManagerUI.class,
+                "RainfallDownscalingOutputManagerUI.lblInput.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -223,7 +227,9 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         add(lblInput, gridBagConstraints);
 
-        hypInput.setText(NbBundle.getMessage(RainfallDownscalingOutputManagerUI.class, "RainfallDownscalingOutputManagerUI.hypInput.text")); // NOI18N
+        hypInput.setText(NbBundle.getMessage(
+                RainfallDownscalingOutputManagerUI.class,
+                "RainfallDownscalingOutputManagerUI.hypInput.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -232,12 +238,17 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         add(hypInput, gridBagConstraints);
 
-        pnlStatisticalResults.setBorder(javax.swing.BorderFactory.createTitledBorder(NbBundle.getMessage(RainfallDownscalingOutputManagerUI.class, "RainfallDownscalingOutputManagerUI.pnlStatisticalResults.border.title"))); // NOI18N
+        pnlStatisticalResults.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                NbBundle.getMessage(
+                    RainfallDownscalingOutputManagerUI.class,
+                    "RainfallDownscalingOutputManagerUI.pnlStatisticalResults.border.title"))); // NOI18N
         pnlStatisticalResults.setMinimumSize(new java.awt.Dimension(296, 150));
         pnlStatisticalResults.setOpaque(false);
         pnlStatisticalResults.setLayout(new java.awt.GridBagLayout());
 
-        lblStatisticalCaption.setText(NbBundle.getMessage(RainfallDownscalingOutputManagerUI.class, "RainfallDownscalingOutputManagerUI.lblStatisticalCaption.text")); // NOI18N
+        lblStatisticalCaption.setText(NbBundle.getMessage(
+                RainfallDownscalingOutputManagerUI.class,
+                "RainfallDownscalingOutputManagerUI.lblStatisticalCaption.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -250,31 +261,37 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         jScrollPane1.setMinimumSize(new java.awt.Dimension(100, 120));
 
         jtbAdditionalResults.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {"Winter (Dec-Feb)", "+ 27 %", "+ 27 %", "+ 9 %"},
-                {"Spring (Mar-May)", "+ 15 %", "+ 16 %", "+ 8 %"},
-                {"Summer (Jun-Aug)", "- 14 %", "+ 20 %", "- 16 %"},
-                {"Autumn (Sep-Nov)", "+ 20 %", "+ 35 %", "- 3 %"}
-            },
-            new String [] {
-                "", "Total season accumulation", "Maximum 30-min intensity", "Frequency of occurrence"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false
-            };
+                new Object[][] {
+                    { "Winter (Dec-Feb)", "+ 27 %", "+ 27 %", "+ 9 %" },
+                    { "Spring (Mar-May)", "+ 15 %", "+ 16 %", "+ 8 %" },
+                    { "Summer (Jun-Aug)", "- 14 %", "+ 20 %", "- 16 %" },
+                    { "Autumn (Sep-Nov)", "+ 20 %", "+ 35 %", "- 3 %" }
+                },
+                new String[] {
+                    "",
+                    "Total season accumulation",
+                    "Maximum 30-min intensity",
+                    "Frequency of occurrence"
+                }) {
 
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
+                Class[] types = new Class[] {
+                        java.lang.String.class,
+                        java.lang.String.class,
+                        java.lang.String.class,
+                        java.lang.String.class
+                    };
+                boolean[] canEdit = new boolean[] { false, false, false, false };
 
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
+                @Override
+                public Class getColumnClass(final int columnIndex) {
+                    return types[columnIndex];
+                }
+
+                @Override
+                public boolean isCellEditable(final int rowIndex, final int columnIndex) {
+                    return canEdit[columnIndex];
+                }
+            });
         jtbAdditionalResults.setMinimumSize(new java.awt.Dimension(250, 60));
         jtbAdditionalResults.setPreferredSize(new java.awt.Dimension(500, 60));
         jScrollPane1.setViewportView(jtbAdditionalResults);
@@ -296,7 +313,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         add(pnlStatisticalResults, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
 

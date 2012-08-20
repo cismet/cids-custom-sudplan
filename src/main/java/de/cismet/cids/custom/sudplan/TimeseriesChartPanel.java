@@ -1,12 +1,10 @@
-/**
- * *************************************************
- *
- * cismet GmbH, Saarbruecken, Germany
- * 
-* ... and it just works.
- * 
-***************************************************
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cids.custom.sudplan;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
@@ -15,6 +13,8 @@ import org.apache.log4j.Logger;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.util.Log;
+
+import org.openide.util.WeakListeners;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -50,20 +50,23 @@ import de.cismet.cids.dynamics.Disposable;
 
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import org.openide.util.WeakListeners;
 
 /**
  * DOCUMENT ME!
  *
- * @version $Revision$, $Date$
+ * @version  $Revision$, $Date$
  */
 public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposable, ShowOrigTimeseriesListener {
 
     //~ Static fields/initializers ---------------------------------------------
+
     private static final transient Logger LOG = Logger.getLogger(TimeseriesChartPanel.class);
+
     //~ Instance fields --------------------------------------------------------
+
     private final transient HashMap<TimeseriesRetrieverConfig, TimeseriesConverter> configs;
-    private final transient HashMap<TimeSeries, TimeseriesRetrieverConfig> tsMap = new HashMap<TimeSeries, TimeseriesRetrieverConfig>();
+    private final transient HashMap<TimeSeries, TimeseriesRetrieverConfig> tsMap =
+        new HashMap<TimeSeries, TimeseriesRetrieverConfig>();
     private transient JFreeChart chart;
     private transient BufferedImage image;
     private transient volatile Boolean cached;
@@ -76,12 +79,13 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
+
     /**
      * Creates new form TimeseriesFeatureRenderer.
      *
-     * @param uri DOCUMENT ME!
+     * @param   uri  DOCUMENT ME!
      *
-     * @throws MalformedURLException DOCUMENT ME!
+     * @throws  MalformedURLException  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final String uri) throws MalformedURLException {
         this(TimeseriesRetrieverConfig.fromUrl(uri), false, null, null);
@@ -90,7 +94,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param config DOCUMENT ME!
+     * @param  config  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final TimeseriesRetrieverConfig config) {
         this(config, false, null, null);
@@ -99,10 +103,10 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param uri DOCUMENT ME!
-     * @param converter DOCUMENT ME!
+     * @param   uri        DOCUMENT ME!
+     * @param   converter  DOCUMENT ME!
      *
-     * @throws MalformedURLException DOCUMENT ME!
+     * @throws  MalformedURLException  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final String uri, final TimeseriesConverter converter) throws MalformedURLException {
         this(TimeseriesRetrieverConfig.fromUrl(uri), false, null, converter);
@@ -111,8 +115,8 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param config DOCUMENT ME!
-     * @param converter DOCUMENT ME!
+     * @param  config     DOCUMENT ME!
+     * @param  converter  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final TimeseriesRetrieverConfig config, final TimeseriesConverter converter) {
         this(config, false, null, converter);
@@ -121,10 +125,10 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * Creates new form TimeseriesFeatureRenderer.
      *
-     * @param uri DOCUMENT ME!
-     * @param refreshable DOCUMENT ME!
+     * @param   uri          DOCUMENT ME!
+     * @param   refreshable  DOCUMENT ME!
      *
-     * @throws MalformedURLException DOCUMENT ME!
+     * @throws  MalformedURLException  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final String uri, final Refreshable refreshable) throws MalformedURLException {
         this(TimeseriesRetrieverConfig.fromUrl(uri), false, refreshable, null);
@@ -133,8 +137,8 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param config DOCUMENT ME!
-     * @param cacheImmedialtely DOCUMENT ME!
+     * @param  config             DOCUMENT ME!
+     * @param  cacheImmedialtely  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final TimeseriesRetrieverConfig config, final boolean cacheImmedialtely) {
         this(config, cacheImmedialtely, null, null);
@@ -143,11 +147,11 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param configs DOCUMENT ME!
-     * @param cacheImmedialtely DOCUMENT ME!
-     * @param refreshable DOCUMENT ME!
+     * @param   configs            DOCUMENT ME!
+     * @param   cacheImmedialtely  DOCUMENT ME!
+     * @param   refreshable        DOCUMENT ME!
      *
-     * @throws IllegalArgumentException DOCUMENT ME!
+     * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final HashMap<TimeseriesRetrieverConfig, TimeseriesConverter> configs,
             final boolean cacheImmedialtely,
@@ -166,12 +170,12 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param config DOCUMENT ME!
-     * @param cacheImmediately DOCUMENT ME!
-     * @param refreshable DOCUMENT ME!
-     * @param converter DOCUMENT ME!
+     * @param   config            DOCUMENT ME!
+     * @param   cacheImmediately  DOCUMENT ME!
+     * @param   refreshable       DOCUMENT ME!
+     * @param   converter         DOCUMENT ME!
      *
-     * @throws IllegalArgumentException DOCUMENT ME!
+     * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final TimeseriesRetrieverConfig config,
             final boolean cacheImmediately,
@@ -192,6 +196,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     }
 
     //~ Methods ----------------------------------------------------------------
+
     /**
      * DOCUMENT ME!
      */
@@ -206,10 +211,11 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * Caches the chart and repaints itself. Caching means that the chart is transformed into an image so after this
      * method has been called once successfully no manipulation can be done with the chart anymore. It has turned into
-     * an image. If the chart has already been cached nothing will be done.<br/> <br/> NOTE: This method does a
-     * synchronized(this) until the caching is finished
+     * an image. If the chart has already been cached nothing will be done.<br/>
+     * <br/>
+     * NOTE: This method does a synchronized(this) until the caching is finished
      *
-     * @throws IOException if an error occurs during caching
+     * @throws  IOException  if an error occurs during caching
      */
     public void cache() throws IOException {
         if (!cached) {
@@ -220,11 +226,11 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
 
                     EventQueue.invokeLater(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            repaint();
-                        }
-                    });
+                            @Override
+                            public void run() {
+                                repaint();
+                            }
+                        });
                 }
             }
         }
@@ -233,12 +239,12 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * DOCUMENT ME!
      *
-     * @param g DOCUMENT ME!
+     * @param  g  DOCUMENT ME!
      */
     @Override
     public void paint(final Graphics g) {
         if (cached) {
-            final Graphics2D g2 = (Graphics2D) g;
+            final Graphics2D g2 = (Graphics2D)g;
 
             assert image != null : "image is null"; // NOI18N
 
@@ -249,10 +255,9 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     }
 
     /**
-     * Returns the cached state of this
-     * <code>TimeseriesChartPanel</code>.
+     * Returns the cached state of this <code>TimeseriesChartPanel</code>.
      *
-     * @return true if the chart is cached, false otherwise
+     * @return  true if the chart is cached, false otherwise
      */
     public boolean isCached() {
         return cached;
@@ -261,7 +266,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * DOCUMENT ME!
      *
-     * @throws IOException DOCUMENT ME!
+     * @throws  IOException  DOCUMENT ME!
      */
     private void performCaching() throws IOException {
         // TODO: proper image size
@@ -277,7 +282,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
+        final java.awt.GridBagConstraints gridBagConstraints;
 
         lblLoading = new de.cismet.cids.custom.sudplan.LoadingLabel();
 
@@ -291,7 +296,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(0, 50, 0, 0);
         add(lblLoading, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
     @Override
     public void dispose() {
@@ -300,7 +305,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     }
 
     @Override
-    public void showOrigTS(TimeSeries ts) {
+    public void showOrigTS(final TimeSeries ts) {
         final TimeseriesRetrieverConfig cfg = tsMap.get(ts);
         this.removeAll();
         initComponents();
@@ -309,20 +314,22 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     }
 
     //~ Inner Classes ----------------------------------------------------------
+
     /**
      * DOCUMENT ME!
      *
-     * @version $Revision$, $Date$
+     * @version  $Revision$, $Date$
      */
     private final class TimeseriesDisplayer extends SwingWorker<Void, Void> {
 
         //~ Methods ------------------------------------------------------------
+
         /**
          * DOCUMENT ME!
          *
-         * @return DOCUMENT ME!
+         * @return  DOCUMENT ME!
          *
-         * @throws Exception DOCUMENT ME!
+         * @throws  Exception  DOCUMENT ME!
          */
         @Override
         protected Void doInBackground() throws Exception {
@@ -421,7 +428,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
                     gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
                     add(pnlToolbar, gridBagConstraints);
-                    final TimeSeriesChartToolBar toolbar = (TimeSeriesChartToolBar) tsVis.getToolbar();
+                    final TimeSeriesChartToolBar toolbar = (TimeSeriesChartToolBar)tsVis.getToolbar();
                     toolbar.enableMapButton(false);
                     toolbar.enableOperationsMenue(false);
                     toolbar.setOpaque(false);
