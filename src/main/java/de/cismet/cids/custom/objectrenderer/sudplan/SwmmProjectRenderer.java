@@ -10,12 +10,10 @@ package de.cismet.cids.custom.objectrenderer.sudplan;
 import Sirius.navigator.search.CidsSearchExecutor;
 import Sirius.navigator.ui.ComponentRegistry;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import org.jdesktop.swingx.JXHyperlink;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
@@ -26,13 +24,11 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.swing.*;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
 
-import de.cismet.cids.client.tools.DevelopmentTools;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.server.search.CsoByOverflowSearch;
@@ -516,7 +512,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void bntSwmmSearchActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_bntSwmmSearchActionPerformed
+    private void bntSwmmSearchActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bntSwmmSearchActionPerformed
         if (this.cbSwmmRuns.getSelectedItem() != null) {
             final int swmmRun = (Integer)((CidsBean)this.cbSwmmRuns.getSelectedItem()).getProperty("id");
             float overflowVolume = 0f;
@@ -536,14 +532,14 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         } else {
             LOG.warn("no SWMM runs available to perform search");
         }
-    } //GEN-LAST:event_bntSwmmSearchActionPerformed
+    }//GEN-LAST:event_bntSwmmSearchActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void bntEtaSearchActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_bntEtaSearchActionPerformed
+    private void bntEtaSearchActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bntEtaSearchActionPerformed
 
         final int swmmProjectId = (Integer)this.getCidsBean().getProperty("id");
         int parameter = EtaResultSearch.NONE;
@@ -560,7 +556,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
                     + " and parameter " + parameter);
 
         CidsSearchExecutor.searchAndDisplayResultsWithDialog(etaResultSearch);
-    } //GEN-LAST:event_bntEtaSearchActionPerformed
+    }//GEN-LAST:event_bntEtaSearchActionPerformed
 
     @Override
     public JComponent getTitleComponent() {
@@ -571,36 +567,6 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
     public void setTitle(final String title) {
         super.setTitle(title);
         titleComponent.setTitle(title);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        try {
-            BasicConfigurator.configure();
-            final CidsBean swmmProject = DevelopmentTools.createCidsBeanFromRMIConnectionOnLocalhost(
-                    "SUDPLAN-LINZ",
-                    "Administratoren",
-                    "admin",
-                    "cismetz12",
-                    "swmm_project",
-                    2);
-
-            final SwmmProjectRenderer swmmProjectRenderer = new SwmmProjectRenderer();
-            swmmProjectRenderer.setCidsBean(swmmProject);
-            swmmProjectRenderer.init();
-            swmmProjectRenderer.setPreferredSize(new java.awt.Dimension(600, 400));
-            final JFrame frame = new JFrame("SwmmProjectRenderer");
-            frame.setContentPane(swmmProjectRenderer);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.pack();
-            frame.setVisible(true);
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-        }
     }
 
     //~ Inner Classes ----------------------------------------------------------

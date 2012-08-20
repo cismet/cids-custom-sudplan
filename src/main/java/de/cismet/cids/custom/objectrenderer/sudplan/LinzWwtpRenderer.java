@@ -9,7 +9,6 @@ package de.cismet.cids.custom.objectrenderer.sudplan;
 
 import Sirius.navigator.ui.RequestsFullSizeComponent;
 
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
@@ -22,14 +21,12 @@ import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
 
-import javax.swing.*;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 
-import de.cismet.cids.client.tools.DevelopmentTools;
 
 import de.cismet.cids.custom.sudplan.ImageUtil;
 
@@ -305,16 +302,16 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblBackMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblBackMouseClicked
+    private void lblBackMouseClicked(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblBackMouseClicked
         btnBackActionPerformed(null);
-    }                                                                       //GEN-LAST:event_lblBackMouseClicked
+    }//GEN-LAST:event_lblBackMouseClicked
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnBackActionPerformed
+    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
         cardLayout.show(this, CARD_1);
         firstPageShowing = true;
         timer.restart();
@@ -322,14 +319,14 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
         btnForward.setEnabled(true);
         lblBack.setEnabled(false);
         lblForw.setEnabled(true);
-    }                                                                           //GEN-LAST:event_btnBackActionPerformed
+    }//GEN-LAST:event_btnBackActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnForwardActionPerformed
+    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnForwardActionPerformed
         cardLayout.show(this, CARD_2);
         firstPageShowing = false;
         timer.restart();
@@ -337,16 +334,16 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
         btnForward.setEnabled(false);
         lblBack.setEnabled(true);
         lblForw.setEnabled(false);
-    }                                                                              //GEN-LAST:event_btnForwardActionPerformed
+    }//GEN-LAST:event_btnForwardActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblForwMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblForwMouseClicked
+    private void lblForwMouseClicked(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblForwMouseClicked
         btnForwardActionPerformed(null);
-    }                                                                       //GEN-LAST:event_lblForwMouseClicked
+    }//GEN-LAST:event_lblForwMouseClicked
 
     @Override
     public Border getCenterrBorder() {
@@ -401,26 +398,6 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
     public JComponent getTitleComponent() {
         // return panTitle;
         return this.linzWwtpTitleComponent;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   args  DOCUMENT ME!
-     *
-     * @throws  Exception  DOCUMENT ME!
-     */
-    public static void main(final String[] args) throws Exception {
-        // DevelopmentTools.showTestFrame(new LinzWwtpRenderer(), 1024, 768);
-        final LinzWwtpRenderer linzWwtpRenderer = new LinzWwtpRenderer();
-        linzWwtpRenderer.setPreferredSize(new java.awt.Dimension(1024, 768));
-        final JFrame frame = new JFrame("LinzWwtpRenderer");
-        frame.getContentPane().add(linzWwtpRenderer, BorderLayout.CENTER);
-        frame.getContentPane().add(linzWwtpRenderer.getTitleComponent(), BorderLayout.NORTH);
-        frame.getContentPane().add(linzWwtpRenderer.getFooterComponent(), BorderLayout.SOUTH);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
     }
 
     //~ Inner Classes ----------------------------------------------------------

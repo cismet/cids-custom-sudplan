@@ -7,20 +7,14 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz.model;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import de.cismet.cids.custom.sudplan.local.linz.EtaConfiguration;
 import de.cismet.cids.custom.sudplan.local.linz.EtaInput;
 import de.cismet.cids.custom.sudplan.local.linz.EtaOutput;
-import de.cismet.cids.custom.sudplan.local.linz.SwmmOutput;
 
 /**
  * Local Model for ETA Calculation.
@@ -212,188 +206,5 @@ public class EtaComputationModel {
         etaOutput.setEtaSedRequired(eta_afs);
 
         return etaOutput;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        try {
-            BasicConfigurator.configure();
-
-            final SwmmReportParser swmmReportParser = new SwmmReportParser();
-            // final InputStream swmmReportFile = new FileInputStream("c:\\linz_v1_2011-08-29_neu.rpt");
-            final InputStream swmmReportFile = new FileInputStream(
-                    "P:\\SUDPLAN\\WP7 - Linz Pilot\\Workshop_2011-05-09\\linz_v1_2011-08-29.rpt");
-
-            SwmmOutput swmmOutput = new SwmmOutput();
-            swmmOutput.setSwmmProject(2);
-            swmmOutput.setUser("Pascal Dihé");
-            swmmOutput.setCreated(new Date());
-
-            swmmOutput = swmmReportParser.parseRPT(swmmOutput, swmmReportFile);
-            EtaComputationModel.LOG.info(swmmOutput.getCsoOverflows().size() + " CSO overflows parsed from RPT");
-            final EtaInput etaInput = new EtaInput(swmmOutput);
-            EtaComputationModel.LOG.info(etaInput.getCsoOverflows().size() + " CSO overflows in ETA Input");
-
-            final String[] csoNames = new String[] {
-                    "RDSRUE51",
-                    "ULKS1",
-                    "FUEAusl",
-                    "RKL_Ablauf",
-                    "AB_Plesching",
-                    "HSU12_1S5b",
-                    "HSU1_1RUE2",
-                    "ALBSP1nolink",
-                    "ALKSP1nolink",
-                    "ANFSP1nolink",
-                    "EDBSP1nolink",
-                    "ENNSP1nolink",
-                    "ENNSP2nolink",
-                    "RUEB_Traunnolink",
-                    "EWDSP1nolink",
-                    "FKDSP1nolink",
-                    "GLWSP1nolink",
-                    "GRSSP2nolink",
-                    "HEMSP1nolink",
-                    "HHSSP1nolink",
-                    "HOESP1nolink",
-                    "HOESP2nolink",
-                    "HZDSP1nolink",
-                    "KRTSP1nolink",
-                    "KSSSP1nolink",
-                    "LTBSP1nolink",
-                    "LTBSP2nolink",
-                    "LTBSP3nolink",
-                    // "RUEB_Lunznolink",
-                    "NNKSP1nolink",
-                    "OFTSP1nolink",
-                    "OTHSP1nolink",
-                    // "RUEB_Pleshnolink",
-                    "PNASP1nolink",
-                    "PUKSP1nolink",
-                    // "RDS20_1S48nolink",
-                    "SMMSP1nolink",
-                    "STFSP1nolink",
-                    "STMSP1nolink",
-                    "STYSP1nolink",
-                    // "RHHB_Wsee3nolink",
-                    "HSMSEntlnolink",
-                    "WLDSP1nolink",
-                    "WLDSP2nolink",
-                    "WLGSP1nolink"
-                };
-            final int[] csoIds = new int[] {
-                    2,
-                    3,
-                    4,
-                    5,
-                    6,
-                    7,
-                    8,
-                    9,
-                    10,
-                    11,
-                    12,
-                    13,
-                    14,
-                    15,
-                    16,
-                    17,
-                    18,
-                    19,
-                    20,
-                    21,
-                    22,
-                    23,
-                    24,
-                    25,
-                    26,
-                    27,
-                    28,
-                    29,
-                    30,
-                    31,
-                    32,
-                    33,
-                    34,
-                    35,
-                    36,
-                    37,
-                    38,
-                    39,
-                    40,
-                    41,
-                    42,
-                    43,
-                    44,
-                    45,
-                    46
-                };
-
-            int i = 0;
-            final List<EtaConfiguration> etaConfigurations = new ArrayList<EtaConfiguration>(csoNames.length);
-            for (final String csoName : csoNames) {
-                final EtaConfiguration etaConfiguration = new EtaConfiguration();
-                etaConfiguration.setEnabled(true);
-
-                if (csoName.equals("RKL_Ablauf")) {
-                    etaConfiguration.setEnabled(false);
-                }
-
-                etaConfiguration.setName(csoName);
-
-                if (csoName.equals("ULKS1")
-                            || csoName.equals("AB_Plesching")
-                            || csoName.equals("ALKSP1nolink")
-                            || csoName.equals("ANFSP1nolink")
-                            || csoName.equals("EDBSP1nolink")
-                            || csoName.equals("ENNSP1nolink")
-                            || csoName.equals("ENNSP2nolink")
-                            || csoName.equals("RUEB_Traunnolink")
-                            || csoName.equals("EWDSP1nolink")
-                            || csoName.equals("FKDSP1nolink")
-                            || csoName.equals("GLWSP1nolink")
-                            || csoName.equals("GRSSP2nolink")
-                            || csoName.equals("HEMSP1nolink")
-                            || csoName.equals("HZDSP1nolink")
-                            || csoName.equals("KRTSP1nolink")
-                            || csoName.equals("NNKSP1nolink")
-                            || csoName.equals("OTHSP1nolink")
-                            || csoName.equals("PNASP1nolink")
-                            || csoName.equals("SMMSP1nolink")
-                            || csoName.equals("STYSP1nolink")
-                            || csoName.equals("WLDSP1nolink")
-                            || csoName.equals("WLDSP2nolink")
-                            || csoName.equals("WLGSP1nolink")) {
-                    etaConfiguration.setSedimentationEfficency(21.0f);
-                } else {
-                    etaConfiguration.setSedimentationEfficency(0.0f);
-                }
-
-                etaConfigurations.add(etaConfiguration);
-                // etaInput.getEtaConfigurations().add(etaConfiguration);
-
-                i++;
-            }
-
-            etaInput.setEtaConfigurations(etaConfigurations);
-
-            // etaInput.setR720((float)29.0232183);
-            etaInput.setR720(35.1297126666468f);
-
-            final EtaComputationModel etaComputationModel = new EtaComputationModel();
-            final EtaOutput etaOutput = etaComputationModel.computateEta(etaInput);
-
-            System.out.println("EtaHydActual: " + etaOutput.getEtaHydActual());
-            System.out.println("tEtaHydRequired: " + etaOutput.getEtaHydRequired());
-            System.out.println("EtaSedActual: " + etaOutput.getEtaSedActual());
-            System.out.println("EtaSedRequired: " + etaOutput.getEtaSedRequired());
-        } catch (Exception e) {
-            EtaComputationModel.LOG.fatal(e.getMessage(), e);
-            System.exit(1);
-        }
     }
 }

@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import org.jfree.chart.ChartFactory;
@@ -32,7 +31,6 @@ import java.text.DecimalFormat;
 
 import java.util.List;
 
-import javax.swing.JFrame;
 
 /**
  * DOCUMENT ME!
@@ -195,34 +193,4 @@ public class EfficiencyRatesComparisionPanel extends javax.swing.JPanel {
     } // </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        BasicConfigurator.configure();
-        final List<String> etaRunNames = new java.util.ArrayList(4);
-        final List<EtaOutput> etaOutputs = new java.util.ArrayList(4);
-
-        for (int i = 0; i < 4; i++) {
-            etaRunNames.add("ETA RUN TEST " + i);
-            final EtaOutput etaOutput = new EtaOutput();
-            etaOutput.setEtaHydActual((float)Math.random() * 10);
-            etaOutput.setEtaHydRequired((float)Math.random() * 10);
-            etaOutput.setEtaSedActual((float)Math.random() * 10);
-            etaOutput.setEtaSedRequired((float)Math.random() * 10);
-            etaOutputs.add(etaOutput);
-        }
-
-        final EfficiencyRatesComparisionPanel EfficiencyRatesComparisionPanel = new EfficiencyRatesComparisionPanel();
-        EfficiencyRatesComparisionPanel.setPreferredSize(new java.awt.Dimension(600, 400));
-        EfficiencyRatesComparisionPanel.setEtaOutputs(etaRunNames, etaOutputs);
-        final JFrame frame = new JFrame("EfficiencyRatesComparisionPanel");
-        frame.setContentPane(EfficiencyRatesComparisionPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
-    }
 }

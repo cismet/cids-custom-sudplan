@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import org.jfree.chart.ChartFactory;
@@ -19,20 +18,16 @@ import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.util.TableOrder;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.*;
 
 import java.text.DecimalFormat;
 
-import java.util.Arrays;
 import java.util.Collection;
 
-import javax.swing.JFrame;
 import javax.swing.border.EmptyBorder;
 
-import de.cismet.cids.client.tools.DevelopmentTools;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -158,44 +153,4 @@ public class CsoTotalOverflowComparisionPanel extends javax.swing.JPanel {
     } // </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        try {
-            BasicConfigurator.configure();
-            final CidsBean[] swmmResults = DevelopmentTools.createCidsBeansFromRMIConnectionOnLocalhost(
-                    "SUDPLAN",
-                    "Administratoren",
-                    "admin",
-                    "cismetz12",
-                    "linz_swmm_result");
-
-//            final ArrayList<CidsBean> etaBeans = new ArrayList<CidsBean>();
-//            final ArrayList<CidsBean> swmmBeans = new ArrayList<CidsBean>();
-//            final CidsBean swmmBean = new CidsBean();
-//            swmmBean.setProperty("overflow_volume", 20000f);
-//            final CidsBean etaBean1 = new CidsBean();
-//            etaBean1.setProperty("total_overflow_volume", 600000f);
-//            etaBeans.add(etaBean1);
-//            swmmBean.setProperty("eta_results", etaBeans);
-//            swmmBeans.add(swmmBean);
-
-            System.out.println(swmmResults.length);
-            final CsoTotalOverflowComparisionPanel csoTotalOverflowComparisionPanel =
-                new CsoTotalOverflowComparisionPanel();
-            csoTotalOverflowComparisionPanel.setPreferredSize(new java.awt.Dimension(600, 400));
-            csoTotalOverflowComparisionPanel.setSwmmResults(Arrays.asList(swmmResults));
-            final JFrame frame = new JFrame("EfficiencyRatesComparisionPanel");
-            frame.setContentPane(csoTotalOverflowComparisionPanel);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.pack();
-            frame.setVisible(true);
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-        }
-    }
 }

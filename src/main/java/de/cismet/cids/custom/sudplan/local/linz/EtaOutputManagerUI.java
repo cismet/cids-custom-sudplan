@@ -293,31 +293,6 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
     /**
      * DOCUMENT ME!
      *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        final EtaOutputManagerUI etaOutputManagerUI = new EtaOutputManagerUI();
-
-        final EtaOutput etaOutput = new EtaOutput();
-        etaOutput.setEtaHydActual(73.17948f);
-        etaOutput.setEtaHydRequired(60);
-        etaOutput.setEtaSedActual(78.41792f);
-        etaOutput.setEtaSedRequired(75);
-        etaOutput.setR720(14.227189f);
-        etaOutput.setTotalOverflowVolume(610.362f);
-
-        etaOutputManagerUI.updateGauges(etaOutput);
-
-        final JFrame frame = new JFrame("EtaOutputManagerUI");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(etaOutputManagerUI);
-        frame.pack();
-        frame.setVisible(true);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @return  DOCUMENT ME!
      */
     public EtaOutput getEtaOutput() {

@@ -373,45 +373,4 @@ public final class SwmmInput {
     public String toString() {
         return "SWMM Input for SWMM INP File '" + this.getInpFile() + "'";
     }
-
-//    /**
-//     * DOCUMENT ME!
-//     *
-//     * @param  args  DOCUMENT ME!
-//     */
-//    @JsonIgnore
-//    public static void main(final String[] args) {
-//        try {
-//            System.out.println(DATE_FORMAT.parse("01.01.1994").getTime());
-//            System.out.println(DATE_FORMAT.parse("31.07.1994").getTime());
-//
-//            System.out.println(DATE_FORMAT.parse("01.08.1994").getTime());
-//
-//            System.out.println(DATE_FORMAT.parse("06.01.1995").getTime());
-//
-//            System.out.println(DATE_FORMAT.parse("06.12.2000").getTime());
-//
-//            System.out.println(DATE_FORMAT.parse("01.01.2000").getTime());
-//            System.out.println(DATE_FORMAT.parse("31.12.2000").getTime());
-//
-//            System.out.println(DATE_FORMAT.parse("31.12.2048").getTime());
-//            System.out.println(DATE_FORMAT.parse("30.07.2049").getTime());
-//            System.exit(0);
-//
-//            final ObjectMapper mapper = new ObjectMapper();
-//            final StringWriter writer = new StringWriter();
-//
-//            final SwmmInput swmmInput = new SwmmInput();
-//
-//            swmmInput.setCreated(new Date());
-//            swmmInput.setUser("Pascal Dihé");
-//            swmmInput.setStartDate(new Date());
-//            swmmInput.setEndDate(new Date());
-//
-//            mapper.writeValue(writer, swmmInput);
-//            System.out.println(writer.toString());
-//        } catch (Exception ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
-//    }
 }

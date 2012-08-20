@@ -16,17 +16,13 @@ import Sirius.navigator.ui.ComponentRegistry;
 import Sirius.navigator.ui.RequestsFullSizeComponent;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.BasicConfigurator;
 
 import org.jdesktop.swingx.JXHyperlink;
 
-import org.openide.util.Exceptions;
 import org.openide.util.WeakListeners;
 
 import java.awt.*;
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,8 +30,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +41,6 @@ import java.lang.ref.SoftReference;
 import java.net.URLEncoder;
 
 import java.util.*;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
@@ -61,7 +54,6 @@ import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 
-import de.cismet.cids.client.tools.DevelopmentTools;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.ImageUtil;
@@ -1029,13 +1021,13 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lstFotosValueChanged(final javax.swing.event.ListSelectionEvent evt) { //GEN-FIRST:event_lstFotosValueChanged
+    private void lstFotosValueChanged(final javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstFotosValueChanged
 //        if (isShowing()) {
         if (!evt.getValueIsAdjusting() && listListenerEnabled) {
             loadFoto();
         }
 //        }
-    } //GEN-LAST:event_lstFotosValueChanged
+    }//GEN-LAST:event_lstFotosValueChanged
 
     /**
      * DOCUMENT ME!
@@ -1054,67 +1046,67 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnBackActionPerformed
+    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
         lstFotos.setSelectedIndex(lstFotos.getSelectedIndex() - 1);
-    }                                                                           //GEN-LAST:event_btnBackActionPerformed
+    }//GEN-LAST:event_btnBackActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnForwardActionPerformed
+    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnForwardActionPerformed
         lstFotos.setSelectedIndex(lstFotos.getSelectedIndex() + 1);
-    }                                                                              //GEN-LAST:event_btnForwardActionPerformed
+    }//GEN-LAST:event_btnForwardActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblPrevPageMouseClicked(final java.awt.event.MouseEvent evt) //GEN-FIRST:event_lblPrevPageMouseClicked
-    {                                                                         //GEN-HEADEREND:event_lblPrevPageMouseClicked
+    private void lblPrevPageMouseClicked(final java.awt.event.MouseEvent evt)//GEN-FIRST:event_lblPrevPageMouseClicked
+    {//GEN-HEADEREND:event_lblPrevPageMouseClicked
         btnPrevPageActionPerformed(null);
-    }                                                                         //GEN-LAST:event_lblPrevPageMouseClicked
+    }//GEN-LAST:event_lblPrevPageMouseClicked
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_btnPrevPageActionPerformed
-    {                                                                             //GEN-HEADEREND:event_btnPrevPageActionPerformed
+    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_btnPrevPageActionPerformed
+    {//GEN-HEADEREND:event_btnPrevPageActionPerformed
         ((CardLayout)this.getLayout()).show(this, CARD_1);
         btnPrevPage.setEnabled(false);
         btnNextPage.setEnabled(true);
         lblPrevPage.setEnabled(false);
         lblNextPage.setEnabled(true);
-    }                                                                             //GEN-LAST:event_btnPrevPageActionPerformed
+    }//GEN-LAST:event_btnPrevPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_btnNextPageActionPerformed
-    {                                                                             //GEN-HEADEREND:event_btnNextPageActionPerformed
+    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_btnNextPageActionPerformed
+    {//GEN-HEADEREND:event_btnNextPageActionPerformed
 
         ((CardLayout)this.getLayout()).show(this, CARD_2);
         btnPrevPage.setEnabled(true);
         btnNextPage.setEnabled(false);
         lblPrevPage.setEnabled(true);
         lblNextPage.setEnabled(false);
-    } //GEN-LAST:event_btnNextPageActionPerformed
+    }//GEN-LAST:event_btnNextPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblNextPageMouseClicked(final java.awt.event.MouseEvent evt) //GEN-FIRST:event_lblNextPageMouseClicked
-    {                                                                         //GEN-HEADEREND:event_lblNextPageMouseClicked
+    private void lblNextPageMouseClicked(final java.awt.event.MouseEvent evt)//GEN-FIRST:event_lblNextPageMouseClicked
+    {//GEN-HEADEREND:event_lblNextPageMouseClicked
         btnNextPageActionPerformed(null);
-    }                                                                         //GEN-LAST:event_lblNextPageMouseClicked
+    }//GEN-LAST:event_lblNextPageMouseClicked
 
     /**
      * DOCUMENT ME!
@@ -1249,38 +1241,6 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
     @Override
     public JComponent getFooterComponent() {
         return panFooter;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        try {
-            BasicConfigurator.configure();
-            final CidsBean cso = DevelopmentTools.createCidsBeanFromRMIConnectionOnLocalhost(
-                    "SUDPLAN",
-                    "Administratoren",
-                    "admin",
-                    "cismetz12",
-                    "linz_cso",
-                    6);
-
-            final LinzCsoRenderer linzCsoRenderer = new LinzCsoRenderer();
-            linzCsoRenderer.setCidsBean(cso);
-            // linzCsoRenderer.init();
-            linzCsoRenderer.setPreferredSize(new java.awt.Dimension(800, 600));
-            final JFrame frame = new JFrame("LinzCsoRenderer");
-            frame.getContentPane().add(linzCsoRenderer, BorderLayout.CENTER);
-            frame.getContentPane().add(linzCsoRenderer.getTitleComponent(), BorderLayout.NORTH);
-            frame.getContentPane().add(linzCsoRenderer.getFooterComponent(), BorderLayout.SOUTH);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.pack();
-            frame.setVisible(true);
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-        }
     }
 
     //~ Inner Classes ----------------------------------------------------------
