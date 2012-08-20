@@ -79,6 +79,12 @@
     </properties>
 
     <dependencies>
+        <!-- include this (stable) version of commons-logging to prevent v1.1.2-SNAPSHOT to slip in -->
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+        </dependency>
         <dependency>
             <groupId>de.cismet.cids.navigator</groupId>
             <artifactId>default-forms</artifactId>
