@@ -91,6 +91,8 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
     public static final String PROP_CONFIG_SELECTION_CHANGED = "__prop_config_selection_changed__";
     public static final String PROP_ADD_DELTA_SURFACE = "__prop_add_delta_surface__";
 
+    private static final int MAX_COUNT_CONFLICTS_TO_WARN_USER = 30;
+
     private static final Logger LOG = Logger.getLogger(SurfaceManipulationWizardAction.class);
 
     //~ Instance fields --------------------------------------------------------
@@ -232,6 +234,11 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
         if (!addToConfiguration) {
             assert source != null : "cannot perform action on empty source"; // NOI18N
         }
+
+        // Set all global search results to null because new action is performing
+        geoCPMConfigurations = null;
+        overlappingSurfaces = null;
+        geoCPMBreakingEdges = null;
 
         if (!startConflictSearch()) {
             return;
@@ -468,11 +475,33 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
 
             final Object conflictReturn = conflictPane.getValue();
 
-            if (conflictReturn == null) {
-                return;
-            } else if (conflictReturn.equals(strShowConflicts)) {
-                addFeaturesToMap();
-            } else if (conflictReturn.equals(strStartWizard)) {
+            if ((conflictReturn != null) && (conflictReturn.equals(strShowConflicts))) {
+                if ((surfaceCount + edgesCount) > MAX_COUNT_CONFLICTS_TO_WARN_USER) {
+                    final String message = "There are more than " + (surfaceCount + edgesCount)
+                                + " objects to show! Press the ok button to continue";
+                    final JOptionPane infoMessagePane = new JOptionPane(
+                            message,
+                            JOptionPane.QUESTION_MESSAGE,
+                            JOptionPane.OK_CANCEL_OPTION);
+                    final JDialog infoMessageDialog = infoMessagePane.createDialog(ComponentRegistry.getRegistry()
+                                    .getMainWindow(),
+                            "Confirm to show conflicts");
+                    infoMessageDialog.setVisible(true);
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                infoMessageDialog.setVisible(false);
+                            }
+                        });
+
+                    if (infoMessagePane.getValue().equals(JOptionPane.OK_OPTION)) {
+                        addFeaturesToMap();
+                    }
+                } else {
+                    addFeaturesToMap();
+                }
+            } else if ((conflictReturn != null) && (conflictReturn.equals(strStartWizard))) {
                 startWizardDialog();
             }
         } catch (final Exception ex) {
@@ -685,16 +714,16 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                             SMSUtils.DOMAIN_SUDPLAN_WUPP);
             return metaObjects;
         } catch (ConnectionException ex) {
-            try {
-                final MetaObject[] metaObjects = SessionManager.getProxy()
-                            .getMetaObjectByQuery(SessionManager.getSession().getUser(),
-                                query,
-                                SessionManager.getSession().getUser().getDomain());
-                return metaObjects;
-            } catch (ConnectionException cex) {
-                LOG.error("Can't connect to domain " + SMSUtils.DOMAIN_SUDPLAN_WUPP, ex);
-                return null;
-            }
+//            try {
+//                final MetaObject[] metaObjects = SessionManager.getProxy()
+//                            .getMetaObjectByQuery(SessionManager.getSession().getUser(),
+//                                query,
+//                                SessionManager.getSession().getUser().getDomain());
+//                return metaObjects;
+//            } catch (ConnectionException cex) {
+            LOG.error("Can't connect to domain " + SMSUtils.DOMAIN_SUDPLAN_WUPP, ex);
+            return null;
+//            }
         }
     }
 

@@ -93,6 +93,7 @@ public class DeltaSurfacePreparePanel extends javax.swing.JPanel {
 
         setLayout(new java.awt.GridBagLayout());
 
+        progressBar.setIndeterminate(true);
         progressBar.setMaximumSize(new java.awt.Dimension(32767, 10));
         progressBar.setMinimumSize(new java.awt.Dimension(10, 10));
         progressBar.setPreferredSize(new java.awt.Dimension(200, 10));
