@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -389,3 +390,368 @@
         </profile>
     </profiles>
 </project>
+=======
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.cismet.cids</groupId>
+        <artifactId>cids-parent</artifactId>
+        <version>1.0.5</version>
+    </parent>
+
+    <groupId>de.cismet.cids.custom.sudplan</groupId>
+    <artifactId>cids-custom-sudplan</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>cids Custom Sudplan</name>
+    <description>cids Navigator customisation for the SUDPLAN FP7 project</description>
+    <ciManagement>
+        <system>hudson</system>
+        <url>http://kif:8080/hudson/job/cids-custom-sudplan/</url>
+    </ciManagement>
+    <developers>
+        <developer>
+            <id>thell</id>
+            <name>Thorsten Hell</name>
+            <email>thorsten.hell@cismet.de</email>
+            <organization>cismet GmbH</organization>
+        </developer>
+        <developer>
+            <id>sschlobinski</id>
+            <name>Sascha Schlobinski</name>
+            <email>sascha.schlobinski@cismet.de</email>
+            <organization>cismet GmbH</organization>
+        </developer>
+        <developer>
+            <id>mscholl</id>
+            <name>Martin Scholl</name>
+            <email>martin.scholl@cismet.de</email>
+            <organization>cismet GmbH</organization>
+        </developer>
+        <developer>
+            <id>pdihe</id>
+            <name>Pascal Dihé</name>
+            <email>pascal.dihe@cismet.de</email>
+            <organization>cismet GmbH</organization>
+        </developer>
+    </developers>
+    
+    <distributionManagement>
+        <site>
+            <id>sudplan-site</id>
+            <url>scp://sudplanwp3.cismet.de/var/www/vhosts/sudplanwp3.cismet.de/httpdocs/sms/</url>
+        </site>
+    </distributionManagement>
+
+    <properties>
+        <!-- unfortunately the site generation cannot handle variables that contain a dot -->
+        <projectVersion>${project.version}</projectVersion>
+        <projectName>${project.artifactId}</projectName>
+        <projectPackaging>${project.packaging}</projectPackaging>
+        <baseDir>${project.basedir}</baseDir>
+        <!--
+            ToDo make constants for the single values to ease the configuration
+            of the child POMs.
+        -->
+        <de.cismet.libDir>lib/localSudplan</de.cismet.libDir>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>de.cismet.cids.custom.sudplan</groupId>
+            <artifactId>cids-custom-sudplan-server</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.cismet.cismap</groupId>
+            <artifactId>cismap-plugin</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.cismet.commons</groupId>
+            <artifactId>cismap-commons</artifactId>
+            <version>2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.cismet.commons</groupId>
+            <artifactId>cismet-commons</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>jxlayer</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>at.ac.ait.enviro.sudplan</groupId>
+            <artifactId>SOSClient</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <!-- exclusions to prevent version conflicts -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.vividsolutions</groupId>
+                    <artifactId>jts</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>at.ac.ait.enviro.sudplan</groupId>
+            <artifactId>SPSClient</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <!-- exclude slf to prevent version conflicts -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <!-- exclude jts to prevent version conflicts -->
+                <exclusion>
+                    <groupId>com.vividsolutions</groupId>
+                    <artifactId>jts</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-dialogs</artifactId>
+            <version>RELEASE691</version>
+        </dependency>
+        <dependency>
+            <groupId>de.cismet.cids.navigator.plugin</groupId>
+            <artifactId>rm-plugin</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.cismet.cids.custom.sudplan</groupId>
+            <artifactId>geocpm-rest</artifactId>
+            <version>1.0-SNAPSHOT</version>
+             <!-- exclude slf to prevent version conflicts -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.toedter</groupId>
+            <artifactId>jcalendar</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>swingx</artifactId>
+            <version>0.9.7</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.hansolo</groupId>
+            <artifactId>SteelSeries</artifactId>
+            <version>3.9.16</version>
+            <exclusions> 
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xmlParserAPIs</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency> 
+            <groupId>at.ac.ait.enviro.sudplan</groupId> 
+            <artifactId>client-tools</artifactId> 
+            <version>1.0-SNAPSHOT</version>
+             <!-- exclude slf to prevent version conflicts -->
+            <exclusions> 
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                 <!-- exclude jts to prevent version conflicts -->
+                <exclusion>
+                    <groupId>com.vividsolutions</groupId>
+                    <artifactId>jts</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>it.geosolutions</groupId>
+            <artifactId>geoserver-manager</artifactId>
+            <version>1.3.0</version>
+            <exclusions> 
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xmlParserAPIs</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-main</artifactId>
+            <version>2.7.4</version>
+        </dependency>
+        <dependency>
+            <groupId>se.smhi</groupId>
+            <artifactId>hydro-client-mvn</artifactId>
+            <version>1.1</version>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>flexo</id>
+            <name>flexo-public-artifactory</name>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <url>http://flexo.cismet.de:8081/artifactory/repo</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <!-- overwritten because the artifact has to be renamed du to
+                 compatibility reasons to the cidsDistribution -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-installed</id>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <destFileName>cidsCustom.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <arguments>
+                        <argument>-Xmx1024m</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/dist.xml</descriptor>
+                    </descriptors>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>de.cismet.cids</groupId>
+                <artifactId>cids-maven-plugin</artifactId>
+                <version>1.5-SNAPSHOT</version>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <profiles>
+        <profile>
+            <id>default-tools.jar</id>
+            <activation>
+                <property>
+                    <name>java.vendor</name>
+                    <value>Sun Microsystems Inc.</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.sun</groupId>
+                    <artifactId>tools</artifactId>
+                    <version>1.6.0</version>
+                    <scope>system</scope>
+                    <systemPath>${java.home}/../lib/tools.jar</systemPath>
+                </dependency>
+            </dependencies>
+            <properties> 
+                <maven.test.skip>true</maven.test.skip>
+            </properties>
+        </profile>
+    </profiles>
+</project>
+
+
+
+
+
+
+
+>>>>>>> origin/issue2672_manipulation_of_topographic_structures
