@@ -15,10 +15,8 @@ package de.cismet.cids.custom.sudplan.local.linz;
 import Sirius.navigator.resource.PropertyManager;
 import Sirius.navigator.ui.ComponentRegistry;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
@@ -26,17 +24,12 @@ import java.awt.Component;
 
 import java.util.ArrayList;
 
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import de.cismet.cids.client.tools.DevelopmentTools;
-
 import de.cismet.cids.custom.sudplan.server.trigger.SwmmResultGeoserverUpdater;
-
-import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -225,36 +218,6 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
                 JOptionPane.ERROR_MESSAGE);
         }
     } //GEN-LAST:event_showInMapButtonActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        try {
-            BasicConfigurator.configure();
-            final CidsBean swmmResult = DevelopmentTools.createCidsBeanFromRMIConnectionOnLocalhost(
-                    "SUDPLAN",
-                    "Administratoren",
-                    "admin",
-                    "cismetz12",
-                    "modeloutput",
-                    253);
-
-            final SwmmOutputManager swmmOutputManager = new SwmmOutputManager();
-            swmmOutputManager.setCidsBean(swmmResult);
-            final SwmmOutputManagerUI swmmOutputManagerUI = new SwmmOutputManagerUI(swmmOutputManager);
-            swmmOutputManagerUI.setPreferredSize(new java.awt.Dimension(600, 400));
-            final JFrame frame = new JFrame("EfficiencyRatesComparisionPanel");
-            frame.setContentPane(swmmOutputManagerUI);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.pack();
-            frame.setVisible(true);
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-        }
-    }
 
     //~ Inner Classes ----------------------------------------------------------
 

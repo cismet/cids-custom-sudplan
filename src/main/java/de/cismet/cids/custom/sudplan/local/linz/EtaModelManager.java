@@ -11,45 +11,18 @@ import Sirius.navigator.connection.SessionManager;
 
 import Sirius.server.middleware.types.MetaClass;
 
-import at.ac.ait.enviro.sudplan.clientutil.SudplanSOSHelper;
-import at.ac.ait.enviro.sudplan.clientutil.SudplanSPSHelper;
-import at.ac.ait.enviro.sudplan.util.PropertyNames;
-import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
-import at.ac.ait.enviro.util.text.ISO8601DateFormat;
-
-import com.vividsolutions.jts.geom.Envelope;
-
 import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringWriter;
 
-import java.text.DateFormat;
-
-import java.util.*;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import de.cismet.cids.custom.sudplan.*;
-import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
-import de.cismet.cids.custom.sudplan.rainfall.RainfallDownscalingModelManager;
-import de.cismet.cids.custom.sudplan.rainfall.RainfallRunInfo;
-import de.cismet.cids.custom.sudplan.server.trigger.SwmmResultGeoserverUpdater;
 
 import de.cismet.cids.dynamics.CidsBean;
-
-import de.cismet.cids.editors.converters.SqlTimestampToUtilDateConverter;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
@@ -71,11 +44,12 @@ public class EtaModelManager extends AbstractAsyncModelManager {
     @Override
     protected CidsBean createOutputBean() throws IOException {
         if (!isFinished()) {
-            throw new IllegalStateException("cannot create outputbean when not finished yet"); // NOI18N
+            throw new IllegalStateException(cidsBean + " cannot create outputbean when not finished yet ("
+                        + cidsBean.getProperty("started") + ") [" + this + "]"); // NOI18N
         }
 
         if (!(getWatchable() instanceof EtaWatchable)) {
-            throw new IllegalStateException("cannot create output if there is no valid watchable ("
+            throw new IllegalStateException(cidsBean + " cannot create output if there is no valid watchable ("
                         + getWatchable().getClass() + ")"); // NOI18N
         }
 
@@ -125,6 +99,10 @@ public class EtaModelManager extends AbstractAsyncModelManager {
         if (cidsBean == null) {
             throw new IllegalStateException("cidsBean not set"); // NOI18N
         }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("creating watchable for ETA Run '" + cidsBean + "' (" + cidsBean.getProperty("started")
+                        + ") [" + this + "]");                   // NOI18N
+        }
 
         final EtaRunInfo runInfo = this.getRunInfo();
         if (runInfo == null) {
@@ -148,7 +126,8 @@ public class EtaModelManager extends AbstractAsyncModelManager {
     @Override
     protected void prepareExecution() throws IOException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("executing ETA Calculation"); // NOI18N
+            LOG.debug(cidsBean + " executing ETA Calculation (" + cidsBean.getProperty("started")
+                        + ") [" + this + "]"); // NOI18N
         }
 
         // now set to indeterminate
@@ -171,7 +150,8 @@ public class EtaModelManager extends AbstractAsyncModelManager {
         final EtaRunInfo etaRunInfo = new EtaRunInfo();
         etaRunInfo.setSwmmRunId(etaInput.getSwmmRun());
 
-        LOG.info("preparing the execution of '" + this.cidsBean + "' for SWMM Run #" + etaRunInfo.getSwmmRunId());
+        LOG.info("preparing the execution of '" + this.cidsBean + "' for SWMM Run #" + etaRunInfo.getSwmmRunId()
+                    + " (" + this + ")");
         if ((etaInput.getEtaConfigurations() == null) || etaInput.getEtaConfigurations().isEmpty()) {
             final String message = "ETA Run '" + this.cidsBean + "' without proper eta configurations!";
             LOG.error(message);
@@ -184,10 +164,14 @@ public class EtaModelManager extends AbstractAsyncModelManager {
             final StringWriter writer = new StringWriter();
 
             mapper.writeValue(writer, etaRunInfo);
-            cidsBean.setProperty("runinfo", writer.toString());                           // NOI18N
+            cidsBean.setProperty("runinfo", writer.toString());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Saving ETA RunInfo for ETA Run '" + cidsBean + "' saved (" + cidsBean.getProperty("started")
+                            + ")");
+            }
             cidsBean = cidsBean.persist();
             if (LOG.isDebugEnabled()) {
-                LOG.debug("ETA RunInfo for ETA Run '" + cidsBean + "' saved");
+                LOG.debug("ETA RunInfo for ETA Run '" + cidsBean + "' saved [" + this + "]");
             }
         } catch (final Exception ex) {
             final String message = "Cannot store runinfo of  ETA Run '" + cidsBean + "'"; // NOI18N

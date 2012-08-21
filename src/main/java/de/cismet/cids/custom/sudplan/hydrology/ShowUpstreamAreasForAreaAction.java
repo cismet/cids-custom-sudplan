@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 import org.deegree.datatypes.QualifiedName;
 import org.deegree.model.feature.FeatureCollection;
 import org.deegree.model.feature.GMLFeatureCollectionDocument;
-import org.deegree.ogcwebservices.wfs.capabilities.WFSFeatureType;
 
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -30,10 +29,6 @@ import java.awt.EventQueue;
 
 import java.io.InputStream;
 
-import java.lang.reflect.Field;
-
-import java.net.URI;
-
 import java.text.MessageFormat;
 
 import java.util.ArrayList;
@@ -43,15 +38,10 @@ import java.util.ListIterator;
 
 import de.cismet.cismap.commons.MappingModel;
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.featureservice.DefaultLayerProperties;
-import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
-import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
-import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
-import de.cismet.cismap.commons.wfs.capabilities.deegree.DeegreeFeatureType;
 
 import de.cismet.security.AccessHandler.ACCESS_METHODS;
 
@@ -339,94 +329,6 @@ public final class ShowUpstreamAreasForAreaAction extends AbstractWFSFeatureRetr
         }
 
         return raw.outputString(root);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   args  DOCUMENT ME!
-     *
-     * @throws  Exception  DOCUMENT ME!
-     */
-    public static void main(final String[] args) throws Exception {
-        final XMLOutputter pretty = new XMLOutputter(Format.getPrettyFormat());
-        final WFSCapabilitiesFactory factory = new WFSCapabilitiesFactory();
-        final WFSCapabilities cap = factory.createCapabilities(
-                "http://79.125.2.136:49225/geoserver/ows?service=wfs&request=GetCapabilities");
-
-        final Field field = cap.getClass().getDeclaredField("cap");
-        field.setAccessible(true);
-        final org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilities dCaps =
-            (org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilities)field.get(cap);
-        final WFSFeatureType basinType = dCaps.getFeatureTypeList()
-                    .getFeatureType(new QualifiedName("SUDPLAN", "qstations", new URI("http://SUDPLAN")));
-
-        assert basinType
-                    != null;
-
-        System.out.println(basinType);
-
-        final DeegreeFeatureType basinFeatureType = new DeegreeFeatureType(basinType, cap);
-
-        // cannot use it
-        final WFSFeatureFactory featureFactory = new WFSFeatureFactory(
-                new DefaultLayerProperties(),
-                "",
-                basinFeatureType,
-                CismapBroker.getInstance().getSrs());
-
-        final Element root = basinFeatureType.getWFSCapabilities()
-                    .getServiceFacade()
-                    .getGetFeatureQuery(basinFeatureType);
-        System.out.println(pretty.outputString(root));
-        root.setAttribute("maxFeatures", "1");
-
-        final Namespace wfsNs = Namespace.getNamespace("http://www.opengis.net/wfs");
-        final Namespace ogcNs = Namespace.getNamespace("http://www.opengis.net/ogc");
-        final Namespace gmlNs = Namespace.getNamespace("http://www.opengis.net/gml");
-
-        final Element query = root.getChild("Query", wfsNs); // NOI18N
-        query.setAttribute("srsName", "EPSG:4326");          // NOI18N
-
-        final Element filter = query.getChild("Filter", ogcNs); // NOI18N
-        final Element bbox = filter.getChild("BBOX", ogcNs);    // NOI18N
-        bbox.detach();
-
-        final Element and = new Element("AND", ogcNs);
-        filter.addContent(and);
-
-        final Element equal = new Element("PropertyIsEqualTo", ogcNs);
-        and.addContent(bbox);
-        and.addContent(equal);
-
-        final Element propName = new Element("PropertyName", ogcNs); // NOI18N
-        propName.setText("SUDPLAN:subid");                           // NOI18N
-        equal.addContent(propName);
-
-        final Element literal = new Element("Literal", ogcNs); // NOI18N
-        literal.setText("20112");
-        equal.addContent(literal);
-
-        final XMLOutputter raw = new XMLOutputter(Format.getRawFormat());
-        System.out.println(pretty.outputString(root));
-
-        final InputStream resp = WebAccessManager.getInstance()
-                    .doRequest(cap.getURL(), raw.outputString(root), ACCESS_METHODS.POST_REQUEST);
-        final GMLFeatureCollectionDocument gmlDoc = new GMLFeatureCollectionDocument();
-        gmlDoc.load(resp, ShowCatchmentAreaForPointAction.HYDRO_WFS_QNAME_URI.toString());
-//
-        System.out.println("feat count: " + gmlDoc.getFeatureCount());
-//
-//        if (gmlDoc.getFeatureCount() > 1) {
-//            throw new IllegalStateException("too many features: " + gmlDoc.getFeatureCount());
-//        }
-//        if (gmlDoc.getFeatureCount() < 1) {
-//            // FIXME: what to do in this case, replace coords
-//            throw new IllegalStateException("no feature for point found: " + "coords");
-//        }
-//
-//        final FeatureCollection fc = gmlDoc.parse();
-//        fc.getFeature(0);
     }
 
     @Override

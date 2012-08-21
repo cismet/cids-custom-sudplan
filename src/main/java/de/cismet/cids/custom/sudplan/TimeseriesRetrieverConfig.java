@@ -40,9 +40,10 @@ public final class TimeseriesRetrieverConfig {
 
     private static final transient Logger LOG = Logger.getLogger(TimeseriesRetrieverConfig.class);
 
-    public static final String PROTOCOL_TSTB = "tstb"; // NOI18N
-    public static final String PROTOCOL_DAV = "dav";   // NOI18N
-    public static final String PROTOCOL_HYPE = "hype"; // NOI18N
+    public static final String PROTOCOL_TSTB = "tstb";     // NOI18N
+    public static final String PROTOCOL_DAV = "dav";       // NOI18N
+    public static final String PROTOCOL_HYPE = "hype";     // NOI18N
+    public static final String PROTOCOL_NETCDF = "netcdf"; // NOI18N
 
     private static final String TOKEN_TIMEINTERVAL = "ts:interval";
     private static final Pattern PATTERN = Pattern.compile("[\\],\\[](\\w+);(\\w+)[\\],\\[]");
@@ -121,7 +122,11 @@ public final class TimeseriesRetrieverConfig {
 
         final String changedOffering;
         final String changedProcedure;
-        if (PROTOCOL_DAV.equals(this.getProtocol())) {
+        if (PROTOCOL_NETCDF.equals(this.getProtocol())) {
+            LOG.warn(PROTOCOL_NETCDF + " does not support changing of resolutions ("
+                        + resolution.getPrecision() + ")");
+            return this;
+        } else if (PROTOCOL_DAV.equals(this.getProtocol())) {
             changedOffering = this.offering.replaceFirst("_unknown$", '_' + resolution.getPrecision());                  // NOI18N
             changedProcedure = this.procedure.replaceFirst("prec:unknown", "prec:" + resolution.getPrecision());         // NOI18N
         } else {
@@ -328,6 +333,19 @@ public final class TimeseriesRetrieverConfig {
     /**
      * DOCUMENT ME!
      *
+     * @param   netcdfUrl  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  MalformedURLException  DOCUMENT ME!
+     */
+    public static TimeseriesRetrieverConfig fromNetcdfUrl(final String netcdfUrl) throws MalformedURLException {
+        return fromUrl(netcdfUrl, PROTOCOL_NETCDF);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   url  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -345,6 +363,8 @@ public final class TimeseriesRetrieverConfig {
             return fromUrl(url, PROTOCOL_DAV);
         } else if (url.startsWith(PROTOCOL_HYPE)) {
             return fromUrl(url, PROTOCOL_HYPE);
+        } else if (url.startsWith(PROTOCOL_NETCDF)) {
+            return fromUrl(url, PROTOCOL_NETCDF);
         } else {
             throw new MalformedURLException("unknown protocol: " + url); // NOI18N
         }

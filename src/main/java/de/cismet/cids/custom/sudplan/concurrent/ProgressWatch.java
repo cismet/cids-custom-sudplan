@@ -172,6 +172,11 @@ public final class ProgressWatch {
                         status.getStep(),
                         status.getMaxSteps(),
                         status.getMessage());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("progress: '" + status.getMessage() + "' (" + status.getStep()
+                                + "/" + status.getMaxSteps() + ") = " + status.getState()
+                                + ", source = " + status.getSource());
+                }
 
                 watchable.getStatusCallback().progress(progress);
 

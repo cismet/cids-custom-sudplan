@@ -15,12 +15,7 @@ import java.io.*;
 
 import java.io.InputStream;
 
-import java.net.*;
-
 import java.util.*;
-import java.util.Date;
-
-import javax.net.ssl.*;
 
 import de.cismet.cids.custom.sudplan.ProgressListener;
 import de.cismet.cids.custom.sudplan.ProgressSupport;
@@ -157,79 +152,5 @@ public class SwmmReportParser {
             LOG.debug("removeProgressListener: " + progressL);
         }
         progressSupport.removeProgressListener(progressL);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        final long startZeit = System.currentTimeMillis();
-        final SwmmReportParser swmmReportParser = new SwmmReportParser();
-
-        // Wir basteln uns einen Certificat-Manager der alles erlaubt
-        final TrustManager[] trustAllCerts = new TrustManager[] {
-                new X509TrustManager() {
-
-                    @Override
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-
-                    @Override
-                    public void checkClientTrusted(final java.security.cert.X509Certificate[] certs,
-                            final String authType) {
-                        // No need to implement.
-                    }
-
-                    @Override
-                    public void checkServerTrusted(final java.security.cert.X509Certificate[] certs,
-                            final String authType) {
-                        // No need to implement.
-                    }
-                }
-            };
-
-        // Sag Java: wir vertrauen der Verbindung
-        try {
-            final SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        InputStream swmmReportFile = null;
-        try {
-            final URL url = new URL("https://sudplan.ait.ac.at/model/run/run_1337759124496/linz_v1_2011-08-29.rpt");
-            final HttpsURLConnection http = (HttpsURLConnection)url.openConnection();
-            Authenticator.setDefault(new Authenticator() {
-
-                    @Override
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication("SMS", "cismet42".toCharArray());
-                    }
-                });
-            http.setAllowUserInteraction(true);
-            http.setRequestMethod("GET");
-            http.connect();
-
-            swmmReportFile = http.getInputStream(); // (InputStream)uc.getInputStream();//.getInputStream();//new
-                                                    // FileInputStream("c:\\linz_v1_2011-08-29_neu.rpt"); // TODO
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        SwmmOutput swmmOutput = new SwmmOutput();
-        swmmOutput.setSwmmProject(2);
-        swmmOutput.setUser("Pascal Dihé");
-        swmmOutput.setCreated(new Date());
-        try {
-            swmmOutput = swmmReportParser.parseRPT(swmmOutput, swmmReportFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        final long endZeit = System.currentTimeMillis();
-        System.out.println("Gesamte Durchlaufzeit: " + (endZeit - startZeit));
     }
 }

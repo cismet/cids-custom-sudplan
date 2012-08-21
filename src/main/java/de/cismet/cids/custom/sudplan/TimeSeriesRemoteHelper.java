@@ -32,7 +32,10 @@ public final class TimeSeriesRemoteHelper {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String DAV_HOST = "http://sudplan.cismet.de/tsDav";
-    public static final Credentials CREDS = new UsernamePasswordCredentials("tsDav", "RHfio2l4wrsklfghj");
+    public static final Credentials DAV_CREDS = new UsernamePasswordCredentials("tsDav", "RHfio2l4wrsklfghj");
+
+    public static final String NETCDF_HOST = "http://fswwwww1.tu-graz.ac.at:8080/datasets/";
+    public static final Credentials NETCDF_CREDS = new UsernamePasswordCredentials("sudplan", "sudplan@tugraz");
 
     private static final Logger LOG = Logger.getLogger(TimeSeriesRemoteHelper.class);
 
@@ -91,6 +94,6 @@ public final class TimeSeriesRemoteHelper {
      * @return  DOCUMENT ME!
      */
     public static HttpClient createHttpClient() {
-        return createHttpClient(DAV_HOST, CREDS);
+        return createHttpClient(DAV_HOST, DAV_CREDS);
     }
 }

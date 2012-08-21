@@ -82,9 +82,9 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
 
     @Override
     public void readSettings(final Object settings) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("read settings");
-        }
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("read settings");
+//        }
 
         wizard = (WizardDescriptor)settings;
         assert wizard.getProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT) != null : "eta input is null";
@@ -96,9 +96,11 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
 
     @Override
     public void storeSettings(final Object settings) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("store settings");
-        }
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("store settings");
+//        }
+
+        this.etaInput.computeTotalOverflowVolume();
         wizard = (WizardDescriptor)settings;
         wizard.putProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT, this.etaInput);
     }
@@ -156,6 +158,7 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
      */
     public void setEtaConfigurations(final List<EtaConfiguration> etaConfigurations) {
         this.etaInput.setEtaConfigurations(etaConfigurations);
+        this.etaInput.resetToDefaults();
         this.changeSupport.fireChange();
     }
 
@@ -166,5 +169,12 @@ public final class EtaWizardPanelEtaConfiguration implements WizardDescriptor.Pa
      */
     public int getSwmmProjectId() {
         return this.etaInput.getSwmmProject();
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    protected void fireChangeEvent() {
+        changeSupport.fireChange();
     }
 }

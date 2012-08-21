@@ -13,7 +13,6 @@ package de.cismet.cids.custom.sudplan.local.linz.wizard;
 
 import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.exception.ConnectionException;
-import Sirius.navigator.ui.dialog.DateChooser;
 
 import Sirius.server.localserver.attribute.ClassAttribute;
 import Sirius.server.middleware.types.MetaClass;
@@ -24,20 +23,14 @@ import org.apache.log4j.Logger;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.*;
 
-import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
+import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmWizardPanelProjectUI.NameRenderer;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -60,6 +53,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
     private final transient EtaWizardPanelProject model;
     private final transient ItemListener projectListener;
     private final transient ItemListener scenarioListener;
+    private transient CidsBean lastSelectedSwmmProject = null;
+    private transient CidsBean lastSelectedSwmmScenario = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cobProjects;
     private javax.swing.JComboBox cobScenarios;
@@ -105,15 +100,22 @@ public final class EtaWizardPanelProjectUI extends JPanel {
      * DOCUMENT ME!
      */
     void init() {
-        this.cobProjects.setSelectedIndex(-1);
-        this.cobProjects.setSelectedItem(model.getSelectedSwmmProject());
+        if (model.getSelectedSwmmProject() != lastSelectedSwmmProject) {
+            lastSelectedSwmmProject = model.getSelectedSwmmProject();
+            this.cobProjects.setSelectedItem(lastSelectedSwmmProject);
+        }
 
-        this.cobScenarios.setSelectedIndex(-1);
-        this.cobScenarios.setSelectedItem(model.getSelectedSwmmScenario());
+        if (model.getSelectedSwmmScenario() != lastSelectedSwmmScenario) {
+            lastSelectedSwmmScenario = model.getSelectedSwmmScenario();
+            this.cobScenarios.setSelectedItem(lastSelectedSwmmScenario);
+        }
+
+        // this.cobProjects.setSelectedIndex(-1);
+        // this.cobScenarios.setSelectedIndex(-1);
 
         // this should perform all the updates
-        this.bindingGroup.unbind();
-        this.bindingGroup.bind();
+        // this.bindingGroup.unbind();
+        // this.bindingGroup.bind();
     }
 
     /**
@@ -179,6 +181,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 ItemListener.class,
                 this.scenarioListener,
                 this.cobScenarios));
+
+        this.cobScenarios.setSelectedIndex(0);
     }
 
     /**
@@ -381,6 +385,10 @@ public final class EtaWizardPanelProjectUI extends JPanel {
      */
     private class ProjectListener implements ItemListener {
 
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient Logger LOG = Logger.getLogger(ProjectListener.class);
+
         //~ Methods ------------------------------------------------------------
 
         @Override
@@ -392,6 +400,10 @@ public final class EtaWizardPanelProjectUI extends JPanel {
 
                 final CidsBean swmmProject = (CidsBean)e.getItem();
                 model.setSelectedSwmmProject(swmmProject);
+
+                taProjectDescriptionText.setText(
+                    (swmmProject.getProperty("description") != null) ? swmmProject.getProperty("description")
+                                .toString() : null);
 
                 final List<CidsBean> swmmScenarios = (List)swmmProject.getProperty("swmm_scenarios"); // NOI18N
                 initScenarioList(swmmScenarios);
@@ -406,6 +418,10 @@ public final class EtaWizardPanelProjectUI extends JPanel {
      */
     private class ScenarioListener implements ItemListener {
 
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient Logger LOG = Logger.getLogger(ScenarioListener.class);
+
         //~ Methods ------------------------------------------------------------
 
         @Override
@@ -418,38 +434,14 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 final CidsBean swmmScenario = (CidsBean)e.getItem();
                 model.setSelectedSwmmScenario(swmmScenario);
 
+                taScenarioDescriptionText.setText(
+                    (swmmScenario.getProperty("description") != null)
+                        ? swmmScenario.getProperty("description").toString() : null);
+
                 // dieser mist funktioniert einfach nicht
                 // bindingGroup.unbind();
                 // bindingGroup.bind();
             }
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private static final class NameRenderer extends DefaultListCellRenderer {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public Component getListCellRendererComponent(final JList list,
-                final Object value,
-                final int index,
-                final boolean isSelected,
-                final boolean cellHasFocus) {
-            final Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-            if ((comp instanceof JLabel) && (value instanceof CidsBean)) {
-                final JLabel label = (JLabel)comp;
-                final CidsBean obj = (CidsBean)value;
-                final String name = (String)obj.getProperty("title"); // NOI18N
-                label.setText(name);
-            }
-
-            return comp;
         }
     }
 }

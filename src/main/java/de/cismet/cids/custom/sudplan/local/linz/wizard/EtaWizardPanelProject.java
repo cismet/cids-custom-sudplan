@@ -90,9 +90,9 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
 
     @Override
     public void readSettings(final Object settings) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("read settings");
-        }
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("read settings");
+//        }
         wizard = (WizardDescriptor)settings;
         assert wizard.getProperty(EtaWizardAction.PROP_SWMM_PROJECT_BEAN) != null : "swmm project bean is null";
         this.selectedSwmmProject = (CidsBean)wizard.getProperty(EtaWizardAction.PROP_SWMM_PROJECT_BEAN);
@@ -105,28 +105,44 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
 
     @Override
     public void storeSettings(final Object settings) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("store settings");
-        }
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("store settings");
+//        }
         wizard = (WizardDescriptor)settings;
         wizard.putProperty(EtaWizardAction.PROP_SWMM_PROJECT_BEAN, this.getSelectedSwmmProject());
         wizard.putProperty(EtaWizardAction.PROP_SWMM_SCENARIO_BEAN, this.getSelectedSwmmScenario());
 
-        try {
-            final CidsBean swmmOutputBean = (CidsBean)this.getSelectedSwmmScenario().getProperty("modeloutput");
-            final String json = (String)swmmOutputBean.getProperty("ur"); // NOI18N
-            final ObjectMapper mapper = new ObjectMapper();
-            final SwmmOutput swmmOutput = mapper.readValue(json, SwmmOutput.class);
-            final EtaInput etaInput = new EtaInput(swmmOutput);
-
-            if (swmmOutput.getSwmmProject() == -1) {
-                LOG.warn("no suitable SWMM project selected in SWMM Output: -1");
-                etaInput.setSwmmProject(swmmOutput.getSwmmProject());
+        if ((wizard.getProperty(EtaWizardAction.PROP_ETA_INPUT) != null)
+                    && (this.getSelectedSwmmScenario() == wizard.getProperty(
+                            EtaWizardAction.PROP_SWMM_SCENARIO_BEAN))) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("selected SWMM Scenario '" + this.getSelectedSwmmScenario()
+                            + "' didn't change, don't create new eta input");
             }
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("selected SWMM Scenario '" + this.getSelectedSwmmScenario()
+                            + "' did change, create new eta input");
+            }
+            try {
+                final CidsBean swmmOutputBean = (CidsBean)this.getSelectedSwmmScenario().getProperty("modeloutput");
+                final String json = (String)swmmOutputBean.getProperty("ur"); // NOI18N
+                final ObjectMapper mapper = new ObjectMapper();
+                final SwmmOutput swmmOutput = mapper.readValue(json, SwmmOutput.class);
+                final EtaInput etaInput = new EtaInput(swmmOutput);
 
-            wizard.putProperty(EtaWizardAction.PROP_ETA_INPUT, etaInput);
-        } catch (Throwable t) {
-            LOG.error("invalid SWMM Model Output, could not create valid ETA Input: " + t.getMessage(), t);
+                if (swmmOutput.getSwmmProject() == -1) {
+                    final int swmmProjectId = (Integer)this.getSelectedSwmmProject().getProperty("id");
+                    LOG.warn("no suitable SWMM project selected in SWMM Output: -1, setting to " + swmmProjectId);
+                    etaInput.setSwmmProject(swmmProjectId);
+                } else {
+                    etaInput.setSwmmProject(swmmOutput.getSwmmProject());
+                }
+
+                wizard.putProperty(EtaWizardAction.PROP_ETA_INPUT, etaInput);
+            } catch (Throwable t) {
+                LOG.error("invalid SWMM Model Output, could not create valid ETA Input: " + t.getMessage(), t);
+            }
         }
     }
 
@@ -166,9 +182,9 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
                 valid = false;
             }
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("isValid: " + valid);
-        }
+//        if (LOG.isDebugEnabled()) {
+//            LOG.debug("isValid: " + valid);
+//        }
 
         if (valid) {
             wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, null);

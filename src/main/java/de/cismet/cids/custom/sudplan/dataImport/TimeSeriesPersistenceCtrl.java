@@ -138,7 +138,7 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
                             final Future<Boolean> successTrans1 = transmitter.put(
                                     url,
                                     aggTS,
-                                    TimeSeriesRemoteHelper.CREDS);
+                                    TimeSeriesRemoteHelper.DAV_CREDS);
 
                             synchronized (TimeSeriesPersistenceCtrl.this) {
                                 transmittedFiles.add(url);
@@ -155,7 +155,7 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
                             final Future<Boolean> successTrans2 = transmitter.put(
                                     url,
                                     ts,
-                                    TimeSeriesRemoteHelper.CREDS);
+                                    TimeSeriesRemoteHelper.DAV_CREDS);
 
                             synchronized (TimeSeriesPersistenceCtrl.this) {
                                 transmittedFiles.add(url);

@@ -11,7 +11,6 @@ import Sirius.navigator.ui.ComponentRegistry;
 
 import org.apache.log4j.Logger;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
@@ -28,8 +27,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.Future;
-
-import de.cismet.cids.client.tools.DevelopmentTools;
 
 import de.cismet.cids.custom.sudplan.Available;
 import de.cismet.cids.custom.sudplan.LocalisedEnumComboBox;
@@ -318,28 +315,6 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
     public void dispose() {
         // cannot dispose the internal widget as dispose is called when the listne
         // CismapBroker.getInstance().getMappingComponent().removeInternalWidget(widget.getName());
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        try {
-            DevelopmentTools.createRendererInFrameFromRMIConnectionOnLocalhost(
-                "SUDPLAN",         // NOI18N
-                "Administratoren", // NOI18N
-                "admin",           // NOI18N
-                "cismetadmin",     // NOI18N
-                "modeloutput",     // NOI18N
-                305,
-                "Titel",           // NOI18N
-                1024,
-                768);
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-        }
     }
 
     /**

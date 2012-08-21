@@ -28,7 +28,6 @@ import java.io.IOException;
 
 import java.text.MessageFormat;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -41,8 +40,6 @@ import de.cismet.cids.custom.sudplan.local.linz.EtaInput;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 
 import de.cismet.cids.dynamics.CidsBean;
-
-import de.cismet.cids.editors.converters.SqlTimestampToUtilDateConverter;
 
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 
@@ -81,7 +78,7 @@ public final class EtaWizardAction extends AbstractCidsBeanAction {
     public EtaWizardAction() {
         super("Perform ETA Calculation");
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Perform ETA Calculation");
+            LOG.debug("Perform ETA Calculation Action instanciated");
         }
     }
 
@@ -187,7 +184,7 @@ public final class EtaWizardAction extends AbstractCidsBeanAction {
 
                     CidsBean etaModelRun = this.createEtaModelRun(wizardDescriptor, etaModelInput);
                     etaModelRun = etaModelRun.persist();
-                    SMSUtils.executeRun(etaModelRun);
+                    SMSUtils.executeAndShowRun(etaModelRun);
 
                     final List<CidsBean> etaScenarios = (List)cidsBean.getProperty("eta_scenarios"); // NOI18N
                     etaScenarios.add(etaModelRun);

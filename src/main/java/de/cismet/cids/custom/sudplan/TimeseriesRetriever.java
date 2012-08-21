@@ -179,7 +179,9 @@ public final class TimeseriesRetriever {
                 throw new TimeseriesRetrieverException("execution was interrupted"); // NOI18N
             }
 
-            if (TimeseriesRetrieverConfig.PROTOCOL_TSTB.equals(config.getProtocol())) {
+            if (TimeseriesRetrieverConfig.PROTOCOL_NETCDF.equals(config.getProtocol())) {
+                return this.fromNetcdf();
+            } else if (TimeseriesRetrieverConfig.PROTOCOL_TSTB.equals(config.getProtocol())) {
                 return fromTSTB();
             } else if (TimeseriesRetrieverConfig.PROTOCOL_DAV.equals(config.getProtocol())) {
                 return fromDav();
@@ -257,6 +259,73 @@ public final class TimeseriesRetriever {
          *
          * @throws  TimeseriesRetrieverException  DOCUMENT ME!
          */
+        private TimeSeries fromNetcdf() throws TimeseriesRetrieverException {
+            if (converter == null) {
+                throw new TimeseriesRetrieverException("cannot fetch timeseries from HTTP Server without converter"); // NOI18N
+            }
+
+            // we don't use the cismet dav client as its "care-less" implementation leads to unpleasant behaviour in
+            // case of exception/about etc.
+            final HttpClient client = TimeSeriesRemoteHelper.createHttpClient(this.config.getLocation().getHost(),
+                    TimeSeriesRemoteHelper.NETCDF_CREDS);
+
+            String location = config.getLocation().toExternalForm();
+
+            if (location.lastIndexOf('/') != (location.length() - 1)) {
+                location += '/';
+            }
+
+            location += config.getOffering() + ".csv";
+
+            LOG.info("retrieving timeseries for offering '" + config.getOffering()
+                        + "' and observed property '" + config.getObsProp()
+                        + "' from location '" + location + "'");
+
+            final GetMethod get = new GetMethod(location);
+            BufferedInputStream bis = null;
+            try {
+                client.executeMethod(get);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("GET operation has been finished with status code: " + get.getStatusCode());
+                }
+
+                bis = new BufferedInputStream(get.getResponseBodyAsStream());
+
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new TimeseriesRetrieverException("execution was interrupted"); // NOI18N
+                }
+                final TimeSeries ts = converter.convertForward(bis, config.getOffering(), config.getObsProp());
+
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new TimeseriesRetrieverException("execution was interrupted");      // NOI18N
+                }
+                return ts;
+            } catch (final Exception ex) {
+                final String message = "cannot fetch timeseries from HTTP Server: " + config; // NOI18N
+                LOG.error(message, ex);
+
+                get.abort();
+
+                throw new TimeseriesRetrieverException(message, ex);
+            } finally {
+                get.releaseConnection();
+                if (bis != null) {
+                    try {
+                        bis.close();
+                    } catch (final IOException ex) {
+                        LOG.warn("cannot close inputstream", ex); // NOI18N
+                    }
+                }
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         *
+         * @throws  TimeseriesRetrieverException  DOCUMENT ME!
+         */
         private TimeSeries fromDav() throws TimeseriesRetrieverException {
             if (converter == null) {
                 throw new TimeseriesRetrieverException("cannot fetch timeseries from dav without converter"); // NOI18N
@@ -265,7 +334,7 @@ public final class TimeseriesRetriever {
             // we don't use the cismet dav client as its "care-less" implementation leads to unpleasant behaviour in
             // case of exception/about etc.
             final HttpClient client = TimeSeriesRemoteHelper.createHttpClient(this.config.getLocation().getHost(),
-                    TimeSeriesRemoteHelper.CREDS);
+                    TimeSeriesRemoteHelper.DAV_CREDS);
 
             String location = config.getLocation().toExternalForm();
             if (LOG.isDebugEnabled()) {
