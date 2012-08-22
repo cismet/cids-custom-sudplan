@@ -523,7 +523,7 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
         if (lstEmissionGrids.getSelectedValue() instanceof CidsBean) {
             if (pnlEmissionGrid.isDirty()) {
                 final int userDecision = JOptionPane.showConfirmDialog(
-                        this,
+                        ComponentRegistry.getRegistry().getMainWindow(),
                         java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objecteditors/sudplan/Bundle")
                                     .getString(
                                         "EmissionDatabaseEditor.lstEmissionGridsValueChanged(ListSelectionEvent).JOptionPane.message"),
@@ -613,7 +613,7 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
      */
     private void btnAddActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         final String gridName = JOptionPane.showInputDialog(
-                this,
+                ComponentRegistry.getRegistry().getMainWindow(),
                 NbBundle.getMessage(
                     EmissionDatabaseEditor.class,
                     "EmissionDatabaseEditor.btnAddActionPerformed(ActionEvent).JOptionPane.message"),
@@ -713,7 +713,7 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
      */
     private void btnCopyActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCopyActionPerformed
         final String name = JOptionPane.showInputDialog(
-                this,
+                ComponentRegistry.getRegistry().getMainWindow(),
                 NbBundle.getMessage(
                     EmissionDatabaseEditor.class,
                     "EmissionDatabaseEditor.btnCopyActionPerformed(ActionEvent).JOptionPane.message"), // NOI18N
