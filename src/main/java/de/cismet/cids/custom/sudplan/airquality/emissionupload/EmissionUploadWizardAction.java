@@ -54,6 +54,7 @@ import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.Converter;
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -241,8 +242,7 @@ public class EmissionUploadWizardAction extends AbstractCidsBeanAction implement
                             .getMainWindow(),
                     emissionDatabase);
             uploadDialog.pack();
-            uploadDialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
-            uploadDialog.setVisible(true);
+            StaticSwingTools.showDialog(uploadDialog);
             uploadDialog.toFront();
         }
     }

@@ -49,6 +49,7 @@ import de.cismet.cids.editors.EditorSaveListener;
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 import de.cismet.tools.Converter;
+import de.cismet.tools.gui.StaticSwingTools;
 
 import de.cismet.tools.gui.TitleComponentProvider;
 import de.cismet.tools.gui.downloadmanager.ByteArrayDownload;
@@ -514,7 +515,7 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lstEmissionGridsValueChanged(final javax.swing.event.ListSelectionEvent evt) { //GEN-FIRST:event_lstEmissionGridsValueChanged
+    private void lstEmissionGridsValueChanged(final javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstEmissionGridsValueChanged
         if (evt.getValueIsAdjusting()) {
             return;
         }
@@ -554,14 +555,14 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
 
         btnRemove.setEnabled(editable && (lstEmissionGrids.getSelectedValue() instanceof CidsBean));
         btnSave.setEnabled(editable && (lstEmissionGrids.getSelectedValue() instanceof CidsBean));
-    } //GEN-LAST:event_lstEmissionGridsValueChanged
+    }//GEN-LAST:event_lstEmissionGridsValueChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnUploadActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnUploadActionPerformed
+    private void btnUploadActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
         if (cidsBean == null) {
             return;
         }
@@ -591,27 +592,26 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
                         .getMainWindow(),
                 cidsBean);
         uploadDialog.pack();
-        uploadDialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
-        uploadDialog.setVisible(true);
+        StaticSwingTools.showDialog(uploadDialog);
         uploadDialog.toFront();
-    } //GEN-LAST:event_btnUploadActionPerformed
+    }//GEN-LAST:event_btnUploadActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnRemoveActionPerformed
+    private void btnRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         final List<CidsBean> grids = cidsBean.getBeanCollectionProperty("grids"); // NOI18N
         grids.remove((CidsBean)lstEmissionGrids.getSelectedValue());
-    }                                                                             //GEN-LAST:event_btnRemoveActionPerformed
+    }//GEN-LAST:event_btnRemoveActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnAddActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnAddActionPerformed
+    private void btnAddActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         final String gridName = JOptionPane.showInputDialog(
                 this,
                 NbBundle.getMessage(
@@ -695,23 +695,23 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
                 LOG.error("Can't display error dialog", ex1); // NOI18N
             }
         }
-    }                                                         //GEN-LAST:event_btnAddActionPerformed
+    }//GEN-LAST:event_btnAddActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnSaveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnSaveActionPerformed
+    private void btnSaveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         pnlEmissionGrid.persistDisplayedEmissionGrid();
-    }                                                                           //GEN-LAST:event_btnSaveActionPerformed
+    }//GEN-LAST:event_btnSaveActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnCopyActionPerformed(final java.awt.event.ActionEvent evt) {                        //GEN-FIRST:event_btnCopyActionPerformed
+    private void btnCopyActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCopyActionPerformed
         final String name = JOptionPane.showInputDialog(
                 this,
                 NbBundle.getMessage(
@@ -764,14 +764,14 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
         ComponentRegistry.getRegistry().getDescriptionPane().gotoMetaObject(newBean.getMetaObject(), ""); // NOI18N
 
         ComponentRegistry.getRegistry().getCatalogueTree().requestRefreshNode("airquality.edb"); // NOI18N
-    }                                                                                            //GEN-LAST:event_btnCopyActionPerformed
+    }//GEN-LAST:event_btnCopyActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnDownloadActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnDownloadActionPerformed
+    private void btnDownloadActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownloadActionPerformed
         byte[] fileContent = null;
 
         if ((cidsBean != null) && (cidsBean.getProperty("file") instanceof String)) { // NOI18N
@@ -829,7 +829,7 @@ public class EmissionDatabaseEditor extends AbstractCidsBeanRenderer implements 
         DownloadManager.instance()
                 .add(
                     new ByteArrayDownload(fileContent, title, DownloadManagerDialog.getJobname(), filename, ".zip")); // NOI18N
-    }                                                                                                                 //GEN-LAST:event_btnDownloadActionPerformed
+    }//GEN-LAST:event_btnDownloadActionPerformed
 
     @Override
     protected void init() {

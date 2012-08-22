@@ -53,6 +53,7 @@ import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.security.AccessHandler.ACCESS_METHODS;
 
 import de.cismet.security.WebAccessManager;
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -194,9 +195,8 @@ public final class UnionAssignTimeseriesWizardAction extends AssignTimeseriesWiz
                                             final JDialog noResultsDialog = noResultsPane.createDialog(
                                                     dialog,
                                                     "No results");
-
-                                            noResultsDialog.setVisible(true);
-                                        }
+                                            StaticSwingTools.showDialog(noResultsDialog);
+                                          }
                                     });
 
                                 feature = null;
@@ -235,8 +235,9 @@ public final class UnionAssignTimeseriesWizardAction extends AssignTimeseriesWiz
                     }
                 });
 
-        dialog.setVisible(true);
 
+        StaticSwingTools.showDialog(dialog);
+        
         if (pane.getValue() != null) {
             if (!task.isDone()) {
                 // the cancel button has been pressed
