@@ -7,19 +7,12 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
-import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.map.ObjectMapper;
-
-import org.openide.util.Exceptions;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-
-import java.io.IOException;
-import java.io.StringWriter;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -274,6 +267,7 @@ public final class SwmmInput {
      *
      * @param  listener  DOCUMENT ME!
      */
+    @JsonIgnore
     public void addPropertyChangeListener(final PropertyChangeListener listener) {
         propertyChangeSupport.addPropertyChangeListener(listener);
     }
@@ -283,6 +277,7 @@ public final class SwmmInput {
      *
      * @param  listener  DOCUMENT ME!
      */
+    @JsonIgnore
     public void removePropertyChangeListener(final PropertyChangeListener listener) {
         propertyChangeSupport.removePropertyChangeListener(listener);
     }
@@ -373,43 +368,9 @@ public final class SwmmInput {
         propertyChangeSupport.firePropertyChange(PROP_USER, oldUser, user);
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        try {
-            System.out.println(DATE_FORMAT.parse("01.01.1994").getTime());
-            System.out.println(DATE_FORMAT.parse("31.07.1994").getTime());
-
-            System.out.println(DATE_FORMAT.parse("01.08.1994").getTime());
-
-            System.out.println(DATE_FORMAT.parse("06.01.1995").getTime());
-
-            System.out.println(DATE_FORMAT.parse("06.12.2000").getTime());
-
-            System.out.println(DATE_FORMAT.parse("01.01.2000").getTime());
-            System.out.println(DATE_FORMAT.parse("31.12.2000").getTime());
-
-            System.out.println(DATE_FORMAT.parse("31.12.2048").getTime());
-            System.out.println(DATE_FORMAT.parse("30.07.2049").getTime());
-            System.exit(0);
-
-            final ObjectMapper mapper = new ObjectMapper();
-            final StringWriter writer = new StringWriter();
-
-            final SwmmInput swmmInput = new SwmmInput();
-
-            swmmInput.setCreated(new Date());
-            swmmInput.setUser("Pascal Dihé");
-            swmmInput.setStartDate(new Date());
-            swmmInput.setEndDate(new Date());
-
-            mapper.writeValue(writer, swmmInput);
-            System.out.println(writer.toString());
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-        }
+    @JsonIgnore
+    @Override
+    public String toString() {
+        return "SWMM Input for SWMM INP File '" + this.getInpFile() + "'";
     }
 }

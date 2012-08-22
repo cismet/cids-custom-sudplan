@@ -67,6 +67,9 @@ public class EtaInput extends SwmmOutput {
      */
     @JsonIgnore
     public final void fromSwmmOutput(final SwmmOutput swmmOutput) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("initialising ETA Input from SWMM Output '" + swmmOutput + "'");
+        }
         this.setR720(swmmOutput.getR720());
         this.setSwmmProject(swmmOutput.getSwmmProject());
         this.setSwmmRun(swmmOutput.getSwmmRun());
@@ -79,40 +82,33 @@ public class EtaInput extends SwmmOutput {
             for (final CsoOverflow csoOverflow : this.csoOverflows.values()) {
                 final EtaConfiguration etaConfiguration = new EtaConfiguration(csoOverflow.getName(),
                         csoOverflow.getCso());
-
-                if (etaConfiguration.getName().equalsIgnoreCase("ULKS1")) {
-                    etaConfiguration.setSedimentationEfficency(20);
-                } else if (etaConfiguration.getName().equalsIgnoreCase("RKL_Ablauf")) {
-                    etaConfiguration.setEnabled(false);
-                } else if (etaConfiguration.getName().equalsIgnoreCase("AB_Plesching")) {
-                    etaConfiguration.setSedimentationEfficency(20);
-                } else if (etaConfiguration.getName().equalsIgnoreCase("RHHB_Weikerlsee3nolink")) {
-                    etaConfiguration.setSedimentationEfficency(20);
-                }
-
                 this.etaConfigurations.add(etaConfiguration);
             }
         }
 
+        this.resetToDefaults();
         this.computeTotalOverflowVolume();
     }
 
     /**
      * DOCUMENT ME!
      */
+    @JsonIgnore
     public final void computeTotalOverflowVolume() {
-        if ((this.csoOverflows != null) && !this.getCsoOverflows().isEmpty()
+        if ((this.csoOverflows != null) && !csoOverflows.isEmpty()
                     && (etaConfigurations != null) && !etaConfigurations.isEmpty()) {
         } else {
             LOG.warn("cannot compute TotalOverflowVolume, csoOverflows or etaConfigurations are empty");
             this.totalOverflowVolume = -1;
+            return;
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug("computing total overflow volume for " + etaConfigurations.size() + " CSOs");
+            LOG.debug("computing total overflow volume for " + csoOverflows.size() + " CSOs "
+                        + "and " + etaConfigurations.size() + " ETA Configurations");
         }
         if (this.csoOverflows.size() != etaConfigurations.size()) {
             LOG.warn("CSO map size missmatch: " + this.getCsoOverflows().size()
-                        + " vs. " + etaConfigurations.size());
+                        + " CSOs vs. " + etaConfigurations.size() + " ETA Configurations!");
         }
 
         this.totalOverflowVolume = 0;
@@ -137,7 +133,7 @@ public class EtaInput extends SwmmOutput {
 
         if (LOG.isDebugEnabled()) {
             LOG.debug(i + " out of " + getEtaConfigurations().size()
-                        + " CSOs considered in total overflow volume calculation");
+                        + " CSOs considered in total overflow volume (" + totalOverflowVolume + ") calculation");
         }
     }
     /**
@@ -156,6 +152,13 @@ public class EtaInput extends SwmmOutput {
      */
     public void setEtaConfigurations(final List<EtaConfiguration> etaConfigurations) {
         this.etaConfigurations = etaConfigurations;
+
+        if ((this.csoOverflows != null) && !this.csoOverflows.isEmpty()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("etaConfigurations changed, re-computing total overflow volume");
+            }
+            this.computeTotalOverflowVolume();
+        }
     }
 
     /**
@@ -184,6 +187,7 @@ public class EtaInput extends SwmmOutput {
      *
      * @deprecated  DOCUMENT ME!
      */
+    @JsonIgnore
     public String getEtaFile() {
         return etaFile;
     }
@@ -195,6 +199,7 @@ public class EtaInput extends SwmmOutput {
      *
      * @deprecated  DOCUMENT ME!
      */
+    @JsonIgnore
     public void setEtaFile(final String etaFile) {
         this.etaFile = etaFile;
     }
@@ -204,6 +209,7 @@ public class EtaInput extends SwmmOutput {
      *
      * @param  listener  DOCUMENT ME!
      */
+    @JsonIgnore
     public void addPropertyChangeListener(final PropertyChangeListener listener) {
         propertyChangeSupport.addPropertyChangeListener(listener);
     }
@@ -213,145 +219,66 @@ public class EtaInput extends SwmmOutput {
      *
      * @param  listener  DOCUMENT ME!
      */
+    @JsonIgnore
     public void removePropertyChangeListener(final PropertyChangeListener listener) {
         propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
+    @JsonIgnore
+    @Override
+    public String toString() {
+        return "ETA Input for SWMM Run '" + this.getSwmmRunName() + "'";
+    }
+
     /**
      * DOCUMENT ME!
-     *
-     * @param args DOCUMENT ME!
      */
-// public static void main(final String[] args) {
-// try {
-// final ObjectMapper mapper = new ObjectMapper();
-// final StringWriter writer = new StringWriter();
-//
-// final EtaInput etaInput = new EtaInput();
-// etaInput.setSwmmProject(2);
-// etaInput.setUser("Pascal Dihé");
-// etaInput.setCreated(new Date());
-// etaInput.setSwmmRun(382);
-// etaInput.setEtaFile("linz_eta");
-//
-// final String[] csoNames = new String[] {
-// "RDSRUE51",
-// "ULKS1",
-// "FUEAusl",
-// "RKL_Ablauf",
-// "AB_Plesching",
-// "HSU12_1S5b",
-// "HSU1_1RUE2",
-// "ALBSP1nolink",
-// "ALKSP1nolink",
-// "ANFSP1nolink",
-// "EDBSP1nolink",
-// "ENNSP1nolink",
-// "ENNSP2nolink",
-// "RUEB_Traunnolink",
-// "EWDSP1nolink",
-// "FKDSP1nolink",
-// "GLWSP1nolink",
-// "GRSSP2nolink",
-// "HEMSP1nolink",
-// "HHSSP1nolink",
-// "HOESP1nolink",
-// "HOESP2nolink",
-// "HZDSP1nolink",
-// "KRTSP1nolink",
-// "KSSSP1nolink",
-// "LTBSP1nolink",
-// "LTBSP2nolink",
-// "LTBSP3nolink",
-// "RUEB_Lunznolink",
-// "NNKSP1nolink",
-// "OFTSP1nolink",
-// "OTHSP1nolink",
-// "RUEB_Pleshnolink",
-// "PNASP1nolink",
-// "PUKSP1nolink",
-// "RDS20_1S48nolink",
-// "SMMSP1nolink",
-// "STFSP1nolink",
-// "STMSP1nolink",
-// "STYSP1nolink",
-// "RHHB_Wsee3nolink",
-// "HSMSEntlnolink",
-// "WLDSP1nolink",
-// "WLDSP2nolink",
-// "WLGSP1nolink"
-// };
-// final int[] csoIds = new int[] {
-// 2,
-// 3,
-// 4,
-// 5,
-// 6,
-// 7,
-// 8,
-// 9,
-// 10,
-// 11,
-// 12,
-// 13,
-// 14,
-// 15,
-// 16,
-// 17,
-// 18,
-// 19,
-// 20,
-// 21,
-// 22,
-// 23,
-// 24,
-// 25,
-// 26,
-// 27,
-// 28,
-// 29,
-// 30,
-// 31,
-// 32,
-// 33,
-// 34,
-// 35,
-// 36,
-// 37,
-// 38,
-// 39,
-// 40,
-// 41,
-// 42,
-// 43,
-// 44,
-// 45,
-// 46
-// };
-//
-// int i = 0;
-// for (final String csoName : csoNames) {
-// final CsoOverflow csoOverflow = new CsoOverflow();
-// csoOverflow.setName(csoName);
-// csoOverflow.setSwmmProject(2);
-// csoOverflow.setCso(csoIds[i]);
-// csoOverflow.setOverflowDuration((float)Math.random() * 100f);
-// csoOverflow.setOverflowFrequency((float)Math.random() * 10f);
-// csoOverflow.setOverflowVolume((float)Math.random() * 1000f);
-// etaInput.getCsoOverflows().put(csoName, csoOverflow);
-//
-// final EtaConfiguration etaConfiguration = new EtaConfiguration();
-// etaConfiguration.setEnabled(Math.random() > 0.5d);
-// etaConfiguration.setName(csoName);
-// etaConfiguration.setSedimentationEfficency((float)Math.random() * 10f);
-// etaInput.getEtaConfigurations().add(etaConfiguration);
-// i++;
-// }
-//
-// mapper.writeValue(writer, etaInput);
-// System.out.println(writer.toString());
-// } catch (Exception ex) {
-// Exceptions.printStackTrace(ex);
-// }
-// }
+    @JsonIgnore
+    public void resetToDefaults() {
+        if ((this.etaConfigurations != null) && !this.etaConfigurations.isEmpty()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("resetting " + this.etaConfigurations.size() + " ETA Configurations of '" + this
+                            + "' to defaults");
+            }
+            for (final EtaConfiguration etaConfiguration : etaConfigurations) {
+                if (etaConfiguration.getName().equalsIgnoreCase("RKL_Ablauf")
+                            || etaConfiguration.getName().equalsIgnoreCase("RUEB_Lunznolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("RUEB_Pleshnolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("RDS20_1S48nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("RHHB_Wsee3nolink")) {
+                    etaConfiguration.setEnabled(false);
+                }
+
+                if (etaConfiguration.getName().equalsIgnoreCase("ULKS1")
+                            || etaConfiguration.getName().equalsIgnoreCase("AB_Plesching")
+                            || etaConfiguration.getName().equalsIgnoreCase("ALKSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("ANFSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("EDBSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("ENNSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("ENNSP2nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("RUEB_Traunnolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("EWDSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("FKDSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("GLWSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("GRSSP2nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("HEMSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("HZDSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("KRTSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("NNKSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("OTHSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("PNASP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("SMMSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("STYSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("WLDSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("WLDSP2nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("WLGSP1nolink")) {
+                    etaConfiguration.setSedimentationEfficency(21.0f);
+                } else {
+                    etaConfiguration.setSedimentationEfficency(0.0f);
+                }
+            }
+        } else {
+            LOG.warn("could not reset ETA Configurations of '" + this + "' to defaults, no ETA Configurations found!");
+        }
+    }
 }

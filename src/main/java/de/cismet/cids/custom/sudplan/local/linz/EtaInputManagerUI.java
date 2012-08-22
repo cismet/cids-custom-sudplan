@@ -63,7 +63,7 @@ public class EtaInputManagerUI extends javax.swing.JPanel {
             final EtaInput etaInput = inputManager.getUR();
             final DefaultTableModel ctoTableModel = (DefaultTableModel)this.etaTable.getModel();
             if (LOG.isDebugEnabled()) {
-                LOG.debug("loading configuration of #" + etaInput.getEtaConfigurations().size() + "CSO");
+                LOG.debug("loading configuration of #" + etaInput.getEtaConfigurations().size() + " CSOs");
             }
             for (final EtaConfiguration etaConfiguration : etaInput.getEtaConfigurations()) {
                 ctoTableModel.addRow(

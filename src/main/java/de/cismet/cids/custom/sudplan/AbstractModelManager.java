@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.EventQueue;
@@ -25,7 +26,9 @@ import java.io.StringWriter;
 import java.sql.Timestamp;
 
 import java.util.GregorianCalendar;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -92,7 +95,12 @@ public abstract class AbstractModelManager implements ModelManager {
 
     @Override
     public void execute() throws IOException {
-        fireStarted();
+        final Future future = fireStarted();
+        try {
+            future.get();
+        } catch (Exception ex) {
+            throw new IOException("fireStarted failed: :" + ex.getLocalizedMessage(), ex);
+        }
 
         internalExecute();
 
@@ -161,6 +169,9 @@ public abstract class AbstractModelManager implements ModelManager {
 
     @Override
     public void addProgressListener(final ProgressListener progressL) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("addProgressListener: " + progressL);
+        }
         progressSupport.addProgressListener(progressL);
     }
 
@@ -175,19 +186,21 @@ public abstract class AbstractModelManager implements ModelManager {
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     *
      * @throws  IllegalStateException  DOCUMENT ME!
      */
-    protected void fireStarted() {
+    protected Future fireStarted() {
         final Runnable fireStarted = new Runnable() {
 
                 @Override
                 public void run() {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("fireStarted: " + AbstractModelManager.this); // NOI18N
+                        LOG.debug(cidsBean + " fireStarted: " + AbstractModelManager.this); // NOI18N
                     }
 
                     if (isStarted()) {
-                        LOG.warn("cannot start when already started"); // NOI18N
+                        LOG.warn(cidsBean + " cannot start when already started"); // NOI18N
                         return;
                     }
 
@@ -196,8 +209,10 @@ public abstract class AbstractModelManager implements ModelManager {
                         cidsBean.setProperty(
                             "started", // NOI18N
                             dateConverter.convertReverse(GregorianCalendar.getInstance().getTime()));
+                        // WTF? Warum nicht?
+                        // cidsBean = cidsBean.persist();
                     } catch (final Exception ex) {
-                        final String message = "cannot set started flag in runbean"; // NOI18N
+                        final String message = cidsBean + " cannot set started flag in runbean"; // NOI18N
                         LOG.error(message, ex);
                         throw new IllegalStateException(message, ex);
                     }
@@ -208,7 +223,7 @@ public abstract class AbstractModelManager implements ModelManager {
                 }
             };
 
-        progressDispatcher.submit(fireStarted);
+        return progressDispatcher.submit(fireStarted);
     }
 
     /**
@@ -235,16 +250,17 @@ public abstract class AbstractModelManager implements ModelManager {
 
                 @Override
                 public void run() {
-                    if (!isStarted()) {
-                        throw new IllegalStateException("cannot progress when not started yet"); // NOI18N
-                    }
-
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("fireProgressed: " + message); // NOI18N
+                        LOG.debug(cidsBean + " fireProgressed: '" + message + "' (" + step + "/" + maxSteps
+                                    + "), source = '"
+                                    + AbstractModelManager.this + "'"); // NOI18N
                     }
 
+                    if (!isStarted()) {
+                        throw new IllegalStateException(cidsBean + " cannot progress when not started yet"); // NOI18N
+                    }
                     if (isFinished()) {
-                        LOG.warn("cannot progress when already finished"); // NOI18N
+                        LOG.warn(cidsBean + " cannot progress when already finished");                       // NOI18N
                         return;
                     }
 
@@ -271,11 +287,11 @@ public abstract class AbstractModelManager implements ModelManager {
                 @Override
                 public void run() {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("fireBroken: " + message); // NOI18N
+                        LOG.debug(cidsBean + " fireBroken: " + message); // NOI18N
                     }
 
                     if (isFinished()) {
-                        LOG.warn("will not fire broken when run is finished");
+                        LOG.warn(cidsBean + " will not fire broken when run is finished");
                         return;
                     }
 
@@ -377,11 +393,12 @@ public abstract class AbstractModelManager implements ModelManager {
                 @Override
                 public void run() {
                     if (!isStarted()) {
-                        throw new IllegalStateException("cannot be finished when not started yet"); // NOI18N
+                        throw new IllegalStateException(cidsBean + " cannot be finished when not started yet (" + this
+                                    + ")"); // NOI18N
                     }
 
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("fireFinished: " + AbstractModelManager.this); // NOI18N
+                        LOG.debug(cidsBean + " fireFinished: " + AbstractModelManager.this); // NOI18N
                     }
 
                     if (isFinished()) {
@@ -391,7 +408,7 @@ public abstract class AbstractModelManager implements ModelManager {
                     final SqlTimestampToUtilDateConverter dateConverter = new SqlTimestampToUtilDateConverter();
                     try {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("creating model output Bean");
+                            LOG.debug("creating model output Bean of Run #" + cidsBean.getProperty("id"));
                         }
 
                         cidsBean.setProperty(

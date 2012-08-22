@@ -60,6 +60,9 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
         initComponents();
 
         init();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("DefaultModelManagerUI for '" + model.getCidsBean() + "' initialized");
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -270,6 +273,11 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
         add(jPanel1, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
+    @Override
+    public String toString() {
+        return model.getCidsBean() + " Execution Listener";
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -295,6 +303,10 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
      */
     private final class ExecutionListener implements ProgressListener {
 
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient Logger LOG = Logger.getLogger(ExecutionListener.class);
+
         //~ Methods ------------------------------------------------------------
 
         @Override
@@ -319,7 +331,9 @@ public class DefaultModelManagerUI extends javax.swing.JPanel {
          */
         private void handleProgress(final ProgressEvent event) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("handleProgress: " + event);
+                LOG.debug(model.getCidsBean() + " handleProgress: '" + event.getMessage() + "' (" + event.getStep()
+                            + "/" + event.getMaxSteps() + ") = " + event.getState()
+                            + ", source = " + event.getSource());
             }
             if (ProgressEvent.State.STARTED.equals(event.getState())) {
                 btnCancel.setEnabled(false);

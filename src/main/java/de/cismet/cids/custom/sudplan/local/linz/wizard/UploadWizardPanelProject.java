@@ -20,6 +20,8 @@ import java.io.File;
 
 import javax.swing.event.ChangeListener;
 
+import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
+
 import de.cismet.cids.dynamics.CidsBean;
 
 /**
@@ -37,11 +39,12 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
     //~ Instance fields --------------------------------------------------------
 
     private final transient ChangeSupport changeSupport;
-    private transient WizardDescriptor wizard;
+    private transient WizardDescriptor wizardDescriptor;
     private transient UploadWizardPanelProjectUI component;
-    private String title;
-    private String description;
-    private String inpFile;
+    private transient boolean formEnabled = true;
+    private transient CidsBean newSwmmProjectBean;
+    private transient String inpFile = "";
+    private transient int selectedSwmmProject = -1;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -56,8 +59,14 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
 
     @Override
     public Component getComponent() {
-        if (component == null) {
-            component = new UploadWizardPanelProjectUI(this);
+        synchronized (this) {
+            if (component == null) {
+                try {
+                    component = new UploadWizardPanelProjectUI(this);
+                } catch (final WizardInitialisationException ex) {
+                    LOG.error("cannot create wizard panel component", ex); // NOI18N
+                }
+            }
         }
 
         return component;
@@ -70,44 +79,60 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
 
     @Override
     public void readSettings(final Object settings) {
-        wizard = (WizardDescriptor)settings;
-        final CidsBean swmmProject = (CidsBean)wizard.getProperty(
-                UploadWizardAction.PROP_SWMM_PROJECT_BEAN);
+        wizardDescriptor = (WizardDescriptor)settings;
+        this.newSwmmProjectBean = (CidsBean)wizardDescriptor.getProperty(
+                UploadWizardAction.PROP_NEW_SWMM_PROJECT_BEAN);
 
-        this.setTitle((swmmProject.getProperty("title") != null) ? swmmProject.getProperty("title").toString() : "");
-        this.setDescription((swmmProject.getProperty("description") != null)
-                ? swmmProject.getProperty("description").toString() : "");
-//        this.setInpFile(swmmProject.getProperty("inp_file_name") != null
-//                ? swmmProject.getProperty("inp_file_name").toString() : "");
+        assert newSwmmProjectBean != null : "SWMM Project Bean must not be null!";
 
-        this.setInpFile((wizard.getProperty(UploadWizardAction.PROP_SWMM_INP_FILE) != null)
-                ? wizard.getProperty(UploadWizardAction.PROP_SWMM_INP_FILE).toString() : "");
+        try {
+            selectedSwmmProject = Integer.valueOf(
+                    this.wizardDescriptor.getProperty(
+                        UploadWizardAction.PROP_SELECTED_SWMM_PROJECT_ID).toString());
+        } catch (Throwable t) {
+            LOG.warn("could not set swmm project id, setting to default (-1)", t);
+            selectedSwmmProject = -1;
+        }
 
+        this.setInpFile((wizardDescriptor.getProperty(UploadWizardAction.PROP_SWMM_INP_FILE) != null)
+                ? wizardDescriptor.getProperty(UploadWizardAction.PROP_SWMM_INP_FILE).toString() : "");
+
+        final boolean uploadComplete = (Boolean)wizardDescriptor.getProperty(UploadWizardAction.PROP_UPLOAD_COMPLETE);
+        final boolean uploadErroneous = (Boolean)wizardDescriptor.getProperty(
+                UploadWizardAction.PROP_UPLOAD_ERRORNEOUS);
+        final boolean uploadInProgress = (Boolean)wizardDescriptor.getProperty(
+                UploadWizardAction.PROP_UPLOAD_IN_PROGRESS);
+
+        if (uploadInProgress) {
+            LOG.warn("model run is still in progress");
+            this.formEnabled = false;
+        } else {
+            this.formEnabled = !uploadComplete || uploadErroneous;
+        }
+
+        assert component != null : "UploadWizardPanelProjectUI must not be null!";
         component.init();
     }
 
     @Override
     public void storeSettings(final Object settings) {
-        wizard = (WizardDescriptor)settings;
-
-        final CidsBean swmmProject = (CidsBean)wizard.getProperty(
-                UploadWizardAction.PROP_SWMM_PROJECT_BEAN);
+        wizardDescriptor = (WizardDescriptor)settings;
         try {
-            swmmProject.setProperty("title", this.getTitle());
-            swmmProject.setProperty("description", this.getDescription());
-
             if ((this.inpFile != null) && !this.inpFile.isEmpty()
-                        && (this.inpFile.lastIndexOf(File.pathSeparator) != -1)) {
-                swmmProject.setProperty(
+                        && (this.inpFile.lastIndexOf(File.separator) != -1)) {
+                this.newSwmmProjectBean.setProperty(
                     "inp_file_name",
-                    this.inpFile.substring(this.inpFile.lastIndexOf(File.pathSeparator)));
+                    this.inpFile.substring(this.inpFile.lastIndexOf(File.separator) + 1));
             } else {
                 LOG.warn("Input file path '" + this.inpFile
-                            + "' is not set or does not contain path separator '" + File.pathSeparator + "'");
+                            + "' is not set or does not contain separator '" + File.separator + "'");
             }
 
-            wizard.putProperty(UploadWizardAction.PROP_SWMM_INP_FILE,
+            wizardDescriptor.putProperty(UploadWizardAction.PROP_SWMM_INP_FILE,
                 this.getInpFile());
+
+            wizardDescriptor.putProperty(UploadWizardAction.PROP_SELECTED_SWMM_PROJECT_ID, this.selectedSwmmProject);
+            wizardDescriptor.putProperty(UploadWizardAction.PROP_NEW_SWMM_PROJECT_BEAN, this.newSwmmProjectBean);
         } catch (Throwable t) {
             LOG.error("could not set property of SWMM Input File", t);
         }
@@ -116,27 +141,32 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
     @Override
     public boolean isValid() {
         boolean valid = true;
-        if ((this.title == null) || this.title.isEmpty()) {
-            wizard.putProperty(
+        if (this.selectedSwmmProject == -1) {
+            wizardDescriptor.putProperty(
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                NbBundle.getMessage(UploadWizardPanelProject.class, "UploadWizardPanelProject.isValid().noproject"));
+            valid = false;
+        } else if (this.getTitle().isEmpty()) {
+            wizardDescriptor.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 NbBundle.getMessage(
                     UploadWizardPanelProject.class,
                     "UploadWizardPanelProject.isValid().emptyName"));        // NOI18N
             valid = false;
-        } else if ((this.description == null) || this.description.isEmpty()) {
-            wizard.putProperty(
+        } else if (this.getDescription().isEmpty()) {
+            wizardDescriptor.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 NbBundle.getMessage(
                     UploadWizardPanelProject.class,
                     "UploadWizardPanelProject.isValid().emptyDescription")); // NOI18N
-        } else if ((this.inpFile == null) || this.inpFile.isEmpty()) {
-            wizard.putProperty(
+        } else if (this.getInpFile().isEmpty()) {
+            wizardDescriptor.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 NbBundle.getMessage(
                     UploadWizardPanelProject.class,
                     "UploadWizardPanelProject.isValid().emptyFile"));        // NOI18N
         } else {
-            wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, null);
+            wizardDescriptor.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, null);
         }
 
         return valid;
@@ -165,7 +195,8 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
      * @return  the value of title
      */
     public String getTitle() {
-        return title;
+        return ((newSwmmProjectBean != null) && (newSwmmProjectBean.getProperty("title") != null))
+            ? newSwmmProjectBean.getProperty("title").toString() : "";
     }
 
     /**
@@ -174,7 +205,14 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
      * @param  title  new value of title
      */
     public void setTitle(final String title) {
-        this.title = title;
+        try {
+            newSwmmProjectBean.setProperty("title", title);
+//            if (LOG.isDebugEnabled()) {
+//                LOG.debug("title set to " + title);
+//            }
+        } catch (Throwable t) {
+            LOG.error("could not set title of new project to " + title, t);
+        }
     }
 
     /**
@@ -183,7 +221,8 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
      * @return  the value of description
      */
     public String getDescription() {
-        return description;
+        return ((newSwmmProjectBean != null) && (newSwmmProjectBean.getProperty("description") != null))
+            ? newSwmmProjectBean.getProperty("description").toString() : "";
     }
 
     /**
@@ -192,7 +231,11 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
      * @param  description  new value of description
      */
     public void setDescription(final String description) {
-        this.description = description;
+        try {
+            newSwmmProjectBean.setProperty("description", description);
+        } catch (Throwable t) {
+            LOG.error("could not set description of new project to " + description, t);
+        }
     }
 
     /**
@@ -201,7 +244,7 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
      * @return  the value of inpFile
      */
     public String getInpFile() {
-        return inpFile;
+        return this.inpFile;
     }
 
     /**
@@ -211,5 +254,36 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
      */
     public void setInpFile(final String inpFile) {
         this.inpFile = inpFile;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("inpFile set to '" + inpFile + "'");
+        }
+    }
+
+    /**
+     * Get the value of formEnabled.
+     *
+     * @return  the value of formEnabled
+     */
+    public boolean isFormEnabled() {
+        return formEnabled;
+    }
+
+    /**
+     * Get the value of selectedSwmmProject.
+     *
+     * @return  the value of selectedSwmmProject
+     */
+    public int getSelectedSwmmProject() {
+        return selectedSwmmProject;
+    }
+
+    /**
+     * Set the value of selectedSwmmProject.
+     *
+     * @param  selectedSwmmProject  new value of selectedSwmmProject
+     */
+    public void setSelectedSwmmProject(final int selectedSwmmProject) {
+        this.selectedSwmmProject = selectedSwmmProject;
+        this.fireChangeEvent();
     }
 }

@@ -64,14 +64,15 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter {
     /**
      * DOCUMENT ME!
      *
-     * @param   from  DOCUMENT ME!
+     * @param   from    DOCUMENT ME!
+     * @param   params  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      *
      * @throws  ConversionException  DOCUMENT ME!
      */
     @Override
-    public TimeSeries convertForward(final InputStream from) throws ConversionException {
+    public TimeSeries convertForward(final InputStream from, final String... params) throws ConversionException {
         final BufferedReader br;
         try {
             br = new BufferedReader(new InputStreamReader(from));
@@ -129,14 +130,15 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter {
     /**
      * DOCUMENT ME!
      *
-     * @param   to  DOCUMENT ME!
+     * @param   to      DOCUMENT ME!
+     * @param   params  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      *
      * @throws  ConversionException  DOCUMENT ME!
      */
     @Override
-    public InputStream convertBackward(final TimeSeries to) throws ConversionException {
+    public InputStream convertBackward(final TimeSeries to, final String... params) throws ConversionException {
         try {
             final Object valueKeyObject = to.getTSProperty(TimeSeries.VALUE_KEYS);
             final String valueKey;

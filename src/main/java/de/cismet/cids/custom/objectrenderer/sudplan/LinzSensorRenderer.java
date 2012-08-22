@@ -7,9 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
-import Sirius.navigator.ui.RequestsFullSizeComponent;
-
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
@@ -22,19 +19,14 @@ import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
 
-import javax.swing.*;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 
-import de.cismet.cids.client.tools.DevelopmentTools;
-
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.ImageUtil;
-
-import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
 
@@ -684,26 +676,6 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
     public JComponent getTitleComponent() {
         // return panTitle;
         return linzSensorTitleComponent;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   args  DOCUMENT ME!
-     *
-     * @throws  Exception  DOCUMENT ME!
-     */
-    public static void main(final String[] args) throws Exception {
-        // DevelopmentTools.showTestFrame(new LinzWwtpRenderer(), 1024, 768);
-        final LinzSensorRenderer linzWwtpRenderer = new LinzSensorRenderer();
-        linzWwtpRenderer.setPreferredSize(new java.awt.Dimension(1024, 768));
-        final JFrame frame = new JFrame("LinzWwtpRenderer");
-        frame.getContentPane().add(linzWwtpRenderer, BorderLayout.CENTER);
-        frame.getContentPane().add(linzWwtpRenderer.getTitleComponent(), BorderLayout.NORTH);
-        frame.getContentPane().add(linzWwtpRenderer.getFooterComponent(), BorderLayout.SOUTH);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
     }
 
     @Override

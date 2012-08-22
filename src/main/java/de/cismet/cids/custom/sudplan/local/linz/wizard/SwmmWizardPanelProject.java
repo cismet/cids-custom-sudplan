@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
-import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
@@ -20,11 +19,8 @@ import java.awt.Component;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-import java.text.ParseException;
-
 import javax.swing.event.ChangeListener;
 
-import de.cismet.cids.custom.objectrenderer.sudplan.SwmmProjectRenderer;
 import de.cismet.cids.custom.sudplan.local.linz.EtaInput;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.wupp.*;
@@ -131,7 +127,6 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
         boolean valid = true;
 
         if (this.swmmInput.getSwmmProject() == -1) {
-            // FIXME: i18n
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 NbBundle.getMessage(SwmmWizardPanelProject.class, "SwmmWizardPanelProject.error.noproject"));

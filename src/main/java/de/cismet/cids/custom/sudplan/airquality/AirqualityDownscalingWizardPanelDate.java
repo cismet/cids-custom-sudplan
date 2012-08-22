@@ -9,13 +9,10 @@ package de.cismet.cids.custom.sudplan.airquality;
 
 import org.apache.log4j.Logger;
 
-import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.NbBundle;
 
 import java.awt.Component;
-import java.awt.Dialog;
-import java.awt.EventQueue;
 
 import java.util.Date;
 
@@ -41,28 +38,6 @@ public final class AirqualityDownscalingWizardPanelDate extends AbstractWizardPa
     private transient Date endDate;
 
     //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    final AirqualityDownscalingWizardPanelDate panel = new AirqualityDownscalingWizardPanelDate();
-                    panel.createComponent();
-                    final WizardDescriptor wizard = new WizardDescriptor(new WizardDescriptor.Panel[] { panel });
-                    final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
-                    dialog.pack();
-                    dialog.setLocationRelativeTo(null);
-                    dialog.setVisible(true);
-                    dialog.toFront();
-                }
-            });
-    }
 
     @Override
     public Component createComponent() {

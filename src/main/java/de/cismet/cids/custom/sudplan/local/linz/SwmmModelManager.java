@@ -91,9 +91,22 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
                         + swmmRun + ")'"); // NOI18N
 
             final SwmmOutput swmmOutput = swmmWatchable.getSwmmOutput();
+
+            if (swmmOutput.getSwmmProject() == -1) {
+                LOG.warn("SWMM Project id of '" + swmmOutput + "' is -1!");
+            }
+
+            // copy values from input (also needed for ETA calculation)
             swmmOutput.setSwmmProject(swmmInput.getSwmmProject());
             swmmOutput.setSwmmRun(swmmRun);
             swmmOutput.setSwmmRunName(swmmRunName);
+
+            // update overflows project ids also
+            if ((swmmOutput.getCsoOverflows() != null) && !swmmOutput.getCsoOverflows().isEmpty()) {
+                for (final CsoOverflow csoOverflow : swmmOutput.getCsoOverflows().values()) {
+                    csoOverflow.setSwmmProject(swmmOutput.getSwmmProject());
+                }
+            }
 
             final CidsBean swmmModelOutput = SMSUtils.createModelOutput("Modellergebnisse "
                             + swmmOutput.getSwmmRunName(), // NOI18N
@@ -129,7 +142,7 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
     @Override
     protected void prepareExecution() throws IOException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("executing SWMM"); // NOI18N
+            LOG.debug("preparaing the Execution of SWMM Run #" + cidsBean.getProperty("id")); // NOI18N
         }
 
         fireProgressed(
@@ -141,9 +154,9 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
         final SwmmInput swmmInput = (SwmmInput)this.getUR();
         final SwmmRunInfo swmmRunInfo = new SwmmRunInfo();
 
-        LOG.info("executing run for model " + swmmInput.getInpFile());
+        LOG.info("executing SWMM Run for model " + swmmInput.getInpFile());
 
-        assert !swmmInput.getTimeseriesURLs().isEmpty() : "improperly configures swmm run, no timiseries configured";
+        assert !swmmInput.getTimeseriesURLs().isEmpty() : "improperly configured swmm run, no timeseries configured";
         final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(swmmInput.getTimeseriesURLs(0));
         LOG.info("STEP 1: retrieving timeseries from " + swmmInput.getTimeseriesURLs(0));
 
@@ -320,7 +333,18 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
         }
 
         spsTask.setParameter("dat", modelOffering);
-        spsTask.setParameter("inp", swmmInput.getInpFile());
+
+        if (swmmInput.getInpFile().toLowerCase().endsWith(".inp")) {
+            final String inpFile = swmmInput.getInpFile()
+                        .substring(
+                            0,
+                            swmmInput.getInpFile().toLowerCase().lastIndexOf(".inp"));
+
+            LOG.warn("SPS does not like the file extension.INP, removing (" + inpFile + ")");
+            spsTask.setParameter("inp", inpFile);
+        } else {
+            spsTask.setParameter("inp", swmmInput.getInpFile());
+        }
         // eta calculation is now performed on client side, this is just used for r720,1
         spsTask.setParameter("eta", "linz_v1");
 
@@ -408,6 +432,9 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
         final String domain = SessionManager.getSession().getUser().getDomain();
         final MetaClass swmmResultClass = ClassCacheMultiple.getMetaClass(domain, TABLENAME_LINZ_SWMM_RESULT);
         final int swmmProjectId = swmmOutput.getSwmmProject();
+        if (swmmProjectId == -1) {
+            LOG.warn("swmmProjectId of SWMM Output '" + swmmOutput + "' is -1!");
+        }
         final MetaClass csoClass = ClassCacheMultiple.getMetaClass(domain, SwmmPlusEtaWizardAction.TABLENAME_CSOS);
         if (LOG.isDebugEnabled()) {
             LOG.debug("synchronizing CSO IDs with CSO objects in meta database for SWMM Project " + swmmProjectId);

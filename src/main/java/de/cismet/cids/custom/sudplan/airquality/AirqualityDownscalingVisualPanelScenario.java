@@ -12,13 +12,10 @@ import org.apache.log4j.Logger;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
-import java.awt.EventQueue;
-
 import java.util.Arrays;
 import java.util.MissingResourceException;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JDialog;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -190,27 +187,6 @@ public final class AirqualityDownscalingVisualPanelScenario extends javax.swing.
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblDescriptionValue, gridBagConstraints);
     }                                                                                  // </editor-fold>//GEN-END:initComponents
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    final JDialog dialog = new JDialog();
-                    dialog.setContentPane(
-                        new AirqualityDownscalingVisualPanelScenario(new AirqualityDownscalingWizardPanelScenario()));
-                    dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-                    dialog.setLocationRelativeTo(null);
-                    dialog.pack();
-                    dialog.setVisible(true);
-                }
-            });
-    }
 
     //~ Inner Classes ----------------------------------------------------------
 

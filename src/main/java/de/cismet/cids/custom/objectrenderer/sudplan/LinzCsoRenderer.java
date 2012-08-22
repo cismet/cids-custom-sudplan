@@ -16,26 +16,19 @@ import Sirius.navigator.ui.ComponentRegistry;
 import Sirius.navigator.ui.RequestsFullSizeComponent;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.BasicConfigurator;
 
 import org.jdesktop.swingx.JXHyperlink;
 
-import org.openide.util.Exceptions;
 import org.openide.util.WeakListeners;
 
 import java.awt.*;
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +40,6 @@ import java.lang.ref.SoftReference;
 import java.net.URLEncoder;
 
 import java.util.*;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
@@ -60,8 +52,6 @@ import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.border.Border;
-
-import de.cismet.cids.client.tools.DevelopmentTools;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.ImageUtil;
@@ -1249,38 +1239,6 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
     @Override
     public JComponent getFooterComponent() {
         return panFooter;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        try {
-            BasicConfigurator.configure();
-            final CidsBean cso = DevelopmentTools.createCidsBeanFromRMIConnectionOnLocalhost(
-                    "SUDPLAN",
-                    "Administratoren",
-                    "admin",
-                    "cismetz12",
-                    "linz_cso",
-                    6);
-
-            final LinzCsoRenderer linzCsoRenderer = new LinzCsoRenderer();
-            linzCsoRenderer.setCidsBean(cso);
-            // linzCsoRenderer.init();
-            linzCsoRenderer.setPreferredSize(new java.awt.Dimension(800, 600));
-            final JFrame frame = new JFrame("LinzCsoRenderer");
-            frame.getContentPane().add(linzCsoRenderer, BorderLayout.CENTER);
-            frame.getContentPane().add(linzCsoRenderer.getTitleComponent(), BorderLayout.NORTH);
-            frame.getContentPane().add(linzCsoRenderer.getFooterComponent(), BorderLayout.SOUTH);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.pack();
-            frame.setVisible(true);
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-        }
     }
 
     //~ Inner Classes ----------------------------------------------------------

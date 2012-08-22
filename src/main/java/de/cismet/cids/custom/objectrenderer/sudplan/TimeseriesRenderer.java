@@ -7,31 +7,21 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
-import Sirius.navigator.ui.ComponentRegistry;
-
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
-import org.openide.util.WeakListeners;
 
 import java.awt.BorderLayout;
 
 import java.net.MalformedURLException;
 
-import java.text.MessageFormat;
-
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
-import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
-import de.cismet.cids.custom.sudplan.dataExport.TimeSeriesExportWizardAction;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
-import de.cismet.cids.custom.sudplan.timeseriesVisualisation.listeners.TimeSeriesListChangedListener;
 
 /**
  * DOCUMENT ME!
@@ -48,7 +38,6 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
     //~ Instance fields --------------------------------------------------------
 
     private transient TimeseriesChartPanel panel;
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkforecast;
     private javax.swing.JPanel pnlFiller;
@@ -70,19 +59,14 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
     /**
      * DOCUMENT ME!
      *
-     * @param   resolution  DOCUMENT ME!
-     *
      * @throws  RuntimeException  MalformedURLException DOCUMENT ME!
      */
-    private void setTimeSeriesPanel(final Resolution resolution) {
+    private void setTimeSeriesPanel() {
         try {
             final String uri = (String)cidsBean.getProperty("uri"); // NOI18N
             final TimeseriesConverter converter = SMSUtils.loadConverter(cidsBean);
 
-            TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
-            if (resolution != null) {
-                config = config.changeResolution(resolution);
-            }
+            final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
 
             final TimeseriesRetrieverConfig tsrConfig = config;
 
@@ -94,36 +78,13 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
                             TimeseriesRenderer.this.remove(panel);
                         }
 
-                        TimeseriesRenderer.this.panel = new TimeseriesChartPanel(tsrConfig, converter);
+                        TimeseriesRenderer.this.panel = new TimeseriesChartPanel(tsrConfig, converter, true);
                         TimeseriesRenderer.this.add(TimeseriesRenderer.this.panel, BorderLayout.CENTER);
 
                         TimeseriesRenderer.this.invalidate();
                         TimeseriesRenderer.this.validate();
                     }
                 });
-        } catch (final IllegalStateException e) {
-            if (resolution == null) {
-                LOG.error("An error occured while retrieving original TimeSeries", e); // NOI18N
-                throw e;
-            } else {
-                // most likely, there is no TimeSeries with the specified resolution
-                LOG.warn("An error occured while retrieving TimeSeries with resolution " + resolution, e);            // NOI18N
-                final int answer = JOptionPane.showConfirmDialog(
-                        ComponentRegistry.getRegistry().getMainWindow(),
-                        MessageFormat.format(
-                            java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle")
-                                        .getString(
-                                            "TimeseriesRenderer.setTimeSeriesPanel(Resolution).JOptionPane.message"), // NOI18N
-                            resolution.getLocalisedName()),
-                        java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle")
-                                    .getString("TimeseriesRenderer.setTimeSeriesPanel(Resolution).JOptionPane.title"),
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE);
-
-                if (answer == JOptionPane.YES_OPTION) {
-                    this.setTimeSeriesPanel(null);
-                }
-            }
         } catch (final MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -134,22 +95,22 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         bindingGroup.unbind();
         bindingGroup.bind();
 
-        try {
-            final String uri = (String)cidsBean.getProperty("uri"); // NOI18N
-            final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
+//        try {
+//            final String uri = (String) cidsBean.getProperty("uri"); // NOI18N
+//            final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
 
 //            final TimeSeriesExportWizardAction action = (TimeSeriesExportWizardAction)btnExport.getAction();
 //            action.setTimeseriesRetrieverConfig(config);
 //            btnExport.setEnabled(true);
 
-            this.setTimeSeriesPanel(TimeSeriesRendererUtil.getPreviewResolution(config));
-        } catch (final MalformedURLException ex) {
+        this.setTimeSeriesPanel();
+//        } catch (final MalformedURLException ex) {
 //            btnExport.setEnabled(false);
 
-            final String message = "cidsbean contains invalid uri"; // NOI18N
-            LOG.error(message, ex);
-            throw new IllegalStateException(message, ex);
-        }
+//            final String message = "cidsbean contains invalid uri"; // NOI18N
+//            LOG.error(message, ex);
+//            throw new IllegalStateException(message, ex);
+//        }
     }
 
     @Override

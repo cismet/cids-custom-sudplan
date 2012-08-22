@@ -45,6 +45,8 @@ import java.util.NavigableSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import javax.swing.JPanel;
+
 import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
@@ -954,6 +956,11 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             hash = (43 * hash) + ((this.fileToSaveTo != null) ? this.fileToSaveTo.hashCode() : 0);
 
             return hash;
+        }
+
+        @Override
+        public JPanel getExceptionPanel(final Exception exception) {
+            return null;
         }
     }
 }

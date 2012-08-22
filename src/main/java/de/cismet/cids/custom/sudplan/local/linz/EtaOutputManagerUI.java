@@ -51,20 +51,20 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
 
     //~ Instance fields --------------------------------------------------------
 
-    final Section[] SECTION_ETA_SED_75 = {
-            new Section(0, 65, new java.awt.Color(1.0f, 0.0f, 0.0f, 0.3f)),
-            new Section(65, 75, new java.awt.Color(1.0f, 1.0f, 0.0f, 0.3f)),
-            new Section(75, 100, new java.awt.Color(0.0f, 1.0f, 0.0f, 0.3f)),
-        };
     final Section[] R720 = {
             new Section(0, 30, new java.awt.Color(1.0f, 0.0f, 0.0f, 0.3f)),
             new Section(30, 50, new java.awt.Color(1.0f, 1.0f, 0.0f, 0.3f)),
             new Section(50, 100, new java.awt.Color(0.0f, 1.0f, 0.0f, 0.3f)),
         };
+    final Section[] SECTION_ETA_SED_75 = {
+            new Section(0, 65, new java.awt.Color(1.0f, 0.0f, 0.0f, 0.3f)),
+            new Section(65, 75, new java.awt.Color(1.0f, 1.0f, 0.0f, 0.3f)),
+            new Section(75, 100, new java.awt.Color(0.0f, 1.0f, 0.0f, 0.3f)),
+        };
     private final Section[] SECTION_ETA_HYD_50 = {
             new Section(0, 40, new java.awt.Color(1.0f, 0.0f, 0.0f, 0.3f)),
             new Section(40, 50, new java.awt.Color(1.0f, 1.0f, 0.0f, 0.3f)),
-            new Section(60, 100, new java.awt.Color(0.0f, 1.0f, 0.0f, 0.3f)),
+            new Section(50, 100, new java.awt.Color(0.0f, 1.0f, 0.0f, 0.3f)),
         };
     private final Section[] SECTION_ETA_HYD_60 = {
             new Section(0, 50, new java.awt.Color(1.0f, 0.0f, 0.0f, 0.3f)),
@@ -136,24 +136,22 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
      * @param  etaOutput  DOCUMENT ME!
      */
     private void updateGauges(final EtaOutput etaOutput) {
+        final int etaHydRequired = (int)etaOutput.getEtaHydRequired();
+        final int etaSedRequired = (int)etaOutput.getEtaSedRequired();
+
         this.etaHydGauge.setThreshold(etaOutput.getEtaHydRequired());
         this.etaHydGauge.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaHydActual()));
-        switch ((int)etaOutput.getEtaHydRequired()) {
-            case 50: {
-                this.etaHydGauge.setSections(SECTION_ETA_HYD_50);
-                this.etaHydGauge.setAreas(SECTION_ETA_HYD_50);
-            }
 
-            case 60: {
-                this.etaHydGauge.setSections(SECTION_ETA_HYD_60);
-                this.etaHydGauge.setAreas(SECTION_ETA_HYD_60);
-            }
-
-            default: {
-                LOG.warn("ETA HYD not in expected range (50-60):" + etaOutput.getEtaHydRequired());
-                this.etaHydGauge.setSections(SECTION_ETA_HYD_60);
-                this.etaHydGauge.setAreas(SECTION_ETA_HYD_60);
-            }
+        if (etaHydRequired <= 50) {
+            this.etaHydGauge.setSections(SECTION_ETA_HYD_50);
+            this.etaHydGauge.setAreas(SECTION_ETA_HYD_50);
+        } else if (etaHydRequired <= 60) {
+            this.etaHydGauge.setSections(SECTION_ETA_HYD_60);
+            this.etaHydGauge.setAreas(SECTION_ETA_HYD_60);
+        } else {
+            LOG.warn("ETA HYD not in expected range (50-60):" + etaOutput.getEtaHydRequired());
+            this.etaHydGauge.setSections(SECTION_ETA_HYD_60);
+            this.etaHydGauge.setAreas(SECTION_ETA_HYD_60);
         }
 
         if (etaOutput.getEtaHydActual() >= etaOutput.getEtaHydRequired()) {
@@ -166,22 +164,17 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
 
         this.etaSedGauge.setThreshold(etaOutput.getEtaSedRequired());
         this.etaSedGauge.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaSedActual()));
-        switch ((int)etaOutput.getEtaSedRequired()) {
-            case 50: {
-                this.etaSedGauge.setSections(SECTION_ETA_SED_65);
-                this.etaSedGauge.setAreas(SECTION_ETA_SED_65);
-            }
 
-            case 60: {
-                this.etaSedGauge.setSections(SECTION_ETA_SED_75);
-                this.etaSedGauge.setAreas(SECTION_ETA_SED_75);
-            }
-
-            default: {
-                LOG.warn("ETA SED not in expected range (65-75):" + etaOutput.getEtaSedRequired());
-                this.etaSedGauge.setSections(SECTION_ETA_SED_75);
-                this.etaSedGauge.setAreas(SECTION_ETA_SED_75);
-            }
+        if (etaSedRequired <= 65) {
+            this.etaSedGauge.setSections(SECTION_ETA_SED_65);
+            this.etaSedGauge.setAreas(SECTION_ETA_SED_65);
+        } else if (etaSedRequired <= 75) {
+            this.etaSedGauge.setSections(SECTION_ETA_SED_75);
+            this.etaSedGauge.setAreas(SECTION_ETA_SED_75);
+        } else {
+            LOG.warn("ETA SED not in expected range (65-75):" + etaOutput.getEtaSedRequired());
+            this.etaSedGauge.setSections(SECTION_ETA_SED_75);
+            this.etaSedGauge.setAreas(SECTION_ETA_SED_75);
         }
 
         if (etaOutput.getEtaSedActual() >= etaOutput.getEtaSedRequired()) {
@@ -295,31 +288,6 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         } else {
             LOG.error("error initilaising UI: no cidsbean(s) set");
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        final EtaOutputManagerUI etaOutputManagerUI = new EtaOutputManagerUI();
-
-        final EtaOutput etaOutput = new EtaOutput();
-        etaOutput.setEtaHydActual(73.17948f);
-        etaOutput.setEtaHydRequired(60);
-        etaOutput.setEtaSedActual(78.41792f);
-        etaOutput.setEtaSedRequired(75);
-        etaOutput.setR720(14.227189f);
-        etaOutput.setTotalOverflowVolume(610.362f);
-
-        etaOutputManagerUI.updateGauges(etaOutput);
-
-        final JFrame frame = new JFrame("EtaOutputManagerUI");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(etaOutputManagerUI);
-        frame.pack();
-        frame.setVisible(true);
     }
 
     /**

@@ -27,6 +27,7 @@ import de.cismet.cids.custom.sudplan.concurrent.ProgressWatch;
 
 import de.cismet.cids.dynamics.CidsBean;
 
+import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.Download;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
@@ -55,7 +56,9 @@ public abstract class AbstractAsyncModelManager extends AbstractModelManager imp
             throw new IllegalArgumentException("progressevent must not be null"); // NOI18N
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug("progress: " + event);
+            LOG.debug(cidsBean + " progress: '" + event.getMessage() + "' (" + event.getStep()
+                        + "/" + event.getMaxSteps() + ") = " + event.getState()
+                        + ", source = '" + event.getSource() + "' (" + this + ")");
         }
         if (event.getSource() instanceof AbstractModelRunWatchable) {
             final AbstractModelRunWatchable amrw = (AbstractModelRunWatchable)event.getSource();
@@ -133,7 +136,7 @@ public abstract class AbstractAsyncModelManager extends AbstractModelManager imp
 
             if (JOptionPane.YES_OPTION == answer) {
                 final JDialog dialog = DownloadManagerDialog.instance(ComponentRegistry.getRegistry().getMainWindow());
-                dialog.setVisible(true);
+                StaticSwingTools.showDialog(dialog);
                 dialog.toFront();
 
                 final Observer dlObs = new DownloadObserver(amrw);

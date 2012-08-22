@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import Sirius.navigator.ui.ComponentRegistry;
+
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
 import org.apache.log4j.Logger;
@@ -28,15 +30,21 @@ import java.io.IOException;
 
 import java.net.MalformedURLException;
 
+import java.text.MessageFormat;
+
 import java.util.HashMap;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import javax.swing.*;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.border.LineBorder;
 
+import de.cismet.cids.custom.objectrenderer.sudplan.TimeSeriesRendererUtil;
 import de.cismet.cids.custom.sudplan.converter.TimeSeriesSerializer;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.Controllable;
@@ -74,6 +82,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     private final transient TimeseriesDisplayer displayer;
     private TimeSeriesVisualisation tsVis;
     private JPanel pnlToolbar = new JPanel();
+    private boolean showPrevRes;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private de.cismet.cids.custom.sudplan.LoadingLabel lblLoading;
     // End of variables declaration//GEN-END:variables
@@ -83,83 +92,99 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * Creates new form TimeseriesFeatureRenderer.
      *
-     * @param   uri  DOCUMENT ME!
+     * @param   uri                    DOCUMENT ME!
+     * @param   showPreviewResolution  DOCUMENT ME!
      *
      * @throws  MalformedURLException  DOCUMENT ME!
      */
-    public TimeseriesChartPanel(final String uri) throws MalformedURLException {
-        this(TimeseriesRetrieverConfig.fromUrl(uri), false, null, null);
+    public TimeseriesChartPanel(final String uri, final boolean showPreviewResolution) throws MalformedURLException {
+        this(TimeseriesRetrieverConfig.fromUrl(uri), false, null, null, showPreviewResolution);
     }
 
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param  config  DOCUMENT ME!
+     * @param  config                 DOCUMENT ME!
+     * @param  showPreviewResolution  DOCUMENT ME!
      */
-    public TimeseriesChartPanel(final TimeseriesRetrieverConfig config) {
-        this(config, false, null, null);
+    public TimeseriesChartPanel(final TimeseriesRetrieverConfig config, final boolean showPreviewResolution) {
+        this(config, false, null, null, showPreviewResolution);
     }
 
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param   uri        DOCUMENT ME!
-     * @param   converter  DOCUMENT ME!
+     * @param   uri                    DOCUMENT ME!
+     * @param   converter              DOCUMENT ME!
+     * @param   showPreviewResolution  DOCUMENT ME!
      *
      * @throws  MalformedURLException  DOCUMENT ME!
      */
-    public TimeseriesChartPanel(final String uri, final TimeseriesConverter converter) throws MalformedURLException {
-        this(TimeseriesRetrieverConfig.fromUrl(uri), false, null, converter);
+    public TimeseriesChartPanel(final String uri,
+            final TimeseriesConverter converter,
+            final boolean showPreviewResolution) throws MalformedURLException {
+        this(TimeseriesRetrieverConfig.fromUrl(uri), false, null, converter, showPreviewResolution);
     }
 
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param  config     DOCUMENT ME!
-     * @param  converter  DOCUMENT ME!
+     * @param  config                 DOCUMENT ME!
+     * @param  converter              DOCUMENT ME!
+     * @param  showPreviewResolution  DOCUMENT ME!
      */
-    public TimeseriesChartPanel(final TimeseriesRetrieverConfig config, final TimeseriesConverter converter) {
-        this(config, false, null, converter);
+    public TimeseriesChartPanel(final TimeseriesRetrieverConfig config,
+            final TimeseriesConverter converter,
+            final boolean showPreviewResolution) {
+        this(config, false, null, converter, showPreviewResolution);
     }
 
     /**
      * Creates new form TimeseriesFeatureRenderer.
      *
-     * @param   uri          DOCUMENT ME!
-     * @param   refreshable  DOCUMENT ME!
+     * @param   uri                    DOCUMENT ME!
+     * @param   refreshable            DOCUMENT ME!
+     * @param   showPreviewResolution  DOCUMENT ME!
      *
      * @throws  MalformedURLException  DOCUMENT ME!
      */
-    public TimeseriesChartPanel(final String uri, final Refreshable refreshable) throws MalformedURLException {
-        this(TimeseriesRetrieverConfig.fromUrl(uri), false, refreshable, null);
+    public TimeseriesChartPanel(final String uri, final Refreshable refreshable, final boolean showPreviewResolution)
+            throws MalformedURLException {
+        this(TimeseriesRetrieverConfig.fromUrl(uri), false, refreshable, null, showPreviewResolution);
     }
 
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param  config             DOCUMENT ME!
-     * @param  cacheImmedialtely  DOCUMENT ME!
+     * @param  config                 DOCUMENT ME!
+     * @param  cacheImmedialtely      DOCUMENT ME!
+     * @param  showPreviewResolution  DOCUMENT ME!
      */
-    public TimeseriesChartPanel(final TimeseriesRetrieverConfig config, final boolean cacheImmedialtely) {
-        this(config, cacheImmedialtely, null, null);
+    public TimeseriesChartPanel(final TimeseriesRetrieverConfig config,
+            final boolean cacheImmedialtely,
+            final boolean showPreviewResolution) {
+        this(config, cacheImmedialtely, null, null, showPreviewResolution);
     }
 
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param   configs            DOCUMENT ME!
-     * @param   cacheImmedialtely  DOCUMENT ME!
-     * @param   refreshable        DOCUMENT ME!
+     * @param   configs                DOCUMENT ME!
+     * @param   cacheImmedialtely      DOCUMENT ME!
+     * @param   refreshable            DOCUMENT ME!
+     * @param   showPreviewResolution  DOCUMENT ME!
      *
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final HashMap<TimeseriesRetrieverConfig, TimeseriesConverter> configs,
             final boolean cacheImmedialtely,
-            final Refreshable refreshable) {
+            final Refreshable refreshable,
+            final boolean showPreviewResolution) {
         this.configs = configs;
         if (configs == null) {
             throw new IllegalArgumentException("config must not be null"); // NOI18N
         }
+        this.showPrevRes = showPreviewResolution;
         this.cached = cacheImmedialtely;
         this.refreshable = refreshable;
         this.displayer = new TimeseriesDisplayer();
@@ -170,21 +195,23 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     /**
      * Creates a new TimeseriesChartPanel object.
      *
-     * @param   config            DOCUMENT ME!
-     * @param   cacheImmediately  DOCUMENT ME!
-     * @param   refreshable       DOCUMENT ME!
-     * @param   converter         DOCUMENT ME!
+     * @param   config                 DOCUMENT ME!
+     * @param   cacheImmediately       DOCUMENT ME!
+     * @param   refreshable            DOCUMENT ME!
+     * @param   converter              DOCUMENT ME!
+     * @param   showPreviewResolution  DOCUMENT ME!
      *
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     public TimeseriesChartPanel(final TimeseriesRetrieverConfig config,
             final boolean cacheImmediately,
             final Refreshable refreshable,
-            final TimeseriesConverter converter) {
+            final TimeseriesConverter converter,
+            final boolean showPreviewResolution) {
         if (config == null) {
             throw new IllegalArgumentException("config must not be null"); // NOI18N
         }
-
+        this.showPrevRes = showPreviewResolution;
         this.refreshable = refreshable;
         cached = cacheImmediately;
         this.configs = new HashMap<TimeseriesRetrieverConfig, TimeseriesConverter>();
@@ -307,10 +334,12 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
     @Override
     public void showOrigTS(final TimeSeries ts) {
         final TimeseriesRetrieverConfig cfg = tsMap.get(ts);
+
+        tsVis.removeTimeSeries(ts);
         this.removeAll();
-        initComponents();
-        initTimeSeriesChart();
-        displayer.execute();
+        this.initComponents();
+        final OriginalTimeSeriesLoader loader = new OriginalTimeSeriesLoader(cfg);
+        loader.execute();
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -320,7 +349,154 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
      *
      * @version  $Revision$, $Date$
      */
+    private final class OriginalTimeSeriesLoader extends SwingWorker<Void, Void> {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private TimeseriesRetrieverConfig config;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new OriginalTimeSeriesLoader object.
+         *
+         * @param  cfg  DOCUMENT ME!
+         */
+        public OriginalTimeSeriesLoader(final TimeseriesRetrieverConfig cfg) {
+            this.config = cfg;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            Future<TimeSeries> tsFuture = null;
+            try {
+                final TimeseriesConverter converter;
+                if (TimeseriesRetrieverConfig.PROTOCOL_DAV.equals(config.getProtocol())) {
+                    converter = TimeSeriesSerializer.getInstance();
+                } else {
+                    converter = configs.get(config);
+                }
+
+                // set preview resolution
+
+                tsFuture = TimeseriesRetriever.getInstance().retrieve(config, converter);
+                final TimeSeries timeseries = tsFuture.get();
+                final String name = config.getObsProp();
+                String humanReadableObsProp = "";
+                if (name != null) {
+                    final String[] splittedName = name.split(":");
+                    humanReadableObsProp = splittedName[splittedName.length - 1];
+                }
+                timeseries.setTSProperty(TimeSeries.OBSERVEDPROPERTY, humanReadableObsProp);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("retrieved timeseries");                                        // NOI18N
+                }
+                tsMap.put(timeseries, config);
+                tsVis.addTimeSeries(timeseries);
+//                    count++;
+            } catch (final InterruptedException ex) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("chartpanel was interrupted, cancelling retriever future", ex); // NOI18N
+                }
+
+                final boolean flag = tsFuture.cancel(true);
+
+                if (!flag) {
+                    Log.error("Can not abort TimeSeries Retriever");
+                }
+
+                throw ex;
+            } catch (final Exception ex) {
+                LOG.error("cannot create chart", ex); // NOI18N
+                throw ex;
+            }
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("timeseries chart is ready"); // NOI18N
+            }
+
+            if (cached) {
+                performCaching();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                if (!cached) {
+                    final JComponent comp = tsVis.getVisualisationUI();
+                    comp.setBorder(new LineBorder(Color.black, 1));
+                    remove(lblLoading);
+                    lblLoading.dispose();
+                    final java.awt.GridBagConstraints gridBagConstraints;
+                    gridBagConstraints = new java.awt.GridBagConstraints();
+                    gridBagConstraints.gridx = 0;
+                    gridBagConstraints.gridy = 1;
+                    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+                    gridBagConstraints.weightx = 1.0;
+                    gridBagConstraints.weighty = 1.0;
+                    gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
+                    add(comp, gridBagConstraints);
+
+                    pnlToolbar.setMinimumSize(new java.awt.Dimension(10, 32));
+                    pnlToolbar.setOpaque(false);
+                    pnlToolbar.setPreferredSize(new java.awt.Dimension(10, 32));
+                    pnlToolbar.setLayout(new java.awt.BorderLayout());
+                    gridBagConstraints.gridx = 0;
+                    gridBagConstraints.gridy = 0;
+                    gridBagConstraints.weightx = 0;
+                    gridBagConstraints.weighty = 0;
+                    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+                    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+                    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+                    gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
+                    add(pnlToolbar, gridBagConstraints);
+                    final TimeSeriesChartToolBar toolbar = (TimeSeriesChartToolBar)tsVis.getToolbar();
+                    toolbar.enableMapButton(false);
+                    toolbar.enableOperationsMenue(false);
+                    toolbar.setOpaque(false);
+
+                    toolbar.addShowOrigTSListener(TimeseriesChartPanel.this);
+                    pnlToolbar.add(toolbar, BorderLayout.WEST);
+
+                    final Controllable tsVisController = tsVis.getLookup(Controllable.class);
+                    tsVisController.enableContextMenu(true);
+                    tsVisController.enableToolTips(true);
+
+                    Container parent = TimeseriesChartPanel.this;
+                    Container current = getParent();
+                    while (current != null) {
+                        parent = current;
+                        current = parent.getParent();
+                    }
+                    parent.invalidate();
+                    parent.validate();
+                    CismapBroker.getInstance().getMappingComponent().rescaleStickyNodes();
+                }
+            } catch (final Exception e) {
+                final String message = "cannot create chart";  // NOI18N
+                LOG.error(message, e);
+                setLayout(new BorderLayout());
+                add(new JLabel("ERROR"), BorderLayout.CENTER); // NOI18N
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
     private final class TimeseriesDisplayer extends SwingWorker<Void, Void> {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private boolean showOrigButtonNeeded = false;
+        private final Pattern regex = Pattern.compile(".*prec:(\\d+[YMs])");
 
         //~ Methods ------------------------------------------------------------
 
@@ -338,12 +514,33 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
             }
 
             Future<TimeSeries> tsFuture = null;
+            Resolution resolution = null;
+            TimeseriesRetrieverConfig config = null;
             int count = 0;
             try {
-                for (final TimeseriesRetrieverConfig config : configs.keySet()) {
+                for (final TimeseriesRetrieverConfig tmp : configs.keySet()) {
+                    final TimeseriesConverter converter;
+                    config = tmp;
+                    // set preview resolution
+                    final String procedure = tmp.getProcedure();
+                    final Matcher m = regex.matcher(procedure);
+
+                    if (m.matches()) {
+                        final String precision = m.group(1);
+                        if ((precision.equals(Resolution.DAY.getPrecision())
+                                        || precision.equals(Resolution.HOUR.getPrecision()))) {
+                            showOrigButtonNeeded = true;
+                        }
+                    } else {
+                        showOrigButtonNeeded = true;
+                    }
+                    resolution = TimeSeriesRendererUtil.getPreviewResolution(config);
+                    if (TimeseriesChartPanel.this.showPrevRes && (resolution != null)) {
+                        config = config.changeResolution(resolution);
+                    }
+
                     // if TimeSeries data is located on DAV, we can assume that it is encoded in the
                     // internal format (TimeSeriesSerializer)
-                    final TimeseriesConverter converter;
                     if (TimeseriesRetrieverConfig.PROTOCOL_DAV.equals(config.getProtocol())) {
                         converter = TimeSeriesSerializer.getInstance();
                     } else {
@@ -362,9 +559,34 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("retrieved timeseries"); // NOI18N
                     }
-                    tsMap.put(timeseries, config);
+                    tsMap.put(timeseries, tmp);
                     tsVis.addTimeSeries(timeseries);
                     count++;
+                }
+            } catch (final IllegalStateException e) {
+                if (resolution == null) {
+                    LOG.error("An error occured while retrieving original TimeSeries", e); // NOI18N
+                    throw e;
+                } else {
+                    // most likely, there is no TimeSeries with the specified resolution
+                    LOG.warn("An error occured while retrieving TimeSeries with resolution " + resolution, e); // NOI18N
+                    final int answer = JOptionPane.showConfirmDialog(
+                            ComponentRegistry.getRegistry().getMainWindow(),
+                            MessageFormat.format(
+                                java.util.ResourceBundle.getBundle(
+                                    "de/cismet/cids/custom/objectrenderer/sudplan/Bundle").getString(
+                                    "TimeseriesRenderer.setTimeSeriesPanel(Resolution).JOptionPane.message"),  // NOI18N
+                                resolution.getLocalisedName()),
+                            java.util.ResourceBundle.getBundle("de/cismet/cids/custom/objectrenderer/sudplan/Bundle")
+                                        .getString(
+                                            "TimeseriesRenderer.setTimeSeriesPanel(Resolution).JOptionPane.title"),
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE);
+
+                    if (answer == JOptionPane.YES_OPTION) {
+                        final OriginalTimeSeriesLoader loader = new OriginalTimeSeriesLoader(config);
+                        loader.execute();
+                    }
                 }
             } catch (final InterruptedException ex) {
                 if (LOG.isDebugEnabled()) {
@@ -432,6 +654,9 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                     toolbar.enableMapButton(false);
                     toolbar.enableOperationsMenue(false);
                     toolbar.setOpaque(false);
+                    if (!showOrigButtonNeeded) {
+                        toolbar.setShowOrigButtonEnabled(false);
+                    }
 
                     toolbar.addShowOrigTSListener(TimeseriesChartPanel.this);
                     pnlToolbar.add(toolbar, BorderLayout.WEST);

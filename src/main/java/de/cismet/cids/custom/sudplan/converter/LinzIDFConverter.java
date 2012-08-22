@@ -34,7 +34,7 @@ public final class LinzIDFConverter implements IDFConverter {
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public IDFCurve convertForward(final InputStream from) throws ConversionException {
+    public IDFCurve convertForward(final InputStream from, final String... params) throws ConversionException {
         try {
             final IDFCurve curve = new IDFCurve();
             final BufferedReader r = new BufferedReader(new InputStreamReader(from));
@@ -69,14 +69,15 @@ public final class LinzIDFConverter implements IDFConverter {
     /**
      * DOCUMENT ME!
      *
-     * @param   to  DOCUMENT ME!
+     * @param   to      DOCUMENT ME!
+     * @param   params  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      *
      * @throws  ConversionException  DOCUMENT ME!
      */
     @Override
-    public InputStream convertBackward(final IDFCurve to) throws ConversionException {
+    public InputStream convertBackward(final IDFCurve to, final String... params) throws ConversionException {
         final String lineSep = System.getProperty("line.separator"); // NOI18N
         final char sep = '\t';
 

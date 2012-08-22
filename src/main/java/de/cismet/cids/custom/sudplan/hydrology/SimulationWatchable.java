@@ -158,7 +158,7 @@ public final class SimulationWatchable extends AbstractModelRunWatchable {
 
                 final URL tsUrl = new URL(TimeSeriesRemoteHelper.DAV_HOST + "/" + tsOffering); // NOI18N
                 final Future<Boolean> ttFuture = TimeseriesTransmitter.getInstance()
-                            .put(tsUrl, ts, TimeSeriesRemoteHelper.CREDS);
+                            .put(tsUrl, ts, TimeSeriesRemoteHelper.DAV_CREDS);
 
                 if (!ttFuture.get()) {
                     throw new IOException("could not put time series to dav"); // NOI18N

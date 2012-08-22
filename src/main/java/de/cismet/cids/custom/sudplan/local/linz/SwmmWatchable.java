@@ -150,10 +150,11 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
                     setStatus(State.RUNNING);
 
                     try {
-                        LOG.info("SWMM Model completed");
+                        LOG.info("SWMM Model Run of SPS Task '" + runInfo.getSpsTaskId() + "' completed");
                         final Properties[] resultProperties = spsTask.getResults();
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(resultProperties.length + " results retrieved");
+                            LOG.debug(resultProperties.length + " results of SPS Task '" + runInfo.getSpsTaskId()
+                                        + "' retrieved");
                         }
                         for (final Properties resultProperty : resultProperties) {
                             final String serviceType = resultProperty.getProperty("ts:result_service_type");
@@ -351,8 +352,8 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
 
         final TimeStamp timeStamp = resultTS.getTimeStamps().first();
         final Object oKeys = resultTS.getTSProperty(TimeSeries.VALUE_KEYS);
-        if ((oKeys == null) || !(oKeys instanceof String[]) || (((String[])oKeys).length != 3)) {
-            throw new Exception("VALUE_KEYS of SWMM result not defined or VALUE_KEYS not of type String[]");
+        if ((oKeys == null) || !(oKeys instanceof String[]) || (((String[])oKeys).length != 4)) {
+            throw new Exception("VALUE_KEYS of SWMM result not defined or VALUE_KEYS not of type String[]: " + oKeys);
         }
 
         try {
@@ -363,7 +364,7 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
                 }
             }
         } catch (Throwable t) {
-            LOG.warn(t);
+            LOG.warn("cannot determine types of value keys: " + t.getMessage(), t);
         }
 
         final String[] nodes = (String[])resultTS.getValue(timeStamp, "nodes");
@@ -371,7 +372,8 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
         final Float[] volumes = (Float[])resultTS.getValue(timeStamp, "volumes");
 
         if ((nodes.length == 0) || (nodes.length != volumes.length) || (nodes.length != frequencys.length)) {
-            throw new Exception("VALUEs of SWMM result invalid");
+            throw new Exception("VALUEs of SWMM result invalid: " + nodes.length + " nodes, "
+                        + volumes.length + " volumes, " + frequencys.length + " frequencys");
         }
 
         int i = 0;

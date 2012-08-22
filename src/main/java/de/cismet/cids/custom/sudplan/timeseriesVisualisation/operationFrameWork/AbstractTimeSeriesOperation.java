@@ -30,6 +30,8 @@ import javax.swing.SwingWorker;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
 
+import de.cismet.tools.gui.StaticSwingTools;
+
 /**
  * A <code>AbstractTimeSeriesOperation</code> represents the default implementation for <code>TimeSeriesOperation</code>
  * Create a subclass of it to implement your own TimeSeriesOperation and add the operation code into the method <code>
@@ -147,9 +149,9 @@ public abstract class AbstractTimeSeriesOperation extends AbstractAction impleme
         }
         final Frame f = ComponentRegistry.getRegistry().getMainWindow();
         final DefaultParamOrderUI dialog = new DefaultParamOrderUI(f, true, paramCount, tsList, this, tsVis);
-        dialog.setLocationRelativeTo(f);
         dialog.pack();
-        dialog.setVisible(true);
+        StaticSwingTools.showDialog(dialog);
+
         if (dialog.getReturnStatus() == (DefaultParamOrderUI.RET_OK)) {
             final OperationCalculator calculator = new OperationCalculator();
             calculator.execute();
