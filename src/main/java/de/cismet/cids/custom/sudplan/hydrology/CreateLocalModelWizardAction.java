@@ -51,6 +51,8 @@ import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
+import de.cismet.tools.gui.StaticSwingTools;
+
 /**
  * DOCUMENT ME!
  *
@@ -292,7 +294,7 @@ public final class CreateLocalModelWizardAction extends AbstractAction {
                     }
                 });
 
-        dialog.setVisible(true);
+        StaticSwingTools.showDialog(dialog);
 
         if (pane.getValue() == null) {
             try {
