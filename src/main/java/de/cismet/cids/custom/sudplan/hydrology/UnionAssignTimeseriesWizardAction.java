@@ -53,6 +53,7 @@ import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.security.AccessHandler.ACCESS_METHODS;
 
 import de.cismet.security.WebAccessManager;
+
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
@@ -196,7 +197,7 @@ public final class UnionAssignTimeseriesWizardAction extends AssignTimeseriesWiz
                                                     dialog,
                                                     "No results");
                                             StaticSwingTools.showDialog(noResultsDialog);
-                                          }
+                                        }
                                     });
 
                                 feature = null;
@@ -235,9 +236,8 @@ public final class UnionAssignTimeseriesWizardAction extends AssignTimeseriesWiz
                     }
                 });
 
-
         StaticSwingTools.showDialog(dialog);
-        
+
         if (pane.getValue() != null) {
             if (!task.isDone()) {
                 // the cancel button has been pressed

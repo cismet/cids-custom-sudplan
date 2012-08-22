@@ -29,6 +29,7 @@ import javax.swing.SwingWorker;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
+
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
@@ -150,7 +151,7 @@ public abstract class AbstractTimeSeriesOperation extends AbstractAction impleme
         final DefaultParamOrderUI dialog = new DefaultParamOrderUI(f, true, paramCount, tsList, this, tsVis);
         dialog.pack();
         StaticSwingTools.showDialog(dialog);
-        
+
         if (dialog.getReturnStatus() == (DefaultParamOrderUI.RET_OK)) {
             final OperationCalculator calculator = new OperationCalculator();
             calculator.execute();

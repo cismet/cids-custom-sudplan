@@ -8,6 +8,7 @@
 package de.cismet.cids.custom.sudplan.airquality.emissionupload;
 
 import Sirius.navigator.ui.ComponentRegistry;
+
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -170,16 +171,16 @@ public class EmissionUploadVisualPanelGrids extends javax.swing.JPanel {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnAddGridActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddGridActionPerformed
+    private void btnAddGridActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnAddGridActionPerformed
         lstGrids.clearSelection();
-    }//GEN-LAST:event_btnAddGridActionPerformed
+    }                                                                              //GEN-LAST:event_btnAddGridActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnSaveGridActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveGridActionPerformed
+    private void btnSaveGridActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnSaveGridActionPerformed
         final Grid grid = pnlGrid.saveGrid();
 
         if (!lstGridsModel.contains(grid)) {
@@ -188,14 +189,14 @@ public class EmissionUploadVisualPanelGrids extends javax.swing.JPanel {
 
         showSelectedGrid();
         model.setGrids(getGrids());
-    }//GEN-LAST:event_btnSaveGridActionPerformed
+    } //GEN-LAST:event_btnSaveGridActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnRemoveGridActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveGridActionPerformed
+    private void btnRemoveGridActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnRemoveGridActionPerformed
         final ListSelectionListener[] listeners = lstGrids.getListSelectionListeners();
 
         for (final ListSelectionListener listener : listeners) {
@@ -213,20 +214,20 @@ public class EmissionUploadVisualPanelGrids extends javax.swing.JPanel {
 
         showSelectedGrid();
         model.setGrids(getGrids());
-    }//GEN-LAST:event_btnRemoveGridActionPerformed
+    } //GEN-LAST:event_btnRemoveGridActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lstGridsValueChanged(final javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstGridsValueChanged
+    private void lstGridsValueChanged(final javax.swing.event.ListSelectionEvent evt) { //GEN-FIRST:event_lstGridsValueChanged
         if (evt.getValueIsAdjusting()) {
             return;
         }
 
         showSelectedGrid();
-    }//GEN-LAST:event_lstGridsValueChanged
+    } //GEN-LAST:event_lstGridsValueChanged
 
     /**
      * DOCUMENT ME!

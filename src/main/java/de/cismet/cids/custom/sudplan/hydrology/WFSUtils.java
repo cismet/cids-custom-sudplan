@@ -56,6 +56,7 @@ import de.cismet.cismap.commons.wfs.capabilities.deegree.DeegreeFeatureType;
 import de.cismet.security.AccessHandler.ACCESS_METHODS;
 
 import de.cismet.security.WebAccessManager;
+
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
@@ -360,7 +361,7 @@ public final class WFSUtils {
                         });
 
         StaticSwingTools.showDialog(dialog);
-        
+
         if (cancelOption.equals(pane.getValue())) {
             if (!task.isDone()) {
                 if (!task.cancel(true)) {
