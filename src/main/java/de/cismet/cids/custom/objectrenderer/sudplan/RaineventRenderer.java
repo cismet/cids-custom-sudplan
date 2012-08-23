@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import org.apache.log4j.Logger;
+
 import org.jfree.chart.ChartColor;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -26,13 +28,19 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+
+import java.util.Locale;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.border.LineBorder;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.tools.gui.TitleComponentProvider;
 
@@ -44,21 +52,23 @@ import de.cismet.tools.gui.TitleComponentProvider;
  */
 public class RaineventRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final Logger LOG = Logger.getLogger(RaineventRenderer.class);
+
     //~ Instance fields --------------------------------------------------------
 
     private final transient RunGeoCPMTitleComponent titleComponent;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkForecast;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblDescription;
-    private javax.swing.JLabel lblForecast;
     private javax.swing.JLabel lblInterval;
     private javax.swing.JLabel lblMinutes;
     private javax.swing.JLabel lblName;
+    private javax.swing.JLabel lblShowDescription;
+    private javax.swing.JLabel lblShowInterval;
+    private javax.swing.JLabel lblShowName;
     private javax.swing.JPanel pnlChart;
-    private javax.swing.JTextArea txaDescription;
-    private javax.swing.JTextField txtInterval;
-    private javax.swing.JTextField txtName;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
@@ -71,10 +81,6 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         initComponents();
 
         titleComponent = new RunGeoCPMTitleComponent();
-
-        txaDescription.setEditable(false);
-        txtName.setEditable(false);
-        txtInterval.setEditable(false);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -91,15 +97,13 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
 
         lblName = new javax.swing.JLabel();
         lblDescription = new javax.swing.JLabel();
-        txtName = new javax.swing.JTextField();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        txaDescription = new javax.swing.JTextArea();
         lblInterval = new javax.swing.JLabel();
-        txtInterval = new javax.swing.JTextField();
         chkForecast = new javax.swing.JCheckBox();
         pnlChart = new javax.swing.JPanel();
-        lblForecast = new javax.swing.JLabel();
         lblMinutes = new javax.swing.JLabel();
+        lblShowName = new javax.swing.JLabel();
+        lblShowInterval = new javax.swing.JLabel();
+        lblShowDescription = new javax.swing.JLabel();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
@@ -124,47 +128,6 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblDescription, gridBagConstraints);
 
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.name}"),
-                txtName,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        bindingGroup.addBinding(binding);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(txtName, gridBagConstraints);
-
-        txaDescription.setColumns(20);
-        txaDescription.setRows(5);
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
-                txaDescription,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        bindingGroup.addBinding(binding);
-
-        jScrollPane1.setViewportView(txaDescription);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 6;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 0.2;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jScrollPane1, gridBagConstraints);
-
         lblInterval.setText(org.openide.util.NbBundle.getMessage(
                 RaineventRenderer.class,
                 "RaineventRenderer.lblInterval.text")); // NOI18N
@@ -175,37 +138,28 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblInterval, gridBagConstraints);
 
-        txtInterval.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtInterval.setMinimumSize(new java.awt.Dimension(30, 27));
-        txtInterval.setPreferredSize(new java.awt.Dimension(50, 27));
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.interval}"),
-                txtInterval,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        bindingGroup.addBinding(binding);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(txtInterval, gridBagConstraints);
-
+        chkForecast.setText(org.openide.util.NbBundle.getMessage(
+                RaineventRenderer.class,
+                "RaineventRenderer.chkForecast.text")); // NOI18N
         chkForecast.setContentAreaFilled(false);
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.forecast}"),
                 chkForecast,
                 org.jdesktop.beansbinding.BeanProperty.create("selected"));
         bindingGroup.addBinding(binding);
 
+        chkForecast.addItemListener(new java.awt.event.ItemListener() {
+
+                @Override
+                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
+                    chkForecastItemStateChanged(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 0);
@@ -215,21 +169,11 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 7;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 0.8;
         add(pnlChart, gridBagConstraints);
-
-        lblForecast.setText(org.openide.util.NbBundle.getMessage(
-                RaineventRenderer.class,
-                "RaineventRenderer.lblForecast.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 6;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblForecast, gridBagConstraints);
 
         lblMinutes.setText(org.openide.util.NbBundle.getMessage(
                 RaineventRenderer.class,
@@ -237,11 +181,77 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 10);
         add(lblMinutes, gridBagConstraints);
 
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.name}"),
+                lblShowName,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblShowName, gridBagConstraints);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.interval}"),
+                lblShowInterval,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding.setSourceNullValue("\"Dataset error\"");
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblShowInterval, gridBagConstraints);
+
+        lblShowDescription.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
+                lblShowDescription,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblShowDescription, gridBagConstraints);
+
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkForecastItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkForecastItemStateChanged
+        if (cidsBean != null) {
+            final Boolean forecast = (Boolean)cidsBean.getProperty("forecast");
+            chkForecast.setSelected(forecast.booleanValue());
+        }
+    }                                                                              //GEN-LAST:event_chkForecastItemStateChanged
 
     @Override
     protected void init() {
@@ -251,31 +261,37 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         titleComponent.setCidsBean(cidsBean);
 
         final String data = (String)cidsBean.getProperty("data");
-        final int interval = (Integer)cidsBean.getProperty("interval");
+        final Integer interval = (Integer)cidsBean.getProperty("interval");
         final String name = (String)cidsBean.getProperty("name");
 
         final Runnable r = new Runnable() {
 
                 @Override
                 public void run() {
-                    if (pnlChart != null) {
-                        pnlChart.removeAll();
-                        pnlChart.add(new BarChart(name, data, interval), BorderLayout.CENTER);
-                    }
+                    try {
+                        if (pnlChart != null) {
+                            pnlChart.removeAll();
+                            final BarChart chart = new BarChart(name, data, interval);
+                            chart.setBorder(new LineBorder(Color.black, 1));
+                            pnlChart.add(chart, BorderLayout.CENTER);
+                        }
 
-                    Component parent = RaineventRenderer.this.getParent();
-                    Component current = RaineventRenderer.this;
+                        Component parent = RaineventRenderer.this.getParent();
+                        Component current = RaineventRenderer.this;
 
-                    while (parent != null) {
-                        current = parent;
-                        parent = parent.getParent();
-                    }
+                        while (parent != null) {
+                            current = parent;
+                            parent = parent.getParent();
+                        }
 
-                    if (current instanceof JFrame) {
-                        ((JFrame)current).pack();
-                    } else {
-                        current.invalidate();
-                        current.validate();
+                        if (current instanceof JFrame) {
+                            ((JFrame)current).pack();
+                        } else {
+                            current.invalidate();
+                            current.validate();
+                        }
+                    } catch (Exception ex) {
+                        LOG.error("Cannot create BarChart", ex);
                     }
                 }
             };
@@ -344,10 +360,8 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
             final String[] values = data.split(":");
             int steps = interval;
 
-            // Zwei Nachkommastellen
-            final NumberFormat nf = NumberFormat.getInstance();
-            nf.setMinimumFractionDigits(2);
-            nf.setMaximumFractionDigits(2);
+            // Zwei Nachkommastellen im englischen Format
+            final NumberFormat nf = new DecimalFormat("#0.00", new DecimalFormatSymbols(Locale.ENGLISH));
 
             for (int i = 0; i < values.length; i++) {
                 try {
