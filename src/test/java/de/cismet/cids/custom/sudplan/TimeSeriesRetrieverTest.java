@@ -46,9 +46,9 @@ public class TimeSeriesRetrieverTest
         
        testTs = TimeSeriesTestUtil.createTestTimeSeries(); 
         
-       final URL url = new URL(TimeSeriesTestUtil.DAV_HOST + TARGET_FILE);
+       final URL url = new URL(TimeSeriesRemoteHelper.DAV_HOST + TARGET_FILE);
        final TimeseriesTransmitter transmitter = TimeseriesTransmitter.getInstance();
-       transmitter.put(url, testTs, TimeSeriesTestUtil.CREDS);
+       transmitter.put(url, testTs, TimeSeriesRemoteHelper.DAV_CREDS);
        
        // data which has been transferred to the server might not be immediately available
        Thread.sleep(1000l);

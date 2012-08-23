@@ -16,30 +16,17 @@
  */
 package de.cismet.cids.custom.sudplan;
 
-import at.ac.ait.enviro.sudplan.util.PropertyNames;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
-import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
-import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 import de.cismet.cids.custom.sudplan.converter.TimeSeriesSerializer;
 import de.cismet.cids.custom.sudplan.converter.WuppertalTimeseriesConverter;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Calendar;
 import java.util.Properties;
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpConnectionManager;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -93,11 +80,11 @@ public class TimeSeriesTransmitterTest
     
     public void testPut(final TimeSeries ts) throws Exception
     {
-        final URL url = new URL(TimeSeriesTestUtil.DAV_HOST + TARGET_FILE);
-        assertTrue(this.transmitter.put(url, ts, TimeSeriesTestUtil.CREDS).get());
+        final URL url = new URL(TimeSeriesRemoteHelper.DAV_HOST + TARGET_FILE);
+        assertTrue(this.transmitter.put(url, ts, TimeSeriesRemoteHelper.DAV_CREDS).get());
         
         final HttpClient client = TimeSeriesTestUtil.createHttpClient();
-        GetMethod get = new GetMethod(TimeSeriesTestUtil.DAV_HOST + TARGET_FILE);
+        GetMethod get = new GetMethod(TimeSeriesRemoteHelper.DAV_HOST + TARGET_FILE);
         
         try {
             client.executeMethod(get);
