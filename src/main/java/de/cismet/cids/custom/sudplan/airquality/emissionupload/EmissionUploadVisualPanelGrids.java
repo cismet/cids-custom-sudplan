@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.airquality.emissionupload;
 
+import Sirius.navigator.ui.ComponentRegistry;
+
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -234,7 +236,7 @@ public class EmissionUploadVisualPanelGrids extends javax.swing.JPanel {
         if (pnlGrid.isDirty() && btnSaveGrid.isEnabled()) {
             // We want to avoid saving invalid information.
             final int saveGrid = JOptionPane.showConfirmDialog(
-                    this,
+                    ComponentRegistry.getRegistry().getMainWindow(),
                     NbBundle.getMessage(
                         EmissionUploadVisualPanelGrids.class,
                         "EmissionUploadVisualPanelGrids.showSelectedGrid().JOptionPane.confirmSave.message"), // NOI18N

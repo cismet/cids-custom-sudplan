@@ -57,6 +57,8 @@ import de.cismet.security.AccessHandler.ACCESS_METHODS;
 
 import de.cismet.security.WebAccessManager;
 
+import de.cismet.tools.gui.StaticSwingTools;
+
 /**
  * this is a utility class for wfs purposes.
  *
@@ -313,7 +315,7 @@ public final class WFSUtils {
                                                             dialog,
                                                             "No results");
 
-                                                    noResultsDialog.setVisible(true);
+                                                    StaticSwingTools.showDialog(noResultsDialog);
                                                 }
                                             });
 
@@ -358,7 +360,7 @@ public final class WFSUtils {
                             }
                         });
 
-        dialog.setVisible(true);
+        StaticSwingTools.showDialog(dialog);
 
         if (cancelOption.equals(pane.getValue())) {
             if (!task.isDone()) {
