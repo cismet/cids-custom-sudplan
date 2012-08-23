@@ -63,6 +63,7 @@ import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilitiesFactory;
 
+import de.cismet.tools.PasswordEncrypter;
 import de.cismet.tools.PropertyReader;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
@@ -100,19 +101,23 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
     static {
         propertyReader = new PropertyReader(FILE_PROPERTY);
 
-        DB_URL = propertyReader.getProperty("DB_URL");
-        DB_USER = propertyReader.getProperty("DB_USER");
-        DB_PASSWORD = propertyReader.getProperty("DB_PASSWORD");
-        DB_TABLE = propertyReader.getProperty("DB_TABLE");
+        DB_URL = propertyReader.getProperty("DB_URL");                       // NOI18N
+        DB_USER = propertyReader.getProperty("DB_USER");                     // NOI18N
+        DB_PASSWORD = String.valueOf(PasswordEncrypter.decrypt(
+                    propertyReader.getProperty("DB_PASSWORD").toCharArray(), // NOI18N
+                    false));
+        DB_TABLE = propertyReader.getProperty("DB_TABLE");                   // NOI18N
 
-        GEOSERVER_REST_URL = propertyReader.getProperty("GEOSERVER_REST_URL");
-        GEOSERVER_REST_USER = propertyReader.getProperty("GEOSERVER_REST_USER");
-        GEOSERVER_REST_PASSWORD = propertyReader.getProperty("GEOSERVER_REST_PASSWORD");
-        GEOSERVER_WORKSPACE = propertyReader.getProperty("GEOSERVER_WORKSPACE");
-        GEOSERVER_DATASTORE = propertyReader.getProperty("GEOSERVER_DATASTORE");
-        GEOSERVER_CAPABILITIES_URL = MessageFormat.format(propertyReader.getProperty("GEOSERVER_CAPABILITIES_URL"),
+        GEOSERVER_REST_URL = propertyReader.getProperty("GEOSERVER_REST_URL");                                      // NOI18N
+        GEOSERVER_REST_USER = propertyReader.getProperty("GEOSERVER_REST_USER");                                    // NOI18N
+        GEOSERVER_REST_PASSWORD = String.valueOf(PasswordEncrypter.decrypt(
+                    propertyReader.getProperty("GEOSERVER_REST_PASSWORD").toCharArray(),                            // NOI18N
+                    false));
+        GEOSERVER_WORKSPACE = propertyReader.getProperty("GEOSERVER_WORKSPACE");                                    // NOI18N
+        GEOSERVER_DATASTORE = propertyReader.getProperty("GEOSERVER_DATASTORE");                                    // NOI18N
+        GEOSERVER_CAPABILITIES_URL = MessageFormat.format(propertyReader.getProperty("GEOSERVER_CAPABILITIES_URL"), // NOI18N
                 GEOSERVER_REST_URL);
-        GEOSERVER_SLD = propertyReader.getProperty("GEOSERVER_SLD");
+        GEOSERVER_SLD = propertyReader.getProperty("GEOSERVER_SLD");                                                // NOI18N
     }
 
     private static final transient String DB_VIEW_SEPARATOR = "_"; // NOI18N

@@ -17,7 +17,6 @@
 package de.cismet.cids.custom.sudplan;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
-import java.util.Properties;
 import java.util.concurrent.Future;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -54,11 +53,6 @@ public class TimeIntervalTest {
     @After
     public void tearDown() {
     }
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
-    // @Test
-    // public void hello() {}
     
         @Test
     public void testTimeInterval() throws Exception
@@ -68,13 +62,11 @@ public class TimeIntervalTest {
         final String url = "tstb:http://enviro3.ait.ac.at:8080?" +
                  "ts:feature_of_interest=urn:SMHI:feature:Europe&" + 
                 "ts:offering=climate_echam5a1b3_prec_1h&" + 
-//         "ts:observed_property   = urn:ogc:def:property:OGC:prec&" + 
                          "ts:ts_interval=[20000101T000000;20011231T235959]";
         
         Future<TimeSeries> result = retriever.retrieve(TimeseriesRetrieverConfig.fromTSTBUrl(url));
         assertNotNull(result);
         final TimeSeries ts = result.get();
-//        System.out.println("NUMBER: " +  ts.getTimeStamps());
     }
     
 }
