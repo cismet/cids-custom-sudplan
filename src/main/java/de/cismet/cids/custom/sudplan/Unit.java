@@ -56,7 +56,10 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
             NbBundle.getMessage(Unit.class, "Unit.METERS.localisedName")); // NOI18N
     public static final Unit KG = new Unit(
             "kg", // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.KG.localisedName")); // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.KG.localisedName")); // NOI18N   
+    public static final Unit CELSIUS = new Unit(
+            "urn:org:def:uom:OGC:Celcius", // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.CELSIUS.localisedName")); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -88,6 +91,7 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
      */
     private Unit(final String propertyKey, final String localisedName) {
         super(localisedName);
+
         this.propertyKey = propertyKey;
     }
 
@@ -126,7 +130,8 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
     public static Unit[] values() {
         return new Unit[] {
                 MM, PPB, PPM, KELVIN,
-                M3S, LS, M3, MM_MIN, MG_L, METERS, KG
+                M3S, LS, M3, MM_MIN, 
+                MG_L, METERS, KG, CELSIUS
             };
     }
 }
