@@ -20,6 +20,9 @@ import org.apache.log4j.Logger;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.cismet.tools.PasswordEncrypter;
+import de.cismet.tools.PropertyReader;
+
 /**
  * TimeSeriesRemoteHelper provides frequently needed WebDAV connection parameters as well as methods for creating
  * corresponding HttpClient instances.
@@ -31,15 +34,38 @@ public final class TimeSeriesRemoteHelper {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String DAV_HOST = "http://sudplan.cismet.de/tsDav";
-    public static final Credentials DAV_CREDS = new UsernamePasswordCredentials("tsDav", "RHfio2l4wrsklfghj");
+    private static final PropertyReader propertyReader;
+    private static final String FILE_PROPERTY = "/de/cismet/cids/custom/sudplan/repositories.properties";
 
-    public static final String NETCDF_HOST = "http://fswwwww1.tu-graz.ac.at:8080/datasets/";
-    public static final Credentials NETCDF_CREDS = new UsernamePasswordCredentials("sudplan", "sudplan@tugraz");
+    public static final String DAV_HOST;
+    public static final Credentials DAV_CREDS;
+
+    public static final String NETCDF_HOST;
+    public static final Credentials NETCDF_CREDS;
 
     private static final Logger LOG = Logger.getLogger(TimeSeriesRemoteHelper.class);
 
     private static final Map<String, HttpClient> CLIENT_CACHE = new HashMap<String, HttpClient>();
+
+    static {
+        propertyReader = new PropertyReader(FILE_PROPERTY);
+
+        DAV_HOST = propertyReader.getProperty("DAV_HOST");
+        DAV_CREDS = new UsernamePasswordCredentials(
+                propertyReader.getProperty("DAV_USERNAME"),
+                String.valueOf(
+                    PasswordEncrypter.decrypt(
+                        propertyReader.getProperty("DAV_PASSWORD").toCharArray(),
+                        true)));
+
+        NETCDF_HOST = propertyReader.getProperty("NETCDF_HOST");
+        NETCDF_CREDS = new UsernamePasswordCredentials(
+                propertyReader.getProperty("NETCDF_USERNAME"),
+                String.valueOf(
+                    PasswordEncrypter.decrypt(
+                        propertyReader.getProperty("NETCDF_PASSWORD").toCharArray(),
+                        true)));
+    }
 
     //~ Constructors -----------------------------------------------------------
 

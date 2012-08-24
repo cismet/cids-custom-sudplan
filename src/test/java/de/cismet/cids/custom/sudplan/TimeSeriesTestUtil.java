@@ -39,8 +39,8 @@ import static org.junit.Assert.*;
  */
 public class TimeSeriesTestUtil 
 {
-    public static final String      DAV_HOST = "http://sudplan.cismet.de/tsDav/";
-    public static final Credentials CREDS = new UsernamePasswordCredentials("tsDav", "RHfio2l4wrsklfghj");
+    public static final String      DAV_HOST = TimeSeriesRemoteHelper.DAV_HOST;
+    public static final Credentials CREDS = TimeSeriesRemoteHelper.DAV_CREDS;
 
     
     private TimeSeriesTestUtil() {}
