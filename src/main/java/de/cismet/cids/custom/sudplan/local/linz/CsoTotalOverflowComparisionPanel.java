@@ -69,11 +69,11 @@ public class CsoTotalOverflowComparisionPanel extends javax.swing.JPanel {
      */
     public void setSwmmResults(final Collection<CidsBean> swmmResults) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("setSwmmResults: " + swmmResults.size());
+            LOG.debug("setSwmmResults for Total Cso Overflow Comparision: " + swmmResults.size());
         }
 
         if (swmmResults.isEmpty()) {
-            LOG.warn("empty SWMM results list");
+            LOG.warn("empty SWMM results list, cannot show total overflow volume");
             return;
         }
 
@@ -95,7 +95,8 @@ public class CsoTotalOverflowComparisionPanel extends javax.swing.JPanel {
                 final String etaRunName = (String)etaResultBean.getProperty("name");
                 final Object totalOverflowVolume = etaResultBean.getProperty("total_overflow_volume");
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("plotting eta results: " + totalOverflowVolume + " / " + overflowVolume);
+                    LOG.debug("plotting eta '" + etaRunName + "' result: " + totalOverflowVolume + " / "
+                                + overflowVolume);
                 }
                 dataset.addValue(((totalOverflowVolume != null) ? (Float)totalOverflowVolume : 0),
                     etaRunName,
@@ -106,8 +107,14 @@ public class CsoTotalOverflowComparisionPanel extends javax.swing.JPanel {
             }
         }
 
-        System.out.println(dataset.getRowCount());
-        System.out.println(dataset.getColumnCount());
+        if (dataset.getColumnCount() == 0) {
+            LOG.warn("no ETA results found, cannot display total overflow volume");
+            return;
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("showing " + dataset.getColumnCount() + " ETA results");
+            }
+        }
 
         final JFreeChart chart = ChartFactory.createMultiplePieChart(
                 null,

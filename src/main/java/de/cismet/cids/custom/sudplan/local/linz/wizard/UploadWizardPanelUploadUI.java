@@ -241,7 +241,7 @@ public final class UploadWizardPanelUploadUI extends javax.swing.JPanel {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(
-                                UploadWizardAction.SWMM_WEBDAV_USER,
+                                UploadWizardAction.SWMM_WEBDAV_USERNAME,
                                 UploadWizardAction.SWMM_WEBDAV_PASSWORD.toCharArray());
                     }
                 });
@@ -335,7 +335,7 @@ public final class UploadWizardPanelUploadUI extends javax.swing.JPanel {
         @Override
         protected Void doInBackground() throws Exception {
             final UsernamePasswordCredentials defaultcreds = new UsernamePasswordCredentials(
-                    UploadWizardAction.SWMM_WEBDAV_USER,
+                    UploadWizardAction.SWMM_WEBDAV_USERNAME,
                     UploadWizardAction.SWMM_WEBDAV_PASSWORD);
 
             final SSLSocketFactory sslsf = new SSLSocketFactory(new TrustStrategy() {

@@ -61,6 +61,9 @@ import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 
+import de.cismet.tools.PasswordEncrypter;
+import de.cismet.tools.PropertyReader;
+
 /**
  * DOCUMENT ME!
  *
@@ -71,12 +74,11 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    // public static final String SWMM_WEBDAV_HOST = "https://sudplan.ait.ac.at/model/config/"
-    public static final String SWMM_WEBDAV_HOST = "http://sudplan.cismet.de/tsDav/";
-    public static final String SWMM_WEBDAV_USER = "tsDav";
-    // public static final String SWMM_WEBDAV_USER = "SMS";
-    public static final String SWMM_WEBDAV_PASSWORD = "RHfio2l4wrsklfghj";
-    // public static final String SWMM_WEBDAV_PASSWORD = "cismet42";
+    private static final PropertyReader propertyReader;
+    private static final String FILE_PROPERTY = "/de/cismet/cids/custom/sudplan/repositories.properties";
+    public static final String SWMM_WEBDAV_HOST;
+    public static final String SWMM_WEBDAV_USERNAME;
+    public static final String SWMM_WEBDAV_PASSWORD;
     public static final String TABLENAME_SWMM_PROJECT = SwmmInput.TABLENAME_SWMM_PROJECT;
     public static final String PROP_NEW_SWMM_PROJECT_BEAN = "__prop_new_swmm_project_bean__";       // NOI18N
     public static final String PROP_SELECTED_SWMM_PROJECT_ID = "__prop_selected_swmm_project_id__"; // NOI18N
@@ -89,6 +91,16 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
     public static final String PROP_COPY_CSOS_IN_PROGRESS = "__prop_copy_csos_in_progress__";       // NOI18N
     public static final String PROP_COPIED_CSOS = "__prop_copied_csos__";                           // NOI18N
     private static final transient Logger LOG = Logger.getLogger(UploadWizardAction.class);
+
+    static {
+        propertyReader = new PropertyReader(FILE_PROPERTY);
+        // FIXME: replace by SWMM_WEBDAV once we gain write access to the AIT WEBDav
+        SWMM_WEBDAV_HOST = propertyReader.getProperty("DAV_HOST");
+        SWMM_WEBDAV_USERNAME = propertyReader.getProperty("DAV_USERNAME");
+        SWMM_WEBDAV_PASSWORD = String.valueOf(PasswordEncrypter.decrypt(
+                    propertyReader.getProperty("DAV_PASSWORD").toCharArray(),
+                    true));
+    }
 
     //~ Instance fields --------------------------------------------------------
 
@@ -293,7 +305,7 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
                 LOG.warn("deleting upload file '" + inpFile + "' from " + UploadWizardAction.SWMM_WEBDAV_HOST);
 
                 final UsernamePasswordCredentials defaultcreds = new UsernamePasswordCredentials(
-                        UploadWizardAction.SWMM_WEBDAV_USER,
+                        UploadWizardAction.SWMM_WEBDAV_USERNAME,
                         UploadWizardAction.SWMM_WEBDAV_PASSWORD);
 
                 try {
