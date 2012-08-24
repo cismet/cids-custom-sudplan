@@ -79,12 +79,6 @@
     </properties>
 
     <dependencies>
-        <!-- include this (stable) version of commons-logging to prevent v1.1.2-SNAPSHOT to slip in -->
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
-        </dependency>
         <dependency>
             <groupId>de.cismet.cids.navigator</groupId>
             <artifactId>default-forms</artifactId>
@@ -297,7 +291,14 @@
         <dependency>
             <groupId>se.smhi</groupId>
             <artifactId>hydro-client-mvn</artifactId>
-            <version>1.1</version>
+            <version>1.2</version>
+        </dependency>
+        <!-- added here to ensure recent enough version of xerces at runtime, at least 2.4.0 leads to issues -->
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.10.0</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
@@ -332,22 +333,27 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12</version>
                 <configuration>
-                    <arguments>
-                        <argument>-Xmx1024m</argument>
-                    </arguments>
+                    <!-- 
+                        these are remote tests and although it is possible to run them from the outside of our network
+                        they highly depend on external resources that may not be available in the future. thus the tests
+                        need to be redesigned to be independent. however, they will remain deactivated to be able to use
+                        them anyway in case of explicit further development of the corresponding classes
+                     -->
+                    <excludes>
+                        <!-- only a stress test -->
+                        <exclude>**/SOSTest.class</exclude>
+                        <exclude>**/TimeIntervalTest.class</exclude>
+                        <exclude>**/TimeSeriesRetrieverTest.class</exclude>
+                        <exclude>**/TimeSeriesTransmitterTest.class</exclude>
+                        <!-- only a stress test -->
+                        <exclude>**/TimeseriesChartPanelStressTest.class</exclude>
+                    </excludes>
                 </configuration>
-            </plugin>
+           </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
@@ -382,9 +388,6 @@
                     <systemPath>${java.home}/../lib/tools.jar</systemPath>
                 </dependency>
             </dependencies>
-            <properties> 
-                <maven.test.skip>true</maven.test.skip>
-            </properties>
         </profile>
     </profiles>
 </project>

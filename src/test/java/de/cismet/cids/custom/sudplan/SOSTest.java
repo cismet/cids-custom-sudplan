@@ -20,7 +20,6 @@ import com.vividsolutions.jts.geom.Envelope;
 
 import junit.framework.Assert;
 
-import org.apache.log4j.Logger;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -87,7 +86,6 @@ public class SOSTest {
                 + "SOSTestResults.txt");
         w = new BufferedWriter(new FileWriter(resultsFile));
         final SOSClientHandler handler = new SOSClientHandler();
-//        handler.setId("foo");
 
         try {
             handler.getConnector().connect("http://enviro3.ait.ac.at:8080");
@@ -267,7 +265,6 @@ public class SOSTest {
                     ts = dp.getTimeSeries(new TimeInterval(TimeInterval.Openness.OPEN, TimeStamp.NEGATIVE_INFINITY, TimeStamp.POSITIVE_INFINITY, TimeInterval.Openness.OPEN), point);
                     endTime = System.currentTimeMillis();
 
-//                    Assert.assertNotNull(ts);
                     if (ts != null) {
                         String result = " - retrieval succesfull"
                                 + newLine;
