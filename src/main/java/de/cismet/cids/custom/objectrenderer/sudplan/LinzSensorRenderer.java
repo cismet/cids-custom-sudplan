@@ -250,17 +250,18 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
 
             final String sensorName = this.getCidsBean().getProperty("name").toString().toLowerCase();
             if (LOG.isDebugEnabled()) {
-                LOG.debug("lodaing event for sensor '" + sensorName + "'");
+                LOG.debug("loading event for sensor '" + sensorName + "'");
             }
-            if (Sensor.HYDRAULICS.getName().indexOf(sensorName) != -1) {
+            if (sensorName.indexOf(Sensor.HYDRAULICS.getName()) != -1) {
                 currentSensorType = Sensor.HYDRAULICS;
-            } else if (Sensor.INFLOW.getName().indexOf(sensorName) != -1) {
+            } else if (sensorName.indexOf(Sensor.INFLOW.getName()) != -1) {
                 currentSensorType = Sensor.INFLOW;
-            } else if (Sensor.OUTFLOW.getName().indexOf(sensorName) != -1) {
+            } else if (sensorName.indexOf(Sensor.OUTFLOW.getName()) != -1) {
                 currentSensorType = Sensor.OUTFLOW;
             } else {
                 throw new Exception("Unsopported Sensor Type '" + sensorName
-                            + "', expected " + Sensor.HYDRAULICS + ", " + Sensor.OUTFLOW + " or " + Sensor.INFLOW);
+                            + "', expected '" + Sensor.HYDRAULICS + "', '"
+                            + Sensor.OUTFLOW + "' or '" + Sensor.INFLOW + "'");
             }
 
             if ((eventDetectionUpdater != null) && eventDetectionUpdater.isRunning()) {
@@ -284,7 +285,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
             org.openide.awt.Mnemonics.setLocalizedText(
                 progressLabel,
                 org.openide.util.NbBundle.getMessage(
-                    EtaWizardPanelEtaConfigurationUI.class,
+                    LinzSensorRenderer.class,
                     "LinzSensorRenderer.progressLabel.error")); // NOI18N
             ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
         }
@@ -437,7 +438,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
             this.eventTimeseries = eventTimeseries;
             this.columnNames = new String[eventTimeseries.length + 1];
             this.columnNames[0] = org.openide.util.NbBundle.getMessage(
-                    EtaWizardPanelEtaConfigurationUI.class,
+                    LinzSensorRenderer.class,
                     "LinzSensorRenderer.tblEventDetection.column.date");
             this.columnClasses = new Class[eventTimeseries.length + 1];
             this.columnClasses[0] = String.class;
@@ -581,7 +582,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                                 org.openide.awt.Mnemonics.setLocalizedText(
                                     progressLabel,
                                     org.openide.util.NbBundle.getMessage(
-                                        EtaWizardPanelEtaConfigurationUI.class,
+                                        LinzSensorRenderer.class,
                                         "LinzSensorRenderer.progressLabel.error")); // NOI18N
                             }
                         });
