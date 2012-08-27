@@ -17,9 +17,11 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 
 import org.apache.commons.httpclient.Credentials;
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import org.openide.awt.Mnemonics;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.CardLayout;
@@ -30,7 +32,10 @@ import java.io.IOException;
 import java.util.concurrent.Future;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.table.AbstractTableModel;
+
+import de.cismet.cids.client.tools.DevelopmentTools;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.SMSUtils;
@@ -38,6 +43,7 @@ import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
 import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
+import de.cismet.cids.custom.sudplan.converter.LinzNetcdfConverter;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.linz.wizard.EtaWizardPanelEtaConfigurationUI;
@@ -134,10 +140,9 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
     //~ Instance fields --------------------------------------------------------
 
     private final transient LinzSensorTitleComponent linzSensorTitleComponent = new LinzSensorTitleComponent();
-    // End of variables declaration
     private transient Sensor currentSensorType;
-    private EventDetectionUpdater eventDetectionUpdater = null;
-    // Variables declaration - do not modify
+    private transient EventDetectionUpdater eventDetectionUpdater = null;
+    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel cardPanel;
     private javax.swing.JPanel eventDetectionPanel;
     private javax.swing.JScrollPane jScrollPaneEventDetection;
@@ -145,6 +150,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
     private javax.swing.JLabel progressLabel;
     private javax.swing.JPanel progressPanel;
     private javax.swing.JTable tblEventDetection;
+    // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
 
@@ -183,8 +189,10 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                 org.openide.util.NbBundle.getMessage(
                     LinzSensorRenderer.class,
                     "LinzSensorRenderer.eventDetectionPanel.border.title"))); // NOI18N
+        eventDetectionPanel.setOpaque(false);
         eventDetectionPanel.setLayout(new java.awt.GridBagLayout());
 
+        cardPanel.setOpaque(false);
         cardPanel.setLayout(new java.awt.CardLayout());
 
         tblEventDetection.setModel(new javax.swing.table.DefaultTableModel(
@@ -194,6 +202,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
 
         cardPanel.add(jScrollPaneEventDetection, "events");
 
+        progressPanel.setOpaque(false);
         progressPanel.setLayout(new java.awt.GridBagLayout());
 
         progressBar.setIndeterminate(true);
@@ -228,7 +237,6 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
         add(eventDetectionPanel, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
@@ -271,7 +279,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                 Mnemonics.setLocalizedText(
                     progressLabel,
                     NbBundle.getMessage(
-                        EtaWizardPanelEtaConfigurationUI.class,
+                        LinzSensorRenderer.class,
                         "LinzSensorRenderer.progressLabel.text")); // NOI18N
                 progressBar.setIndeterminate(true);
                 ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
@@ -376,28 +384,26 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
         }
 
         final TimeseriesRetriever retriever = TimeseriesRetriever.getInstance();
-        final TimeSeries[] timeseriesList = new TimeSeries[timeseriesMoList.length];
+        final TimeseriesConverter converter = new LinzNetcdfConverter(true);
+        final TimeSeries timeSeries;
 
         try {
-            int i = 0;
-            for (final MetaObject timeseriesMo : timeseriesMoList) {
-                final CidsBean timeseriesBean = timeseriesMo.getBean();
-                final String uri = (String)timeseriesBean.getProperty("uri"); // NOI18N
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("loading remote timeseries for '" + timeseriesBean.getProperty("name") + "' from '"
-                                + uri + "'");
-                }
+            // we need only the first object
+            final MetaObject timeseriesMo = timeseriesMoList[0];
+            final CidsBean timeseriesBean = timeseriesMo.getBean();
+            final String uri = (String)timeseriesBean.getProperty("uri"); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("loading remote timeseries for '" + timeseriesBean.getProperty("name") + "' from '"
+                            + uri + "'");
+            }
 
-                final TimeseriesConverter converter = SMSUtils.loadConverter(timeseriesBean);
-                final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
+            final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
 
-                final Future<TimeSeries> result = retriever.retrieve(config, converter);
-                timeseriesList[i] = result.get();
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("remote timeseries #" + i + " for '" + timeseriesBean.getProperty("name")
-                                + "' successully loaded");
-                }
-                i++;
+            final Future<TimeSeries> result = retriever.retrieve(config, converter);
+            timeSeries = result.get();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("remote timeseries for '" + timeseriesBean.getProperty("name")
+                            + "' successully loaded");
             }
         } catch (Exception ex) {
             throw new IOException("could not load timeseries '" + sensor
@@ -405,7 +411,12 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                 ex);
         }
 
-        return new EventDetectionTableModel(timeseriesList);
+        final int timeseriesLength = timeSeries.getTimeStampsArray().length;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("event time series loaded with length of " + timeseriesLength);
+        }
+
+        return new EventDetectionTableModel(timeSeries);
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -420,9 +431,10 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
         //~ Instance fields ----------------------------------------------------
 
         private final transient Logger LOG = Logger.getLogger(LinzSensorRenderer.EventDetectionTableModel.class);
-        private final TimeSeries[] eventTimeseries;
+        private final TimeSeries eventTimeseries;
         private final TimeStamp[] timeStamps;
         private final String[] columnNames;
+        private final String[] columnKeys;
         private final Class[] columnClasses;
 
         //~ Constructors -------------------------------------------------------
@@ -434,40 +446,52 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
          *
          * @throws  IllegalStateException  DOCUMENT ME!
          */
-        private EventDetectionTableModel(final TimeSeries[] eventTimeseries) {
+        private EventDetectionTableModel(final TimeSeries eventTimeseries) {
             this.eventTimeseries = eventTimeseries;
-            this.columnNames = new String[eventTimeseries.length + 1];
-            this.columnNames[0] = org.openide.util.NbBundle.getMessage(
-                    LinzSensorRenderer.class,
-                    "LinzSensorRenderer.tblEventDetection.column.date");
-            this.columnClasses = new Class[eventTimeseries.length + 1];
-            this.columnClasses[0] = String.class;
 
-            int i = 1;
-            for (final TimeSeries timeSeries : eventTimeseries) {
-                final Object valueKeyObject = timeSeries.getTSProperty(TimeSeries.VALUE_KEYS);
-                final String valueKey;
-                if (valueKeyObject instanceof String) {
-                    valueKey = (String)valueKeyObject;
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("found valuekey: " + valueKey);                                 // NOI18N
-                    }
-                } else if (valueKeyObject instanceof String[]) {
-                    final String[] valueKeys = (String[])valueKeyObject;
-                    if (valueKeys.length > 1) {
-                        LOG.warn("found multiple valuekeys: " + valueKeys.length);                // NOI18N
-                    }
-                    valueKey = valueKeys[0];
-                } else {
-                    throw new IllegalStateException("unknown value key type: " + valueKeyObject); // NOI18N
+            final Object valueKeyObject = eventTimeseries.getTSProperty(TimeSeries.VALUE_KEYS);
+            if (valueKeyObject instanceof String[]) {
+                final String[] valueKeys = (String[])valueKeyObject;
+                this.columnNames = new String[valueKeys.length + 1];
+                this.columnKeys = new String[valueKeys.length + 1];
+                this.columnClasses = new Class[valueKeys.length + 1];
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(columnNames.length + " columns and " + valueKeys.length + " values");
                 }
-                columnNames[i] = valueKey;
-                columnClasses[i] = Float.class;
-                i++;
+
+                this.columnNames[0] = org.openide.util.NbBundle.getMessage(
+                        LinzSensorRenderer.class,
+                        "LinzSensorRenderer.tblEventDetection.column.eventid");
+                this.columnNames[1] = org.openide.util.NbBundle.getMessage(
+                        LinzSensorRenderer.class,
+                        "LinzSensorRenderer.tblEventDetection.column.startdate");
+                this.columnNames[2] = org.openide.util.NbBundle.getMessage(
+                        LinzSensorRenderer.class,
+                        "LinzSensorRenderer.tblEventDetection.column.enddate");
+
+                this.columnKeys[0] = valueKeys[1];
+                this.columnKeys[1] = this.columnNames[1];
+                this.columnKeys[2] = valueKeys[0];
+
+                this.columnClasses[0] = String.class;
+                this.columnClasses[1] = String.class;
+                this.columnClasses[2] = String.class;
+
+                int i = 0;
+                for (final String valueKey : valueKeys) {
+                    if (i >= 2) {
+                        columnNames[i + 1] = valueKey;
+                        columnKeys[i + 1] = valueKey;
+                        columnClasses[i + 1] = Float.class;
+                    }
+                    i++;
+                }
+            } else {
+                throw new IllegalStateException("unknown value key type: " + valueKeyObject); // NOI18N
             }
 
             // take the #st time series for the date column
-            timeStamps = eventTimeseries[0].getTimeStampsArray();
+            timeStamps = eventTimeseries.getTimeStampsArray();
         }
 
         //~ Methods ------------------------------------------------------------
@@ -484,18 +508,15 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
 
         @Override
         public Object getValueAt(final int rowIndex, final int columnIndex) {
-            switch (columnIndex) {
-                case 0: {
-                    return this.timeStamps[rowIndex];
-                }
-                case 1: {
-                    return eventTimeseries[rowIndex].getValue(
-                            this.timeStamps[rowIndex],
-                            this.columnNames[columnIndex]);
-                }
+            if (columnIndex == 1) {
+                // start date
+                return this.timeStamps[rowIndex];
+            } else {
+                final Object o = eventTimeseries.getValue(
+                        this.timeStamps[rowIndex],
+                        this.columnKeys[columnIndex]);
+                return o;
             }
-
-            return null;
         }
 
         @Override
@@ -572,7 +593,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                     }
                     eventDetectionTableModel = loadEvents(sensor);
                 } catch (Throwable t) {
-                    LOG.error("EventDetectionUpdater: could not retrieve evetn detection values: " + t.getMessage(), t);
+                    LOG.error("EventDetectionUpdater: could not retrieve event detection values: " + t.getMessage(), t);
                     run = false;
                     EventQueue.invokeLater(new Runnable() {
 
