@@ -22,9 +22,6 @@ import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import java.net.URL;
-
-import java.text.DecimalFormat;
 import java.text.MessageFormat;
 
 import java.util.LinkedList;
@@ -32,13 +29,11 @@ import java.util.List;
 import java.util.MissingResourceException;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.UIManager;
 
-import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.gridcomparison.LayerStyle.Entry;
 
 import de.cismet.cismap.commons.BoundingBox;
@@ -63,30 +58,6 @@ public class GridComparisonWidget extends javax.swing.JPanel {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(GridComparisonWidget.class);
-
-    private static ImageIcon ICON_LAYER_INVISIBLE = null;
-    private static ImageIcon ICON_LAYER_VISIBLE = null;
-
-    static {
-        final URL iconLayerInvisibleUrl = GridComparisonWidget.class.getResource(
-                "GridComparisonWidget_SlidableWMSServiceLayerGroup_invisible.png");
-        final URL iconLayerVisibleUrl = GridComparisonWidget.class.getResource(
-                "GridComparisonWidget_SlidableWMSServiceLayerGroup_visible.png");
-
-        if (iconLayerInvisibleUrl == null) {
-            LOG.warn("The icon for invisible layers can't be loaded.");
-        }
-        if (iconLayerVisibleUrl == null) {
-            LOG.warn("The icon for visible layers can't be loaded.");
-        }
-
-        if (iconLayerInvisibleUrl != null) {
-            ICON_LAYER_INVISIBLE = new ImageIcon(iconLayerInvisibleUrl);
-        }
-        if (iconLayerVisibleUrl != null) {
-            ICON_LAYER_VISIBLE = new ImageIcon(iconLayerVisibleUrl);
-        }
-    }
 
     //~ Instance fields --------------------------------------------------------
 
@@ -130,11 +101,7 @@ public class GridComparisonWidget extends javax.swing.JPanel {
 
         initComponents();
 
-        StaticSwingTools.enableSliderToolTips(
-            sldContrastResult,
-            new MessageFormat("Contrast: {0,number,#0.0}"),
-            .1D); // ,
-// new DecimalFormat("#0.0"));
+        StaticSwingTools.enableSliderToolTips(sldContrastResult, new MessageFormat("Contrast: {0,number,#0.0}"), .1D);
 
         cmbFirstOperand.setRenderer(new SlidableWMSServiceLayerGroupCellRenderer());
         cmbSecondOperand.setRenderer(new SlidableWMSServiceLayerGroupCellRenderer());
@@ -566,6 +533,13 @@ public class GridComparisonWidget extends javax.swing.JPanel {
      */
     private void refreshFeature() {
         if (feature != null) {
+            if ((firstOperand != null) && (firstOperand.getPNode() != null)) {
+                firstOperand.getPNode().setVisible(true);
+            }
+            if ((secondOperand != null) && (secondOperand.getPNode() != null)) {
+                secondOperand.getPNode().setVisible(true);
+            }
+
             CismapBroker.getInstance().getMappingComponent().getFeatureCollection().removeFeature(feature);
         }
 
@@ -580,18 +554,51 @@ public class GridComparisonWidget extends javax.swing.JPanel {
         if (Double.isNaN(contrast)) {
             result = gridComparator.compare(operation);
         } else {
-            result = gridComparator.compare(operation, 0D, contrast, 0D);
+            result = gridComparator.compare(operation, contrast);
+        }
+
+        final String nameOfFeature;
+        switch (operation) {
+            case SUBTRACTION: {
+                nameOfFeature = NbBundle.getMessage(
+                        GridComparisonWidget.class,
+                        "GridComparisonWidget.refreshFeature().operation.subtraction",
+                        GridComparisonLayerProvider.generateMenuRepresentation(firstOperand),
+                        GridComparisonLayerProvider.generateMenuRepresentation(secondOperand));
+
+                break;
+            }
+            case AVERAGE: {
+                nameOfFeature = NbBundle.getMessage(
+                        GridComparisonWidget.class,
+                        "GridComparisonWidget.refreshFeature().operation.average",
+                        GridComparisonLayerProvider.generateMenuRepresentation(firstOperand),
+                        GridComparisonLayerProvider.generateMenuRepresentation(secondOperand));
+                break;
+            }
+            default: {
+                nameOfFeature = NbBundle.getMessage(
+                        GridComparisonWidget.class,
+                        "GridComparisonWidget.refreshFeature().operation.default",
+                        GridComparisonLayerProvider.generateMenuRepresentation(firstOperand),
+                        GridComparisonLayerProvider.generateMenuRepresentation(secondOperand));
+            }
         }
 
         if ((result != null) && !result.isEmpty()) {
-            // final Geometry geometry =
-            // CrsTransformer.transformToGivenCrs(((SlidableWMSServiceLayerGroup)firstOperandObj)
-            // .getBoundingBox().getGeometry(), "EPSG:3021");
             final Geometry geometry = ((SlidableWMSServiceLayerGroup)firstOperand).getBoundingBox().getGeometry();
             feature = new SlidingImagesFeature(result, geometry);
             feature.setSliderPosition(sldTimestamp.getValue());
+            feature.setName(nameOfFeature);
             CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(feature);
             sldTimestamp.setEnabled(true);
+
+            if ((firstOperand != null) && (firstOperand.getPNode() != null)) {
+                firstOperand.getPNode().setVisible(false);
+            }
+            if ((secondOperand != null) && (secondOperand.getPNode() != null)) {
+                secondOperand.getPNode().setVisible(false);
+            }
         }
     }
 
@@ -738,8 +745,8 @@ public class GridComparisonWidget extends javax.swing.JPanel {
             }
 
             gridComparator = new GridComparator(
-                    GridComparisonWidget.this.secondOperand,
                     GridComparisonWidget.this.firstOperand,
+                    GridComparisonWidget.this.secondOperand,
                     layerStyle,
                     (float)cropX,
                     (float)cropY,
@@ -874,14 +881,6 @@ public class GridComparisonWidget extends javax.swing.JPanel {
             if (value instanceof SlidableWMSServiceLayerGroup) {
                 final SlidableWMSServiceLayerGroup layer = (SlidableWMSServiceLayerGroup)value;
                 setText(GridComparisonLayerProvider.generateMenuRepresentation(layer));
-
-                if ((ICON_LAYER_INVISIBLE != null) && (ICON_LAYER_VISIBLE != null)) {
-                    if (layer.isVisible()) {
-                        setIcon(ICON_LAYER_VISIBLE);
-                    } else {
-                        setIcon(ICON_LAYER_INVISIBLE);
-                    }
-                }
 
                 if (!layer.isEnabled()) {
                     setBackground(UIManager.getDefaults().getColor("ComboBox.disabledBackground")); // NOI18N

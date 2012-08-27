@@ -45,6 +45,7 @@ public class SlidingImagesFeature implements RasterDocumentFeature, XStyledFeatu
     private int sliderPosition = 0;
     private BufferedImage document;
     private Graphics2D documentGraphics;
+    private String name;
 
     private boolean hidden = false;
 
@@ -59,6 +60,7 @@ public class SlidingImagesFeature implements RasterDocumentFeature, XStyledFeatu
     public SlidingImagesFeature(final List<Image> images, final Geometry geometry) {
         this.images = new ArrayList<Image>(images.size());
         this.geometry = geometry;
+        this.name = "Slidable";
 
         for (int i = 0; i < images.size(); i++) {
             // Load the image
@@ -171,7 +173,16 @@ public class SlidingImagesFeature implements RasterDocumentFeature, XStyledFeatu
 
     @Override
     public String getName() {
-        return "TADA";
+        return name;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  name  DOCUMENT ME!
+     */
+    public void setName(final String name) {
+        this.name = name;
     }
 
     @Override
@@ -221,7 +232,7 @@ public class SlidingImagesFeature implements RasterDocumentFeature, XStyledFeatu
 
     @Override
     public float getTransparency() {
-        return 1F;
+        return .8F;
     }
 
     @Override

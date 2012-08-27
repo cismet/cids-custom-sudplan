@@ -34,6 +34,7 @@ public final class IDFCurve {
     private transient SortedMap<Integer, SortedMap<Integer, Double>> data;
     private transient Geometry geom;
     private transient Integer centerYear;
+    private transient Boolean forecast;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -212,5 +213,23 @@ public final class IDFCurve {
      */
     public void setGeom(final Geometry geom) {
         this.geom = geom;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Boolean getForecast() {
+        return forecast;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  forecast  DOCUMENT ME!
+     */
+    public void setForecast(final Boolean forecast) {
+        this.forecast = forecast;
     }
 }
