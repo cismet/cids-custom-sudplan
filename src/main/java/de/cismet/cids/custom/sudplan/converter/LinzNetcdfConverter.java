@@ -376,7 +376,7 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
         try {
             final Object valueKeyObject = to.getTSProperty(TimeSeries.VALUE_KEYS);
             final String[] valueKeys;
-            final boolean isEventTimeseries = this.isEventTimeseries(valueKeyObject);
+            final boolean isEventTimeseries = this.isEventTimeseries(to.getTSProperty(TimeSeries.VALUE_TYPES));
             if (valueKeyObject instanceof String) {
                 valueKeys = new String[] { (String)valueKeyObject };
                 if (LOG.isDebugEnabled()) {
@@ -385,7 +385,8 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
             } else if (valueKeyObject instanceof String[]) {
                 valueKeys = (String[])valueKeyObject;
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("found multiple valuekeys: " + valueKeys.length);               // NOI18N
+                    LOG.debug("found multiple valuekeys: " + valueKeys.length
+                                + ", is event timeseries: " + isEventTimeseries);             // NOI18N
                 }
             } else {
                 throw new IllegalStateException("unknown value key type: " + valueKeyObject); // NOI18N
@@ -413,16 +414,17 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
 
                 int i = 0;
                 for (final String valueKey : valueKeys) {
-                    final Object value = to.getValue(stamp, valueKeys[i]);
+                    final Object value = to.getValue(stamp, valueKey);
                     if (isEventTimeseries && (i == 0)) {
                         // end timestamp
                         sb.append(DATEFORMAT.format(TS_DATEFORMAT.parse((String)value))).append(valueSep);
-                    }
-                    if (isEventTimeseries && (i == 1)) {
+                    } else if (isEventTimeseries && (i == 1)) {
                         // event id
-                        sb.append(NUMBERFORMAT.format(value)).append(valueSep);
+                        sb.append(value).append(valueSep);
+                    } else if (value instanceof Float) {
+                        sb.append(NUMBERFORMAT.format((Float)value)).append(valueSep);
                     } else {
-                        sb.append((Float)value).append(valueSep);
+                        sb.append(value).append(valueSep);
                     }
 
                     i++;
