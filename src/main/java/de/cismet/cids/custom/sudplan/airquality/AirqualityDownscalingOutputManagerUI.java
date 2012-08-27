@@ -7,9 +7,13 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.airquality;
 
+import Sirius.navigator.plugin.PluginRegistry;
 import Sirius.navigator.ui.ComponentRegistry;
 
 import org.apache.log4j.Logger;
+
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
 
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
@@ -27,6 +31,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 
 import de.cismet.cids.custom.sudplan.Available;
 import de.cismet.cids.custom.sudplan.LocalisedEnumComboBox;
@@ -41,6 +46,8 @@ import de.cismet.cids.dynamics.Disposable;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
+
+import de.cismet.cismap.navigatorplugin.CismapPlugin;
 
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
@@ -96,9 +103,7 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
     private final transient javax.swing.JLabel lblResolution = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblVariable = new javax.swing.JLabel();
     private final transient javax.swing.JPanel pnlControls = new javax.swing.JPanel();
-    private final transient javax.swing.JPanel pnlDownloadAndShow = new javax.swing.JPanel();
     private final transient javax.swing.JPanel pnlProgess = new javax.swing.JPanel();
-    private final transient javax.swing.JPanel pnlVariableAndResolution = new javax.swing.JPanel();
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -134,6 +139,9 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
             // TODO: User feedback.
             // TODO: Disable all elements.
         }
+
+        pnlProgess.setVisible(false);
+        gluControls.setVisible(true);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -171,12 +179,14 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        pnlVariableAndResolution.setBorder(javax.swing.BorderFactory.createTitledBorder(
-                org.openide.util.NbBundle.getMessage(
-                    AirqualityDownscalingOutputManagerUI.class,
-                    "AirqualityDownscalingOutputManagerUI.pnlVariableAndResolution.border.title"))); // NOI18N
-        pnlVariableAndResolution.setOpaque(false);
-        pnlVariableAndResolution.setLayout(new java.awt.GridBagLayout());
+        gluMain.setMaximumSize(new java.awt.Dimension(0, 32767));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 0.1;
+        add(gluMain, gridBagConstraints);
 
         lblVariable.setText(NbBundle.getMessage(
                 AirqualityDownscalingOutputManagerUI.class,
@@ -187,15 +197,15 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlVariableAndResolution.add(lblVariable, gridBagConstraints);
+        add(lblVariable, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlVariableAndResolution.add(cboVariable, gridBagConstraints);
+        add(cboResolution, gridBagConstraints);
 
         lblResolution.setText(NbBundle.getMessage(
                 AirqualityDownscalingOutputManagerUI.class,
@@ -206,24 +216,41 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlVariableAndResolution.add(lblResolution, gridBagConstraints);
+        add(lblResolution, gridBagConstraints);
+
+        pnlControls.setOpaque(false);
+        pnlControls.setLayout(new java.awt.GridBagLayout());
+
+        btnExport.setText(org.openide.util.NbBundle.getMessage(
+                AirqualityDownscalingOutputManagerUI.class,
+                "AirqualityDownscalingOutputManagerUI.btnExport.text")); // NOI18N
+        btnExport.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlVariableAndResolution.add(cboResolution, gridBagConstraints);
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
+        pnlControls.add(btnExport, gridBagConstraints);
 
+        btnShowInMap.setText(NbBundle.getMessage(
+                AirqualityDownscalingOutputManagerUI.class,
+                "AirqualityDownscalingOutputManagerUI.btnShowInMap.text")); // NOI18N
+        btnShowInMap.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(pnlVariableAndResolution, gridBagConstraints);
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        pnlControls.add(btnShowInMap, gridBagConstraints);
 
-        pnlDownloadAndShow.setBorder(javax.swing.BorderFactory.createTitledBorder("Download and Show"));
-        pnlDownloadAndShow.setOpaque(false);
-        pnlDownloadAndShow.setLayout(new java.awt.GridBagLayout());
+        gluControls.setMaximumSize(new java.awt.Dimension(32767, 0));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+        pnlControls.add(gluControls, gridBagConstraints);
 
         pnlProgess.setOpaque(false);
         pnlProgess.setLayout(new java.awt.GridBagLayout());
@@ -253,62 +280,24 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlDownloadAndShow.add(pnlProgess, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+        pnlControls.add(pnlProgess, gridBagConstraints);
 
-        pnlControls.setOpaque(false);
-        pnlControls.setLayout(new java.awt.GridBagLayout());
-
-        btnExport.setText(org.openide.util.NbBundle.getMessage(
-                AirqualityDownscalingOutputManagerUI.class,
-                "AirqualityDownscalingOutputManagerUI.btnExport.text")); // NOI18N
-        btnExport.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
+        add(pnlControls, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_END;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlControls.add(btnExport, gridBagConstraints);
-
-        btnShowInMap.setText(NbBundle.getMessage(
-                AirqualityDownscalingOutputManagerUI.class,
-                "AirqualityDownscalingOutputManagerUI.btnShowInMap.text")); // NOI18N
-        btnShowInMap.setEnabled(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlControls.add(btnShowInMap, gridBagConstraints);
-
-        gluControls.setMaximumSize(new java.awt.Dimension(32767, 0));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.1;
-        pnlControls.add(gluControls, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        pnlDownloadAndShow.add(pnlControls, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(pnlDownloadAndShow, gridBagConstraints);
-
-        gluMain.setMaximumSize(new java.awt.Dimension(0, 32767));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 0.1;
-        add(gluMain, gridBagConstraints);
+        add(cboVariable, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
     @Override
@@ -376,6 +365,8 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
             btnShowInMap.setEnabled(false);
             btnExport.setEnabled(false);
             jpbDownload.setIndeterminate(true);
+            gluControls.setVisible(false);
+            pnlProgess.setVisible(true);
 
             if ((model.getCidsBean() == null)
                         || !(model.getCidsBean().getProperty("id") instanceof Integer)
@@ -406,19 +397,58 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                             final SlidableWMSServiceLayerGroup layerGroup = managerFuture.get();
 
                             if ((manager.getException() != null) || (layerGroup == null)) {
-                                LOG.error("Could not visualize result.", manager.getException()); // NOI18N
-                            }
+                                final Exception exception = manager.getException();
 
-                            CismapBroker.getInstance().getMappingComponent().getMappingModel().addLayer(layerGroup);
-                            ComponentRegistry.getRegistry().showComponent("cismap");
-                        } catch (Exception ex) {
+                                LOG.error("Could not visualize result.", exception); // NOI18N
+
+                                final ErrorInfo errorInfo = new ErrorInfo(
+                                        org.openide.util.NbBundle.getMessage(
+                                            AirqualityDownscalingOutputManagerUI.class,
+                                            "AirqualityDownscalingOutputManagerUI.ShowInMapListener.actionPerformed(ActionEvent).run().Runnable().run().visualizationError.title"),   // NOI18N
+                                        org.openide.util.NbBundle.getMessage(
+                                            AirqualityDownscalingOutputManagerUI.class,
+                                            "AirqualityDownscalingOutputManagerUI.ShowInMapListener.actionPerformed(ActionEvent).run().Runnable().run().visualizationError.message"), // NOI18N
+                                        null,
+                                        null,
+                                        exception,
+                                        Level.SEVERE,
+                                        null);
+
+                                JXErrorPane.showDialog(AirqualityDownscalingOutputManagerUI.this, errorInfo);
+                            } else {
+                                ((CismapPlugin)PluginRegistry.getRegistry().getPluginDescriptor("cismap").getPlugin())
+                                        .getCapabilities()
+                                        .processUrl(
+                                            AirqualityDownscalingResultManager.GEOSERVER_CAPABILITIES_URL,
+                                            null);
+                                CismapBroker.getInstance().getMappingComponent().getMappingModel().addLayer(layerGroup);
+                                ComponentRegistry.getRegistry().showComponent("cismap");
+                            }
+                        } catch (final Exception ex) {
                             // TODO: User feedback.
                             LOG.error("Could not visualize result.", ex); // NOI18N
+
+                            final ErrorInfo errorInfo = new ErrorInfo(
+                                    org.openide.util.NbBundle.getMessage(
+                                        AirqualityDownscalingOutputManagerUI.class,
+                                        "AirqualityDownscalingOutputManagerUI.ShowInMapListener.actionPerformed(ActionEvent).run().Runnable().run().visualizationError.title"),   // NOI18N
+                                    org.openide.util.NbBundle.getMessage(
+                                        AirqualityDownscalingOutputManagerUI.class,
+                                        "AirqualityDownscalingOutputManagerUI.ShowInMapListener.actionPerformed(ActionEvent).run().Runnable().run().visualizationError.message"), // NOI18N
+                                    null,
+                                    null,
+                                    ex,
+                                    Level.SEVERE,
+                                    null);
+
+                            JXErrorPane.showDialog(AirqualityDownscalingOutputManagerUI.this, errorInfo);
                         } finally {
                             EventQueue.invokeLater(new Runnable() {
 
                                     @Override
                                     public void run() {
+                                        pnlProgess.setVisible(false);
+                                        gluControls.setVisible(true);
                                         jpbDownload.setIndeterminate(false);
                                         btnShowInMap.setEnabled(true);
                                         btnExport.setEnabled(true);
