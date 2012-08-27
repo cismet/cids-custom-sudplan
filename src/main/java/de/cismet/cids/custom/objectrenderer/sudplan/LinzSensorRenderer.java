@@ -45,6 +45,7 @@ import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.converter.LinzNetcdfConverter;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
+import de.cismet.cids.custom.sudplan.dataExport.TimeSeriesExportWizardAction;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.linz.wizard.EtaWizardPanelEtaConfigurationUI;
 import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
@@ -139,12 +140,15 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
 
     //~ Instance fields --------------------------------------------------------
 
+    private final transient TimeSeriesExportWizardAction exportAction = new TimeSeriesExportWizardAction();
+
     private final transient LinzSensorTitleComponent linzSensorTitleComponent = new LinzSensorTitleComponent();
     private transient Sensor currentSensorType;
     private transient EventDetectionUpdater eventDetectionUpdater = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel cardPanel;
     private javax.swing.JPanel eventDetectionPanel;
+    private javax.swing.JButton exportButton;
     private javax.swing.JScrollPane jScrollPaneEventDetection;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JLabel progressLabel;
@@ -179,6 +183,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
         progressPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
         progressLabel = new javax.swing.JLabel();
+        exportButton = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(204, 204, 204));
         setMinimumSize(new java.awt.Dimension(0, 0));
@@ -230,6 +235,17 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 10, 10, 10);
         eventDetectionPanel.add(cardPanel, gridBagConstraints);
+
+        exportButton.setAction(exportAction);
+        exportButton.setText(org.openide.util.NbBundle.getMessage(
+                LinzSensorRenderer.class,
+                "LinzSensorRenderer.exportButton.text")); // NOI18N
+        exportButton.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        eventDetectionPanel.add(exportButton, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -374,7 +390,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
      *
      * @throws  IOException  DOCUMENT ME!
      */
-    private EventDetectionTableModel loadEvents(final Sensor sensor) throws IOException {
+    private TimeSeries loadEvents(final Sensor sensor) throws IOException {
         LOG.info("loading events for '" + sensor + '\'');
         final MetaObject[] timeseriesMoList = getTimeseriesBeans(sensor);
 
@@ -416,7 +432,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
             LOG.debug("event time series loaded with length of " + timeseriesLength);
         }
 
-        return new EventDetectionTableModel(timeSeries);
+        return timeSeries;
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -591,7 +607,9 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("EventDetectionUpdater: loading events for sensor '" + sensor + "'");
                     }
-                    eventDetectionTableModel = loadEvents(sensor);
+                    final TimeSeries timeSeries = loadEvents(sensor);
+                    exportAction.setTimeSeries(timeSeries);
+                    eventDetectionTableModel = new EventDetectionTableModel(timeSeries);
                 } catch (Throwable t) {
                     LOG.error("EventDetectionUpdater: could not retrieve event detection values: " + t.getMessage(), t);
                     run = false;
@@ -619,6 +637,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                                 }
                                 LinzSensorRenderer.this.tblEventDetection.setModel(eventDetectionTableModel);
                                 ((CardLayout)cardPanel.getLayout()).show(cardPanel, "events");
+                                exportButton.setEnabled(true);
                                 run = false;
                             }
                         });

@@ -12,7 +12,6 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.JsonFactory;
@@ -20,11 +19,12 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -37,7 +37,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
@@ -55,6 +54,7 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
     private static final transient Logger LOG = Logger.getLogger(LinzNetcdfConverter.class);
     public static final transient String NAN = "nan";
     private static final transient DateFormat DATEFORMAT;
+    private static final transient DateFormat TS_DATEFORMAT;
     private static final transient NumberFormat NUMBERFORMAT;
 
     static {
@@ -64,6 +64,7 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
         NUMBERFORMAT.setRoundingMode(RoundingMode.HALF_UP);
 
         DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // NOI18N
+        TS_DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -330,7 +331,32 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
 
     @Override
     public String toString() {
-        return "Linz-Hydraulics Converter";
+        return NbBundle.getMessage(
+                LinzNetcdfConverter.class,
+                "LinzNetcdfConverter.this.name");
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   valueTypesObject  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean isEventTimeseries(final Object valueTypesObject) {
+        if (valueTypesObject instanceof String) {
+            return false;
+        } else if (valueTypesObject instanceof String[]) {
+            final String[] valueTypes = (String[])valueTypesObject;
+            if (valueTypes.length < 3) {
+                return false;
+            } else if (valueTypes[0].equals(TimeSeries.VALUE_TYPE_STRING)
+                        && valueTypes[1].equals(TimeSeries.VALUE_TYPE_STRING)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -341,12 +367,75 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
      *
      * @return  DOCUMENT ME!
      *
-     * @throws  ConversionException            DOCUMENT ME!
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
+     * @throws  ConversionException  DOCUMENT ME!
      */
     @Override
     public InputStream convertBackward(final TimeSeries to, final String... params) throws ConversionException {
-        throw new UnsupportedOperationException("convertBackward operation not supported by " + this.toString());
+        LOG.info("exporting timeseries with " + to.getTimeStampsArray().length
+                    + " values (retrieveAllValues=" + this.retrieveAllValues + ")");
+        try {
+            final Object valueKeyObject = to.getTSProperty(TimeSeries.VALUE_KEYS);
+            final String[] valueKeys;
+            final boolean isEventTimeseries = this.isEventTimeseries(valueKeyObject);
+            if (valueKeyObject instanceof String) {
+                valueKeys = new String[] { (String)valueKeyObject };
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("found valuekey: " + valueKeys[0]);                             // NOI18N
+                }
+            } else if (valueKeyObject instanceof String[]) {
+                valueKeys = (String[])valueKeyObject;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("found multiple valuekeys: " + valueKeys.length);               // NOI18N
+                }
+            } else {
+                throw new IllegalStateException("unknown value key type: " + valueKeyObject); // NOI18N
+            }
+
+            final StringBuilder sb = new StringBuilder();
+            final String lineSep = System.getProperty("line.separator"); // NOI18N
+            final char valueSep = ';';
+
+            if (isEventTimeseries) {
+                sb.append("start_time").append(valueSep);
+            } else {
+                sb.append("timestamp").append(valueSep);
+            }
+
+            for (final String valueKey : valueKeys) {
+                sb.append(valueKey).append(valueSep);
+            }
+            sb.append(lineSep);
+
+            final Iterator<TimeStamp> it = to.getTimeStamps().iterator();
+            while (it.hasNext()) {
+                final TimeStamp stamp = it.next();
+                sb.append(DATEFORMAT.format(stamp.asDate())).append(valueSep);
+
+                int i = 0;
+                for (final String valueKey : valueKeys) {
+                    final Object value = to.getValue(stamp, valueKeys[i]);
+                    if (isEventTimeseries && (i == 0)) {
+                        // end timestamp
+                        sb.append(DATEFORMAT.format(TS_DATEFORMAT.parse((String)value))).append(valueSep);
+                    }
+                    if (isEventTimeseries && (i == 1)) {
+                        // event id
+                        sb.append(NUMBERFORMAT.format(value)).append(valueSep);
+                    } else {
+                        sb.append((Float)value).append(valueSep);
+                    }
+
+                    i++;
+                }
+                sb.append(lineSep);
+            }
+
+            return new ByteArrayInputStream(sb.toString().getBytes());
+        } catch (final Exception e) {
+            final String message = "cannot convert timeseries data"; // NOI18N
+            LOG.error(message, e);
+            throw new ConversionException(message, e);
+        }
     }
 
     /**
