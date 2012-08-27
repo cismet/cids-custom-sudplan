@@ -171,6 +171,9 @@ public final class EtaWizardPanelProjectUI extends JPanel {
      * @param  swmmScenarios  DOCUMENT ME!
      */
     private void initScenarioList(final List<CidsBean> swmmScenarios) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("loading " + swmmScenarios + " SWMM Sceanrios");
+        }
         final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
         for (final CidsBean swmmScenario : swmmScenarios) {
             comboBoxModel.addElement(swmmScenario);
@@ -182,6 +185,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 this.scenarioListener,
                 this.cobScenarios));
 
+        // fire selection event
+        this.cobScenarios.setSelectedIndex(-1);
         this.cobScenarios.setSelectedIndex(0);
     }
 
