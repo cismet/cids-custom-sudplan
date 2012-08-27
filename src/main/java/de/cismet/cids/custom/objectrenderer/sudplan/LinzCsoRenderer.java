@@ -15,6 +15,7 @@ package de.cismet.cids.custom.objectrenderer.sudplan;
 import Sirius.navigator.ui.ComponentRegistry;
 import Sirius.navigator.ui.RequestsFullSizeComponent;
 
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.io.IOUtils;
 
 import org.jdesktop.swingx.JXHyperlink;
@@ -65,6 +66,8 @@ import de.cismet.netutil.Proxy;
 import de.cismet.security.WebDavClient;
 
 import de.cismet.tools.CismetThreadPool;
+import de.cismet.tools.PasswordEncrypter;
+import de.cismet.tools.PropertyReader;
 
 import de.cismet.tools.gui.*;
 
@@ -82,6 +85,9 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
 
     //~ Static fields/initializers ---------------------------------------------
 
+    private static final PropertyReader propertyReader;
+    private static final String FILE_PROPERTY = "/de/cismet/cids/custom/sudplan/repositories.properties";
+
     private static final String CARD_1 = "CARD1";
     private static final String CARD_2 = "CARD2";
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(LinzCsoRenderer.class);
@@ -89,9 +95,9 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
                 "/de/cismet/cids/custom/objectrenderer/sudplan/file-broken.png"));
     private static final ImageIcon FOLDER_ICON = new ImageIcon(LinzCsoRenderer.class.getResource(
                 "/de/cismet/cids/custom/objectrenderer/sudplan/inode-directory.png"));
-    private static final String WEB_DAV_USER = "tsDav";
-    private static final String WEB_DAV_PASSWORD = "RHfio2l4wrsklfghj";
-    private static final String WEB_DAV_DIRECTORY = "http://sudplan.cismet.de/tsDav/linz-images/";
+    private static final String LINZ_IMAGES_WEBDAV_USERNAME;
+    private static final String LINZ_IMAGES_WEBDAV_PASSWORD;
+    private static final String LINZ_IMAGES_WEBDAV_HOST;
     private static final int CACHE_SIZE = 20;
     private static final Map<String, SoftReference<BufferedImage>> IMAGE_CACHE =
         new LinkedHashMap<String, SoftReference<BufferedImage>>(CACHE_SIZE) {
@@ -101,6 +107,16 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
                 return size() >= CACHE_SIZE;
             }
         };
+
+    static {
+        propertyReader = new PropertyReader(FILE_PROPERTY);
+
+        LINZ_IMAGES_WEBDAV_HOST = propertyReader.getProperty("LINZ_IMAGES_WEBDAV_HOST");
+        LINZ_IMAGES_WEBDAV_USERNAME = propertyReader.getProperty("LINZ_IMAGES_WEBDAV_USERNAME");
+        LINZ_IMAGES_WEBDAV_PASSWORD = String.valueOf(PasswordEncrypter.decrypt(
+                    propertyReader.getProperty("LINZ_IMAGES_WEBDAV_PASSWORD").toCharArray(),
+                    false));
+    }
 
     //~ Instance fields --------------------------------------------------------
 
@@ -186,7 +202,9 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
     public LinzCsoRenderer(final boolean editable) {
         this.listListenerEnabled = true;
         this.resizeListenerEnabled = true;
-        this.webDavClient = new WebDavClient(Proxy.fromPreferences(), WEB_DAV_USER, WEB_DAV_PASSWORD);
+        this.webDavClient = new WebDavClient(Proxy.fromPreferences(),
+                LINZ_IMAGES_WEBDAV_USERNAME,
+                LINZ_IMAGES_WEBDAV_PASSWORD);
         initComponents();
 
         timer = new Timer(300, new ActionListener() {
@@ -245,14 +263,20 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
             LOG.debug("downloadImageFromWebDAV:" + fileName);
         }
         final String encodedFileName = encodeURL(fileName);
-        final InputStream iStream = webDavClient.getInputStream(WEB_DAV_DIRECTORY
+        final InputStream iStream = webDavClient.getInputStream(LINZ_IMAGES_WEBDAV_HOST
                         + encodedFileName);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("original: " + fileName + "\nweb dav path: " + WEB_DAV_DIRECTORY + encodedFileName);
+            LOG.debug("original: " + fileName + "\nweb dav path: " + LINZ_IMAGES_WEBDAV_HOST + encodedFileName);
         }
         try {
             final ImageInputStream iiStream = ImageIO.createImageInputStream(iStream);
             final Iterator<ImageReader> itReader = ImageIO.getImageReaders(iiStream);
+
+            if (!itReader.hasNext()) {
+                throw new IOException("could not download image '" + fileName + "' from webdav '"
+                            + LINZ_IMAGES_WEBDAV_HOST + "': file not found");
+            }
+
             final ImageReader reader = itReader.next();
             final ProgressMonitor monitor = new ProgressMonitor(this, "Bild wird übertragen...", "", 0, 100);
 //            monitor.setMillisToPopup(500);

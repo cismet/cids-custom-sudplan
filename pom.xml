@@ -80,17 +80,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>de.cismet.cids.navigator</groupId>
-            <artifactId>default-forms</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>de.cismet.cids.navigator</groupId>
-                    <artifactId>cids-navigator</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>de.cismet.cids.custom.sudplan</groupId>
             <artifactId>cids-custom-sudplan-server</artifactId>
             <version>2.0-SNAPSHOT</version>
@@ -333,22 +322,27 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12</version>
                 <configuration>
-                    <arguments>
-                        <argument>-Xmx1024m</argument>
-                    </arguments>
+                    <!-- 
+                        these are remote tests and although it is possible to run them from the outside of our network
+                        they highly depend on external resources that may not be available in the future. thus the tests
+                        need to be redesigned to be independent. however, they will remain deactivated to be able to use
+                        them anyway in case of explicit further development of the corresponding classes
+                     -->
+                    <excludes>
+                        <!-- only a stress test -->
+                        <exclude>**/SOSTest.class</exclude>
+                        <exclude>**/TimeIntervalTest.class</exclude>
+                        <exclude>**/TimeSeriesRetrieverTest.class</exclude>
+                        <exclude>**/TimeSeriesTransmitterTest.class</exclude>
+                        <!-- only a stress test -->
+                        <exclude>**/TimeseriesChartPanelStressTest.class</exclude>
+                    </excludes>
                 </configuration>
-            </plugin>
+           </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>

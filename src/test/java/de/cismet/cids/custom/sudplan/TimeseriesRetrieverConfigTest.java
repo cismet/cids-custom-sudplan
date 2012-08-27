@@ -39,7 +39,6 @@ public class TimeseriesRetrieverConfigTest
     {
     }
 
-
     private String getCurrentMethodName()
     {
         return new Throwable().getStackTrace()[1].getMethodName();
@@ -109,11 +108,6 @@ public class TimeseriesRetrieverConfigTest
         assertTrue(result.getInterval().isLeftOpen() && result.getInterval().isRightOpen());
         assertEquals(url, result.toUrl());
     }
-    
-    
-
-    
-    
     
     @Test
     public void testToTSTBUrl() throws Exception

@@ -16,16 +16,12 @@ import java.awt.Image;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.ParameterBlock;
 
-import java.io.File;
-
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
-
-import javax.imageio.ImageIO;
 
 import javax.media.jai.JAI;
 import javax.media.jai.RenderedOp;
@@ -58,7 +54,7 @@ public class GridComparator {
 
         //~ Enum constants -----------------------------------------------------
 
-        /*ADDITION, */ SUBTRACTION, AVERAGE;
+        SUBTRACTION, AVERAGE;
 
         //~ Methods ------------------------------------------------------------
 
@@ -140,30 +136,19 @@ public class GridComparator {
      * @return  DOCUMENT ME!
      */
     public List<Image> compare(final Operation operation) {
-        return compare(operation, 128D, 1D, 0D);
+        return compare(operation, 1D);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   operation    DOCUMENT ME!
-     * @param   scaleCenter  DOCUMENT ME!
-     * @param   contrast     DOCUMENT ME!
-     * @param   brightness   DOCUMENT ME!
+     * @param   operation  DOCUMENT ME!
+     * @param   contrast   DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     public List<Image> compare(final Operation operation,
-            final double scaleCenter,
-            final double contrast,
-            final double brightness) {
-//        List<Image> result = results.get(operation);
-
-//        if (result != null) {
-//            return result;
-//        }
-
-//        result = new ArrayList<Image>();
+            final double contrast) {
         final List<Image> result = new ArrayList<Image>();
         results.put(operation, result);
 
@@ -184,7 +169,7 @@ public class GridComparator {
             try {
                 result.add(
                     i,
-                    process(operation, firstOperands.get(i), secondOperands.get(i), scaleCenter, contrast, brightness));
+                    process(operation, firstOperands.get(i), secondOperands.get(i), contrast));
             } catch (final Exception ex) {
                 LOG.warn("Could not calculate '" + operation + "'.", ex);
                 result.clear();
@@ -201,9 +186,7 @@ public class GridComparator {
      * @param   operation      DOCUMENT ME!
      * @param   firstOperand   DOCUMENT ME!
      * @param   secondOperand  DOCUMENT ME!
-     * @param   scaleCenter    DOCUMENT ME!
      * @param   contrast       DOCUMENT ME!
-     * @param   brightness     DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      *
@@ -213,58 +196,26 @@ public class GridComparator {
     protected Image process(final Operation operation,
             final RenderedImage firstOperand,
             final RenderedImage secondOperand,
-            final double scaleCenter,
-            final double contrast,
-            final double brightness) throws Exception {
+            final double contrast) throws Exception {
         RenderedOp resultImage = null;
         ParameterBlock pb;
 
-//        try {
-//            pb = new ParameterBlock();
-//            pb.add(firstOperandAWT);
-//            firstOperand = JAI.create("awtimage", pb);
-//
-//            pb = new ParameterBlock();
-//            pb.add(secondOperandAWT);
-//            secondOperand = JAI.create("awtimage", pb);
-//        } catch (final Exception ex) {
-//            throw new Exception("Couldn't convert AWT images to JAI images.", ex);
-//        }
-
         switch (operation) {
-//            case ADDITION: {
-//                pb = new ParameterBlock();
-//                pb.addSource(firstOperand);
-//                pb.addSource(secondOperand);
-//                resultImage = JAI.create("add", pb);
-//
-//                pb = new ParameterBlock();
-//                pb.addSource(resultImage);
-//                // Invert the red band of the addition and use it as green band
-//                pb.add(
-//                    new double[][] {
-//                        { 1D, 0D, 0D, 0D },
-//                        { -1D, 0D, 0D, 255D },
-//                        { 0D, 0D, 0D, 0D } // ,
-////                        { 0D, 0D, 0D, 255D },
-//                    });
-//
-//                // Invert the green band of the addition and use it as red band
-//// pb.add(
-//// new double[][]{
-//// {1D, 0D, 0D, 0D, 0D},
-//// {-1D, 0D, 0D, 0D, 255D},
-//// {0D, 0D, 0D, 0D, 0D},
-//// {0D, 0D, 0D, 0D, 255D},});
-//
-//                resultImage = JAI.create("bandcombine", pb);
-//
-//                break;
-//            }
             case SUBTRACTION: {
                 pb = new ParameterBlock();
-                pb.addSource(firstOperand);
+
+                // In common cases, the time period of the first operand will be before the time period of the second
+                // operand. This means, the user provides the two time series in a manner like "ozone 2030, ozone 2040".
+                // In order to show the difference between the time series, it's useful to support a reading like
+                // "compared with 2030, ozone concentrations in 2040 will be increase/decrease".
+
+                // Let's assume we have low concentrations in the first operand and high concentrations in the second.
+                // Further we assume that "green" means low and "red" high concentration.
+                // Then the calculation green - red would produce green, representing a low value. But the user shall
+                // see that the concentration increases, which is represented by red. Thus, we switch the operands.
+
                 pb.addSource(secondOperand);
+                pb.addSource(firstOperand);
                 resultImage = JAI.create("subtract", pb);
 
                 break;
@@ -282,40 +233,8 @@ public class GridComparator {
                     throw new Exception("Colors of layer style are not independent.");
                 }
 
-                final boolean[] minBands = getInfluencingBands(colorMap.get(0).getColor());
-                final boolean[] maxBands = getInfluencingBands(colorMap.get(1).getColor());
-
-                if ((minBands == null) || (maxBands == null) || (minBands.length != maxBands.length)) {
-                    throw new Exception("Couldn't interpret colors of layer style.");
-                }
-
-                final double[] factor = new double[] { 0D, 0D, 0D, 1D };
+                final double[] factor = new double[] { 0.5D, 0.5D, 0.5D, 1D };
                 final double[] constant = new double[] { 0D, 0D, 0D, 0D };
-                final double[][] bandCombinationMatrix = new double[][] {
-                        { 0D, 0D, 0D, 0D },
-                        { 0D, 0D, 0D, 0D },
-                        { 0D, 0D, 0D, 0D } // ,
-//                        { 0D, 0D, 0D, 255D }
-                    };
-
-                for (int i = 0; i < maxBands.length; i++) {
-                    if (maxBands[i]) {
-                        factor[i] = .5D;
-                        bandCombinationMatrix[i][i] = 1D;
-                    }
-                }
-
-                for (int i = 0; i < minBands.length; i++) {
-                    if (minBands[i]) {
-                        bandCombinationMatrix[i][3] = 255D;
-
-                        for (int j = 0; j < maxBands.length; j++) {
-                            if (maxBands[j]) {
-                                bandCombinationMatrix[i][j] = -1D;
-                            }
-                        }
-                    }
-                }
 
                 // Scale down operands
                 pb = new ParameterBlock();
@@ -324,29 +243,11 @@ public class GridComparator {
                 pb.add(constant);
                 final RenderedOp firstOperandScaled = JAI.create("rescale", pb);
 
-//                try {
-//                    final File outputFileBuffered = new File("D:\\Caches\\xy\\BI_" + operation.name() + "_0_"
-//                                    + System.currentTimeMillis()
-//                                    + ".png");
-//                    ImageIO.write(firstOperandScaled, "png", outputFileBuffered);
-//                } catch (final Exception ex) {
-//                    // NoOp
-//                }
-
                 pb = new ParameterBlock();
                 pb.addSource(secondOperand);
                 pb.add(factor);
                 pb.add(constant);
                 final RenderedOp secondOperandScaled = JAI.create("rescale", pb);
-
-//                try {
-//                    final File outputFileBuffered = new File("D:\\Caches\\xy\\BI_" + operation.name() + "_1_"
-//                                    + System.currentTimeMillis()
-//                                    + ".png");
-//                    ImageIO.write(secondOperandScaled, "png", outputFileBuffered);
-//                } catch (final Exception ex) {
-//                    // NoOp
-//                }
 
                 // Add scaled operands
                 pb = new ParameterBlock();
@@ -354,28 +255,7 @@ public class GridComparator {
                 pb.addSource(secondOperandScaled);
                 final RenderedOp addition = JAI.create("add", pb);
 
-//                try {
-//                    final File outputFileBuffered = new File("D:\\Caches\\xy\\BI_" + operation.name() + "_2_"
-//                                    + System.currentTimeMillis()
-//                                    + ".png");
-//                    ImageIO.write(addition, "png", outputFileBuffered);
-//                } catch (final Exception ex) {
-//                    // NoOp
-//                }
-
-                pb = new ParameterBlock();
-                pb.addSource(addition);
-                pb.add(bandCombinationMatrix);
-                resultImage = JAI.create("bandcombine", pb);
-
-//                try {
-//                    final File outputFileBuffered = new File("D:\\Caches\\xy\\BI_" + operation.name() + "_3_"
-//                                    + System.currentTimeMillis()
-//                                    + ".png");
-//                    ImageIO.write(resultImage, "png", outputFileBuffered);
-//                } catch (final Exception ex) {
-//                    // NoOp
-//                }
+                resultImage = addition;
 
                 break;
             }
@@ -385,38 +265,7 @@ public class GridComparator {
             throw new Exception("Result of operation '" + operation.toString() + "' is null.");
         }
 
-        resultImage = rescale(contrast, brightness, scaleCenter, resultImage);
-
-        // final BufferedImage result = resultImage.getAsBufferedImage();
-// try {
-        // final File outputFile = new File("D:\\Caches\\xy\\" + operation.name() + "_" + System.currentTimeMillis()
-        // + ".png");
-        // final FileOutputStream stream = new FileOutputStream(outputFile);
-        // JAI.create("encode", resultImage, stream, "PNG", null);
-        // stream.flush();
-        // stream.close();
-        //
-        // // Store the image in the BMP format.
-        //// JAI.create(
-        //// "filestore",
-        //// resultImage,
-        //// "D:\\Caches\\xy\\1_"
-        //// // + operation.name()
-        //// // + "_"
-        //// + System.currentTimeMillis()
-        //// + ".tif",
-        //// "TIFF",
-        //// null);
-        //
-//         final File outputFileBuffered = new File("D:\\Caches\\xy\\BI_" + operation.name() + "_"
-//         + System.currentTimeMillis()
-//         + ".png");
-//         ImageIO.write(resultImage, "png", outputFileBuffered);
-//         } catch (final Exception ex) {
-//         // NoOp
-//         }
-        //
-        // return result;
+        resultImage = rescale(contrast, resultImage);
 
         return resultImage.getAsBufferedImage();
     }
@@ -434,7 +283,6 @@ public class GridComparator {
         secondOperands.clear();
 
         ParameterBlock pb;
-        final RenderedOp alphaImage = null;
         for (final Iterator iter = firstOperand.getPNode().getChildrenIterator(); iter.hasNext();) {
             final Object imageObj = iter.next();
 
@@ -443,66 +291,16 @@ public class GridComparator {
                 return;
             }
 
-//            pb = new ParameterBlock();
-//            pb.add(((XPImage)imageObj).getImage());
-//            final RenderedOp renderedImage = JAI.create("awtimage", pb);
-//
-//            final Image image = ((XPImage)imageObj).getImage();
-//            final BufferedImage bufferedImage = new BufferedImage(image.getWidth(null),
-//                    image.getHeight(null),
-//                    BufferedImage.TYPE_INT_ARGB);
-//            final Graphics2D documentGraphics = bufferedImage.createGraphics();
-//            documentGraphics.drawImage(image, 0, 0, null);
-//            documentGraphics.dispose();
-//
-//            pb = new ParameterBlock();
-//            pb.add(bufferedImage);
-//            final RenderedOp renderedImage = JAI.create("awtimage", pb);
             final RenderedOp renderedImage = JAI.create("awtimage", ((XPImage)imageObj).getImage());
-
-//            if (alphaImage == null) {
-//                pb = new ParameterBlock();
-//                pb.add(new Float(renderedImage.getWidth()));
-//                pb.add(new Float(renderedImage.getHeight()));
-//                pb.add(new Integer[] { new Integer(255) });
-//                alphaImage = JAI.create("constant", pb);
-//            }
-//
-//            if (alphaImage != null) {
-//                pb = new ParameterBlock();
-//                pb.addSource(alphaImage);
-//                pb.addSource(renderedImage);
-//                final ImageLayout layout = new ImageLayout();
-//                layout.setColorModel(new ComponentColorModel(
-//                        ColorSpace.getInstance(ColorSpace.CS_sRGB),
-//                        new int[] { 8, 8, 8, 8 },
-//                        true,
-//                        false,
-//                        Transparency.OPAQUE,
-//                        DataBuffer.TYPE_BYTE));
-//                pb.add(new RenderingHints(JAI.KEY_IMAGE_LAYOUT, layout));
-//                renderedImage = JAI.create("bandmerge", pb);
-//            }
 
             pb = new ParameterBlock();
             pb.addSource(renderedImage);
-//            pb.addSource(bufferedImage);
             pb.add(cropX);
             pb.add(cropY);
             pb.add(cropWidth);
             pb.add(cropHeight);
 
             firstOperands.add(JAI.create("crop", pb));
-
-//            try {
-//                final File outputFile = new File("D:\\Caches\\xy\\EI_" + System.currentTimeMillis() + ".png");
-//                final FileOutputStream stream = new FileOutputStream(outputFile);
-//                JAI.create("encode", firstOperands.get(i++), stream, "PNG", null);
-//                stream.flush();
-//                stream.close();
-//            } catch (final Exception ex) {
-//                // NoOp
-//            }
         }
 
         for (final Iterator iter = secondOperand.getPNode().getChildrenIterator(); iter.hasNext();) {
@@ -514,42 +312,10 @@ public class GridComparator {
                 return;
             }
 
-//            pb = new ParameterBlock();
-//            pb.add(((XPImage)imageObj).getImage());
-//            final RenderedOp renderedImage = JAI.create("awtimage", pb);
-
-//            final Image image = ((XPImage)imageObj).getImage();
-//            final BufferedImage bufferedImage = new BufferedImage(image.getWidth(null),
-//                    image.getHeight(null),
-//                    BufferedImage.TYPE_INT_ARGB);
-//            final Graphics2D documentGraphics = bufferedImage.createGraphics();
-//            documentGraphics.drawImage(image, 0, 0, null);
-//            documentGraphics.dispose();
-//
-//            pb = new ParameterBlock();
-//            pb.add(bufferedImage);
-//            final RenderedOp renderedImage = JAI.create("awtimage", pb);
             final RenderedOp renderedImage = JAI.create("awtimage", ((XPImage)imageObj).getImage());
-
-//            if (alphaImage != null) {
-//                pb = new ParameterBlock();
-//                pb.addSource(alphaImage);
-//                pb.addSource(renderedImage);
-//                final ImageLayout layout = new ImageLayout();
-//                layout.setColorModel(new ComponentColorModel(
-//                        ColorSpace.getInstance(ColorSpace.CS_sRGB),
-//                        new int[] { 8, 8, 8, 8 },
-//                        true,
-//                        false,
-//                        Transparency.OPAQUE,
-//                        DataBuffer.TYPE_BYTE));
-//                pb.add(new RenderingHints(JAI.KEY_IMAGE_LAYOUT, layout));
-//                renderedImage = JAI.create("bandmerge", pb);
-//            }
 
             pb = new ParameterBlock();
             pb.addSource(renderedImage);
-//            pb.addSource(bufferedImage);
             pb.add(cropX);
             pb.add(cropY);
             pb.add(cropWidth);
@@ -562,19 +328,14 @@ public class GridComparator {
      * DOCUMENT ME!
      *
      * @param   contrast     DOCUMENT ME!
-     * @param   brightness   DOCUMENT ME!
-     * @param   scaleCenter  DOCUMENT ME!
      * @param   resultImage  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     private RenderedOp rescale(final double contrast,
-            final double brightness,
-            final double scaleCenter,
             final RenderedOp resultImage) {
         // Should be OK not to use an epsilon here, since a good developer uses real double constants (1D) as parameter.
-        if ((1D != contrast) || (0D != brightness)) {
-//            final double constant = ((contrast * scaleCenter) * -1D) + scaleCenter + brightness;
+        if (1D != contrast) {
             final ParameterBlock pb = new ParameterBlock();
 
             pb.addSource(resultImage);
