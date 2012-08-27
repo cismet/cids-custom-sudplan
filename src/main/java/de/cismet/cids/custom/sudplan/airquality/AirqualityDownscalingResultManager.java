@@ -18,6 +18,9 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
+import it.geosolutions.geoserver.rest.GeoServerRESTReader;
+import it.geosolutions.geoserver.rest.decoder.RESTLayerList;
+import it.geosolutions.geoserver.rest.decoder.utils.NameLinkElem;
 import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
 
 import org.apache.log4j.Logger;
@@ -38,9 +41,14 @@ import java.sql.Statement;
 
 import java.text.MessageFormat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -51,6 +59,7 @@ import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverException;
+import de.cismet.cids.custom.sudplan.Variable;
 import de.cismet.cids.custom.sudplan.airquality.AirqualityDownscalingOutput.Result;
 import de.cismet.cids.custom.sudplan.geoserver.AttributesAwareGSFeatureTypeEncoder;
 import de.cismet.cids.custom.sudplan.geoserver.GSAttributeEncoder;
@@ -95,7 +104,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
     private static final transient String GEOSERVER_WORKSPACE;
     private static final transient String GEOSERVER_DATASTORE;
 
-    private static final transient String GEOSERVER_CAPABILITIES_URL;
+    protected static final transient String GEOSERVER_CAPABILITIES_URL;
     private static final transient String GEOSERVER_SLD;
 
     static {
@@ -599,15 +608,41 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             throw new Exception(message);
         }
 
-        final GeoServerRESTPublisher publisher = new GeoServerRESTPublisher(
+        final GeoServerRESTReader geoServerRESTReader = new GeoServerRESTReader(
                 GEOSERVER_REST_URL,
                 GEOSERVER_REST_USER,
                 GEOSERVER_REST_PASSWORD);
+        final GeoServerRESTPublisher geoServerRESTPublisher = new GeoServerRESTPublisher(
+                GEOSERVER_REST_URL,
+                GEOSERVER_REST_USER,
+                GEOSERVER_REST_PASSWORD);
+
+        if (!geoServerRESTReader.existGeoserver()) {
+            final String message = "The URL '" + GEOSERVER_REST_URL + "' doesn't point to a GeoServer."; // NOI18N
+            LOG.error(message);
+            throw new Exception(message);
+        }
+
+        final RESTLayerList availableLayers;
+        try {
+            availableLayers = geoServerRESTReader.getLayers();
+        } catch (final Exception ex) {
+            final String message = "Couldn't connect to GeoServer '" + GEOSERVER_REST_URL + "'."; // NOI18N
+            LOG.error(message, ex);
+            throw new Exception(message, ex);
+        }
+
+        final List<String> availableLayerNames = new ArrayList<String>(availableLayers.size());
+        for (final NameLinkElem availableLayer : availableLayers) {
+            availableLayerNames.add(availableLayer.getName());
+        }
+        Collections.sort(availableLayerNames);
+
         final Connection connection;
         try {
             connection = openConnection();
-        } catch (Exception ex) {
-            final String message = "Couldn't connect to database."; // NOI18N
+        } catch (final Exception ex) {
+            final String message = "Couldn't connect to database '" + DB_URL + "'."; // NOI18N
             LOG.error(message, ex);
             throw new Exception(message, ex);
         }
@@ -648,6 +683,8 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             throw new Exception(message, ex);
         }
 
+        final Collection<String> createdLayers = new LinkedList<String>();
+        boolean removeCreatedLayers = false;
         try {
             for (final TimeStamp stamp : timeseries.getTimeStamps()) {
                 final Float[][] values = (Float[][])timeseries.getValue(stamp, valueKey);
@@ -658,6 +695,13 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                             result.getResolution().getOfferingSuffix(),
                             Long.toString(stamp.asMilis()))
                             .toLowerCase();
+
+                if (Collections.binarySearch(availableLayerNames, viewName) >= 0) {
+                    final String message = "The layer '" + viewName + "' already exists in GeoServer."; // NOI18N
+                    LOG.error(message);
+                    removeCreatedLayers = true;
+                    break;
+                }
 
                 writeValuesToDatabase(
                     connection,
@@ -683,7 +727,6 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                     boundaries[0][2],
                     boundaries[0][3],
                     srs.getCode());
-//                    GEOSERVER_CRS);
 
                 featureType.setLatLonBoundingBox(
                     boundaries[1][0],
@@ -691,7 +734,6 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                     boundaries[1][2],
                     boundaries[1][3],
                     "EPSG:4326");
-//                    GEOSERVER_CRS);
 
                 featureType.addKeyword("min:" + min);
                 featureType.addKeyword("max:" + max);
@@ -702,18 +744,26 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 layer.setPath("/"
                             + name
                             + "/"
-                            + result.getResolution().getLocalisedName() // NOI18N
+                            + formatForWmsPath(result.getResolution()) // NOI18N
                             + "/"
-                            + result.getVariable().getLocalisedName()   // NOI18N
-                            + "[]");                                    // NOI18N
+                            + formatForWmsPath(result.getVariable())   // NOI18N
+                            + "[]");                                   // NOI18N
+
                 // TODO: SLD according to variable or style interprets variable property.
                 layer.setDefaultStyle(GEOSERVER_SLD);
 
-                if (!publisher.publishDBLayer(GEOSERVER_WORKSPACE, GEOSERVER_DATASTORE, featureType, layer)) {
+                if (!geoServerRESTPublisher.publishDBLayer(
+                                GEOSERVER_WORKSPACE,
+                                GEOSERVER_DATASTORE,
+                                featureType,
+                                layer)) {
+                    removeCreatedLayers = true;
                     throw new Exception("GeoServer import was not successful"); // NOI18N
+                } else {
+                    createdLayers.add(viewName);
                 }
             }
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             final String message = "Something went wrong while downloading results."; // NOI18N
             LOG.error(message, ex);
             throw new Exception(message, ex);
@@ -722,6 +772,15 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 connection.close();
             } catch (Exception ex) {
                 LOG.warn("Could not close connection to database '" + DB_URL + "'.", ex); // NOI18N
+            }
+
+            if (removeCreatedLayers) {
+                for (final String createdLayer : createdLayers) {
+                    geoServerRESTPublisher.unpublishFeatureType(GEOSERVER_WORKSPACE, GEOSERVER_DATASTORE, createdLayer);
+                    geoServerRESTPublisher.removeLayer(GEOSERVER_WORKSPACE, createdLayer);
+                }
+
+                throw new Exception("At least one of the layers to create already exists.");
             }
         }
     }
@@ -755,7 +814,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
 
             Layer resolutionLayer = null;
             for (final Layer layer : modelLayer.getChildren()) {
-                if (layer.getName().equals(this.result.getResolution().getLocalisedName())) {
+                if (layer.getName().equals(formatForWmsPath(this.result.getResolution()))) {
                     resolutionLayer = layer;
                     break;
                 }
@@ -767,7 +826,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
 
             Layer variableLayer = null;
             for (final Layer layer : resolutionLayer.getChildren()) {
-                if (layer.getName().equals(this.result.getVariable().getLocalisedName() + "[]")) {
+                if (layer.getName().equals(formatForWmsPath(this.result.getVariable()).concat("[]"))) {
                     variableLayer = layer;
                     break;
                 }
@@ -788,7 +847,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                     wmsCapabilities,
                     GEOSERVER_CAPABILITIES_URL,
                     srs);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             exception = ex;
             return result;
         }
@@ -803,6 +862,60 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
      */
     public Exception getException() {
         return exception;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   variable  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String formatForWmsPath(final Variable variable) {
+        if (Variable.NO2.equals(variable)) {
+            return "NO2";
+        }
+        if (Variable.NOX.equals(variable)) {
+            return "NOX";
+        }
+        if (Variable.O3.equals(variable)) {
+            return "O3";
+        }
+        if (Variable.PM10.equals(variable)) {
+            return "PM10";
+        }
+        if (Variable.SO2.equals(variable)) {
+            return "SO2";
+        }
+
+        return "unknown";
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   resolution  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String formatForWmsPath(final Resolution resolution) {
+        if (Resolution.DECADE.equals(resolution)) {
+            return "10-yearly";
+        }
+        if (Resolution.YEAR.equals(resolution)) {
+            return "yearly";
+        }
+        if (Resolution.MONTH.equals(resolution)) {
+            return "monthly";
+        }
+        if (Resolution.DAY.equals(resolution)) {
+            return "daily";
+        }
+        if (Resolution.HOUR.equals(resolution)) {
+            return "hourly";
+        }
+
+        return "unknown";
     }
 
     //~ Inner Classes ----------------------------------------------------------
