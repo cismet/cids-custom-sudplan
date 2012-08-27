@@ -14,6 +14,8 @@ import Sirius.server.middleware.types.MetaClass;
 
 import org.apache.log4j.Logger;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
@@ -33,10 +35,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import de.cismet.cids.custom.sudplan.IDFTablePanel;
-import de.cismet.cids.custom.sudplan.SMSUtils;
-import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
-import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
+import de.cismet.cids.custom.sudplan.*;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -137,20 +136,27 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
             jtbAdditionalResults.setDefaultRenderer(String.class, new AdditionalResultsCellRenderer());
             jtbAdditionalResults.setPreferredScrollableViewportSize(jtbAdditionalResults.getPreferredSize());
         } else {
-            /*
-             * final ObjectMapper mapper = new ObjectMapper(); final String uriInput =
-             * (String)inputTs.getProperty("uri");   // NOI18N final String uriResult =
-             * (String)resultTs.getProperty("uri"); // NOI18N
-             *
-             * final IDFCurve idfInput; final IDFCurve idfResult; try { idfInput = mapper.readValue(uriInput,
-             * IDFCurve.class); idfResult = mapper.readValue(uriResult, IDFCurve.class); } catch (Exception ex) { final
-             * String message = "cannot read idf data from uri"; // NOI18N LOG.error(message, ex); throw new
-             * IllegalStateException(message, ex); }
-             *
-             * inputPanel = new IDFTablePanel(idfInput); resultPanel = new IDFTablePanel(idfResult);
-             * */
-            inputPanel = new IDFTablePanel(inputTs);
-            resultPanel = new IDFTablePanel(resultTs);
+            final ObjectMapper mapper = new ObjectMapper();
+            final String uriInput = (String)inputTs.getProperty("uri");   // NOI18N
+            final String uriResult = (String)resultTs.getProperty("uri"); // NOI18N
+
+            final IDFCurve idfInput;
+            final IDFCurve idfResult;
+            try {
+                idfInput = mapper.readValue(uriInput,
+                        IDFCurve.class);
+                idfResult = mapper.readValue(uriResult, IDFCurve.class);
+            } catch (Exception ex) {
+                final String message = "cannot read idf data from uri"; // NOI18N
+                LOG.error(message, ex);
+                throw new IllegalStateException(message, ex);
+            }
+
+            inputPanel = new IDFTablePanel(idfInput);
+            resultPanel = new IDFTablePanel(idfResult);
+
+// inputPanel = new IDFTablePanel(inputTs);
+// resultPanel = new IDFTablePanel(resultTs);
 
             this.remove(pnlStatisticalResults);
         }
