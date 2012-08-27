@@ -109,34 +109,18 @@ public class EulerComputationWizardAction extends AbstractCidsBeanAction {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-        final CidsBean cidsBean = model.getCidsBeanIDFcurve();
-        assert cidsBean != null : "cidsbean not set";                            // NOI18N
-        assert cidsBean.getMetaObject() != null : "cidsbean without metaobject"; // NOI18N
-
-        final MetaObject mo = cidsBean.getMetaObject();
-        final MetaClass mc = mo.getMetaClass();
-
-        assert mc != null : "metaobject without metaclass"; // NOI18N
+        final IDFCurve idfCurve = model.getIDFcurve();
+        assert idfCurve != null : "idfCurve not set"; // NOI18N
 
         final boolean forecast;
 
-        if (cidsBean.getProperty("forecast") == null) {
+        if (idfCurve.getForecast() == null) {
             forecast = false;
         } else {
-            forecast = (Boolean)cidsBean.getProperty("forecast");
+            forecast = idfCurve.getForecast();
         }
 
-        final String json = (String)cidsBean.getProperty("uri");    // NOI18N
-        final ObjectMapper mapper = new ObjectMapper();
-        final IDFCurve idfcurve;
-        try {
-            idfcurve = mapper.readValue(new StringReader(json), IDFCurve.class);
-        } catch (IOException ex) {
-            final String message = "cannot read idf data from uri"; // NOI18N
-            throw new IllegalStateException(message, ex);
-        }
-
-        final int interval = idfcurve.getData().firstKey();
+        final int interval = idfCurve.getData().firstKey();
         assert interval > 0 : "interval cannot be negative or 0";
 
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
@@ -153,8 +137,8 @@ public class EulerComputationWizardAction extends AbstractCidsBeanAction {
         final SortedMap<Integer, Double> raindata = new TreeMap<Integer, Double>();
 
         for (int i = rowIndexStart; i <= rowIndexEnd; i++) {
-            final Integer duration = (Integer)idfcurve.getDurationIntensityRows()[i][0];
-            final Double value = (Double)idfcurve.getDurationIntensityRows()[i][colIndexEnd];
+            final Integer duration = (Integer)idfCurve.getDurationIntensityRows()[i][0];
+            final Double value = (Double)idfCurve.getDurationIntensityRows()[i][colIndexEnd];
             if ((duration != null) && (value != null)) {
                 raindata.put(duration, value);
             }
