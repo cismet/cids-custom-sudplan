@@ -9,13 +9,17 @@ package de.cismet.cids.custom.objectrenderer.sudplan;
 
 import org.apache.log4j.Logger;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import org.openide.util.NbBundle;
 
-import java.awt.BorderLayout;
+import java.io.IOException;
+import java.io.StringReader;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
-import de.cismet.cids.custom.sudplan.IDFChartPanel;
-import de.cismet.cids.custom.sudplan.IDFTablePanel;
+import de.cismet.cids.custom.sudplan.IDFCurve;
+import de.cismet.cids.custom.sudplan.IDFCurvePanel;
+import de.cismet.cids.custom.sudplan.Unit;
 
 /**
  * DOCUMENT ME!
@@ -48,6 +52,7 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
      */
     public IdfCurveRenderer() {
         initComponents();
+        lblUnitValue.setText(Unit.MM_H.getLocalisedName());
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -104,7 +109,7 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         chkForecast.setContentAreaFilled(false);
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.forecast}"),
                 chkForecast,
@@ -112,6 +117,13 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         binding.setSourceNullValue(false);
         bindingGroup.addBinding(binding);
 
+        chkForecast.addItemListener(new java.awt.event.ItemListener() {
+
+                @Override
+                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
+                    chkForecastItemStateChanged(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -161,20 +173,39 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkForecastItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkForecastItemStateChanged
+        if (cidsBean != null) {
+            final Boolean forecast = (Boolean)cidsBean.getProperty("forecast");
+            if (forecast != null) {
+                chkForecast.setSelected(forecast.booleanValue());
+            } else {
+                chkForecast.setSelected(false);
+            }
+        }
+    }                                                                              //GEN-LAST:event_chkForecastItemStateChanged
+
     @Override
     protected void init() {
         bindingGroup.unbind();
         bindingGroup.bind();
 
-        try {
-            pnlIdf.removeAll();
-            pnlIdf.add(new IDFTablePanel(cidsBean));
-            pnlFiller.removeAll();
-            pnlFiller.add(new IDFChartPanel(cidsBean), BorderLayout.CENTER);
-        } catch (final Exception ex) {
-            LOG.error("cannot initialise IDF renderer", ex); // NOI18N
+        pnlIdf.removeAll();
 
-            lblStatus.setText("ERROR: " + ex.getMessage()); // NOI18N
+        final String json = (String)cidsBean.getProperty("uri");
+        final ObjectMapper mapper = new ObjectMapper();
+        final IDFCurve curve;
+        try {
+            curve = mapper.readValue(new StringReader(json), IDFCurve.class);
+            pnlIdf.add(new IDFCurvePanel(curve));
+        } catch (IOException ex) {
+            final String message = "cannot read idf data from uri"; // NOI18N
+            LOG.error(message, ex);
+//            throw new IllegalStateException(message, ex);
         }
     }
 }
