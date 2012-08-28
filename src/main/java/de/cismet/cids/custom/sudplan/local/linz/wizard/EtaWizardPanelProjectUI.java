@@ -230,8 +230,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 EtaWizardPanelProjectUI.class,
                 "EtaWizardPanelProjectUI.lblDescription.text")); // NOI18N
 
-        taProjectDescriptionText.setColumns(20);
         taProjectDescriptionText.setEditable(false);
+        taProjectDescriptionText.setColumns(20);
         taProjectDescriptionText.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         taProjectDescriptionText.setRows(3);
 
@@ -294,10 +294,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 EtaWizardPanelProjectUI.class,
                 "EtaWizardPanelProjectUI.lblScenarios.text")); // NOI18N
 
-        cobScenarios.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Scenario #1" }));
-
-        taScenarioDescriptionText.setColumns(20);
         taScenarioDescriptionText.setEditable(false);
+        taScenarioDescriptionText.setColumns(20);
         taScenarioDescriptionText.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         taScenarioDescriptionText.setRows(3);
         jScrollPane2.setViewportView(taScenarioDescriptionText);

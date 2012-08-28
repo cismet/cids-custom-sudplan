@@ -182,7 +182,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
         }
 
         List<EtaConfiguration> etaConfigurations = new ArrayList(0);
-        if ((lightwightCsos != null) && lightwightCsos.isEmpty()) {
+        if ((lightwightCsos != null) && !lightwightCsos.isEmpty()) {
             etaConfigurations = new ArrayList<EtaConfiguration>(lightwightCsos.size());
 
             for (final LightwightCso lightwightCso : lightwightCsos) {

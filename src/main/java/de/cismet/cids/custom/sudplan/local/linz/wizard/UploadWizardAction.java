@@ -94,11 +94,10 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
 
     static {
         propertyReader = new PropertyReader(FILE_PROPERTY);
-        // FIXME: replace by SWMM_WEBDAV once we gain write access to the AIT WEBDav
-        SWMM_WEBDAV_HOST = propertyReader.getProperty("DAV_HOST");
-        SWMM_WEBDAV_USERNAME = propertyReader.getProperty("DAV_USERNAME");
+        SWMM_WEBDAV_HOST = propertyReader.getProperty("SWMM_WEBDAV_HOST");
+        SWMM_WEBDAV_USERNAME = propertyReader.getProperty("SWMM_WEBDAV_USERNAME");
         SWMM_WEBDAV_PASSWORD = String.valueOf(PasswordEncrypter.decrypt(
-                    propertyReader.getProperty("DAV_PASSWORD").toCharArray(),
+                    propertyReader.getProperty("SWMM_WEBDAV_PASSWORD").toCharArray(),
                     true));
     }
 
