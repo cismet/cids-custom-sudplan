@@ -57,6 +57,9 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
     public static final Unit KG = new Unit(
             "kg", // NOI18N
             NbBundle.getMessage(Unit.class, "Unit.KG.localisedName")); // NOI18N
+    public static final Unit MM_H = new Unit(
+            "mm/h",
+            org.openide.util.NbBundle.getMessage(Unit.class, "Unit.MM_H.localisedName"));
 
     //~ Instance fields --------------------------------------------------------
 
