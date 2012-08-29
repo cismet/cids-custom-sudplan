@@ -11,12 +11,14 @@
  */
 package de.cismet.cids.custom.sudplan;
 
+import org.apache.log4j.Logger;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
-import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
