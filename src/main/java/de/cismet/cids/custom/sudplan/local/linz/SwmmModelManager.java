@@ -127,9 +127,9 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
     protected String getReloadId() {
         try {
             final SwmmInput swmmInput = (SwmmInput)getUR();
-            return "project_id" + swmmInput.getSwmmProject() + "_scenarios"; // NOI18N
+            return "local.linz." + swmmInput.getSwmmProject() + ".swmm.scenarios"; // NOI18N
         } catch (final Exception e) {
-            LOG.warn("cannot fetch reload id", e);                           // NOI18N
+            LOG.warn("cannot fetch reload id", e);                                 // NOI18N
             return null;
         }
     }
