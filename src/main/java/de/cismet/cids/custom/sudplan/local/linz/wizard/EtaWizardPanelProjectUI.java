@@ -171,6 +171,9 @@ public final class EtaWizardPanelProjectUI extends JPanel {
      * @param  swmmScenarios  DOCUMENT ME!
      */
     private void initScenarioList(final List<CidsBean> swmmScenarios) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("loading " + swmmScenarios + " SWMM Sceanrios");
+        }
         final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
         for (final CidsBean swmmScenario : swmmScenarios) {
             comboBoxModel.addElement(swmmScenario);
@@ -182,6 +185,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 this.scenarioListener,
                 this.cobScenarios));
 
+        // fire selection event
+        this.cobScenarios.setSelectedIndex(-1);
         this.cobScenarios.setSelectedIndex(0);
     }
 
@@ -225,8 +230,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 EtaWizardPanelProjectUI.class,
                 "EtaWizardPanelProjectUI.lblDescription.text")); // NOI18N
 
-        taProjectDescriptionText.setColumns(20);
         taProjectDescriptionText.setEditable(false);
+        taProjectDescriptionText.setColumns(20);
         taProjectDescriptionText.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         taProjectDescriptionText.setRows(3);
 
@@ -289,10 +294,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 EtaWizardPanelProjectUI.class,
                 "EtaWizardPanelProjectUI.lblScenarios.text")); // NOI18N
 
-        cobScenarios.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Scenario #1" }));
-
-        taScenarioDescriptionText.setColumns(20);
         taScenarioDescriptionText.setEditable(false);
+        taScenarioDescriptionText.setColumns(20);
         taScenarioDescriptionText.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         taScenarioDescriptionText.setRows(3);
         jScrollPane2.setViewportView(taScenarioDescriptionText);

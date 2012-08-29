@@ -8,8 +8,10 @@
 package de.cismet.cids.custom.sudplan.local.linz;
 
 import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.exception.ConnectionException;
 
 import Sirius.server.middleware.types.MetaClass;
+import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
 
@@ -20,7 +22,10 @@ import org.openide.util.NbBundle;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import java.util.Collection;
+
 import de.cismet.cids.custom.sudplan.*;
+import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -80,6 +85,9 @@ public class EtaModelManager extends AbstractAsyncModelManager {
             etaResultBean.setProperty("total_overflow_volume", etaOutput.getTotalOverflowVolume());
             etaResultBean.persist();
 
+            final EtaInput etaInput = (EtaInput)this.getUR();
+            this.updateSwmmResults(etaInput, etaOutput);
+
             return etaModelOutput.persist();
         } catch (final Exception e) {
             final String message = "cannot get results for ETA Run '" + this.cidsBean + "': " + e.getMessage();
@@ -89,9 +97,107 @@ public class EtaModelManager extends AbstractAsyncModelManager {
         }
     }
 
+    /**
+     * updates the model results (swmm) attached to the CSO objects (in the meta data base) and sets the CSO ids of the
+     * CSO JSon objects.
+     *
+     * @param   etaInput   swmmOutput DOCUMENT ME!
+     * @param   etaOutput  DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
+    private void updateSwmmResults(final EtaInput etaInput, final EtaOutput etaOutput) throws IOException {
+        LOG.info("updating " + etaInput.getCsoOverflows().size() + " CSOs with model results for ETA Run '"
+                    + etaOutput.getEtaRunName() + "' {" + etaOutput.getEtaRun() + "} of SWMM Run '"
+                    + etaInput.getSwmmRunName() + "' {" + etaInput.getSwmmRun() + "}");
+        final String domain = SessionManager.getSession().getUser().getDomain();
+        final MetaClass swmmResultClass = ClassCacheMultiple.getMetaClass(
+                domain,
+                SwmmModelManager.TABLENAME_LINZ_SWMM_RESULT);
+        final MetaClass etaResultClass = ClassCacheMultiple.getMetaClass(
+                domain,
+                EtaModelManager.TABLENAME_LINZ_ETA_RESULT);
+        final int swmmRunId = etaInput.getSwmmRun();
+        if (swmmRunId == -1) {
+            throw new IOException("swmmRunId of ETA Run '"
+                        + etaOutput.getEtaRunName() + "' {" + etaOutput.getEtaRun() + "} is -1!");
+        }
+
+        if (swmmResultClass == null) {
+            throw new IOException("cannot fetch SWMM result metaclass"); // NOI18N
+        } else if (etaResultClass == null) {
+            throw new IOException("cannot fetch ETA result metaclass");  // NOI18N
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("SELECT ").append(swmmResultClass.getID()).append(',').append(swmmResultClass.getPrimaryKey()); // NOI18N
+        sb.append(" FROM ").append(swmmResultClass.getTableName());                                               // NOI18N
+        sb.append(" WHERE swmm_scenario_id = ").append(swmmRunId);
+
+        final MetaObject[] swmmScenarioMetaObjects;
+
+        try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("executing SQL statement: \n" + sb);
+            }
+            swmmScenarioMetaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
+        } catch (final ConnectionException ex) {
+            final String message = "cannot get SWMM Scenario  meta objects from database"; // NOI18N
+            LOG.error(message, ex);
+            throw new IOException(message, ex);
+        }
+
+        if ((swmmScenarioMetaObjects == null) || (swmmScenarioMetaObjects.length == 0)) {
+            throw new IOException("no SWMM results found for SWMM Run #" + swmmRunId);
+        }
+
+        CidsBean etaResultBean = etaResultClass.getEmptyInstance().getBean();
+
+        try {
+            etaResultBean.setProperty("name", etaOutput.getEtaRunName());
+            etaResultBean.setProperty("swmm_scenario_id", etaOutput.getSwmmRun());
+            etaResultBean.setProperty("eta_scenario_id", etaOutput.getEtaRun());
+            etaResultBean.setProperty("total_overflow_volume", etaOutput.getTotalOverflowVolume());
+            etaResultBean.setProperty("r720", etaOutput.getR720());
+            etaResultBean.setProperty("eta_hyd_required", etaOutput.getEtaHydRequired());
+            etaResultBean.setProperty("eta_sed_required", etaOutput.getEtaSedRequired());
+            etaResultBean.setProperty("eta_hyd_actual", etaOutput.getEtaHydActual());
+            etaResultBean.setProperty("eta_sed_actual", etaOutput.getEtaSedActual());
+            etaResultBean = etaResultBean.persist();
+        } catch (Exception ex) {
+            final String message = "could not update ETA Result for ETA Run '"
+                        + etaOutput.getEtaRunName() + "' {" + etaOutput.getEtaRun() + "} of SWMM Run '"
+                        + etaInput.getSwmmRunName() + "' {" + etaInput.getSwmmRun() + "}";
+            LOG.error(message, ex);
+            throw new IOException(message, ex);
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("updating " + swmmScenarioMetaObjects.length + " SWMM Results with ETA Results");
+        }
+        for (final MetaObject swmmScenarioMetaObject : swmmScenarioMetaObjects) {
+            try {
+                final CidsBean swmmScenarioBean = swmmScenarioMetaObject.getBean();
+                final Collection<CidsBean> etaResults = (Collection)swmmScenarioBean.getProperty("eta_results"); // NOI18N
+                etaResults.add(etaResultBean);
+                swmmScenarioBean.persist();
+            } catch (Exception ex) {
+                final String message = "could not update  SWMM Result '" + swmmScenarioMetaObject.getName() + "': "
+                            + ex.getMessage();
+                LOG.error(message, ex);
+                throw new IOException(message, ex);
+            }
+        }
+    }
+
     @Override
     protected String getReloadId() {
-        return "local.linz.*";
+        try {
+            final EtaInput etaInput = (EtaInput)getUR();
+            return "local.linz." + etaInput.getSwmmProject() + ".eta.scenarios"; // NOI18N
+        } catch (final Exception e) {
+            LOG.warn("cannot fetch reload id", e);                               // NOI18N
+            return null;
+        }
     }
 
     @Override
