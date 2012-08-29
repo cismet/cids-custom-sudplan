@@ -23,6 +23,7 @@ import de.cismet.cids.custom.sudplan.RaineventPanel;
 import de.cismet.cids.custom.sudplan.geocpmrest.io.Rainevent;
 
 import de.cismet.tools.gui.TitleComponentProvider;
+import javax.swing.border.LineBorder;
 
 /**
  * DOCUMENT ME!
@@ -92,9 +93,9 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
                 this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.forecast}"),
-                chkForecast,
-                org.jdesktop.beansbinding.BeanProperty.create("selected"));
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
+                lblShowDescription,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
         bindingGroup.addBinding(binding);
 
         chkForecast.addItemListener(new java.awt.event.ItemListener() {
