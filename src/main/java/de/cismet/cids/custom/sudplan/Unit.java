@@ -60,6 +60,7 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
     public static final Unit MM_H = new Unit(
             "mm/h",
             org.openide.util.NbBundle.getMessage(Unit.class, "Unit.MM_H.localisedName"));
+    public static final Unit L_S_HA = new Unit("l/s*ha", "l/s*ha");
 
     //~ Instance fields --------------------------------------------------------
 
