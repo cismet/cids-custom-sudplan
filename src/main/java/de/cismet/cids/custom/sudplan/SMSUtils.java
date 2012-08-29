@@ -74,6 +74,8 @@ public final class SMSUtils {
     public static final String TABLENAME_IDFCURVE = "IDF_CURVE";                        // NOI18N
     public static final String TABLENAME_GEOCPM_CONFIGURATION = "geocpm_configuration"; // NOI18N
     public static final String TABLENAME_DELTA_CONFIGURATION = "delta_configuration";   // NOI18N
+    public static final String TABLENAME_GEOCPM_BREAKING_EDGE = "geocpm_breaking_edge";
+    public static final String TABLENAME_DELTA_SURFACE = "delta_surface";
     public static final String TABLENAME_HYDROLOGY_WORKSPACE = "HYDROLOGY_WORKSPACE";   // NOI18N
     public static final String CISMAP_PLUGIN_NAME = "cismap";                           // NOI18N
     public static final String DOMAIN_SUDPLAN_WUPP = "SUDPLAN-WUPP";                    // NOI18N
