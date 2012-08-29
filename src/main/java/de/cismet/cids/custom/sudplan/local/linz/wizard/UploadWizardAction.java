@@ -94,11 +94,10 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
 
     static {
         propertyReader = new PropertyReader(FILE_PROPERTY);
-        // FIXME: replace by SWMM_WEBDAV once we gain write access to the AIT WEBDav
-        SWMM_WEBDAV_HOST = propertyReader.getProperty("DAV_HOST");
-        SWMM_WEBDAV_USERNAME = propertyReader.getProperty("DAV_USERNAME");
+        SWMM_WEBDAV_HOST = propertyReader.getProperty("SWMM_WEBDAV_HOST");
+        SWMM_WEBDAV_USERNAME = propertyReader.getProperty("SWMM_WEBDAV_USERNAME");
         SWMM_WEBDAV_PASSWORD = String.valueOf(PasswordEncrypter.decrypt(
-                    propertyReader.getProperty("DAV_PASSWORD").toCharArray(),
+                    propertyReader.getProperty("SWMM_WEBDAV_PASSWORD").toCharArray(),
                     true));
     }
 
@@ -214,20 +213,7 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
             if (LOG.isDebugEnabled()) {
                 LOG.info("wizard closed (not cancelled), new SWMM Model saved");
             }
-
-//            try {
-//                newSwmmBean.persist();
-//            } catch (final Exception ex) {
-//                final String message = "Cannot save new SWMM Model '"
-//                            + newSwmmBean + "'";
-//                LOG.error(message, ex);
-//                JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
-//                    message,
-//                    NbBundle.getMessage(
-//                        UploadWizardAction.class,
-//                        "UploadWizardAction.actionPerformed(ActionEvent).wizard.error"),
-//                    JOptionPane.ERROR_MESSAGE);
-//            }
+            ComponentRegistry.getRegistry().getCatalogueTree().requestRefreshNode("local.linz.projects");
         } else {
             final boolean uploadComplete = (Boolean)wizardDescriptor.getProperty(PROP_UPLOAD_COMPLETE);
             final boolean copyCSOsComplete = (Boolean)wizardDescriptor.getProperty(PROP_COPY_CSOS_COMPLETE);

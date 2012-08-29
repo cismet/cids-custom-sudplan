@@ -25,7 +25,7 @@ import de.cismet.cids.utils.interfaces.CidsBeanAction;
 /**
  * DOCUMENT ME!
  *
- * @author   mscholl
+ * @author   pascal.dihe@cismet.de
  * @version  $Revision$, $Date$
  */
 public class SwmmProjectTitleComponent extends javax.swing.JPanel {

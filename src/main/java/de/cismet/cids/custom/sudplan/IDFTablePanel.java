@@ -51,7 +51,6 @@ public class IDFTablePanel extends javax.swing.JPanel {
     private final ActionListener popupL;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lblDuration;
     private javax.swing.JLabel lblFrequency;
     private javax.swing.JLabel lblHeaderSpace;
@@ -72,14 +71,19 @@ public class IDFTablePanel extends javax.swing.JPanel {
         initComponents();
 
         lblDuration.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
-        lblDuration.setForeground(tblIDF.getForeground());
-        lblDuration.setBackground(tblIDF.getBackground());
+        lblDuration.setForeground(UIManager.getColor("TableHeader.foreground"));
+        lblDuration.setBackground(UIManager.getColor("TableHeader.background"));
+        lblDuration.setFont(UIManager.getFont("TableHeader.font"));
+
         lblFrequency.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
-        lblFrequency.setForeground(tblIDF.getForeground());
-        lblFrequency.setBackground(tblIDF.getBackground());
+        lblFrequency.setForeground(UIManager.getColor("TableHeader.foreground"));
+        lblFrequency.setBackground(UIManager.getColor("TableHeader.background"));
+        lblFrequency.setFont(UIManager.getFont("TableHeader.font"));
+
         lblHeaderSpace.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
-        lblHeaderSpace.setForeground(tblIDF.getForeground());
-        lblHeaderSpace.setBackground(tblIDF.getBackground());
+        lblHeaderSpace.setForeground(UIManager.getColor("TableHeader.foreground"));
+        lblHeaderSpace.setBackground(UIManager.getColor("TableHeader.background"));
+        lblHeaderSpace.setFont(UIManager.getFont("TableHeader.font"));
 
         Font font = lblFrequency.getFont();
         font = font.deriveFont(Font.BOLD);
@@ -236,7 +240,6 @@ public class IDFTablePanel extends javax.swing.JPanel {
 
         spIDFTable = new javax.swing.JScrollPane();
         tblIDF = new javax.swing.JTable();
-        jLabel1 = new javax.swing.JLabel();
         lblFrequency = new javax.swing.JLabel();
         lblDuration = new javax.swing.JLabel();
         lblHeaderSpace = new javax.swing.JLabel();
@@ -275,12 +278,6 @@ public class IDFTablePanel extends javax.swing.JPanel {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         add(spIDFTable, gridBagConstraints);
-
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(IDFTablePanel.class, "IDFTablePanel.jLabel1.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        add(jLabel1, gridBagConstraints);
 
         lblFrequency.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblFrequency.setText(org.openide.util.NbBundle.getMessage(
@@ -492,8 +489,9 @@ public class IDFTablePanel extends javax.swing.JPanel {
             if ((value != null) && ((column == 0) || (row == -1))) {
                 final JButton b = new JButton(value.toString());
                 b.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
-                b.setForeground(table.getForeground());
-                b.setBackground(table.getBackground());
+                b.setForeground(UIManager.getColor("TableHeader.foreground"));
+                b.setBackground(UIManager.getColor("TableHeader.background"));
+                b.setFont(UIManager.getFont("TableHeader.font"));
 
                 if (column == 0) {
                     b.setHorizontalAlignment(JButton.RIGHT);

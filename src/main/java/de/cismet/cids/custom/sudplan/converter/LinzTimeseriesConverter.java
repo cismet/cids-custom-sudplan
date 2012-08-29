@@ -14,6 +14,7 @@ import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.io.BufferedReader;
@@ -186,6 +187,8 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter {
 
     @Override
     public String toString() {
-        return "Linz Converter";
+        return NbBundle.getMessage(
+                LinzTimeseriesConverter.class,
+                "LinzTimeseriesConverter.this.name");
     }
 }

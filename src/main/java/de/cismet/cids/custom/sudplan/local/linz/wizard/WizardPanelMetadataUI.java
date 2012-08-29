@@ -29,6 +29,7 @@ public final class WizardPanelMetadataUI extends javax.swing.JPanel {
     private final transient DocumentListener docL;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private final transient javax.swing.JButton descriptionButton = new javax.swing.JButton();
     private final transient javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
     private final transient javax.swing.JLabel lblDescription = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblName = new javax.swing.JLabel();
@@ -105,6 +106,17 @@ public final class WizardPanelMetadataUI extends javax.swing.JPanel {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
+        descriptionButton.setText(org.openide.util.NbBundle.getMessage(
+                WizardPanelMetadataUI.class,
+                "WizardPanelMetadataUI.descriptionButton.text")); // NOI18N
+        descriptionButton.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    descriptionButtonActionPerformed(evt);
+                }
+            });
+
         setLayout(new java.awt.GridBagLayout());
 
         lblName.setText(NbBundle.getMessage(WizardPanelMetadataUI.class, "WizardPanelMetadataUI.lblName.text")); // NOI18N
@@ -147,6 +159,16 @@ public final class WizardPanelMetadataUI extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(6, 6, 6, 6);
         add(jScrollPane1, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void descriptionButtonActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_descriptionButtonActionPerformed
+    {                                                                                   //GEN-HEADEREND:event_descriptionButtonActionPerformed
+        this.txaDescription.setText(model.getDefaultDescription());
+    }                                                                                   //GEN-LAST:event_descriptionButtonActionPerformed
 
     //~ Inner Classes ----------------------------------------------------------
 

@@ -18,6 +18,7 @@ import org.openide.util.WeakListeners;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import de.cismet.cids.custom.sudplan.converter.LinzNetcdfConverter;
 import de.cismet.cids.custom.sudplan.converter.LinzTimeseriesConverter;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 import de.cismet.cids.custom.sudplan.converter.WuppertalTimeseriesConverter;
@@ -77,6 +78,7 @@ public class TimeSeriesExportVisualPanelChooseConverter extends javax.swing.JPan
         this.cboConverterChooser.removeAllItems();
         this.cboConverterChooser.addItem(new WuppertalTimeseriesConverter());
         this.cboConverterChooser.addItem(new LinzTimeseriesConverter());
+        this.cboConverterChooser.addItem(new LinzNetcdfConverter());
         this.cboConverterChooser.setSelectedIndex(0);
 
         final TimeseriesConverter converter = model.getTimeseriesConverter();
