@@ -47,6 +47,10 @@ public class IDFCurvePanel extends javax.swing.JPanel {
     private JButton btnExportData;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel lblShowUnit;
+    private javax.swing.JLabel lblShowYear;
+    private javax.swing.JLabel lblUnit;
+    private javax.swing.JLabel lblYear;
     private javax.swing.JPanel pnlChart;
     private javax.swing.JPanel pnlTable;
     private javax.swing.JToolBar tlbToolBar;
@@ -65,6 +69,9 @@ public class IDFCurvePanel extends javax.swing.JPanel {
         assert this.idfCurve != null : "Rainevent cannot be null";
 
         initComponents();
+
+        lblShowYear.setText(String.valueOf(this.idfCurve.getCenterYear()));
+        lblShowUnit.setText(Unit.MM_H.getLocalisedName());
 
         tlbToolBar.add(createExportDataButton());
 
@@ -92,6 +99,10 @@ public class IDFCurvePanel extends javax.swing.JPanel {
         pnlTable = new javax.swing.JPanel();
         pnlChart = new javax.swing.JPanel();
         tlbToolBar = new javax.swing.JToolBar();
+        lblYear = new javax.swing.JLabel();
+        lblUnit = new javax.swing.JLabel();
+        lblShowYear = new javax.swing.JLabel();
+        lblShowUnit = new javax.swing.JLabel();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
@@ -100,7 +111,8 @@ public class IDFCurvePanel extends javax.swing.JPanel {
         pnlTable.setLayout(new java.awt.BorderLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.weightx = 1.0;
@@ -112,7 +124,8 @@ public class IDFCurvePanel extends javax.swing.JPanel {
         pnlChart.setLayout(new java.awt.BorderLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.weightx = 1.0;
@@ -128,12 +141,53 @@ public class IDFCurvePanel extends javax.swing.JPanel {
         tlbToolBar.setPreferredSize(new java.awt.Dimension(12, 30));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
         add(tlbToolBar, gridBagConstraints);
-    } // </editor-fold>//GEN-END:initComponents
+
+        lblYear.setText(org.openide.util.NbBundle.getMessage(IDFCurvePanel.class, "IDFCurvePanel.lblYear.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblYear, gridBagConstraints);
+
+        lblUnit.setText(org.openide.util.NbBundle.getMessage(IDFCurvePanel.class, "IDFCurvePanel.lblUnit.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblUnit, gridBagConstraints);
+
+        lblShowYear.setText(org.openide.util.NbBundle.getMessage(
+                IDFCurvePanel.class,
+                "IDFCurvePanel.lblShowYear.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblShowYear, gridBagConstraints);
+
+        lblShowUnit.setText(org.openide.util.NbBundle.getMessage(
+                IDFCurvePanel.class,
+                "IDFCurvePanel.lblShowUnit.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblShowUnit, gridBagConstraints);
+    }                                               // </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
