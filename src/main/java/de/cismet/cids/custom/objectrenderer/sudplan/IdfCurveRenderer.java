@@ -13,9 +13,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import org.openide.util.NbBundle;
 
-import java.awt.Color;
-
-import java.io.IOException;
 import java.io.StringReader;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
@@ -160,7 +157,7 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkForecastItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkForecastItemStateChanged
+    private void chkForecastItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkForecastItemStateChanged
         if (cidsBean != null) {
             final Boolean forecast = (Boolean)cidsBean.getProperty("forecast");
             if (forecast != null) {
@@ -169,7 +166,7 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
                 chkForecast.setSelected(false);
             }
         }
-    }//GEN-LAST:event_chkForecastItemStateChanged
+    }                                                                              //GEN-LAST:event_chkForecastItemStateChanged
 
     @Override
     protected void init() {
