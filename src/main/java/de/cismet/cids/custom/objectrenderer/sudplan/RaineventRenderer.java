@@ -17,13 +17,13 @@ import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.RaineventPanel;
 import de.cismet.cids.custom.sudplan.geocpmrest.io.Rainevent;
 
 import de.cismet.tools.gui.TitleComponentProvider;
-import javax.swing.border.LineBorder;
 
 /**
  * DOCUMENT ME!
