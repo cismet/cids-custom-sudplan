@@ -36,7 +36,11 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import de.cismet.cids.custom.sudplan.*;
+import de.cismet.cids.custom.sudplan.IDFCurve;
+import de.cismet.cids.custom.sudplan.IDFCurvePanel;
+import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
+import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -60,7 +64,8 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
 
     private final transient ActionListener runL;
     private final transient ActionListener inputL;
-    private final transient ImageIcon icon;
+    private final transient ImageIcon tsIcon;
+    private final transient ImageIcon idfIcon;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient org.jdesktop.swingx.JXHyperlink hypInput = new org.jdesktop.swingx.JXHyperlink();
@@ -85,8 +90,8 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         this.model = model;
         this.runL = new OpenRunActionListener();
         this.inputL = new OpenInputActionListener();
-        // FIXME: we probably want to relocate the icon source and probably want some other icon, too
-        this.icon = ImageUtilities.loadImageIcon("/de/cismet/cids/custom/sudplan/graph_16.png", false); // NOI18N
+        this.tsIcon = ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/rainfall/timeseries.png", false); // NOI18N
+        this.idfIcon = ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/rainfall/idf.png", false);       // NOI18N
 
         initComponents();
 
@@ -109,6 +114,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
 
         final JPanel resultPanel;
         final JPanel inputPanel;
+        final ImageIcon icon;
 
         if (SMSUtils.TABLENAME_TIMESERIES.equals(model.getRfObjTableName())) {
             final TimeseriesRetrieverConfig resultCfg;
@@ -144,6 +150,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
                 throw new IllegalStateException(message, ex);
             }
 
+            icon = tsIcon;
             tblStatisticalResults.setDefaultRenderer(String.class, new StatisticalResultsCellRenderer());
             tblStatisticalResults.setPreferredScrollableViewportSize(tblStatisticalResults.getPreferredSize());
         } else {
@@ -165,6 +172,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
             inputPanel = new IDFCurvePanel(idfInput);
             resultPanel = new IDFCurvePanel(idfResult);
 
+            icon = idfIcon;
             this.remove(pnlStatisticalResults);
         }
 
