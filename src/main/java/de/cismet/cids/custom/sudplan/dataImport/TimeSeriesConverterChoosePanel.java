@@ -5,18 +5,18 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- * TimeSeriesImportFileChoosePanel.java
- *
- * Created on 07.12.2011, 14:37:26
- */
 package de.cismet.cids.custom.sudplan.dataImport;
 
-import de.cismet.cids.custom.sudplan.converter.HydrologyTimeseriesConverter;
-import de.cismet.cids.custom.sudplan.converter.LinzTimeseriesConverter;
-import de.cismet.cids.custom.sudplan.converter.TimeSeriesSerializer;
-import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
-import de.cismet.cids.custom.sudplan.converter.WuppertalTimeseriesConverter;
+import org.openide.util.WeakListeners;
+
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
+import de.cismet.cids.custom.sudplan.converter.*;
+import java.awt.Component;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -29,10 +29,17 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
     //~ Instance fields --------------------------------------------------------
 
     private final transient TimeSeriesConverterChoosePanelCtrl ctrl;
+    private final transient ItemListener converterL;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboConverterChooser;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel lblConverter;
+    private javax.swing.JLabel lblFormatDescription;
+    private javax.swing.JLabel lblFormatDescriptionValue;
+    private javax.swing.JLabel lblFormatExample;
+    private javax.swing.JLabel lblFormatExampleValue;
+    private javax.swing.JPanel pnlFormatExample;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -50,11 +57,15 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
                         + "must not be null"); // NOI18N
         }
 
+        this.converterL = new ConverterItemListener();
+
         initComponents();
 
         this.setName(java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
                 "TimeSeriesConverterChoosePanel"));
         this.ctrl = ctrl;
+
+        cboConverterChooser.addItemListener(WeakListeners.create(ItemListener.class, converterL, cboConverterChooser));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -69,6 +80,8 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
         this.cboConverterChooser.addItem(new LinzTimeseriesConverter());
         this.cboConverterChooser.addItem(new HydrologyTimeseriesConverter());
         this.cboConverterChooser.addItem(TimeSeriesSerializer.getInstance());
+        
+        this.cboConverterChooser.setSelectedIndex(0);
     }
 
     /**
@@ -91,8 +104,16 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+
         jPanel1 = new javax.swing.JPanel();
         cboConverterChooser = new javax.swing.JComboBox();
+        lblConverter = new javax.swing.JLabel();
+        lblFormatDescription = new javax.swing.JLabel();
+        lblFormatDescriptionValue = new javax.swing.JLabel();
+        lblFormatExample = new javax.swing.JLabel();
+        pnlFormatExample = new javax.swing.JPanel();
+        lblFormatExampleValue = new javax.swing.JLabel();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -100,14 +121,143 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
 
         cboConverterChooser.setMinimumSize(new java.awt.Dimension(300, 27));
         cboConverterChooser.setPreferredSize(new java.awt.Dimension(300, 27));
-        jPanel1.add(cboConverterChooser, new java.awt.GridBagConstraints());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel1.add(cboConverterChooser, gridBagConstraints);
+
+        lblConverter.setText(org.openide.util.NbBundle.getMessage(
+                TimeSeriesConverterChoosePanel.class,
+                "TimeSeriesConverterChoosePanel.lblConverter.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel1.add(lblConverter, gridBagConstraints);
+
+        lblFormatDescription.setText(org.openide.util.NbBundle.getMessage(
+                TimeSeriesConverterChoosePanel.class,
+                "TimeSeriesConverterChoosePanel.lblFormatDescription.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel1.add(lblFormatDescription, gridBagConstraints);
+
+        lblFormatDescriptionValue.setText(org.openide.util.NbBundle.getMessage(
+                TimeSeriesConverterChoosePanel.class,
+                "TimeSeriesConverterChoosePanel.lblFormatDescriptionValue.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 5);
+        jPanel1.add(lblFormatDescriptionValue, gridBagConstraints);
+
+        lblFormatExample.setText(org.openide.util.NbBundle.getMessage(
+                TimeSeriesConverterChoosePanel.class,
+                "TimeSeriesConverterChoosePanel.lblFormatExample.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel1.add(lblFormatExample, gridBagConstraints);
+
+        pnlFormatExample.setBackground(new java.awt.Color(255, 255, 255));
+        pnlFormatExample.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true));
+        pnlFormatExample.setLayout(new java.awt.GridBagLayout());
+
+        lblFormatExampleValue.setText(org.openide.util.NbBundle.getMessage(
+                TimeSeriesConverterChoosePanel.class,
+                "TimeSeriesConverterChoosePanel.lblFormatExampleValue.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        pnlFormatExample.add(lblFormatExampleValue, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        jPanel1.add(pnlFormatExample, gridBagConstraints);
 
         add(jPanel1, java.awt.BorderLayout.CENTER);
     } // </editor-fold>//GEN-END:initComponents
 
+    //~ Inner Classes ----------------------------------------------------------
+
     /**
      * DOCUMENT ME!
      *
-     * @param  evt  DOCUMENT ME!
+     * @version  $Revision$, $Date$
      */
+    private final class ConverterItemListener implements ItemListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void itemStateChanged(final ItemEvent e) {
+            if (ItemEvent.SELECTED == e.getStateChange()) {
+                final TimeseriesConverter converter = (TimeseriesConverter)e.getItem();
+                if (converter instanceof FormatHint) {
+                    final FormatHint hint = (FormatHint)converter;
+
+                    if (hint.getFormatHtmlDescription() == null) {
+                        lblFormatDescriptionValue.setText(hint.getFormatDescription());
+                    } else {
+                        lblFormatDescriptionValue.setText(hint.getFormatHtmlDescription());
+                    }
+
+                    final Object formatExample = hint.getFormatExample();
+                    if (formatExample instanceof String) {
+                        lblFormatExampleValue.setText((String)formatExample);
+                    } else if (formatExample instanceof Component){
+                        pnlFormatExample.removeAll();
+                        pnlFormatExample.add((Component)formatExample);
+                    } else {
+                        LOG.warn("unsupported example format: " + formatExample);
+                        resetExample();
+                    }
+                } else {
+                    lblFormatDescriptionValue.setText("<no description>");
+                    
+                    resetExample();
+                }
+            }
+        }
+        
+        private void resetExample(){
+            lblFormatExampleValue.setText("<no example>");
+                    pnlFormatExample.removeAll();
+
+                    final GridBagConstraints constraints = new GridBagConstraints();
+                    constraints.gridx = 0;
+                    constraints.gridy = 0;
+                    constraints.fill = GridBagConstraints.HORIZONTAL;
+                    constraints.anchor = GridBagConstraints.NORTHWEST;
+                    constraints.weightx = 1.0;
+                    constraints.weighty = 1.0;
+                    constraints.insets = new Insets(10, 10, 10, 10);
+
+                    pnlFormatExample.add(lblFormatExampleValue, constraints);
+        }
+    }
+    
+    private static final transient Logger LOG = Logger.getLogger(TimeSeriesConverterChoosePanel.class);
 }

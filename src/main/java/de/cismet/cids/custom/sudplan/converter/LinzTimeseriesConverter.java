@@ -212,29 +212,29 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
     @Override
     public String getFormatDescription() {
         return "No metadata\n"
-                + "Every line contains one date and a corresponding float value\n"
-                + "Format: [YYYY-mm-dd\\w*#.###]\n"
-                + "Expected unit of the float value: mm (millimeters since last timestamp)";
+                    + "Every line contains one date and a corresponding float value\n"
+                    + "Format: [YYYY-mm-dd\\w*#.###]\n"
+                    + "Expected unit of the float value: mm (millimeters since last timestamp)";
     }
 
     @Override
     public String getFormatHtmlDescription() {
         return "<html><ul>"
-                + "<li>No metadata</li>"
-                + "<li>Every line contains one date and a corresponding float value</li>"
-                + "<li>Format: <i>YYYY-MM-DD\\w*#.###</i></li>"
-                + "<li>Expected unit: <i>mm (millimeters since last timestamp)</i></li>"
-                + "</ul></html>";
+                    + "<li>No metadata</li>"
+                    + "<li>Every line contains one date and a corresponding float value</li>"
+                    + "<li>Format: <i>YYYY-MM-DD\\w*#.###</i></li>"
+                    + "<li>Expected unit: <i>mm (millimeters since last timestamp)</i></li>"
+                    + "</ul></html>";
     }
 
     @Override
     public Object getFormatExample() {
         return "<html>"
-                + "1993-01-07   1.300<br/>"
-                + "1993-01-08   5.200<br/>"
-                + "1993-01-09   0.100<br/>"
-                + "1993-01-10   0.100<br/>"
-                + "1993-01-11   0.900<br/>"
-                + "</html>";
+                    + "1993-01-07   1.300<br/>"
+                    + "1993-01-08   5.200<br/>"
+                    + "1993-01-09   0.100<br/>"
+                    + "1993-01-10   0.100<br/>"
+                    + "1993-01-11   0.900<br/>"
+                    + "</html>";
     }
 }
