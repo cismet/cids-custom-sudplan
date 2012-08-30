@@ -16,8 +16,6 @@ import org.apache.log4j.Logger;
 import org.jfree.chart.JFreeChart;
 import org.jfree.util.Log;
 
-import org.openide.util.WeakListeners;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
@@ -37,9 +35,9 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.*;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.border.LineBorder;

@@ -80,6 +80,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="lblDescription">
       <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Lucida Grande" size="13" style="1"/>
+        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="de/cismet/cids/custom/objectrenderer/sudplan/Bundle.properties" key="IdfCurveRenderer.lblDescription.text" replaceFormat="NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
@@ -93,7 +96,12 @@
     <Component class="javax.swing.JLabel" name="lblShowDescription">
       <BindingProperties>
         <BindingProperty name="text" source="Form" sourcePath="${cidsBean.description}" target="lblShowDescription" targetPath="text" updateStrategy="0" immediately="false">
-          <Property name="nullValue" type="java.lang.String" value=""/>
+          <Property name="nullValue" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+            <ResourceString bundle="de/cismet/cids/custom/objectrenderer/sudplan/Bundle.properties" key="IdfCurveRenderer.lblDescriptionValue.text.nullSourceValue" replaceFormat="NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          </Property>
+          <Property name="incompletePathValue" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+            <ResourceString bundle="de/cismet/cids/custom/objectrenderer/sudplan/Bundle.properties" key="IdfCurveRenderer.lblDescriptionValue.text.unreadableSourceValue" replaceFormat="NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          </Property>
         </BindingProperty>
       </BindingProperties>
       <Constraints>

@@ -199,6 +199,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
+        jtpResults.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         jtpResults.setPreferredSize(null);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -211,6 +212,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         add(jtpResults, gridBagConstraints);
 
+        lblRun.setFont(new java.awt.Font("Lucida Grande", 1, 13));  // NOI18N
         lblRun.setText(NbBundle.getMessage(
                 RainfallDownscalingOutputManagerUI.class,
                 "RainfallDownscalingOutputManagerUI.lblRun.text")); // NOI18N
@@ -233,6 +235,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         add(hypRun, gridBagConstraints);
 
+        lblInput.setFont(new java.awt.Font("Lucida Grande", 1, 13));  // NOI18N
         lblInput.setText(NbBundle.getMessage(
                 RainfallDownscalingOutputManagerUI.class,
                 "RainfallDownscalingOutputManagerUI.lblInput.text")); // NOI18N
@@ -255,9 +258,13 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
         add(hypInput, gridBagConstraints);
 
         pnlStatisticalResults.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                null,
                 NbBundle.getMessage(
                     RainfallDownscalingOutputManagerUI.class,
-                    "RainfallDownscalingOutputManagerUI.pnlStatisticalResults.border.title"))); // NOI18N
+                    "RainfallDownscalingOutputManagerUI.pnlStatisticalResults.border.title"),
+                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                javax.swing.border.TitledBorder.DEFAULT_POSITION,
+                new java.awt.Font("Lucida Grande", 1, 13))); // NOI18N
         pnlStatisticalResults.setMinimumSize(new java.awt.Dimension(296, 150));
         pnlStatisticalResults.setOpaque(false);
         pnlStatisticalResults.setLayout(new java.awt.GridBagLayout());

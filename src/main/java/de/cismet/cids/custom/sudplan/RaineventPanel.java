@@ -12,7 +12,6 @@
 package de.cismet.cids.custom.sudplan;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -151,9 +150,10 @@ public class RaineventPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(pnlChart, gridBagConstraints);
 
+        lblInterval.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         lblInterval.setText(org.openide.util.NbBundle.getMessage(
                 RaineventPanel.class,
-                "RaineventPanel.lblInterval.text")); // NOI18N
+                "RaineventPanel.lblInterval.text"));                    // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -162,6 +162,7 @@ public class RaineventPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblInterval, gridBagConstraints);
 
+        lblUnit.setFont(new java.awt.Font("Lucida Grande", 1, 13));                                                 // NOI18N
         lblUnit.setText(org.openide.util.NbBundle.getMessage(RaineventPanel.class, "RaineventPanel.lblUnit.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
