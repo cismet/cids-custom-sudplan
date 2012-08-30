@@ -18,6 +18,9 @@ import org.openide.util.WeakListeners;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 /**
@@ -31,15 +34,18 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
     //~ Instance fields --------------------------------------------------------
 
     private final transient ActionListener openRFObjL;
+    private final transient ChangeListener freqAdjustL;
 
     private final transient RainfallDownscalingInput model;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private final transient javax.swing.JCheckBox chkFreqAdjust = new javax.swing.JCheckBox();
     private final transient org.jdesktop.swingx.JXHyperlink hypRainfallObject = new org.jdesktop.swingx.JXHyperlink();
     private final transient javax.swing.JLabel lblCreated = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblCreatedBy = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblCreatedByValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblCreatedValue = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblFreqAdjust = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblName = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblNameValue = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblRainfallObject = new javax.swing.JLabel();
@@ -59,6 +65,7 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
      */
     public RainfallDownscalingInputManagerUI(final RainfallDownscalingInput model) {
         this.openRFObjL = new OpenRainfallObjectActionListener();
+        this.freqAdjustL = new PreventChangeListener();
         this.model = model;
 
         initComponents();
@@ -66,6 +73,7 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
         init();
 
         hypRainfallObject.addActionListener(WeakListeners.create(ActionListener.class, openRFObjL, hypRainfallObject));
+        chkFreqAdjust.addChangeListener(WeakListeners.change(freqAdjustL, chkFreqAdjust));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -80,6 +88,7 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
         lblScenarioValue.setText(model.getScenario());
         lblTargetYearValue.setText(model.getTargetYear().toString());
         hypRainfallObject.setText(model.getRainfallObjectName());
+        chkFreqAdjust.setSelected(model.isFrequencyAdjustment());
     }
 
     /**
@@ -209,7 +218,7 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
                 "RainfallDownscalingInputManagerUI.lblRainfallObject.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         add(lblRainfallObject, gridBagConstraints);
@@ -219,13 +228,13 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
         final org.jdesktop.layout.GroupLayout pnlFillerLayout = new org.jdesktop.layout.GroupLayout(pnlFiller);
         pnlFiller.setLayout(pnlFillerLayout);
         pnlFillerLayout.setHorizontalGroup(
-            pnlFillerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
+            pnlFillerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 0, Short.MAX_VALUE));
         pnlFillerLayout.setVerticalGroup(
-            pnlFillerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
+            pnlFillerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 0, Short.MAX_VALUE));
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.weighty = 1.0;
         add(pnlFiller, gridBagConstraints);
@@ -235,15 +244,52 @@ public class RainfallDownscalingInputManagerUI extends javax.swing.JPanel {
                 "RainfallDownscalingInputManagerUI.hypRainfallObject.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         add(hypRainfallObject, gridBagConstraints);
-    }                                                                         // </editor-fold>//GEN-END:initComponents
+
+        lblFreqAdjust.setText(NbBundle.getMessage(
+                RainfallDownscalingInputManagerUI.class,
+                "RainfallDownscalingInputManagerUI.lblFreqAdjust.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
+        add(lblFreqAdjust, gridBagConstraints);
+
+        chkFreqAdjust.setText(NbBundle.getMessage(
+                RainfallDownscalingInputManagerUI.class,
+                "RainfallDownscalingInputManagerUI.chkFreqAdjust.text")); // NOI18N
+        chkFreqAdjust.setContentAreaFilled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
+        add(chkFreqAdjust, gridBagConstraints);
+    }                                                                     // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class PreventChangeListener implements ChangeListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void stateChanged(final ChangeEvent e) {
+            chkFreqAdjust.setSelected(model.isFrequencyAdjustment());
+        }
+    }
 
     /**
      * DOCUMENT ME!
