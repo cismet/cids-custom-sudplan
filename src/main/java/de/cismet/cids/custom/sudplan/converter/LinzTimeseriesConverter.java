@@ -42,7 +42,7 @@ import de.cismet.cids.custom.sudplan.Variable;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = Converter.class)
-public final class LinzTimeseriesConverter implements TimeseriesConverter {
+public final class LinzTimeseriesConverter implements TimeseriesConverter, FormatHint {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -189,6 +189,52 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter {
     public String toString() {
         return NbBundle.getMessage(
                 LinzTimeseriesConverter.class,
-                "LinzTimeseriesConverter.this.name");
+                "LinzTimeseriesConverter.this.name"); // NOI18N
+    }
+
+    @Override
+    public String getFormatName() {
+        return "linz-timeseries-converter"; // NOI18N
+    }
+
+    @Override
+    public String getFormatDisplayName() {
+        return NbBundle.getMessage(
+                LinzTimeseriesConverter.class,
+                "LinzTimeseriesConverter.this.name"); // NOI18N
+    }
+
+    @Override
+    public String getFormatHtmlName() {
+        return null;
+    }
+
+    @Override
+    public String getFormatDescription() {
+        return "No metadata\n"
+                + "Every line contains one date and a corresponding float value\n"
+                + "Format: [YYYY-mm-dd\\w*#.###]\n"
+                + "Expected unit of the float value: mm (millimeters since last timestamp)";
+    }
+
+    @Override
+    public String getFormatHtmlDescription() {
+        return "<html><ul>"
+                + "<li>No metadata</li>"
+                + "<li>Every line contains one date and a corresponding float value</li>"
+                + "<li>Format: <i>YYYY-MM-DD\\w*#.###</i></li>"
+                + "<li>Expected unit: <i>mm (millimeters since last timestamp)</i></li>"
+                + "</ul></html>";
+    }
+
+    @Override
+    public Object getFormatExample() {
+        return "<html>"
+                + "1993-01-07   1.300<br/>"
+                + "1993-01-08   5.200<br/>"
+                + "1993-01-09   0.100<br/>"
+                + "1993-01-10   0.100<br/>"
+                + "1993-01-11   0.900<br/>"
+                + "</html>";
     }
 }
