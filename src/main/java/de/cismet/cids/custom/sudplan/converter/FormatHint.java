@@ -8,10 +8,12 @@
 package de.cismet.cids.custom.sudplan.converter;
 
 /**
- * DOCUMENT ME!
+ * Interface to be implemented by {@link Converter} implementations to hint the user about
+ * the supported format so that they can decide which <code>Converter</code> to use for
+ * import or export of their data.
  *
  * @author   martin.scholl@cismet.de
- * @version  $Revision$, $Date$
+ * @version  1.0, 2012/08/30
  */
 public interface FormatHint {
 
