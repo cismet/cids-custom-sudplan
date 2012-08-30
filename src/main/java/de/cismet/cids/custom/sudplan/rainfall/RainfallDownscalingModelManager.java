@@ -128,7 +128,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
             dsBean.setProperty("name", rfObjName + " downscaled (taskid=" + watchable.getRunId() + ")"); // NOI18N
             dsBean.setProperty("converter", rfBean.getProperty("converter"));                            // NOI18N
-            dsBean.setProperty("description", "Downscaled timeseries");                                  // NOI18N
+            dsBean.setProperty("description", "Downscaled rainfall object");                             // NOI18N
             dsBean.setProperty("forecast", Boolean.TRUE);                                                // NOI18N
 
             dsBean = dsBean.persist();
@@ -152,6 +152,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
                     RainfallDownscalingModelManager.class,
                     "RainfallDownscalingModelManager.createOutputBean().output.resultName")); // NOI18N
             output.setRfObjTableName(input.getRainfallObjectTableName());
+            output.setRfStatisticalData(watchable.getStatisticalResult());
         } catch (final Exception e) {
             final String message = "cannot create model output";                              // NOI18N
             LOG.error(message, e);
