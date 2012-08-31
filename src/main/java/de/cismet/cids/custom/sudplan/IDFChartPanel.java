@@ -97,7 +97,6 @@ public class IDFChartPanel extends javax.swing.JPanel {
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setMouseZoomable(true, true);
         chartPanel.setMouseWheelEnabled(true);
-        chartPanel.setPopupMenu(null);
         chartPanel.setBorder(BorderFactory.createLineBorder(Color.black, 1));
         pnlChart.add(chartPanel, BorderLayout.CENTER);
     }
