@@ -67,13 +67,24 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
     public static final Variable LOCAL_Q = new Variable(
             "urn:ogc:def:property:OGC:LocalQ", // NOI18N
             NbBundle.getMessage(Variable.class, "Variable.LOCAL_Q.localisedName")); // NOI18N
-
-    // FIXME: what are those variables, ask the hydrologists
-    public static final Variable COUT = new Variable("urn:ogc:def:property:OGC:cout");
-    public static final Variable CRUN = new Variable("urn:ogc:def:property:OGC:crun");
-    public static final Variable CPRC = new Variable("urn:ogc:def:property:OGC:cprc");
-    public static final Variable CTMP = new Variable("urn:ogc:def:property:OGC:ctmp");
-    public static final Variable GWAT = new Variable("urn:ogc:def:property:OGC:gwat");
+    public static final Variable COUT = new Variable(
+            "urn:ogc:def:property:OGC:cout", // NOI18N
+            NbBundle.getMessage(Variable.class, "Variable.COUT.localisedName")); // NOI18N
+    public static final Variable CRUN = new Variable(
+            "urn:ogc:def:property:OGC:crun", // NOI18N
+            NbBundle.getMessage(Variable.class, "Variable.CRUN.localisedName")); // NOI18N
+    public static final Variable CPRC = new Variable(
+            "urn:ogc:def:property:OGC:cprc", // NOI18N
+            NbBundle.getMessage(Variable.class, "Variable.CPRC.localisedName")); // NOI18N
+    public static final Variable CTMP = new Variable(
+            "urn:ogc:def:property:OGC:ctmp", // NOI18N
+            NbBundle.getMessage(Variable.class, "Variable.CTMP.localisedName")); // NOI18N
+    public static final Variable GWAT = new Variable(
+            "urn:ogc:def:property:OGC:gwat", // NOI18N
+            NbBundle.getMessage(Variable.class, "Variable.GWAT.localisedName")); // NOI18N
+    public static final Variable SMDF = new Variable(
+            "urn:ogc:def:property:OGC:smdf", // NOI18N
+            NbBundle.getMessage(Variable.class, "Variable.SMDF.localisedName")); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 

@@ -80,6 +80,7 @@ public final class SMSUtils {
     public static final String CISMAP_PLUGIN_NAME = "cismap";                           // NOI18N
     public static final String DOMAIN_SUDPLAN_WUPP = "SUDPLAN-WUPP";                    // NOI18N
     public static final String EPSG_WUPP = "EPSG:31466";                                // NOI18N
+    public static final String EPSG_WGS84 = "EPSG:4326";                                // NOI18N
 
     private static final String RUN_FROM_IO_QUERY = "SELECT {0}, {1} FROM run WHERE modelinput = {2}"; // NOI18N
 

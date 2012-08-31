@@ -14,11 +14,20 @@ package de.cismet.cids.custom.sudplan.dataImport;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.ImageUtilities;
+
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
+import de.cismet.cids.custom.sudplan.MonitorstationContext;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -40,6 +49,8 @@ public class TimeSeriesMetaDataPanel extends javax.swing.JPanel {
 
     private final transient TimeSeriesMetaDataPanelCtrl ctrl;
     private transient CidsBean cidsBean;
+
+    private final transient ImageIcon stationIcon;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private de.cismet.cids.editors.DefaultBindableReferenceCombo cboStation;
@@ -68,6 +79,8 @@ public class TimeSeriesMetaDataPanel extends javax.swing.JPanel {
             throw new NullPointerException("Given TimeSeriesConverterChoosePanelCtrl instance "
                         + "must not be null"); // NOI18N
         }
+
+        stationIcon = ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/monitor_16.png", false); // NOI18N
 
         initComponents();
 
@@ -103,6 +116,8 @@ public class TimeSeriesMetaDataPanel extends javax.swing.JPanel {
                     ctrl.fireChangeEvent();
                 }
             });
+
+        cboStation.setRenderer(new StationRenderer());
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -132,7 +147,7 @@ public class TimeSeriesMetaDataPanel extends javax.swing.JPanel {
 
         try {
             this.cidsBean.setProperty("forecast", Boolean.FALSE);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("ERROR", e);
         }
 
@@ -330,4 +345,51 @@ public class TimeSeriesMetaDataPanel extends javax.swing.JPanel {
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class StationRenderer extends DefaultListCellRenderer {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public Component getListCellRendererComponent(final JList list,
+                final Object value,
+                final int index,
+                final boolean isSelected,
+                final boolean cellHasFocus) {
+            final Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+            if (c instanceof JLabel) {
+                final JLabel label = (JLabel)c;
+
+                if (value == null) {
+                    label.setText(cboStation.getNullValueRepresentation());
+                } else {
+                    final CidsBean bean = (CidsBean)value;
+                    final String name = (String)bean.getProperty("name"); // NOI18N
+                    final String type = (String)bean.getProperty("type"); // NOI18N
+
+                    final int colonIndex = type.indexOf(':');
+
+                    if (colonIndex > 0) {
+                        final String ctxKey = type.substring(0, colonIndex);
+                        final MonitorstationContext ctx = MonitorstationContext.getMonitorstationContext(ctxKey);
+                        label.setText(name + "(" + ctx.getLocalisedName() + ")"); // NOI18N
+                    } else {
+                        label.setText(name);
+                    }
+
+                    label.setIcon(stationIcon);
+                }
+            }
+
+            return c;
+        }
+    }
 }
