@@ -7,9 +7,10 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import org.openide.util.NbBundle;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Font;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,6 @@ import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
-import javax.swing.border.LineBorder;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.RaineventPanel;
@@ -39,7 +39,7 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkForecast;
     private javax.swing.JLabel lblDescription;
-    private javax.swing.JLabel lblShowDescription;
+    private javax.swing.JLabel lblDescriptionValue;
     private javax.swing.JPanel pnlRainevent;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
@@ -70,14 +70,15 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         lblDescription = new javax.swing.JLabel();
         chkForecast = new javax.swing.JCheckBox();
         pnlRainevent = new javax.swing.JPanel();
-        lblShowDescription = new javax.swing.JLabel();
+        lblDescriptionValue = new javax.swing.JLabel();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
+        lblDescription.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         lblDescription.setText(org.openide.util.NbBundle.getMessage(
                 RaineventRenderer.class,
-                "RaineventRenderer.lblDescription.text")); // NOI18N
+                "RaineventRenderer.lblDescription.text"));                 // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -89,15 +90,6 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
                 RaineventRenderer.class,
                 "RaineventRenderer.chkForecast.text")); // NOI18N
         chkForecast.setContentAreaFilled(false);
-
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
-                lblShowDescription,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        bindingGroup.addBinding(binding);
-
         chkForecast.addItemListener(new java.awt.event.ItemListener() {
 
                 @Override
@@ -123,14 +115,20 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         gridBagConstraints.weighty = 0.8;
         add(pnlRainevent, gridBagConstraints);
 
-        lblShowDescription.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        lblDescriptionValue.setVerticalAlignment(javax.swing.SwingConstants.TOP);
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+        final org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
-                lblShowDescription,
+                lblDescriptionValue,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding.setSourceNullValue(NbBundle.getMessage(
+                RaineventRenderer.class,
+                "RaineventRenderer.lblDescriptionValue.text.nullSourceValue"));       // NOI18N
+        binding.setSourceUnreadableValue(NbBundle.getMessage(
+                RaineventRenderer.class,
+                "RaineventRenderer.lblDescriptionValue.text.unreadableSourceValue")); // NOI18N
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -139,7 +137,7 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblShowDescription, gridBagConstraints);
+        add(lblDescriptionValue, gridBagConstraints);
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents

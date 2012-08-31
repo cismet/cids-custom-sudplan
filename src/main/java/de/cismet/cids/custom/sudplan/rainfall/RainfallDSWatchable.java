@@ -23,6 +23,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Properties;
 import java.util.Set;
 
@@ -61,6 +62,7 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
 
     private transient URL dsDailyRes;
     private transient URL dsOrigRes;
+    private transient Float[][] dsStatRes;
     private transient IDFCurve curve;
 
     //~ Constructors -----------------------------------------------------------
@@ -252,6 +254,9 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                     final String dsDailyResult = results[3].substring(results[3].indexOf("tsf"), // NOI18N
                             results[3].length()
                                     - 1);
+                    final String dsStatisticalResult = results[4].substring(results[4].indexOf("tbl:"),
+                            results[4].length()
+                                    - 1);
                     // table results don't work! it's annoying
                     try {
                         // ds results with original resolution
@@ -316,6 +321,38 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
 
                         dsDailyRes = url;
 
+                        // ds statistical results
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("processing ds result with daily resolution"); // NOI18N
+                        }
+
+                        filter.setProperty(TimeSeries.OFFERING, dsStatisticalResult);
+                        dps = dh.getDatapoints(filter, Access.READ);
+                        if (dps.size() != 1) {
+                            throw new IllegalStateException("there should be exactly one datapoint: "
+                                        + dsStatisticalResult); // NOI18N
+                        }
+
+                        datapoint = dps.iterator().next();
+                        ts = datapoint.getTimeSeries(new TimeInterval(
+                                    TimeInterval.Openness.OPEN,
+                                    TimeStamp.NEGATIVE_INFINITY,
+                                    TimeStamp.POSITIVE_INFINITY,
+                                    TimeInterval.Openness.OPEN));
+
+                        final TimeStamp avDataMinStamp = new TimeStamp((Date)ts.getTSProperty(
+                                    TimeSeries.AVAILABLE_DATA_MIN));
+                        final Float[] minValues = (Float[])ts.getValue(avDataMinStamp, "Minimum");
+                        final Float[] maxValues = (Float[])ts.getValue(avDataMinStamp, "Maximum");
+                        final Float[] freqValues = (Float[])ts.getValue(avDataMinStamp, "Frequency");
+
+                        final Float[][] tableData = new Float[3][];
+                        tableData[0] = minValues;
+                        tableData[1] = maxValues;
+                        tableData[2] = freqValues;
+
+                        dsStatRes = tableData;
+
                         setStatus(State.COMPLETED);
                     } catch (final Exception ex) {
                         LOG.error("error while downloading the results", ex); // NOI18N
@@ -350,6 +387,15 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
      */
     public URL getOrigResolutionResult() {
         return dsOrigRes;
+    }
+
+    /**
+     * First min, then max, then freq.
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Float[][] getStatisticalResult() {
+        return dsStatRes;
     }
 
     /**

@@ -124,6 +124,7 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(chkForecast, gridBagConstraints);
 
+        lblDescription.setFont(new java.awt.Font("Lucida Grande", 1, 13));                                           // NOI18N
         lblDescription.setText(NbBundle.getMessage(IdfCurveRenderer.class, "IdfCurveRenderer.lblDescription.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -138,7 +139,12 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
                 lblShowDescription,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("");
+        binding.setSourceNullValue(NbBundle.getMessage(
+                IdfCurveRenderer.class,
+                "IdfCurveRenderer.lblDescriptionValue.text.nullSourceValue"));       // NOI18N
+        binding.setSourceUnreadableValue(NbBundle.getMessage(
+                IdfCurveRenderer.class,
+                "IdfCurveRenderer.lblDescriptionValue.text.unreadableSourceValue")); // NOI18N
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();

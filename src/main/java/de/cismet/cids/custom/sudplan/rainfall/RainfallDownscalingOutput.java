@@ -28,6 +28,7 @@ public final class RainfallDownscalingOutput {
     private transient int rfObjInputId;
     private transient String rfObjInputName;
     private transient String rfObjTableName;
+    private transient Float[][] rfStatisticalData;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -40,13 +41,14 @@ public final class RainfallDownscalingOutput {
     /**
      * Creates a new RainfallDownscalingOutput object.
      *
-     * @param  modelInputId     DOCUMENT ME!
-     * @param  modelRunId       DOCUMENT ME!
-     * @param  rfObjResultId    DOCUMENT ME!
-     * @param  rfObjResultName  DOCUMENT ME!
-     * @param  rfObjInputId     DOCUMENT ME!
-     * @param  rfObjInputName   DOCUMENT ME!
-     * @param  rfObjTableName   DOCUMENT ME!
+     * @param  modelInputId       DOCUMENT ME!
+     * @param  modelRunId         DOCUMENT ME!
+     * @param  rfObjResultId      DOCUMENT ME!
+     * @param  rfObjResultName    DOCUMENT ME!
+     * @param  rfObjInputId       DOCUMENT ME!
+     * @param  rfObjInputName     DOCUMENT ME!
+     * @param  rfObjTableName     DOCUMENT ME!
+     * @param  rfStatisticalData  DOCUMENT ME!
      */
     public RainfallDownscalingOutput(final int modelInputId,
             final int modelRunId,
@@ -54,7 +56,8 @@ public final class RainfallDownscalingOutput {
             final String rfObjResultName,
             final int rfObjInputId,
             final String rfObjInputName,
-            final String rfObjTableName) {
+            final String rfObjTableName,
+            final Float[][] rfStatisticalData) {
         this.modelInputId = modelInputId;
         this.modelRunId = modelRunId;
         this.rfObjResultId = rfObjResultId;
@@ -62,6 +65,7 @@ public final class RainfallDownscalingOutput {
         this.rfObjInputId = rfObjInputId;
         this.rfObjInputName = rfObjInputName;
         this.rfObjTableName = rfObjTableName;
+        this.rfStatisticalData = rfStatisticalData;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -208,5 +212,23 @@ public final class RainfallDownscalingOutput {
      */
     public void setRfObjTableName(final String rfObjTableName) {
         this.rfObjTableName = rfObjTableName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Float[][] getRfStatisticalData() {
+        return rfStatisticalData;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  rfStatisticalData  DOCUMENT ME!
+     */
+    public void setRfStatisticalData(final Float[][] rfStatisticalData) {
+        this.rfStatisticalData = rfStatisticalData;
     }
 }

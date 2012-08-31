@@ -7,15 +7,16 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
-import org.apache.log4j.Logger;
-
 import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
 
 import java.awt.BorderLayout;
 
 import java.net.MalformedURLException;
 
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.SMSUtils;
@@ -31,17 +32,16 @@ import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
  */
 public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
 
-    //~ Static fields/initializers ---------------------------------------------
-
-    private static final transient Logger LOG = Logger.getLogger(TimeseriesRenderer.class);
-
     //~ Instance fields --------------------------------------------------------
 
+    private final ChangeListener chkForecastL;
+
     private transient TimeseriesChartPanel panel;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox chkforecast;
-    private javax.swing.JPanel pnlFiller;
-    private javax.swing.JPanel pnlNorth;
+    private final transient javax.swing.JCheckBox chkForecast = new javax.swing.JCheckBox();
+    private final transient javax.swing.JPanel pnlFiller = new javax.swing.JPanel();
+    private final transient javax.swing.JPanel pnlNorth = new javax.swing.JPanel();
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
@@ -51,7 +51,11 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
      * Creates new form TimeseriesRenderer.
      */
     public TimeseriesRenderer() {
+        this.chkForecastL = new PreventChangeListener();
+
         initComponents();
+
+        chkForecast.addChangeListener(WeakListeners.change(chkForecastL, chkForecast));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -95,22 +99,7 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         bindingGroup.unbind();
         bindingGroup.bind();
 
-//        try {
-//            final String uri = (String) cidsBean.getProperty("uri"); // NOI18N
-//            final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
-
-//            final TimeSeriesExportWizardAction action = (TimeSeriesExportWizardAction)btnExport.getAction();
-//            action.setTimeseriesRetrieverConfig(config);
-//            btnExport.setEnabled(true);
-
         this.setTimeSeriesPanel();
-//        } catch (final MalformedURLException ex) {
-//            btnExport.setEnabled(false);
-
-//            final String message = "cidsbean contains invalid uri"; // NOI18N
-//            LOG.error(message, ex);
-//            throw new IllegalStateException(message, ex);
-//        }
     }
 
     @Override
@@ -130,24 +119,20 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         java.awt.GridBagConstraints gridBagConstraints;
         bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
-        pnlNorth = new javax.swing.JPanel();
-        chkforecast = new javax.swing.JCheckBox();
-        pnlFiller = new javax.swing.JPanel();
-
         setOpaque(false);
         setLayout(new java.awt.BorderLayout());
 
         pnlNorth.setOpaque(false);
         pnlNorth.setLayout(new java.awt.GridBagLayout());
 
-        chkforecast.setText(NbBundle.getMessage(TimeseriesRenderer.class, "TimeseriesRenderer.chkforecast.text")); // NOI18N
-        chkforecast.setContentAreaFilled(false);
+        chkForecast.setText(NbBundle.getMessage(TimeseriesRenderer.class, "TimeseriesRenderer.chkForecast.text")); // NOI18N
+        chkForecast.setContentAreaFilled(false);
 
         final org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.forecast}"),
-                chkforecast,
+                chkForecast,
                 org.jdesktop.beansbinding.BeanProperty.create("selected"));
         bindingGroup.addBinding(binding);
 
@@ -157,7 +142,7 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(8, 8, 8, 8);
-        pnlNorth.add(chkforecast, gridBagConstraints);
+        pnlNorth.add(chkForecast, gridBagConstraints);
 
         pnlFiller.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -171,4 +156,22 @@ public class TimeseriesRenderer extends AbstractCidsBeanRenderer {
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class PreventChangeListener implements ChangeListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void stateChanged(final ChangeEvent e) {
+            final Boolean forecast = (Boolean)cidsBean.getProperty("forecast"); // NOI18N
+            chkForecast.setSelected((forecast == null) ? false : forecast);
+        }
+    }
 }

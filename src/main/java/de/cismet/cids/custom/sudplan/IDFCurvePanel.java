@@ -61,12 +61,16 @@ public class IDFCurvePanel extends javax.swing.JPanel {
     /**
      * Creates new form IDFCurvePanel.
      *
-     * @param  idfCurve  raineventBean DOCUMENT ME!
+     * @param   idfCurve  raineventBean DOCUMENT ME!
+     *
+     * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     public IDFCurvePanel(final IDFCurve idfCurve) {
-        this.idfCurve = idfCurve;
+        if (idfCurve == null) {
+            throw new IllegalArgumentException("idfCurve must not be null");
+        }
 
-        assert this.idfCurve != null : "Rainevent cannot be null";
+        this.idfCurve = idfCurve;
 
         initComponents();
 
@@ -148,6 +152,7 @@ public class IDFCurvePanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
         add(tlbToolBar, gridBagConstraints);
 
+        lblYear.setFont(new java.awt.Font("Lucida Grande", 1, 13));                                               // NOI18N
         lblYear.setText(org.openide.util.NbBundle.getMessage(IDFCurvePanel.class, "IDFCurvePanel.lblYear.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -157,6 +162,7 @@ public class IDFCurvePanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblYear, gridBagConstraints);
 
+        lblUnit.setFont(new java.awt.Font("Lucida Grande", 1, 13));                                               // NOI18N
         lblUnit.setText(org.openide.util.NbBundle.getMessage(IDFCurvePanel.class, "IDFCurvePanel.lblUnit.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
