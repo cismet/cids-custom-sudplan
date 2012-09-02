@@ -19,11 +19,11 @@ import javax.swing.event.DocumentListener;
  * @author   bfriedrich
  * @version  $Revision$, $Date$
  */
-public class VisualPanelChooseFile extends javax.swing.JPanel {
+public class VisualPanelChooseFileImport extends javax.swing.JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient WizardPanelChooseFile ctrl;
+    private final transient WizardPanelChooseFileImport ctrl;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFileChooser;
@@ -41,7 +41,7 @@ public class VisualPanelChooseFile extends javax.swing.JPanel {
      *
      * @throws  NullPointerException  DOCUMENT ME!
      */
-    public VisualPanelChooseFile(final WizardPanelChooseFile ctrl) {
+    public VisualPanelChooseFileImport(final WizardPanelChooseFileImport ctrl) {
         if (ctrl == null) {
             throw new NullPointerException("Given WizardPanelChooseFile instance " // NOI18N
                         + "must not be null");          // NOI18N
@@ -50,7 +50,7 @@ public class VisualPanelChooseFile extends javax.swing.JPanel {
         initComponents();
 
         this.setName(NbBundle.getMessage(
-                VisualPanelChooseFile.class,
+                VisualPanelChooseFileImport.class,
                 "VisualPanelChooseFile.this.name")); // NOI18N
 
         this.ctrl = ctrl;
@@ -110,47 +110,39 @@ public class VisualPanelChooseFile extends javax.swing.JPanel {
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
-        lblFileChooser.setText(org.openide.util.NbBundle.getMessage(
-                VisualPanelChooseFile.class,
-                "VisualPanelChooseFile.lblFileChooser.text")); // NOI18N
+        lblFileChooser.setText(org.openide.util.NbBundle.getMessage(VisualPanelChooseFileImport.class, "VisualPanelChooseFileImport.lblFileChooser.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.ipadx = 5;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         jPanel1.add(lblFileChooser, gridBagConstraints);
 
-        txtFileChooser.setText(org.openide.util.NbBundle.getMessage(
-                VisualPanelChooseFile.class,
-                "VisualPanelChooseFile.txtFileChooser.text")); // NOI18N
+        txtFileChooser.setText(org.openide.util.NbBundle.getMessage(VisualPanelChooseFileImport.class, "VisualPanelChooseFileImport.txtFileChooser.text")); // NOI18N
         txtFileChooser.setMinimumSize(new java.awt.Dimension(100, 27));
         txtFileChooser.setPreferredSize(new java.awt.Dimension(200, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.ipadx = 4;
         jPanel1.add(txtFileChooser, gridBagConstraints);
 
-        btnFileChooser.setText(org.openide.util.NbBundle.getMessage(
-                VisualPanelChooseFile.class,
-                "VisualPanelChooseFile.btnFileChooser.text")); // NOI18N
+        btnFileChooser.setText(org.openide.util.NbBundle.getMessage(VisualPanelChooseFileImport.class, "VisualPanelChooseFileImport.btnFileChooser.text")); // NOI18N
         btnFileChooser.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    btnFileChooserActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFileChooserActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.ipadx = 5;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         jPanel1.add(btnFileChooser, gridBagConstraints);
 
         add(jPanel1, java.awt.BorderLayout.CENTER);
-    } // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnFileChooserActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnFileChooserActionPerformed
+    private void btnFileChooserActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFileChooserActionPerformed
         final JFileChooser chooser = new JFileChooser();
         final int returnVal = chooser.showOpenDialog(this);
 
@@ -158,5 +150,5 @@ public class VisualPanelChooseFile extends javax.swing.JPanel {
             this.txtFileChooser.setText(chooser.getSelectedFile().getAbsolutePath());
             this.ctrl.fireChangeEvent();
         }
-    } //GEN-LAST:event_btnFileChooserActionPerformed
+    }//GEN-LAST:event_btnFileChooserActionPerformed
 }

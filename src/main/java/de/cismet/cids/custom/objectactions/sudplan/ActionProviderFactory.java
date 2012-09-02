@@ -45,16 +45,16 @@ public final class ActionProviderFactory {
      *
      * @return  DOCUMENT ME!
      */
-    public static CidsBeanAction getCidsBeanAction(final Class<? extends CidsBeanAction> clazz) {
+    public static <T extends CidsBeanAction> T getCidsBeanAction(final Class<T> clazz) {
         if (clazz == null) {
             return null;
         }
 
-        CidsBeanAction action = null;
+        T action = null;
         synchronized (instances) {
             for (final Object instance : instances) {
                 if (instance.getClass().equals(clazz)) {
-                    action = (CidsBeanAction)instance;
+                    action = (T)instance;
                     break;
                 }
             }

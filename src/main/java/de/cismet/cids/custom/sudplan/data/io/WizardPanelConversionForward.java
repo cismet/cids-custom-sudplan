@@ -32,7 +32,7 @@ import de.cismet.tools.CismetThreadPool;
  * @author   bfriedrich
  * @version  $Revision$, $Date$
  */
-public class WizardPanelConversion extends AbstractWizardPanelCtrl implements Cancellable {
+public class WizardPanelConversionForward extends AbstractWizardPanelCtrl implements Cancellable {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -49,9 +49,9 @@ public class WizardPanelConversion extends AbstractWizardPanelCtrl implements Ca
     /**
      * Creates a new WizardPanelConversion object.
      */
-    public WizardPanelConversion() {
+    public WizardPanelConversionForward() {
         this.comp = new StatusPanel(NbBundle.getMessage(
-                    WizardPanelConversion.class,
+                    WizardPanelConversionForward.class,
                     "WizardPanelConversion.comp.name")); // NOI18N
     }
 
@@ -66,14 +66,14 @@ public class WizardPanelConversion extends AbstractWizardPanelCtrl implements Ca
     protected void read(final WizardDescriptor wizard) {
         this.comp.setBusy(true);
         this.comp.setStatusMessage(NbBundle.getMessage(
-                WizardPanelConversion.class,
+                WizardPanelConversionForward.class,
                 "WizardPanelConversion.comp.setConversionStatus().start"));
 
         this.runningTask = CismetThreadPool.submit(new Runnable() {
 
                     @Override
                     public void run() {
-                        final File importFile = (File)wizard.getProperty(WizardPanelChooseFile.PROP_INPUT_FILE);
+                        final File importFile = (File)wizard.getProperty(WizardPanelChooseFileImport.PROP_INPUT_FILE);
                         final Converter converter = (Converter)wizard.getProperty(
                                 AbstractConverterChoosePanelCtrl.PROP_CONVERTER);
 
@@ -84,7 +84,7 @@ public class WizardPanelConversion extends AbstractWizardPanelCtrl implements Ca
                             converted = converter.convertForward(bin);
                             comp.setStatusMessage(
                                 NbBundle.getMessage(
-                                    WizardPanelConversion.class,
+                                    WizardPanelConversionForward.class,
                                     "WizardPanelConversion.comp.setConversionStatus().finish"));
                         } catch (final Exception e) {
                             // TODO distinguish different exception types for better error messages
@@ -92,16 +92,16 @@ public class WizardPanelConversion extends AbstractWizardPanelCtrl implements Ca
                             wizard.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, e);
                             comp.setStatusMessage(
                                 NbBundle.getMessage(
-                                    WizardPanelConversion.class,
+                                    WizardPanelConversionForward.class,
                                     "WizardPanelConversion.comp.setConversionStatus().error"));
                             wizard.setValid(false);
                         }
 
-                        WizardPanelConversion.this.fireChangeEvent();
+                        WizardPanelConversionForward.this.fireChangeEvent();
                         comp.setBusy(false);
 
-                        synchronized (WizardPanelConversion.this) {
-                            WizardPanelConversion.this.runningTask = null;
+                        synchronized (WizardPanelConversionForward.this) {
+                            WizardPanelConversionForward.this.runningTask = null;
                         }
                     }
                 });

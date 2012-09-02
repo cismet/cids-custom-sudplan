@@ -74,9 +74,9 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
 
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
-                    new WizardPanelChooseFile(),
+                    new WizardPanelChooseFileImport(),
                     new TimeSeriesConverterChoosePanelCtrl(),
-                    new WizardPanelConversion(),
+                    new WizardPanelConversionForward(),
                     new WizardPanelMetadata(SMSUtils.TABLENAME_TIMESERIES),
                     new TimeSeriesPersistenceCtrl()
                 };

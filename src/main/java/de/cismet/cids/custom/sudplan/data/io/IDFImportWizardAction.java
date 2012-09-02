@@ -87,9 +87,9 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
 
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
-                    new WizardPanelChooseFile(),
+                    new WizardPanelChooseFileImport(),
                     new IDFImportWizardPanelChooseConverter(),
-                    new WizardPanelConversion(),
+                    new WizardPanelConversionForward(),
                     new WizardPanelMetadata(SMSUtils.TABLENAME_IDFCURVE)
                 };
 
@@ -140,7 +140,7 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
 
         if (wizard.getValue() == WizardDescriptor.FINISH_OPTION) {
             try {
-                final IDFCurve idfCurve = (IDFCurve)wizard.getProperty(WizardPanelConversion.PROP_CONVERTED);
+                final IDFCurve idfCurve = (IDFCurve)wizard.getProperty(WizardPanelConversionForward.PROP_CONVERTED);
                 final CidsBean idfBean = (CidsBean)wizard.getProperty(WizardPanelMetadata.PROP_BEAN);
                 final Object converter = wizard.getProperty(AbstractConverterChoosePanelCtrl.PROP_CONVERTER);
                 final ObjectMapper mapper = new ObjectMapper();

@@ -8,6 +8,7 @@
 package de.cismet.cids.custom.sudplan.data.io;
 
 import Sirius.navigator.ui.ComponentRegistry;
+import de.cismet.cids.custom.sudplan.IDFCurve;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
@@ -32,23 +33,23 @@ import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
  *
  * @version  $Revision$, $Date$
  */
-public final class IDFCurveExportWizardAction extends AbstractCidsBeanAction {
+public final class IDFExportWizardAction extends AbstractCidsBeanAction {
 
     //~ Instance fields --------------------------------------------------------
 
     private transient WizardDescriptor.Panel[] panels;
-
+    
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RainfallDownscalingWizardAction object.
      */
-    public IDFCurveExportWizardAction() {
+    public IDFExportWizardAction() {
         super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/data/io/idf_export.png", false)); // NOI18N
 
         putValue(
             Action.SHORT_DESCRIPTION,
-            NbBundle.getMessage(IDFCurveExportWizardAction.class, "TimeSeriesExportWizardAction.shortDescription")); // NOI18N
+            NbBundle.getMessage(IDFExportWizardAction.class, "IDFExportWizardAction.shortDescription")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -62,7 +63,9 @@ public final class IDFCurveExportWizardAction extends AbstractCidsBeanAction {
         assert EventQueue.isDispatchThread() : "can only be called from EDT"; // NOI18N
 
         if (panels == null) {
-            panels = new WizardDescriptor.Panel[] {};
+            panels = new WizardDescriptor.Panel[] {
+                new IDFImportWizardPanelChooseConverter()
+            };
 
             final String[] steps = new String[panels.length];
             for (int i = 0; i < panels.length; i++) {
@@ -94,9 +97,19 @@ public final class IDFCurveExportWizardAction extends AbstractCidsBeanAction {
 
     @Override
     public boolean isEnabled() {
-        return super.isEnabled();
+        return true;
     }
-
+    
+    public IDFCurve getIdfCurve(){
+        return idfCurve;
+    }
+    
+    public void setIdfCurve(final IDFCurve curve){
+        this.idfCurve = curve;
+    }
+    
+    private transient IDFCurve idfCurve;
+    
     /**
      * DOCUMENT ME!
      *
@@ -107,8 +120,10 @@ public final class IDFCurveExportWizardAction extends AbstractCidsBeanAction {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
         wizard.setTitleFormat(new MessageFormat("{0}"));                                    // NOI18N
         wizard.setTitle(NbBundle.getMessage(
-                IDFCurveExportWizardAction.class,
-                "TimeSeriesExportWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
+                IDFExportWizardAction.class,
+                "IDFExportWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
+        
+        assert idfCurve != null : "idfCurve is null"; // NOI18N
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -116,8 +131,7 @@ public final class IDFCurveExportWizardAction extends AbstractCidsBeanAction {
         dialog.setVisible(true);
         dialog.toFront();
 
-        if (wizard.getValue() == WizardDescriptor.FINISH_OPTION) {
-        } else {
+        if (wizard.getValue() != WizardDescriptor.FINISH_OPTION) {
             for (final WizardDescriptor.Panel panel : this.panels) {
                 if (panel instanceof Cancellable) {
                     ((Cancellable)panel).cancel();

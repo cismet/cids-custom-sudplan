@@ -22,7 +22,7 @@ import java.text.MessageFormat;
  * @author   bfriedrich
  * @version  $Revision$, $Date$
  */
-public class WizardPanelChooseFile extends AbstractWizardPanelCtrl {
+public class WizardPanelChooseFileImport extends AbstractWizardPanelCtrl {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -30,7 +30,7 @@ public class WizardPanelChooseFile extends AbstractWizardPanelCtrl {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient VisualPanelChooseFile comp;
+    private final transient VisualPanelChooseFileImport comp;
 
     private transient File importFile;
 
@@ -39,8 +39,8 @@ public class WizardPanelChooseFile extends AbstractWizardPanelCtrl {
     /**
      * Creates a new TimeSeriesImportFileChoosePanelCtrl object.
      */
-    public WizardPanelChooseFile() {
-        this.comp = new VisualPanelChooseFile(this);
+    public WizardPanelChooseFileImport() {
+        this.comp = new VisualPanelChooseFileImport(this);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -67,7 +67,7 @@ public class WizardPanelChooseFile extends AbstractWizardPanelCtrl {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 NbBundle.getMessage(
-                    WizardPanelChooseFile.class,
+                    WizardPanelChooseFileImport.class,
                     "WizardPanelChooseFile.isValid().wizard.putProperty(String,String).noFile"));
             return false;
         }
@@ -78,7 +78,7 @@ public class WizardPanelChooseFile extends AbstractWizardPanelCtrl {
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 MessageFormat.format(
                     NbBundle.getMessage(
-                        WizardPanelChooseFile.class,
+                        WizardPanelChooseFileImport.class,
                         "WizardPanelChooseFile.isValid().wizard.putProperty(String,String).noExistence"),
                     fileName));
             return false;
@@ -89,7 +89,7 @@ public class WizardPanelChooseFile extends AbstractWizardPanelCtrl {
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 MessageFormat.format(
                     NbBundle.getMessage(
-                        WizardPanelChooseFile.class,
+                        WizardPanelChooseFileImport.class,
                         "WizardPanelChooseFile.isValid().wizard.putProperty(String,String).noRead"),
                     fileName));
             return false;

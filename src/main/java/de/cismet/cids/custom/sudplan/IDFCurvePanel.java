@@ -5,19 +5,13 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package de.cismet.cids.custom.sudplan;
 
+import de.cismet.cids.custom.objectactions.sudplan.ActionProviderFactory;
+import de.cismet.cids.custom.sudplan.data.io.IDFExportWizardAction;
 import org.apache.log4j.Logger;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JButton;
 
 /**
@@ -33,14 +27,6 @@ public class IDFCurvePanel extends javax.swing.JPanel {
     private static final Logger LOG = Logger.getLogger(IDFCurvePanel.class);
 
     //~ Instance fields --------------------------------------------------------
-
-    public Action exportData = new AbstractAction() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                // TODO Start Export-Wizard
-            }
-        };
 
     private final transient IDFCurve idfCurve;
 
@@ -76,8 +62,9 @@ public class IDFCurvePanel extends javax.swing.JPanel {
 
         lblShowYear.setText(String.valueOf(this.idfCurve.getCenterYear()));
         lblShowUnit.setText(Unit.MM_H.getLocalisedName());
-
-        tlbToolBar.add(createExportDataButton());
+        final IDFExportWizardAction exportAction = new IDFExportWizardAction();
+        exportAction.setIdfCurve(idfCurve);
+        tlbToolBar.add(new JButton(exportAction));
 
         try {
             pnlTable.removeAll();
@@ -194,20 +181,4 @@ public class IDFCurvePanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblShowUnit, gridBagConstraints);
     }                                               // </editor-fold>//GEN-END:initComponents
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private JButton createExportDataButton() {
-        btnExportData = new JButton(exportData);
-        btnExportData.setToolTipText(org.openide.util.NbBundle.getMessage(
-                IDFCurvePanel.class,
-                "IDFCurvePanel.createExportButton().btnExportData.tooltip"));
-        btnExportData.setFocusPainted(false);
-        btnExportData.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/sudplan/data/io/idf_export.png")));
-        return btnExportData;
-    }
 }
