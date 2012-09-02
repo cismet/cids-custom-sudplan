@@ -261,32 +261,22 @@ public final class WuppertalTimeseriesConverter implements TimeseriesConverter, 
 
     @Override
     public String getFormatDescription() {
-        return "- Metadata keys: [Station, Stationsnummer, Unterbezeichnung, Parameter, Einheit, Geber]\n"
-                    + "- Every line contains one date and a corresponding float value\n"
-                    + "- Format: [dd.MM.yyyy HH:mm:ss;\\w*#,##] (';' separator)\n"
-                    + "- Expected unit of the float value: mm/h (millimeters per hour)\n"
-                    + "- No unit conversion";
+        return NbBundle.getMessage(
+                WuppertalTimeseriesConverter.class,
+                "WuppertalTimeseriesConverter.getFormatDescription().description"); // NOI18N
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return "<html>"
-                    + "- Metadata keys; [Station, Stationsnummer, Unterbezeichnung, Parameter, Einheit, Geber]<br/>"
-                    + "- Every line contains one date and a corresponding float value<br/>"
-                    + "- Format: <i>dd.MM.yyyy HH:mm:ss;\\w*#,##</i> (';' separator)<br/>"
-                    + "- Expected unit: <i>mm/h (millimeters per hour)</i><br/>"
-                    + "- No unit conversion"
-                    + "</html>";
+        return NbBundle.getMessage(
+                WuppertalTimeseriesConverter.class,
+                "WuppertalTimeseriesConverter.getFormatHtmlDescription().description"); // NOI18N
     }
 
     @Override
     public Object getFormatExample() {
-        return "<html>"
-                    + "Station;Buchenhofen-Pluvio<br/>"
-                    + "Einheit;mm/h<br/>"
-                    + "01.01.1960 14:04:45;      0,00<br/>"
-                    + "01.01.1960 14:05:15;      0,17<br/>"
-                    + "01.01.1960 14:09:45;      0,40<br/>"
-                    + "</html>";
+        return NbBundle.getMessage(
+                WuppertalTimeseriesConverter.class,
+                "WuppertalTimeseriesConverter.getFormatExample().description"); // NOI18N
     }
 }

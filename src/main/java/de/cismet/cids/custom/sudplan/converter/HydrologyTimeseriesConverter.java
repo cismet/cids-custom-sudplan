@@ -208,32 +208,22 @@ public final class HydrologyTimeseriesConverter implements TimeseriesConverter, 
 
     @Override
     public String getFormatDescription() {
-        return "- One line of metadata (header)\n"
-                    + "- Every line contains one date and a corresponding float value\n"
-                    + "- Format: [yyyy.MM.dd\\w*#.###] (white space separator)\n"
-                    + "- Expected unit of the float value: m³/s (cubic meters per hour)\n"
-                    + "- No unit conversion";
+        return NbBundle.getMessage(
+                HydrologyTimeseriesConverter.class,
+                "HydrologyTimeseriesConverter.getFormatDescription().description");
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return "<html>"
-                    + "- One line of metadata (header)<br/>"
-                    + "- Every line contains one date and a corresponding float value<br/>"
-                    + "- Format: <i>yyyy.MM.dd\\w*#.###</i> (white space separator)<br/>"
-                    + "- Expected unit: <i>m³/s (cubic meters per hour)</i><br/>"
-                    + "- No unit conversion"
-                    + "</html>";
+        return NbBundle.getMessage(
+                HydrologyTimeseriesConverter.class,
+                "HydrologyTimeseriesConverter.getFormatHtmlDescription().description");
     }
 
     @Override
     public Object getFormatExample() {
-        return "<html>"
-                    + "Date     545223<br/>"
-                    + "1985-01-01    6<br/>"
-                    + "1985-01-02    5<br/>"
-                    + "1985-01-03    10.2<br/>"
-                    + "1985-01-04    -9999<br/>"
-                    + "</html>";
+        return NbBundle.getMessage(
+                HydrologyTimeseriesConverter.class,
+                "HydrologyTimeseriesConverter.getFormatExample().description");
     }
 }

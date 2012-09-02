@@ -209,32 +209,22 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
 
     @Override
     public String getFormatDescription() {
-        return "- No metadata\n"
-                    + "- Every line contains one date and a corresponding float value\n"
-                    + "- Format: [yyyy-MM-dd\\w+#.###] (white space separator)\n"
-                    + "- Expected unit: mm (millimeters since last timestamp)\n"
-                    + "- No unit conversion";
+        return NbBundle.getMessage(
+                LinzTimeseriesConverter.class,
+                "LinzTimeseriesConverter.getFormatDescription().description"); // NOI18N
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return "<html>"
-                    + "- No metadata<br/>"
-                    + "- Every line contains one date and a corresponding float value<br/>"
-                    + "- Format: <i>yyyy-MM-dd\\w+#.###</i> (white space separator)<br/>"
-                    + "- Expected unit: <i>mm (millimeters since last timestamp)</i><br/>"
-                    + "- No unit conversion"
-                    + "</html>";
+        return NbBundle.getMessage(
+                LinzTimeseriesConverter.class,
+                "LinzTimeseriesConverter.getFormatHtmlDescription().description"); // NOI18N
     }
 
     @Override
     public Object getFormatExample() {
-        return "<html>"
-                    + "1993-01-07   1.300<br/>"
-                    + "1993-01-08   5.200<br/>"
-                    + "1993-01-09   0.100<br/>"
-                    + "1993-01-10   0.100<br/>"
-                    + "1993-01-11   0.900<br/>"
-                    + "</html>";
+        return NbBundle.getMessage(
+                LinzTimeseriesConverter.class,
+                "LinzTimeseriesConverter.getFormatExample().description"); // NOI18N
     }
 }
