@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.converter;
+package de.cismet.cids.custom.sudplan.data.io;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.NbBundle;
@@ -15,8 +15,6 @@ import java.awt.Component;
 import java.io.File;
 
 import java.text.MessageFormat;
-
-import de.cismet.cids.custom.sudplan.data.io.AbstractWizardPanelCtrl;
 
 /**
  * DOCUMENT ME!

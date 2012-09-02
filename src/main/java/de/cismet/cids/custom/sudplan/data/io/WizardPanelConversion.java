@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.converter;
+package de.cismet.cids.custom.sudplan.data.io;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
@@ -22,8 +22,7 @@ import java.io.FileInputStream;
 import java.util.concurrent.Future;
 
 import de.cismet.cids.custom.sudplan.StatusPanel;
-import de.cismet.cids.custom.sudplan.data.io.AbstractWizardPanelCtrl;
-import de.cismet.cids.custom.sudplan.data.io.TimeSeriesImportWizardAction;
+import de.cismet.cids.custom.sudplan.converter.Converter;
 
 import de.cismet.tools.CismetThreadPool;
 

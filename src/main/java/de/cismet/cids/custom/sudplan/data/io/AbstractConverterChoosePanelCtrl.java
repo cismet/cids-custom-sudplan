@@ -5,12 +5,10 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.converter;
+package de.cismet.cids.custom.sudplan.data.io;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.NbBundle;
-
-import de.cismet.cids.custom.sudplan.data.io.AbstractWizardPanelCtrl;
 
 /**
  * DOCUMENT ME!

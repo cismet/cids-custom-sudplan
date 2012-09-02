@@ -39,9 +39,7 @@ import de.cismet.cids.custom.sudplan.StatusPanel;
 import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
 import de.cismet.cids.custom.sudplan.TimeSeriesTrashBin;
 import de.cismet.cids.custom.sudplan.TimeseriesTransmitter;
-import de.cismet.cids.custom.sudplan.converter.AbstractConverterChoosePanelCtrl;
 import de.cismet.cids.custom.sudplan.converter.TimeSeriesAggregator;
-import de.cismet.cids.custom.sudplan.converter.WizardPanelConversion;
 
 import de.cismet.cids.dynamics.CidsBean;
 

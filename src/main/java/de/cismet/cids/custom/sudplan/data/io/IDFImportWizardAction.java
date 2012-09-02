@@ -28,7 +28,6 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
-import de.cismet.cids.custom.sudplan.converter.WizardPanelChooseFile;
 
 import de.cismet.cids.navigator.utils.CidsClientToolbarItem;
 

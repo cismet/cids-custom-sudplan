@@ -7,9 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.data.io;
 
-import de.cismet.cids.custom.sudplan.converter.AbstractConverterChoosePanel;
-import de.cismet.cids.custom.sudplan.converter.AbstractConverterChoosePanelCtrl;
-
 /**
  * DOCUMENT ME!
  *

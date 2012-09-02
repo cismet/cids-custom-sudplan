@@ -10,8 +10,6 @@ package de.cismet.cids.custom.sudplan.data.io;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.cismet.cids.custom.sudplan.converter.AbstractConverterChoosePanel;
-import de.cismet.cids.custom.sudplan.converter.AbstractConverterChoosePanelCtrl;
 import de.cismet.cids.custom.sudplan.converter.HydrologyTimeseriesConverter;
 import de.cismet.cids.custom.sudplan.converter.LinzTimeseriesConverter;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;

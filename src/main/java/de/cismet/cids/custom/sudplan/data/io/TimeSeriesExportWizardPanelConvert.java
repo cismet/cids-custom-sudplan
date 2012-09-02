@@ -29,7 +29,6 @@ import de.cismet.cids.custom.sudplan.StatusPanel;
 import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
-import de.cismet.cids.custom.sudplan.converter.AbstractConverterChoosePanelCtrl;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 
 /**

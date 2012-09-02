@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.converter;
+package de.cismet.cids.custom.sudplan.data.io;
 
 import org.apache.log4j.Logger;
 
@@ -19,6 +19,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import java.util.List;
+
+import de.cismet.cids.custom.sudplan.converter.Converter;
+import de.cismet.cids.custom.sudplan.converter.FormatHint;
 
 /**
  * DOCUMENT ME!

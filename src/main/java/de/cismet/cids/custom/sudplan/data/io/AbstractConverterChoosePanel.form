@@ -46,7 +46,7 @@
         <Component class="javax.swing.JLabel" name="lblConverter">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cids/custom/sudplan/converter/Bundle.properties" key="AbstractConverterChoosePanel.lblConverter.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cids/custom/sudplan/data/io/Bundle.properties" key="AbstractConverterChoosePanel.lblConverter.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Constraints>
@@ -58,7 +58,7 @@
         <Component class="javax.swing.JLabel" name="lblFormatDescription">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cids/custom/sudplan/converter/Bundle.properties" key="AbstractConverterChoosePanel.lblFormatDescription.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cids/custom/sudplan/data/io/Bundle.properties" key="AbstractConverterChoosePanel.lblFormatDescription.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Constraints>
@@ -74,7 +74,7 @@
             </Property>
             <Property name="horizontalAlignment" type="int" value="2"/>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cids/custom/sudplan/converter/Bundle.properties" key="AbstractConverterChoosePanel.lblFormatDescriptionValue.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cids/custom/sudplan/data/io/Bundle.properties" key="AbstractConverterChoosePanel.lblFormatDescriptionValue.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Constraints>
@@ -86,7 +86,7 @@
         <Component class="javax.swing.JLabel" name="lblFormatExample">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cids/custom/sudplan/converter/Bundle.properties" key="AbstractConverterChoosePanel.lblFormatExample.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cids/custom/sudplan/data/io/Bundle.properties" key="AbstractConverterChoosePanel.lblFormatExample.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Constraints>
@@ -120,7 +120,7 @@
                   <Font name="Tahoma" size="10" style="0"/>
                 </Property>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cids/custom/sudplan/converter/Bundle.properties" key="AbstractConverterChoosePanel.lblFormatExampleValue.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cids/custom/sudplan/data/io/Bundle.properties" key="AbstractConverterChoosePanel.lblFormatExampleValue.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
               </Properties>
               <Constraints>

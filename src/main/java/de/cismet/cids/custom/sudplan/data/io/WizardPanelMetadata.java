@@ -135,7 +135,7 @@ public class WizardPanelMetadata extends AbstractWizardPanelCtrl {
                 java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/data/io/Bundle").getString(
                     "WizardPanelMetadata.isValid().wizard.putProperty(String,String).nameAndStation")); // NOI18N
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Leaving isValid() with retun value false");                                          // NOI18N
+                LOG.debug("Leaving isValid() with retun value false");                                  // NOI18N
             }
             return false;
         }
@@ -147,7 +147,7 @@ public class WizardPanelMetadata extends AbstractWizardPanelCtrl {
                 java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/data/io/Bundle").getString(
                     "WizardPanelMetadata.isValid().wizard.putProperty(String,String).name")); // NOI18N
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Leaving isValid() with retun value false");                                // NOI18N
+                LOG.debug("Leaving isValid() with retun value false");                        // NOI18N
             }
             return false;
         }
@@ -196,7 +196,7 @@ public class WizardPanelMetadata extends AbstractWizardPanelCtrl {
             java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/data/io/Bundle").getString(
                 "WizardPanelMetadata.isValid().wizard.putProperty(String,String).persisting")); // NOI18N
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Leaving isValid() with retun value true");                                       // NOI18N
+            LOG.debug("Leaving isValid() with retun value true");                               // NOI18N
         }
         return true;
     }
