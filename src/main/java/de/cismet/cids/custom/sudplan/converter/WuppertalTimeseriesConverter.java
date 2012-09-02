@@ -14,6 +14,7 @@ import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.io.BufferedReader;
@@ -41,7 +42,7 @@ import de.cismet.cids.custom.sudplan.Variable;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = Converter.class)
-public final class WuppertalTimeseriesConverter implements TimeseriesConverter {
+public final class WuppertalTimeseriesConverter implements TimeseriesConverter, FormatHint {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -120,7 +121,7 @@ public final class WuppertalTimeseriesConverter implements TimeseriesConverter {
                         }
                     } else if (TOKEN_UNIT.equals(key)) {
                         if (value.equals("mm/h")) {         // NOI18N
-                            ts.setTSProperty(TimeSeries.VALUE_UNITS, new String[] { Unit.MM.getPropertyKey() });
+                            ts.setTSProperty(TimeSeries.VALUE_UNITS, new String[] { Unit.MM_H.getPropertyKey() });
                         } else {
                             ts.setTSProperty(TimeSeries.VALUE_UNITS, new String[] { value });
                         }
@@ -238,6 +239,52 @@ public final class WuppertalTimeseriesConverter implements TimeseriesConverter {
 
     @Override
     public String toString() {
-        return "Wuppertal Converter";
+        return getFormatDisplayName();
+    }
+
+    @Override
+    public String getFormatName() {
+        return "linz-timeseries-converter"; // NOI18N
+    }
+
+    @Override
+    public String getFormatDisplayName() {
+        return NbBundle.getMessage(
+                WuppertalTimeseriesConverter.class,
+                "WuppertalTimeseriesConverter.this.name"); // NOI18N
+    }
+
+    @Override
+    public String getFormatHtmlName() {
+        return null;
+    }
+
+    @Override
+    public String getFormatDescription() {
+        return "Metadata keys: [Station, Stationsnummer, Unterbezeichnung, Parameter, Einheit, Geber]\n"
+                    + "Every line contains one date and a corresponding float value\n"
+                    + "Format: [dd.MM.YYYY HH:mm:ss;\\w*#,##] (';' separator)\n"
+                    + "Expected unit of the float value: mm (millimeters per hour)";
+    }
+
+    @Override
+    public String getFormatHtmlDescription() {
+        return "<html><ul>"
+                    + "<li>Metadata keys; [Station, Stationsnummer, Unterbezeichnung, Parameter, Einheit, Geber]</li>"
+                    + "<li>Every line contains one date and a corresponding float value</li>"
+                    + "<li>Format: <i>dd.MM.YYYY HH:mm:ss;\\w*#,##</i> (';' separator)</li>"
+                    + "<li>Expected unit: <i>mm/h (millimeters per hour)</i></li>"
+                    + "</ul></html>";
+    }
+
+    @Override
+    public Object getFormatExample() {
+        return "<html>"
+                    + "Station;Buchenhofen-Pluvio<br/>"
+                    + "Einheit;mm/h<br/>"
+                    + "01.01.1960 14:04:45;      0,00<br/>"
+                    + "01.01.1960 14:05:15;      0,17<br/>"
+                    + "01.01.1960 14:09:45;      0,40<br/>"
+                    + "</html>";
     }
 }

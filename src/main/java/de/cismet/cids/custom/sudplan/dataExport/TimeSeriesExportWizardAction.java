@@ -11,8 +11,6 @@ import Sirius.navigator.ui.ComponentRegistry;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
-import org.apache.log4j.Logger;
-
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
@@ -30,6 +28,8 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
+import de.cismet.cids.custom.sudplan.dataImport.TimeSeriesConverterChoosePanelCtrl;
+import de.cismet.cids.custom.sudplan.dataImport.TimeSeriesImportFileChoosePanelCtrl;
 
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 
@@ -78,7 +78,7 @@ public final class TimeSeriesExportWizardAction extends AbstractCidsBeanAction {
 
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
-                    new TimeSeriesExportWizardPanelChooseConverter(),
+                    new TimeSeriesConverterChoosePanelCtrl(),
                     new TimeSeriesExportWizardPanelFile(),
                     new TimeSeriesExportWizardPanelConvert()
                 };

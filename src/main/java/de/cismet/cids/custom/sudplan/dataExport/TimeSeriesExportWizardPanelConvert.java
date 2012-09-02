@@ -24,14 +24,13 @@ import java.io.InputStream;
 
 import java.util.concurrent.Future;
 
-import javax.swing.JButton;
-
 import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
 import de.cismet.cids.custom.sudplan.StatusPanel;
 import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
+import de.cismet.cids.custom.sudplan.dataImport.TimeSeriesImportWizardAction;
 
 /**
  * DOCUMENT ME!
@@ -74,7 +73,7 @@ public final class TimeSeriesExportWizardPanelConvert extends AbstractWizardPane
         synchronized (lock) {
             final File exportFile = (File)wizard.getProperty(TimeSeriesExportWizardPanelFile.PROP_EXPORT_FILE);
             final TimeseriesConverter timeseriesConverter = (TimeseriesConverter)wizard.getProperty(
-                    TimeSeriesExportWizardPanelChooseConverter.PROP_TS_CONVERTER);
+                    TimeSeriesImportWizardAction.PROP_CONVERTER);
             final TimeSeries timeSeries = (TimeSeries)wizard.getProperty(TimeSeriesExportWizardAction.PROP_TIMESERIES);
             final TimeseriesRetrieverConfig trc = (TimeseriesRetrieverConfig)wizard.getProperty(
                     TimeSeriesExportWizardAction.PROP_TS_RETRIEVER_CFG);

@@ -213,7 +213,7 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
     public String getFormatDescription() {
         return "No metadata\n"
                     + "Every line contains one date and a corresponding float value\n"
-                    + "Format: [YYYY-mm-dd\\w*#.###]\n"
+                    + "Format: [YYYY-MM-dd   #.###] (three space separator)\n"
                     + "Expected unit of the float value: mm (millimeters since last timestamp)";
     }
 
@@ -222,7 +222,7 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
         return "<html><ul>"
                     + "<li>No metadata</li>"
                     + "<li>Every line contains one date and a corresponding float value</li>"
-                    + "<li>Format: <i>YYYY-MM-DD\\w*#.###</i></li>"
+                    + "<li>Format: <i>YYYY-MM-dd   #.###</i> (three space separator)</li>"
                     + "<li>Expected unit: <i>mm (millimeters since last timestamp)</i></li>"
                     + "</ul></html>";
     }

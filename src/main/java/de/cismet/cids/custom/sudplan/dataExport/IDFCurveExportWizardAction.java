@@ -78,7 +78,6 @@ public final class IDFCurveExportWizardAction extends AbstractCidsBeanAction {
 
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
-                    new TimeSeriesExportWizardPanelChooseConverter(),
                     new TimeSeriesExportWizardPanelFile(),
                     new TimeSeriesExportWizardPanelConvert()
                 };
