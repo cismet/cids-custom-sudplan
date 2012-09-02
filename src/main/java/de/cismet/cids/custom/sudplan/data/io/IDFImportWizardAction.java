@@ -11,9 +11,15 @@ import Sirius.navigator.ui.ComponentRegistry;
 
 import org.apache.log4j.Logger;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 
@@ -22,12 +28,19 @@ import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
+import java.io.StringWriter;
+
 import java.text.MessageFormat;
+
+import java.util.logging.Level;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
 
+import de.cismet.cids.custom.sudplan.IDFCurve;
 import de.cismet.cids.custom.sudplan.SMSUtils;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.CidsClientToolbarItem;
 
@@ -42,10 +55,6 @@ import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 public final class IDFImportWizardAction extends AbstractCidsBeanAction implements CidsClientToolbarItem {
 
     //~ Static fields/initializers ---------------------------------------------
-
-    public static final String PROP_INPUT_FILE = "__prop_input_file__"; // NOI18N
-    public static final String PROP_TIMESERIES = "__prop_idf__";        // NOI18N
-    public static final String PROP_BEAN = "__prop_bean__";             // NOI18N
 
     private static final transient Logger LOG = Logger.getLogger(IDFImportWizardAction.class);
 
@@ -80,6 +89,7 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
             panels = new WizardDescriptor.Panel[] {
                     new WizardPanelChooseFile(),
                     new IDFImportWizardPanelChooseConverter(),
+                    new WizardPanelConversion(),
                     new WizardPanelMetadata(SMSUtils.TABLENAME_IDFCURVE)
                 };
 
@@ -118,9 +128,9 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // TODO: unquote and implement wizard
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
-        wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N wizard.setTitle("IDF import");
+        wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
+        wizard.setTitle("IDF Import");
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -128,8 +138,29 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
         dialog.setVisible(true);
         dialog.toFront();
 
-        // if TS import has been canceled, cancel all running threads
-        if (wizard.getValue() != WizardDescriptor.FINISH_OPTION) {
+        if (wizard.getValue() == WizardDescriptor.FINISH_OPTION) {
+            try {
+                final IDFCurve idfCurve = (IDFCurve)wizard.getProperty(WizardPanelConversion.PROP_CONVERTED);
+                final CidsBean idfBean = (CidsBean)wizard.getProperty(WizardPanelMetadata.PROP_BEAN);
+                final Object converter = wizard.getProperty(AbstractConverterChoosePanelCtrl.PROP_CONVERTER);
+                final ObjectMapper mapper = new ObjectMapper();
+                final StringWriter writer = new StringWriter();
+
+                mapper.writeValue(writer, idfCurve);
+
+                idfBean.setProperty("uri", writer.toString());                    // NOI18N
+                idfBean.setProperty("converter", converter.getClass().getName()); // NOI18N
+                idfBean.persist();
+
+                // TODO: reload catalogue
+            } catch (final Exception ex) {
+                final String message = "could not persist idf bean"; // NOI18N
+                LOG.error(message, ex);
+
+                final ErrorInfo info = new ErrorInfo("Persist error", message, null, "ERROR", ex, Level.SEVERE, null);
+                JXErrorPane.showDialog(ComponentRegistry.getRegistry().getMainWindow(), info);
+            }
+        } else {
             for (final WizardDescriptor.Panel panel : this.panels) {
                 if (panel instanceof Cancellable) {
                     ((Cancellable)panel).cancel();

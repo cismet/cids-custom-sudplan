@@ -36,7 +36,7 @@ public class WizardPanelConversion extends AbstractWizardPanelCtrl implements Ca
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String PROP_CONVERTED = "__prop_timeseries__"; // NOI18N
+    public static final String PROP_CONVERTED = "__prop_converted__"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 

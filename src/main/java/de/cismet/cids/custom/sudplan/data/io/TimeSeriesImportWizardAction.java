@@ -129,7 +129,9 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
         dialog.toFront();
 
         // if TS import has been canceled, cancel all running threads
-        if (wizard.getValue() != WizardDescriptor.FINISH_OPTION) {
+        if (wizard.getValue() == WizardDescriptor.FINISH_OPTION) {
+            // TODO: reload catalogue
+        } else {
             for (final WizardDescriptor.Panel panel : this.panels) {
                 if (panel instanceof Cancellable) {
                     ((Cancellable)panel).cancel();
