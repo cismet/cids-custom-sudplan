@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.dataExport;
+package de.cismet.cids.custom.sudplan.data.io;
 
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;

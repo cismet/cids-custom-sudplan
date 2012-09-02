@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.dataImport;
+package de.cismet.cids.custom.sudplan.data.io;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
@@ -80,7 +80,7 @@ public abstract class AbstractWizardPanelCtrl implements WizardDescriptor.Panel 
     /**
      * DOCUMENT ME!
      */
-    protected void fireChangeEvent() {
+    public void fireChangeEvent() {
         changeSupport.fireChange();
     }
 }

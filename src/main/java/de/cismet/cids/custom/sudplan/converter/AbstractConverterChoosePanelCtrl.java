@@ -10,7 +10,7 @@ package de.cismet.cids.custom.sudplan.converter;
 import org.openide.WizardDescriptor;
 import org.openide.util.NbBundle;
 
-import de.cismet.cids.custom.sudplan.dataImport.AbstractWizardPanelCtrl;
+import de.cismet.cids.custom.sudplan.data.io.AbstractWizardPanelCtrl;
 
 /**
  * DOCUMENT ME!

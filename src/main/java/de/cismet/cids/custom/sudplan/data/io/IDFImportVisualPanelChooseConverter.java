@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.dataImport;
+package de.cismet.cids.custom.sudplan.data.io;
 
 import java.util.ArrayList;
 import java.util.List;

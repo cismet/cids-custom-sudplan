@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.dataImport;
+package de.cismet.cids.custom.sudplan.data.io;
 
 import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.exception.ConnectionException;
@@ -41,6 +41,7 @@ import de.cismet.cids.custom.sudplan.TimeSeriesTrashBin;
 import de.cismet.cids.custom.sudplan.TimeseriesTransmitter;
 import de.cismet.cids.custom.sudplan.converter.AbstractConverterChoosePanelCtrl;
 import de.cismet.cids.custom.sudplan.converter.TimeSeriesAggregator;
+import de.cismet.cids.custom.sudplan.converter.WizardPanelConversion;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -99,15 +100,14 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
 
                     @Override
                     public void run() {
-                        final CidsBean tsBean = (CidsBean)wizard.getProperty(TimeSeriesImportWizardAction.PROP_BEAN);
+                        final CidsBean tsBean = (CidsBean)wizard.getProperty(WizardPanelMetadata.PROP_BEAN);
 
                         try {
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("start persisting processing..."); // NOI18N
                             }
 
-                            final TimeSeries ts = (TimeSeries)wizard.getProperty(
-                                    TimeSeriesImportWizardAction.PROP_TIMESERIES);
+                            final TimeSeries ts = (TimeSeries)wizard.getProperty(WizardPanelConversion.PROP_CONVERTED);
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("start aggregation of TimeSeries " + ts);                // NOI18N
                             }
@@ -201,7 +201,7 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
 
                                 comp.setStatusMessage(
                                     java.util.ResourceBundle.getBundle(
-                                        "de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
+                                        "de/cismet/cids/custom/sudplan/data/io/Bundle").getString(
                                         "TimeSeriesPersistenceCtrl.read(WizardDescriptor).comp.statusMessage.success"));
 
                                 hasFinished = true;
@@ -212,7 +212,7 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
                                             + url.getHost()); // NOI18N
                                 comp.setStatusMessage(
                                     java.util.ResourceBundle.getBundle(
-                                        "de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
+                                        "de/cismet/cids/custom/sudplan/data/io/Bundle").getString(
                                         "TimeSeriesPersistenceCtrl.read(WizardDescriptor).comp.statusMessage.transmissionError"));
 
                                 deleteTransmittedFiles();
@@ -221,7 +221,7 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
                             LOG.error("an error has occurred while persisting imported TimeSeries", e);
                             comp.setStatusMessage(
                                 java.util.ResourceBundle.getBundle(
-                                    "de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
+                                    "de/cismet/cids/custom/sudplan/data/io/Bundle").getString(
                                     "TimeSeriesPersistenceCtrl.read(WizardDescriptor).comp.statusMessage.error"));
 
                             deleteTransmittedFiles();

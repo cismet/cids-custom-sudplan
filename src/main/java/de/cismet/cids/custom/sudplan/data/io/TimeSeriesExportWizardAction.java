@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.dataExport;
+package de.cismet.cids.custom.sudplan.data.io;
 
 import Sirius.navigator.ui.ComponentRegistry;
 
@@ -28,8 +28,7 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
-import de.cismet.cids.custom.sudplan.dataImport.TimeSeriesConverterChoosePanelCtrl;
-import de.cismet.cids.custom.sudplan.dataImport.TimeSeriesImportFileChoosePanelCtrl;
+import de.cismet.cids.custom.sudplan.converter.WizardPanelChooseFile;
 
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 
@@ -59,7 +58,7 @@ public final class TimeSeriesExportWizardAction extends AbstractCidsBeanAction {
      * Creates a new RainfallDownscalingWizardAction object.
      */
     public TimeSeriesExportWizardAction() {
-        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/dataExport/ts_export.png", false)); // NOI18N
+        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/data/io/ts_export.png", false)); // NOI18N
 
         putValue(
             Action.SHORT_DESCRIPTION,

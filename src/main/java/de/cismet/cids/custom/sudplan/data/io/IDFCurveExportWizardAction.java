@@ -5,11 +5,9 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.dataImport;
+package de.cismet.cids.custom.sudplan.data.io;
 
 import Sirius.navigator.ui.ComponentRegistry;
-
-import org.apache.log4j.Logger;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
@@ -27,8 +25,6 @@ import java.text.MessageFormat;
 import javax.swing.Action;
 import javax.swing.JComponent;
 
-import de.cismet.cids.navigator.utils.CidsClientToolbarItem;
-
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 
 /**
@@ -36,16 +32,7 @@ import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
  *
  * @version  $Revision$, $Date$
  */
-@org.openide.util.lookup.ServiceProvider(service = CidsClientToolbarItem.class)
-public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction implements CidsClientToolbarItem {
-
-    //~ Static fields/initializers ---------------------------------------------
-
-    public static final String PROP_INPUT_FILE = "__prop_input_file__"; // NOI18N
-    public static final String PROP_TIMESERIES = "__prop_timeseries__"; // NOI18N
-    public static final String PROP_BEAN = "__prop_bean__";             // NOI18N
-
-    private static final transient Logger LOG = Logger.getLogger(TimeSeriesImportWizardAction.class);
+public final class IDFCurveExportWizardAction extends AbstractCidsBeanAction {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -56,12 +43,12 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
     /**
      * Creates a new RainfallDownscalingWizardAction object.
      */
-    public TimeSeriesImportWizardAction() {
-        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/dataImport/ts_import.png", false)); // NOI18N
+    public IDFCurveExportWizardAction() {
+        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/data/io/idf_export.png", false)); // NOI18N
 
         putValue(
             Action.SHORT_DESCRIPTION,
-            NbBundle.getMessage(TimeSeriesImportWizardAction.class, "TimeSeriesImportWizardAction.shortDescription")); // NOI18N
+            NbBundle.getMessage(IDFCurveExportWizardAction.class, "TimeSeriesExportWizardAction.shortDescription")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -75,13 +62,7 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
         assert EventQueue.isDispatchThread() : "can only be called from EDT"; // NOI18N
 
         if (panels == null) {
-            panels = new WizardDescriptor.Panel[] {
-                    new TimeSeriesImportFileChoosePanelCtrl(),
-                    new TimeSeriesConverterChoosePanelCtrl(),
-                    new TimeSeriesConversionCtrl(),
-                    new TimeSeriesMetaDataPanelCtrl(),
-                    new TimeSeriesPersistenceCtrl()
-                };
+            panels = new WizardDescriptor.Panel[] {};
 
             final String[] steps = new String[panels.length];
             for (int i = 0; i < panels.length; i++) {
@@ -111,6 +92,11 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
         return panels;
     }
 
+    @Override
+    public boolean isEnabled() {
+        return super.isEnabled();
+    }
+
     /**
      * DOCUMENT ME!
      *
@@ -121,8 +107,8 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
         wizard.setTitleFormat(new MessageFormat("{0}"));                                    // NOI18N
         wizard.setTitle(NbBundle.getMessage(
-                TimeSeriesImportWizardAction.class,
-                "TimeSeriesImportWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
+                IDFCurveExportWizardAction.class,
+                "TimeSeriesExportWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -130,23 +116,13 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
         dialog.setVisible(true);
         dialog.toFront();
 
-        // if TS import has been canceled, cancel all running threads
-        if (wizard.getValue() != WizardDescriptor.FINISH_OPTION) {
+        if (wizard.getValue() == WizardDescriptor.FINISH_OPTION) {
+        } else {
             for (final WizardDescriptor.Panel panel : this.panels) {
                 if (panel instanceof Cancellable) {
                     ((Cancellable)panel).cancel();
                 }
             }
         }
-    }
-
-    @Override
-    public String getSorterString() {
-        return "ZZZZZZZZ"; // NOI18N
-    }
-
-    @Override
-    public boolean isVisible() {
-        return true;
     }
 }

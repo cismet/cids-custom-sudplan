@@ -5,12 +5,9 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- * TimeSeriesImportFileChoosePanel.java
- *
- * Created on 07.12.2011, 14:37:26
- */
-package de.cismet.cids.custom.sudplan.dataImport;
+package de.cismet.cids.custom.sudplan.converter;
+
+import org.openide.util.NbBundle;
 
 import javax.swing.JFileChooser;
 import javax.swing.event.DocumentEvent;
@@ -22,11 +19,11 @@ import javax.swing.event.DocumentListener;
  * @author   bfriedrich
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesImportFileChoosePanel extends javax.swing.JPanel {
+public class VisualPanelChooseFile extends javax.swing.JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient TimeSeriesImportFileChoosePanelCtrl ctrl;
+    private final transient WizardPanelChooseFile ctrl;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFileChooser;
@@ -38,22 +35,23 @@ public class TimeSeriesImportFileChoosePanel extends javax.swing.JPanel {
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates new form TimeSeriesImportFileChoosePanel.
+     * Creates a new VisualPanelChooseFile object.
      *
      * @param   ctrl  DOCUMENT ME!
      *
      * @throws  NullPointerException  DOCUMENT ME!
      */
-    public TimeSeriesImportFileChoosePanel(final TimeSeriesImportFileChoosePanelCtrl ctrl) {
+    public VisualPanelChooseFile(final WizardPanelChooseFile ctrl) {
         if (ctrl == null) {
-            throw new NullPointerException("Given TimeSeriesImportFileChoosePanelCtrl instance "
-                        + "must not be null"); // NOI18N
+            throw new NullPointerException("Given WizardPanelChooseFile instance " // NOI18N
+                        + "must not be null");          // NOI18N
         }
 
         initComponents();
 
-        this.setName(java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                "TimeSeriesImportFileChoosePanel.this.name"));
+        this.setName(NbBundle.getMessage(
+                VisualPanelChooseFile.class,
+                "VisualPanelChooseFile.this.name")); // NOI18N
 
         this.ctrl = ctrl;
 
@@ -113,16 +111,16 @@ public class TimeSeriesImportFileChoosePanel extends javax.swing.JPanel {
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
         lblFileChooser.setText(org.openide.util.NbBundle.getMessage(
-                TimeSeriesImportFileChoosePanel.class,
-                "TimeSeriesImportFileChoosePanel.lblFileChooser.text")); // NOI18N
+                VisualPanelChooseFile.class,
+                "VisualPanelChooseFile.lblFileChooser.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.ipadx = 5;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         jPanel1.add(lblFileChooser, gridBagConstraints);
 
         txtFileChooser.setText(org.openide.util.NbBundle.getMessage(
-                TimeSeriesImportFileChoosePanel.class,
-                "TimeSeriesImportFileChoosePanel.txtFileChooser.text")); // NOI18N
+                VisualPanelChooseFile.class,
+                "VisualPanelChooseFile.txtFileChooser.text")); // NOI18N
         txtFileChooser.setMinimumSize(new java.awt.Dimension(100, 27));
         txtFileChooser.setPreferredSize(new java.awt.Dimension(200, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -130,8 +128,8 @@ public class TimeSeriesImportFileChoosePanel extends javax.swing.JPanel {
         jPanel1.add(txtFileChooser, gridBagConstraints);
 
         btnFileChooser.setText(org.openide.util.NbBundle.getMessage(
-                TimeSeriesImportFileChoosePanel.class,
-                "TimeSeriesImportFileChoosePanel.btnFileChooser.text")); // NOI18N
+                VisualPanelChooseFile.class,
+                "VisualPanelChooseFile.btnFileChooser.text")); // NOI18N
         btnFileChooser.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override

@@ -207,7 +207,7 @@ public class IDFCurvePanel extends javax.swing.JPanel {
                 "IDFCurvePanel.createExportButton().btnExportData.tooltip"));
         btnExportData.setFocusPainted(false);
         btnExportData.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/sudplan/dataExport/idf_export.png")));
+                getClass().getResource("/de/cismet/cids/custom/sudplan/data/io/idf_export.png")));
         return btnExportData;
     }
 }

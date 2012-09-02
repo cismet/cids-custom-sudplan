@@ -5,20 +5,30 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.dataImport;
+package de.cismet.cids.custom.sudplan.data.io;
+
+import Sirius.navigator.ui.ComponentRegistry;
 
 import org.apache.log4j.Logger;
 
+import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
+import org.openide.util.Cancellable;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
+import java.text.MessageFormat;
+
 import javax.swing.Action;
 import javax.swing.JComponent;
+
+import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.converter.WizardPanelChooseFile;
 
 import de.cismet.cids.navigator.utils.CidsClientToolbarItem;
 
@@ -35,7 +45,6 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String PROP_INPUT_FILE = "__prop_input_file__"; // NOI18N
-    public static final String PROP_CONVERTER = "__prop_converter__";   // NOI18N
     public static final String PROP_TIMESERIES = "__prop_idf__";        // NOI18N
     public static final String PROP_BEAN = "__prop_bean__";             // NOI18N
 
@@ -51,7 +60,7 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
      * Creates a new RainfallDownscalingWizardAction object.
      */
     public IDFImportWizardAction() {
-        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/dataImport/idf_import.png", false)); // NOI18N
+        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/data/io/idf_import.png", false)); // NOI18N
 
         putValue(
             Action.SHORT_DESCRIPTION,
@@ -69,7 +78,11 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
         assert EventQueue.isDispatchThread() : "can only be called from EDT"; // NOI18N
 
         if (panels == null) {
-            panels = new WizardDescriptor.Panel[] {};
+            panels = new WizardDescriptor.Panel[] {
+                    new WizardPanelChooseFile(),
+                    new IDFImportWizardPanelChooseConverter(),
+                    new WizardPanelMetadata(SMSUtils.TABLENAME_IDFCURVE)
+                };
 
             final String[] steps = new String[panels.length];
             for (int i = 0; i < panels.length; i++) {
@@ -106,16 +119,24 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        // TODO: unquote and implement wizard final WizardDescriptor wizard = new WizardDescriptor(getPanels());
-        // wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N wizard.setTitle("IDF import");
-        //
-        // final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard); dialog.pack();
-        // dialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow()); dialog.setVisible(true);
-        // dialog.toFront();
-        //
-        // if TS import has been canceled, cancel all running threads if (wizard.getValue() !=
-        // WizardDescriptor.FINISH_OPTION) { for (final WizardDescriptor.Panel panel : this.panels) { if (panel
-        // instanceof Cancellable) { ((Cancellable)panel).cancel(); } } }
+        // TODO: unquote and implement wizard
+        final WizardDescriptor wizard = new WizardDescriptor(getPanels());
+        wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N wizard.setTitle("IDF import");
+
+        final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
+        dialog.pack();
+        dialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
+        dialog.setVisible(true);
+        dialog.toFront();
+
+        // if TS import has been canceled, cancel all running threads
+        if (wizard.getValue() != WizardDescriptor.FINISH_OPTION) {
+            for (final WizardDescriptor.Panel panel : this.panels) {
+                if (panel instanceof Cancellable) {
+                    ((Cancellable)panel).cancel();
+                }
+            }
+        }
     }
 
     @Override

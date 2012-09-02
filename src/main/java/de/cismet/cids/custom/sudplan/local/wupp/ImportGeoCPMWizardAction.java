@@ -61,7 +61,7 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
      * Creates a new ImportGeoCPMWizardAction object.
      */
     public ImportGeoCPMWizardAction() {
-        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/dataImport/geocpm_import.png", false)); // NOI18N
+        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/local/wupp/geocpm_import.png", false)); // NOI18N
 
         putValue(
             Action.SHORT_DESCRIPTION,

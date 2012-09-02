@@ -5,9 +5,10 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.dataImport;
+package de.cismet.cids.custom.sudplan.converter;
 
 import org.openide.WizardDescriptor;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
@@ -15,17 +16,23 @@ import java.io.File;
 
 import java.text.MessageFormat;
 
+import de.cismet.cids.custom.sudplan.data.io.AbstractWizardPanelCtrl;
+
 /**
  * DOCUMENT ME!
  *
  * @author   bfriedrich
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesImportFileChoosePanelCtrl extends AbstractWizardPanelCtrl {
+public class WizardPanelChooseFile extends AbstractWizardPanelCtrl {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final String PROP_INPUT_FILE = "__prop_input_file__"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient TimeSeriesImportFileChoosePanel comp;
+    private final transient VisualPanelChooseFile comp;
 
     private transient File importFile;
 
@@ -34,8 +41,8 @@ public class TimeSeriesImportFileChoosePanelCtrl extends AbstractWizardPanelCtrl
     /**
      * Creates a new TimeSeriesImportFileChoosePanelCtrl object.
      */
-    public TimeSeriesImportFileChoosePanelCtrl() {
-        this.comp = new TimeSeriesImportFileChoosePanel(this);
+    public WizardPanelChooseFile() {
+        this.comp = new VisualPanelChooseFile(this);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -52,7 +59,7 @@ public class TimeSeriesImportFileChoosePanelCtrl extends AbstractWizardPanelCtrl
 
     @Override
     protected void store(final WizardDescriptor wizard) {
-        wizard.putProperty(TimeSeriesImportWizardAction.PROP_INPUT_FILE, this.importFile);
+        wizard.putProperty(PROP_INPUT_FILE, this.importFile);
     }
 
     @Override
@@ -61,8 +68,9 @@ public class TimeSeriesImportFileChoosePanelCtrl extends AbstractWizardPanelCtrl
         if ((fileName == null) || fileName.trim().isEmpty()) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                    "TimeSeriesImportFileChoosePanelCtrl.isValid().wizard.putProperty(String,String).noFile"));
+                NbBundle.getMessage(
+                    WizardPanelChooseFile.class,
+                    "WizardPanelChooseFile.isValid().wizard.putProperty(String,String).noFile"));
             return false;
         }
 
@@ -71,8 +79,9 @@ public class TimeSeriesImportFileChoosePanelCtrl extends AbstractWizardPanelCtrl
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 MessageFormat.format(
-                    java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                        "TimeSeriesImportFileChoosePanelCtrl.isValid().wizard.putProperty(String,String).noExistence"),
+                    NbBundle.getMessage(
+                        WizardPanelChooseFile.class,
+                        "WizardPanelChooseFile.isValid().wizard.putProperty(String,String).noExistence"),
                     fileName));
             return false;
         }
@@ -81,8 +90,9 @@ public class TimeSeriesImportFileChoosePanelCtrl extends AbstractWizardPanelCtrl
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
                 MessageFormat.format(
-                    java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                        "TimeSeriesImportFileChoosePanelCtrl.isValid().wizard.putProperty(String,String).noRead"),
+                    NbBundle.getMessage(
+                        WizardPanelChooseFile.class,
+                        "WizardPanelChooseFile.isValid().wizard.putProperty(String,String).noRead"),
                     fileName));
             return false;
         }

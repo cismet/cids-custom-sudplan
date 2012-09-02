@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.dataImport;
+package de.cismet.cids.custom.sudplan.data.io;
 
 import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.exception.ConnectionException;
@@ -16,7 +16,6 @@ import Sirius.server.search.CidsServerSearch;
 import org.apache.log4j.Logger;
 
 import org.openide.WizardDescriptor;
-import org.openide.util.Exceptions;
 
 import java.awt.Component;
 
@@ -24,7 +23,6 @@ import java.text.MessageFormat;
 
 import java.util.Collection;
 
-import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.server.search.TimeSeriesSearch;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -37,24 +35,31 @@ import de.cismet.cids.navigator.utils.ClassCacheMultiple;
  * @author   bfriedrich
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
+public class WizardPanelMetadata extends AbstractWizardPanelCtrl {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final Logger LOG = Logger.getLogger(TimeSeriesMetaDataPanelCtrl.class);
+    private static final Logger LOG = Logger.getLogger(WizardPanelMetadata.class);
+
+    public static final String PROP_BEAN = "__prop_bean__"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient TimeSeriesMetaDataPanel comp;
+    private final transient VisualPanelMetadata comp;
+    private final transient String tableName;
+
     private transient CidsBean cidsBean;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new TimeSeriesImportFileChoosePanelCtrl object.
+     *
+     * @param  tableName  DOCUMENT ME!
      */
-    public TimeSeriesMetaDataPanelCtrl() {
-        this.comp = new TimeSeriesMetaDataPanel(this);
+    public WizardPanelMetadata(final String tableName) {
+        this.comp = new VisualPanelMetadata(this);
+        this.tableName = tableName;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -71,15 +76,15 @@ public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
         }
 
         final String domain = SessionManager.getSession().getUser().getDomain();
-        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SMSUtils.TABLENAME_TIMESERIES);
+        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, tableName);
 
         if (mc == null) {
             LOG.error(
                 "Was not able to retrieve MetaClass for domain '"
-                        + domain                        // NOI18N //NOI18N
+                        + domain // NOI18N //NOI18N
                         + "' and table '"
-                        + SMSUtils.TABLENAME_TIMESERIES // NOI18N //NOI18N
-                        + "'");                         // NOI18N
+                        + tableName
+                        + "'");  // NOI18N
         } else {
             this.cidsBean = mc.getEmptyInstance().getBean();
             this.comp.init();
@@ -104,7 +109,7 @@ public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
             LOG.debug("Entering store(WizardDescriptor)"); // NOI18N
         }
 
-        wizard.putProperty(TimeSeriesImportWizardAction.PROP_BEAN, this.cidsBean);
+        wizard.putProperty(PROP_BEAN, this.cidsBean);
 
         wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, null);
         if (LOG.isDebugEnabled()) {
@@ -127,8 +132,8 @@ public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
         if ((nameObj == null) || (station == null)) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                    "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).nameAndStation")); // NOI18N
+                java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/data/io/Bundle").getString(
+                    "WizardPanelMetadata.isValid().wizard.putProperty(String,String).nameAndStation")); // NOI18N
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Leaving isValid() with retun value false");                                          // NOI18N
             }
@@ -139,8 +144,8 @@ public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
         if (name.trim().isEmpty()) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                    "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).name")); // NOI18N
+                java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/data/io/Bundle").getString(
+                    "WizardPanelMetadata.isValid().wizard.putProperty(String,String).name")); // NOI18N
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Leaving isValid() with retun value false");                                // NOI18N
             }
@@ -161,8 +166,8 @@ public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
                 wizard.putProperty(
                     WizardDescriptor.PROP_WARNING_MESSAGE,
                     MessageFormat.format(
-                        java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                            "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).duplicateName"),
+                        java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/data/io/Bundle").getString(
+                            "WizardPanelMetadata.isValid().wizard.putProperty(String,String).duplicateName"),
                         name));
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Leaving isValid() with retun value false"); // NOI18N
@@ -175,8 +180,8 @@ public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
 
             wizard.putProperty(
                 WizardDescriptor.PROP_ERROR_MESSAGE,
-                java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                    "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).ConnectionException"));
+                java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/data/io/Bundle").getString(
+                    "WizardPanelMetadata.isValid().wizard.putProperty(String,String).ConnectionException"));
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Leaving isValid() with retun value false"); // NOI18N
@@ -188,8 +193,8 @@ public class TimeSeriesMetaDataPanelCtrl extends AbstractWizardPanelCtrl {
         wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, null);
         wizard.putProperty(
             WizardDescriptor.PROP_INFO_MESSAGE,
-            java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                "TimeSeriesMetaDataPanelCtrl.isValid().wizard.putProperty(String,String).persisting")); // NOI18N
+            java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/data/io/Bundle").getString(
+                "WizardPanelMetadata.isValid().wizard.putProperty(String,String).persisting")); // NOI18N
         if (LOG.isDebugEnabled()) {
             LOG.debug("Leaving isValid() with retun value true");                                       // NOI18N
         }

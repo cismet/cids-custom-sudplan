@@ -5,11 +5,9 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.dataExport;
+package de.cismet.cids.custom.sudplan.data.io;
 
 import Sirius.navigator.ui.ComponentRegistry;
-
-import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
 import org.apache.log4j.Logger;
 
@@ -29,7 +27,11 @@ import java.text.MessageFormat;
 import javax.swing.Action;
 import javax.swing.JComponent;
 
-import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
+import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.converter.WizardPanelChooseFile;
+import de.cismet.cids.custom.sudplan.converter.WizardPanelConversion;
+
+import de.cismet.cids.navigator.utils.CidsClientToolbarItem;
 
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 
@@ -38,32 +40,28 @@ import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
  *
  * @version  $Revision$, $Date$
  */
-public final class IDFCurveExportWizardAction extends AbstractCidsBeanAction {
+@org.openide.util.lookup.ServiceProvider(service = CidsClientToolbarItem.class)
+public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction implements CidsClientToolbarItem {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String PROP_TIMESERIES = "__prop_timeseries__";             // NOI18N
-    public static final String PROP_TS_RETRIEVER_CFG = "__prop_ts_retriever_cfg__"; // NOI18N
+    private static final transient Logger LOG = Logger.getLogger(TimeSeriesImportWizardAction.class);
 
     //~ Instance fields --------------------------------------------------------
 
     private transient WizardDescriptor.Panel[] panels;
-
-    private transient TimeSeries timeSeries;
-
-    private transient TimeseriesRetrieverConfig timeseriesRetrieverConfig;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RainfallDownscalingWizardAction object.
      */
-    public IDFCurveExportWizardAction() {
-        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/dataExport/ts_export.png", false)); // NOI18N
+    public TimeSeriesImportWizardAction() {
+        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/data/io/ts_import.png", false)); // NOI18N
 
         putValue(
             Action.SHORT_DESCRIPTION,
-            NbBundle.getMessage(IDFCurveExportWizardAction.class, "TimeSeriesExportWizardAction.shortDescription")); // NOI18N
+            NbBundle.getMessage(TimeSeriesImportWizardAction.class, "TimeSeriesImportWizardAction.shortDescription")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -78,8 +76,11 @@ public final class IDFCurveExportWizardAction extends AbstractCidsBeanAction {
 
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
-                    new TimeSeriesExportWizardPanelFile(),
-                    new TimeSeriesExportWizardPanelConvert()
+                    new WizardPanelChooseFile(),
+                    new TimeSeriesConverterChoosePanelCtrl(),
+                    new WizardPanelConversion(),
+                    new WizardPanelMetadata(SMSUtils.TABLENAME_TIMESERIES),
+                    new TimeSeriesPersistenceCtrl()
                 };
 
             final String[] steps = new String[panels.length];
@@ -113,47 +114,6 @@ public final class IDFCurveExportWizardAction extends AbstractCidsBeanAction {
     /**
      * DOCUMENT ME!
      *
-     * @param  timeSeries  DOCUMENT ME!
-     */
-    public void setTimeSeries(final TimeSeries timeSeries) {
-        this.timeSeries = timeSeries;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public TimeSeries getTimeSeries() {
-        return timeSeries;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public TimeseriesRetrieverConfig getTimeseriesRetrieverConfig() {
-        return timeseriesRetrieverConfig;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  timeseriesRetrieverConfig  DOCUMENT ME!
-     */
-    public void setTimeseriesRetrieverConfig(final TimeseriesRetrieverConfig timeseriesRetrieverConfig) {
-        this.timeseriesRetrieverConfig = timeseriesRetrieverConfig;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return super.isEnabled() && ((timeSeries != null) || (timeseriesRetrieverConfig != null));
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @param  e  DOCUMENT ME!
      */
     @Override
@@ -161,13 +121,8 @@ public final class IDFCurveExportWizardAction extends AbstractCidsBeanAction {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
         wizard.setTitleFormat(new MessageFormat("{0}"));                                    // NOI18N
         wizard.setTitle(NbBundle.getMessage(
-                IDFCurveExportWizardAction.class,
-                "TimeSeriesExportWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
-
-        assert (timeSeries != null) || (timeseriesRetrieverConfig != null) : "time series must not be null"; // NOI18N
-
-        wizard.putProperty(PROP_TIMESERIES, timeSeries);
-        wizard.putProperty(PROP_TS_RETRIEVER_CFG, timeseriesRetrieverConfig);
+                TimeSeriesImportWizardAction.class,
+                "TimeSeriesImportWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -183,5 +138,15 @@ public final class IDFCurveExportWizardAction extends AbstractCidsBeanAction {
                 }
             }
         }
+    }
+
+    @Override
+    public String getSorterString() {
+        return "ZZZZZZZZ"; // NOI18N
+    }
+
+    @Override
+    public boolean isVisible() {
+        return true;
     }
 }

@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.dataImport;
+package de.cismet.cids.custom.sudplan.converter;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
@@ -22,8 +22,8 @@ import java.io.FileInputStream;
 import java.util.concurrent.Future;
 
 import de.cismet.cids.custom.sudplan.StatusPanel;
-import de.cismet.cids.custom.sudplan.converter.AbstractConverterChoosePanelCtrl;
-import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
+import de.cismet.cids.custom.sudplan.data.io.AbstractWizardPanelCtrl;
+import de.cismet.cids.custom.sudplan.data.io.TimeSeriesImportWizardAction;
 
 import de.cismet.tools.CismetThreadPool;
 
@@ -33,23 +33,27 @@ import de.cismet.tools.CismetThreadPool;
  * @author   bfriedrich
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesConversionCtrl extends AbstractWizardPanelCtrl implements Cancellable {
+public class WizardPanelConversion extends AbstractWizardPanelCtrl implements Cancellable {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final String PROP_CONVERTED = "__prop_timeseries__"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
     private final transient StatusPanel comp;
-    private transient volatile TimeSeries ts;
+    private transient volatile Object converted;
     private transient Future<?> runningTask;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates a new TimeSeriesImportFileChoosePanelCtrl object.
+     * Creates a new WizardPanelConversion object.
      */
-    public TimeSeriesConversionCtrl() {
+    public WizardPanelConversion() {
         this.comp = new StatusPanel(NbBundle.getMessage(
-                    TimeSeriesConversionCtrl.class,
-                    "TimeSeriesConversionPanelCtrl.comp.name")); // NOI18N
+                    WizardPanelConversion.class,
+                    "WizardPanelConversion.comp.name")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -62,43 +66,43 @@ public class TimeSeriesConversionCtrl extends AbstractWizardPanelCtrl implements
     @Override
     protected void read(final WizardDescriptor wizard) {
         this.comp.setBusy(true);
-        this.comp.setStatusMessage(java.util.ResourceBundle.getBundle(
-                "de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                "TimeSeriesConversionPanelCtrl.comp.setConversionStatus().start"));
+        this.comp.setStatusMessage(NbBundle.getMessage(
+                WizardPanelConversion.class,
+                "WizardPanelConversion.comp.setConversionStatus().start"));
 
         this.runningTask = CismetThreadPool.submit(new Runnable() {
 
                     @Override
                     public void run() {
-                        final File importFile = (File)wizard.getProperty(TimeSeriesImportWizardAction.PROP_INPUT_FILE);
-                        final TimeseriesConverter converter = (TimeseriesConverter)wizard.getProperty(
+                        final File importFile = (File)wizard.getProperty(WizardPanelChooseFile.PROP_INPUT_FILE);
+                        final Converter converter = (Converter)wizard.getProperty(
                                 AbstractConverterChoosePanelCtrl.PROP_CONVERTER);
 
                         try {
                             final FileInputStream fin = new FileInputStream(importFile);
                             final BufferedInputStream bin = new BufferedInputStream(fin);
 
-                            ts = converter.convertForward(bin);
+                            converted = converter.convertForward(bin);
                             comp.setStatusMessage(
-                                java.util.ResourceBundle.getBundle(
-                                    "de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                                    "TimeSeriesConversionPanelCtrl.comp.setConversionStatus().finish"));
+                                NbBundle.getMessage(
+                                    WizardPanelConversion.class,
+                                    "WizardPanelConversion.comp.setConversionStatus().finish"));
                         } catch (final Exception e) {
                             // TODO distinguish different exception types for better error messages
 
                             wizard.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, e);
                             comp.setStatusMessage(
-                                java.util.ResourceBundle.getBundle(
-                                    "de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                                    "TimeSeriesConversionPanelCtrl.comp.setConversionStatus().error"));
+                                NbBundle.getMessage(
+                                    WizardPanelConversion.class,
+                                    "WizardPanelConversion.comp.setConversionStatus().error"));
                             wizard.setValid(false);
                         }
 
-                        TimeSeriesConversionCtrl.this.fireChangeEvent();
+                        WizardPanelConversion.this.fireChangeEvent();
                         comp.setBusy(false);
 
-                        synchronized (TimeSeriesConversionCtrl.this) {
-                            TimeSeriesConversionCtrl.this.runningTask = null;
+                        synchronized (WizardPanelConversion.this) {
+                            WizardPanelConversion.this.runningTask = null;
                         }
                     }
                 });
@@ -106,13 +110,13 @@ public class TimeSeriesConversionCtrl extends AbstractWizardPanelCtrl implements
 
     @Override
     protected void store(final WizardDescriptor wizard) {
-        wizard.putProperty(TimeSeriesImportWizardAction.PROP_TIMESERIES, this.ts);
+        wizard.putProperty(PROP_CONVERTED, this.converted);
         wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, null);
     }
 
     @Override
     public boolean isValid() {
-        return this.ts != null;
+        return this.converted != null;
     }
 
     @Override
