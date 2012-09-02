@@ -24,6 +24,7 @@ import java.util.Properties;
 
 import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
 import de.cismet.cids.custom.sudplan.DataHandlerCache;
+import de.cismet.cids.custom.sudplan.SudplanOptions;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 /**
@@ -75,7 +76,7 @@ public final class AirqualityDownscalingWizardPanelScenario extends AbstractWiza
                         final DataHandler dataHandler = DataHandlerCache.getInstance()
                                     .getSPSDataHandler(
                                         AirqualityDownscalingModelManager.AQ_SPS_LOOKUP,
-                                        AirqualityDownscalingModelManager.AQ_SPS_URL);
+                                        SudplanOptions.getInstance().getAqSpsUrl());
                         final Datapoint datapoint = dataHandler.createDatapoint(filter, null, DataHandler.Access.READ);
                         final InputDescriptor inputDescriptor = (InputDescriptor)datapoint.getProperties()
                                     .get("jaxb_desc:climate_scenario"); // NOI18N
