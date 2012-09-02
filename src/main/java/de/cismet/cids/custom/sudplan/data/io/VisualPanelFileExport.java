@@ -88,7 +88,9 @@ public class VisualPanelFileExport extends javax.swing.JPanel {
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        lblExportFile.setText(NbBundle.getMessage(VisualPanelFileExport.class, "VisualPanelFileExport.lblExportFile.text")); // NOI18N
+        lblExportFile.setText(NbBundle.getMessage(
+                VisualPanelFileExport.class,
+                "VisualPanelFileExport.lblExportFile.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -96,7 +98,9 @@ public class VisualPanelFileExport extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
         add(lblExportFile, gridBagConstraints);
 
-        txtExportFile.setText(NbBundle.getMessage(VisualPanelFileExport.class, "VisualPanelFileExport.txtExportFile.text")); // NOI18N
+        txtExportFile.setText(NbBundle.getMessage(
+                VisualPanelFileExport.class,
+                "VisualPanelFileExport.txtExportFile.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -105,13 +109,15 @@ public class VisualPanelFileExport extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(txtExportFile, gridBagConstraints);
 
-        btnChooseFile.setText(NbBundle.getMessage(VisualPanelFileExport.class, "VisualPanelFileExport.btnChooseFile.text")); // NOI18N
+        btnChooseFile.setText(NbBundle.getMessage(
+                VisualPanelFileExport.class,
+                "VisualPanelFileExport.btnChooseFile.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(btnChooseFile, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
+    }                                                         // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
 

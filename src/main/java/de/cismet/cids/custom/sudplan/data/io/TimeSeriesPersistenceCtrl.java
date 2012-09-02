@@ -105,7 +105,8 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
                                 LOG.debug("start persisting processing..."); // NOI18N
                             }
 
-                            final TimeSeries ts = (TimeSeries)wizard.getProperty(WizardPanelConversionForward.PROP_CONVERTED);
+                            final TimeSeries ts = (TimeSeries)wizard.getProperty(
+                                    WizardPanelConversionForward.PROP_CONVERTED);
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("start aggregation of TimeSeries " + ts);                // NOI18N
                             }

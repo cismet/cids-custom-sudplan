@@ -8,7 +8,6 @@
 package de.cismet.cids.custom.sudplan.data.io;
 
 import Sirius.navigator.ui.ComponentRegistry;
-import de.cismet.cids.custom.sudplan.IDFCurve;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
@@ -26,6 +25,8 @@ import java.text.MessageFormat;
 import javax.swing.Action;
 import javax.swing.JComponent;
 
+import de.cismet.cids.custom.sudplan.IDFCurve;
+
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 
 /**
@@ -35,10 +36,16 @@ import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
  */
 public final class IDFExportWizardAction extends AbstractCidsBeanAction {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final String PROP_IDF_CURVE = "__prop_idf_curve__"; // NOI18N
+
     //~ Instance fields --------------------------------------------------------
 
     private transient WizardDescriptor.Panel[] panels;
-    
+
+    private transient IDFCurve idfCurve;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -64,8 +71,10 @@ public final class IDFExportWizardAction extends AbstractCidsBeanAction {
 
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
-                new IDFImportWizardPanelChooseConverter()
-            };
+                    new WizardPanelFileExport(),
+                    new IDFImportWizardPanelChooseConverter(),
+                    new IDFExportWizardPanelConvert()
+                };
 
             final String[] steps = new String[panels.length];
             for (int i = 0; i < panels.length; i++) {
@@ -99,17 +108,25 @@ public final class IDFExportWizardAction extends AbstractCidsBeanAction {
     public boolean isEnabled() {
         return true;
     }
-    
-    public IDFCurve getIdfCurve(){
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public IDFCurve getIdfCurve() {
         return idfCurve;
     }
-    
-    public void setIdfCurve(final IDFCurve curve){
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  curve  DOCUMENT ME!
+     */
+    public void setIdfCurve(final IDFCurve curve) {
         this.idfCurve = curve;
     }
-    
-    private transient IDFCurve idfCurve;
-    
+
     /**
      * DOCUMENT ME!
      *
@@ -118,12 +135,14 @@ public final class IDFExportWizardAction extends AbstractCidsBeanAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
-        wizard.setTitleFormat(new MessageFormat("{0}"));                                    // NOI18N
+        wizard.setTitleFormat(new MessageFormat("{0}"));                             // NOI18N
         wizard.setTitle(NbBundle.getMessage(
                 IDFExportWizardAction.class,
                 "IDFExportWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
-        
+
         assert idfCurve != null : "idfCurve is null"; // NOI18N
+
+        wizard.putProperty(PROP_IDF_CURVE, idfCurve);
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();

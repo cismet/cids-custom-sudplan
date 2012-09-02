@@ -41,6 +41,7 @@ public final class ActionProviderFactory {
     /**
      * DOCUMENT ME!
      *
+     * @param   <T>    DOCUMENT ME!
      * @param   clazz  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
