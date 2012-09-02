@@ -7,16 +7,17 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.dataImport;
 
+import org.apache.log4j.Logger;
+
 import org.openide.util.WeakListeners;
 
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import de.cismet.cids.custom.sudplan.converter.*;
-import java.awt.Component;
-import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -25,6 +26,10 @@ import org.apache.log4j.Logger;
  * @version  $Revision$, $Date$
  */
 public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(TimeSeriesConverterChoosePanel.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -80,7 +85,7 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
         this.cboConverterChooser.addItem(new LinzTimeseriesConverter());
         this.cboConverterChooser.addItem(new HydrologyTimeseriesConverter());
         this.cboConverterChooser.addItem(TimeSeriesSerializer.getInstance());
-        
+
         this.cboConverterChooser.setSelectedIndex(0);
     }
 
@@ -171,7 +176,7 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
         jPanel1.add(lblFormatExample, gridBagConstraints);
 
         pnlFormatExample.setBackground(new java.awt.Color(255, 255, 255));
-        pnlFormatExample.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true));
+        pnlFormatExample.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         pnlFormatExample.setLayout(new java.awt.GridBagLayout());
 
         lblFormatExampleValue.setText(org.openide.util.NbBundle.getMessage(
@@ -227,7 +232,7 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
                     final Object formatExample = hint.getFormatExample();
                     if (formatExample instanceof String) {
                         lblFormatExampleValue.setText((String)formatExample);
-                    } else if (formatExample instanceof Component){
+                    } else if (formatExample instanceof Component) {
                         pnlFormatExample.removeAll();
                         pnlFormatExample.add((Component)formatExample);
                     } else {
@@ -236,28 +241,29 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
                     }
                 } else {
                     lblFormatDescriptionValue.setText("<no description>");
-                    
+
                     resetExample();
                 }
             }
         }
-        
-        private void resetExample(){
+
+        /**
+         * DOCUMENT ME!
+         */
+        private void resetExample() {
             lblFormatExampleValue.setText("<no example>");
-                    pnlFormatExample.removeAll();
+            pnlFormatExample.removeAll();
 
-                    final GridBagConstraints constraints = new GridBagConstraints();
-                    constraints.gridx = 0;
-                    constraints.gridy = 0;
-                    constraints.fill = GridBagConstraints.HORIZONTAL;
-                    constraints.anchor = GridBagConstraints.NORTHWEST;
-                    constraints.weightx = 1.0;
-                    constraints.weighty = 1.0;
-                    constraints.insets = new Insets(10, 10, 10, 10);
+            final GridBagConstraints constraints = new GridBagConstraints();
+            constraints.gridx = 0;
+            constraints.gridy = 0;
+            constraints.fill = GridBagConstraints.HORIZONTAL;
+            constraints.anchor = GridBagConstraints.NORTHWEST;
+            constraints.weightx = 1.0;
+            constraints.weighty = 1.0;
+            constraints.insets = new Insets(10, 10, 10, 10);
 
-                    pnlFormatExample.add(lblFormatExampleValue, constraints);
+            pnlFormatExample.add(lblFormatExampleValue, constraints);
         }
     }
-    
-    private static final transient Logger LOG = Logger.getLogger(TimeSeriesConverterChoosePanel.class);
 }
