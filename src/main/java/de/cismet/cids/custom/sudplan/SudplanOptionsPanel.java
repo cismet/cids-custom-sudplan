@@ -50,7 +50,7 @@ public class SudplanOptionsPanel extends AbstractOptionsPanel {
      * Creates new form SudplanOptionsPanel.
      */
     public SudplanOptionsPanel() {
-        super("Sudplan Options", SudplanOptionsCategory.class);
+        super("Common Services", SudplanOptionsCategory.class);
 
         initComponents();
     }
@@ -111,34 +111,45 @@ public class SudplanOptionsPanel extends AbstractOptionsPanel {
      * @param  parent  DOCUMENT ME!
      */
     private void doConfigure(final Element parent) {
-        if(parent == null){
+        if (parent == null) {
             // no option section present, simply leave
             return;
         }
-        
+
         final Element options = parent.getChild("sudplanOptions"); // NOI18N
-        if(options == null){
+        if (options == null) {
             // no options present, simply leave
             return;
         }
-        
-        final Element cs = options.getChild("commonServices");     // NOI18N
+
+        final SudplanOptions opts = SudplanOptions.getInstance();
+        final Element cs = options.getChild("commonServices"); // NOI18N
 
         final Element aq = cs.getChild("airquality");   // NOI18N
         final Element aqSosUrl = aq.getChild("sosUrl"); // NOI18N
         final Element aqSpsUrl = aq.getChild("spsUrl"); // NOI18N
-        txtAQSosUrl.setText(aqSosUrl.getText());
-        txtAQSpsUrl.setText(aqSpsUrl.getText());
+        final String aqSos = aqSosUrl.getText();
+        final String aqSps = aqSpsUrl.getText();
+        txtAQSosUrl.setText(aqSos);
+        txtAQSpsUrl.setText(aqSps);
+        opts.setAqSosUrl(aqSos);
+        opts.setAqSpsUrl(aqSps);
 
         final Element hd = cs.getChild("hydrology");  // NOI18N
         final Element hypeIp = hd.getChild("hypeIp"); // NOI18N
-        txtHDHypeIp.setText(hypeIp.getText());
+        final String hype = hypeIp.getText();
+        txtHDHypeIp.setText(hype);
+        opts.setHdHypeIp(hype);
 
         final Element rf = cs.getChild("rainfall");     // NOI18N
         final Element rfSosUrl = rf.getChild("sosUrl"); // NOI18N
         final Element rfSpsUrl = rf.getChild("spsUrl"); // NOI18N
-        txtRFSosUrl.setText(rfSosUrl.getText());
-        txtRFSpsUrl.setText(rfSpsUrl.getText());
+        final String rfSos = rfSosUrl.getText();
+        final String rfSps = rfSpsUrl.getText();
+        txtRFSosUrl.setText(rfSos);
+        txtRFSpsUrl.setText(rfSps);
+        opts.setRfSosUrl(rfSos);
+        opts.setRfSpsUrl(rfSps);
     }
 
     /**
