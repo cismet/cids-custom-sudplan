@@ -14,6 +14,8 @@ import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -39,7 +41,7 @@ import de.cismet.cids.custom.sudplan.Variable;
  * @version  $Revision$, $Date$
  */
 // FIXME: proper implementation, this serves only testing purposes
-public final class HydrologyTimeseriesConverter implements TimeseriesConverter {
+public final class HydrologyTimeseriesConverter implements TimeseriesConverter, FormatHint {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -90,7 +92,7 @@ public final class HydrologyTimeseriesConverter implements TimeseriesConverter {
             ts.setTSProperty(PropertyNames.DESCRIPTION, "imported_hydrology_timeseries_" + System.currentTimeMillis());
 
             while (line != null) {
-                final String[] split = line.split("   ");              // NOI18N
+                final String[] split = line.split("\\w+");             // NOI18N
                 if (split.length == 1) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("token without value: " + split[0]); // NOI18N
@@ -184,6 +186,54 @@ public final class HydrologyTimeseriesConverter implements TimeseriesConverter {
 
     @Override
     public String toString() {
-        return "Hydrology Converter";
+        return getFormatDisplayName();
+    }
+
+    @Override
+    public String getFormatName() {
+        return "hydro-timeseries-converter"; // NOI18N
+    }
+
+    @Override
+    public String getFormatDisplayName() {
+        return NbBundle.getMessage(
+                HydrologyTimeseriesConverter.class,
+                "HydrologyTimeseriesConverter.this.name"); // NOI18N
+    }
+
+    @Override
+    public String getFormatHtmlName() {
+        return null;
+    }
+
+    @Override
+    public String getFormatDescription() {
+        return "- One line of metadata (header)\n"
+                    + "- Every line contains one date and a corresponding float value\n"
+                    + "- Format: [yyyy.MM.dd\\w*#.###] (white space separator)\n"
+                    + "- Expected unit of the float value: m³/s (cubic meters per hour)\n"
+                    + "- No unit conversion";
+    }
+
+    @Override
+    public String getFormatHtmlDescription() {
+        return "<html>"
+                    + "- One line of metadata (header)<br/>"
+                    + "- Every line contains one date and a corresponding float value<br/>"
+                    + "- Format: <i>yyyy.MM.dd\\w*#.###</i> (white space separator)<br/>"
+                    + "- Expected unit: <i>m³/s (cubic meters per hour)</i><br/>"
+                    + "- No unit conversion"
+                    + "</html>";
+    }
+
+    @Override
+    public Object getFormatExample() {
+        return "<html>"
+                    + "Date     545223<br/>"
+                    + "1985-01-01    6<br/>"
+                    + "1985-01-02    5<br/>"
+                    + "1985-01-03    10.2<br/>"
+                    + "1985-01-04    -9999<br/>"
+                    + "</html>";
     }
 }

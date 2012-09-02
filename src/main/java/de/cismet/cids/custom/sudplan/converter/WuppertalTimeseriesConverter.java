@@ -244,7 +244,7 @@ public final class WuppertalTimeseriesConverter implements TimeseriesConverter, 
 
     @Override
     public String getFormatName() {
-        return "linz-timeseries-converter"; // NOI18N
+        return "wupp-timeseries-converter"; // NOI18N
     }
 
     @Override
@@ -261,20 +261,22 @@ public final class WuppertalTimeseriesConverter implements TimeseriesConverter, 
 
     @Override
     public String getFormatDescription() {
-        return "Metadata keys: [Station, Stationsnummer, Unterbezeichnung, Parameter, Einheit, Geber]\n"
-                    + "Every line contains one date and a corresponding float value\n"
-                    + "Format: [dd.MM.YYYY HH:mm:ss;\\w*#,##] (';' separator)\n"
-                    + "Expected unit of the float value: mm (millimeters per hour)";
+        return "- Metadata keys: [Station, Stationsnummer, Unterbezeichnung, Parameter, Einheit, Geber]\n"
+                    + "- Every line contains one date and a corresponding float value\n"
+                    + "- Format: [dd.MM.yyyy HH:mm:ss;\\w*#,##] (';' separator)\n"
+                    + "- Expected unit of the float value: mm/h (millimeters per hour)\n"
+                    + "- No unit conversion";
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return "<html><ul>"
-                    + "<li>Metadata keys; [Station, Stationsnummer, Unterbezeichnung, Parameter, Einheit, Geber]</li>"
-                    + "<li>Every line contains one date and a corresponding float value</li>"
-                    + "<li>Format: <i>dd.MM.YYYY HH:mm:ss;\\w*#,##</i> (';' separator)</li>"
-                    + "<li>Expected unit: <i>mm/h (millimeters per hour)</i></li>"
-                    + "</ul></html>";
+        return "<html>"
+                    + "- Metadata keys; [Station, Stationsnummer, Unterbezeichnung, Parameter, Einheit, Geber]<br/>"
+                    + "- Every line contains one date and a corresponding float value<br/>"
+                    + "- Format: <i>dd.MM.yyyy HH:mm:ss;\\w*#,##</i> (';' separator)<br/>"
+                    + "- Expected unit: <i>mm/h (millimeters per hour)</i><br/>"
+                    + "- No unit conversion"
+                    + "</html>";
     }
 
     @Override

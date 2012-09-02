@@ -132,7 +132,9 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel1.add(cboConverterChooser, gridBagConstraints);
 
-        lblConverter.setText(org.openide.util.NbBundle.getMessage(TimeSeriesConverterChoosePanel.class, "TimeSeriesConverterChoosePanel.lblConverter.text")); // NOI18N
+        lblConverter.setText(org.openide.util.NbBundle.getMessage(
+                TimeSeriesConverterChoosePanel.class,
+                "TimeSeriesConverterChoosePanel.lblConverter.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -140,7 +142,9 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel1.add(lblConverter, gridBagConstraints);
 
-        lblFormatDescription.setText(org.openide.util.NbBundle.getMessage(TimeSeriesConverterChoosePanel.class, "TimeSeriesConverterChoosePanel.lblFormatDescription.text")); // NOI18N
+        lblFormatDescription.setText(org.openide.util.NbBundle.getMessage(
+                TimeSeriesConverterChoosePanel.class,
+                "TimeSeriesConverterChoosePanel.lblFormatDescription.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -148,9 +152,11 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel1.add(lblFormatDescription, gridBagConstraints);
 
-        lblFormatDescriptionValue.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
+        lblFormatDescriptionValue.setFont(new java.awt.Font("Tahoma", 0, 10));     // NOI18N
         lblFormatDescriptionValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        lblFormatDescriptionValue.setText(org.openide.util.NbBundle.getMessage(TimeSeriesConverterChoosePanel.class, "TimeSeriesConverterChoosePanel.lblFormatDescriptionValue.text")); // NOI18N
+        lblFormatDescriptionValue.setText(org.openide.util.NbBundle.getMessage(
+                TimeSeriesConverterChoosePanel.class,
+                "TimeSeriesConverterChoosePanel.lblFormatDescriptionValue.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -160,7 +166,9 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 5);
         jPanel1.add(lblFormatDescriptionValue, gridBagConstraints);
 
-        lblFormatExample.setText(org.openide.util.NbBundle.getMessage(TimeSeriesConverterChoosePanel.class, "TimeSeriesConverterChoosePanel.lblFormatExample.text")); // NOI18N
+        lblFormatExample.setText(org.openide.util.NbBundle.getMessage(
+                TimeSeriesConverterChoosePanel.class,
+                "TimeSeriesConverterChoosePanel.lblFormatExample.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -172,8 +180,10 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
         pnlFormatExample.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         pnlFormatExample.setLayout(new java.awt.GridBagLayout());
 
-        lblFormatExampleValue.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
-        lblFormatExampleValue.setText(org.openide.util.NbBundle.getMessage(TimeSeriesConverterChoosePanel.class, "TimeSeriesConverterChoosePanel.lblFormatExampleValue.text")); // NOI18N
+        lblFormatExampleValue.setFont(new java.awt.Font("Tahoma", 0, 10));     // NOI18N
+        lblFormatExampleValue.setText(org.openide.util.NbBundle.getMessage(
+                TimeSeriesConverterChoosePanel.class,
+                "TimeSeriesConverterChoosePanel.lblFormatExampleValue.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -195,7 +205,7 @@ public class TimeSeriesConverterChoosePanel extends javax.swing.JPanel {
         jPanel1.add(pnlFormatExample, gridBagConstraints);
 
         add(jPanel1, java.awt.BorderLayout.CENTER);
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
 

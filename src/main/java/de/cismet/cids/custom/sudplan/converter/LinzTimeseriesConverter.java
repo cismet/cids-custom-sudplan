@@ -93,7 +93,7 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
             ts.setTSProperty(PropertyNames.DESCRIPTION, "imported_linz_timeseries_" + System.currentTimeMillis());
 
             while (line != null) {
-                final String[] split = line.split("   ");              // NOI18N
+                final String[] split = line.split("\\w+");             // NOI18N
                 if (split.length == 1) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("token without value: " + split[0]); // NOI18N
@@ -187,9 +187,7 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
 
     @Override
     public String toString() {
-        return NbBundle.getMessage(
-                LinzTimeseriesConverter.class,
-                "LinzTimeseriesConverter.this.name"); // NOI18N
+        return getFormatDisplayName();
     }
 
     @Override
@@ -211,20 +209,22 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
 
     @Override
     public String getFormatDescription() {
-        return "No metadata\n"
-                    + "Every line contains one date and a corresponding float value\n"
-                    + "Format: [YYYY-MM-dd   #.###] (three space separator)\n"
-                    + "Expected unit of the float value: mm (millimeters since last timestamp)";
+        return "- No metadata\n"
+                    + "- Every line contains one date and a corresponding float value\n"
+                    + "- Format: [yyyy-MM-dd\\w+#.###] (white space separator)\n"
+                    + "- Expected unit: mm (millimeters since last timestamp)\n"
+                    + "- No unit conversion";
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return "<html><ul>"
-                    + "<li>No metadata</li>"
-                    + "<li>Every line contains one date and a corresponding float value</li>"
-                    + "<li>Format: <i>YYYY-MM-dd   #.###</i> (three space separator)</li>"
-                    + "<li>Expected unit: <i>mm (millimeters since last timestamp)</i></li>"
-                    + "</ul></html>";
+        return "<html>"
+                    + "- No metadata<br/>"
+                    + "- Every line contains one date and a corresponding float value<br/>"
+                    + "- Format: <i>yyyy-MM-dd\\w+#.###</i> (white space separator)<br/>"
+                    + "- Expected unit: <i>mm (millimeters since last timestamp)</i><br/>"
+                    + "- No unit conversion"
+                    + "</html>";
     }
 
     @Override
