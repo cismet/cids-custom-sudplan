@@ -22,7 +22,7 @@ import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class TimeSeriesExportWizardPanelFile extends AbstractWizardPanel {
+public final class WizardPanelFileExport extends AbstractWizardPanel {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -36,7 +36,7 @@ public final class TimeSeriesExportWizardPanelFile extends AbstractWizardPanel {
 
     @Override
     protected Component createComponent() {
-        return new TimeSeriesExportVisualPanelFile(this);
+        return new VisualPanelFileExport(this);
     }
 
     /**
@@ -63,7 +63,7 @@ public final class TimeSeriesExportWizardPanelFile extends AbstractWizardPanel {
     protected void read(final WizardDescriptor wizard) {
         exportFile = (File)wizard.getProperty(PROP_EXPORT_FILE);
 
-        ((TimeSeriesExportVisualPanelFile)getComponent()).init();
+        ((VisualPanelFileExport)getComponent()).init();
     }
 
     @Override
@@ -77,8 +77,8 @@ public final class TimeSeriesExportWizardPanelFile extends AbstractWizardPanel {
             wizard.putProperty(
                 WizardDescriptor.PROP_INFO_MESSAGE,
                 NbBundle.getMessage(
-                    TimeSeriesExportWizardPanelFile.class,
-                    "TimeSeriesExportWizardPanelFile.isValid().chooseFile")); // NOI18N
+                    WizardPanelFileExport.class,
+                    "WizardPanelFileExport.isValid().chooseFile")); // NOI18N
 
             return false;
         } else {
@@ -96,8 +96,8 @@ public final class TimeSeriesExportWizardPanelFile extends AbstractWizardPanel {
                         wizard.putProperty(
                             WizardDescriptor.PROP_WARNING_MESSAGE,
                             NbBundle.getMessage(
-                                TimeSeriesExportWizardPanelFile.class,
-                                "TimeSeriesExportWizardPanelFile.isValid().notWritable")); // NOI18N
+                                WizardPanelFileExport.class,
+                                "WizardPanelFileExport.isValid().notWritable")); // NOI18N
 
                         return false;
                     }
@@ -105,8 +105,8 @@ public final class TimeSeriesExportWizardPanelFile extends AbstractWizardPanel {
                     wizard.putProperty(
                         WizardDescriptor.PROP_INFO_MESSAGE,
                         NbBundle.getMessage(
-                            TimeSeriesExportWizardPanelFile.class,
-                            "TimeSeriesExportWizardPanelFile.isValid().chooseFile")); // NOI18N
+                            WizardPanelFileExport.class,
+                            "WizardPanelFileExport.isValid().chooseFile")); // NOI18N
 
                     return false;
                 }

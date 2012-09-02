@@ -25,11 +25,11 @@ import javax.swing.event.DocumentListener;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesExportVisualPanelFile extends javax.swing.JPanel {
+public class VisualPanelFileExport extends javax.swing.JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient TimeSeriesExportWizardPanelFile model;
+    private final transient WizardPanelFileExport model;
 
     private final transient DocumentListener docL;
     private final transient ActionListener chooseL;
@@ -47,7 +47,7 @@ public class TimeSeriesExportVisualPanelFile extends javax.swing.JPanel {
      *
      * @param  model  DOCUMENT ME!
      */
-    public TimeSeriesExportVisualPanelFile(final TimeSeriesExportWizardPanelFile model) {
+    public VisualPanelFileExport(final WizardPanelFileExport model) {
         this.model = model;
         this.docL = new DocL();
         this.chooseL = new ChooseL();
@@ -55,8 +55,8 @@ public class TimeSeriesExportVisualPanelFile extends javax.swing.JPanel {
         initComponents();
 
         setName(NbBundle.getMessage(
-                TimeSeriesExportVisualPanelFile.class,
-                "TimeSeriesExportVisualPanelFile.this.name")); // NOI18N
+                VisualPanelFileExport.class,
+                "VisualPanelFileExport.this.name")); // NOI18N
 
         txtExportFile.getDocument().addDocumentListener(WeakListeners.document(docL, txtExportFile.getDocument()));
         btnChooseFile.addActionListener(WeakListeners.create(ActionListener.class, chooseL, btnChooseFile));
@@ -88,9 +88,7 @@ public class TimeSeriesExportVisualPanelFile extends javax.swing.JPanel {
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        lblExportFile.setText(NbBundle.getMessage(
-                TimeSeriesExportVisualPanelFile.class,
-                "TimeSeriesExportVisualPanelFile.lblExportFile.text")); // NOI18N
+        lblExportFile.setText(NbBundle.getMessage(VisualPanelFileExport.class, "VisualPanelFileExport.lblExportFile.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -98,9 +96,7 @@ public class TimeSeriesExportVisualPanelFile extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
         add(lblExportFile, gridBagConstraints);
 
-        txtExportFile.setText(NbBundle.getMessage(
-                TimeSeriesExportVisualPanelFile.class,
-                "TimeSeriesExportVisualPanelFile.txtExportFile.text")); // NOI18N
+        txtExportFile.setText(NbBundle.getMessage(VisualPanelFileExport.class, "VisualPanelFileExport.txtExportFile.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -109,15 +105,13 @@ public class TimeSeriesExportVisualPanelFile extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(txtExportFile, gridBagConstraints);
 
-        btnChooseFile.setText(NbBundle.getMessage(
-                TimeSeriesExportVisualPanelFile.class,
-                "TimeSeriesExportVisualPanelFile.btnChooseFile.text")); // NOI18N
+        btnChooseFile.setText(NbBundle.getMessage(VisualPanelFileExport.class, "VisualPanelFileExport.btnChooseFile.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(btnChooseFile, gridBagConstraints);
-    }                                                                   // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -133,7 +127,7 @@ public class TimeSeriesExportVisualPanelFile extends javax.swing.JPanel {
         @Override
         public void actionPerformed(final ActionEvent e) {
             final JFileChooser chooser = new JFileChooser(model.getExportFile());
-            final int answer = chooser.showSaveDialog(TimeSeriesExportVisualPanelFile.this);
+            final int answer = chooser.showSaveDialog(VisualPanelFileExport.this);
 
             if (JFileChooser.APPROVE_OPTION == answer) {
                 txtExportFile.setText(chooser.getSelectedFile().getAbsolutePath());

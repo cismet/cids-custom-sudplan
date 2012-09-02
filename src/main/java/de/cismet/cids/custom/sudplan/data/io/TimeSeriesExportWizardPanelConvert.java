@@ -70,7 +70,7 @@ public final class TimeSeriesExportWizardPanelConvert extends AbstractWizardPane
     @Override
     protected void read(final WizardDescriptor wizard) {
         synchronized (lock) {
-            final File exportFile = (File)wizard.getProperty(TimeSeriesExportWizardPanelFile.PROP_EXPORT_FILE);
+            final File exportFile = (File)wizard.getProperty(WizardPanelFileExport.PROP_EXPORT_FILE);
             final TimeseriesConverter timeseriesConverter = (TimeseriesConverter)wizard.getProperty(
                     AbstractConverterChoosePanelCtrl.PROP_CONVERTER);
             final TimeSeries timeSeries = (TimeSeries)wizard.getProperty(TimeSeriesExportWizardAction.PROP_TIMESERIES);

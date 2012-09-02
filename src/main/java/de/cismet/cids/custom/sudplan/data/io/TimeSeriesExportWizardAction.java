@@ -77,7 +77,7 @@ public final class TimeSeriesExportWizardAction extends AbstractCidsBeanAction {
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
                     new TimeSeriesConverterChoosePanelCtrl(),
-                    new TimeSeriesExportWizardPanelFile(),
+                    new WizardPanelFileExport(),
                     new TimeSeriesExportWizardPanelConvert()
                 };
 
