@@ -33,6 +33,7 @@ import java.util.Properties;
 import javax.swing.event.ChangeListener;
 
 import de.cismet.cids.custom.sudplan.DataHandlerCache;
+import de.cismet.cids.custom.sudplan.SudplanOptions;
 
 /**
  * DOCUMENT ME!
@@ -106,7 +107,7 @@ public final class RainfallDownscalingWizardPanelTargetDate implements WizardDes
             final DataHandler dh = DataHandlerCache.getInstance()
                         .getSPSDataHandler(
                             RainfallDownscalingModelManager.RF_SPS_LOOKUP,
-                            RainfallDownscalingModelManager.RF_SPS_URL);
+                            SudplanOptions.getInstance().getRfSpsUrl());
             final Properties filter = new Properties();
             filter.put(TimeSeries.PROCEDURE, procedure);
             final Datapoint dp = dh.createDatapoint(filter, null, DataHandler.Access.READ);

@@ -27,15 +27,8 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.Set;
 
-import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
-import de.cismet.cids.custom.sudplan.DataHandlerCache;
-import de.cismet.cids.custom.sudplan.IDFCurve;
-import de.cismet.cids.custom.sudplan.Manager;
-import de.cismet.cids.custom.sudplan.ManagerType;
-import de.cismet.cids.custom.sudplan.ProgressEvent;
-import de.cismet.cids.custom.sudplan.SMSUtils;
-import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
-import de.cismet.cids.custom.sudplan.TimeseriesTransmitter;
+import de.cismet.cids.custom.sudplan.*;
+import de.cismet.cids.custom.sudplan.ProgressEvent.State;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -213,7 +206,7 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                     try {
                         final DataHandler dh = DataHandlerCache.getInstance()
                                     .getSOSDataHandler(String.valueOf(System.currentTimeMillis()),
-                                        RainfallDownscalingModelManager.RF_SOS_URL);
+                                        SudplanOptions.getInstance().getRfSosUrl());
                         final Properties filter = new Properties();
                         filter.setProperty(TimeSeries.OFFERING, dsOrig);
 
@@ -266,7 +259,7 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
 
                         final DataHandler dh = DataHandlerCache.getInstance()
                                     .getSOSDataHandler(String.valueOf(System.currentTimeMillis()),
-                                        RainfallDownscalingModelManager.RF_SOS_URL);
+                                        SudplanOptions.getInstance().getRfSosUrl());
                         final Properties filter = new Properties();
                         filter.setProperty(TimeSeries.OFFERING, dsOrigResult);
 

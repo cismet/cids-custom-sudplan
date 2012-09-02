@@ -61,8 +61,6 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
     public static final String PARAM_CENTER_TIME = "center_time";                       // NOI18N
     public static final String RF_SOS_LOOKUP = "rainfall_sos_lookup";                   // NOI18N
     public static final String RF_SPS_LOOKUP = "rainfall_sps_lookup";                   // NOI18N
-    public static final String RF_SOS_URL = "http://sudplan.ait.ac.at:8084/";           // NOI18N
-    public static final String RF_SPS_URL = "http://sudplan.ait.ac.at:8085/";           // NOI18N
     public static final String RF_TS_DS_PROCEDURE = "Rain_Timeseries_Downscaling";      // NOI18N
     public static final String RF_IDF_DS_PROCEDURE = "IDF_Rain_Timeseries_Downscaling"; // NOI18N
     public static final int MAX_STEPS = 5;
@@ -184,7 +182,8 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
         final DataHandler spsHandler;
         try {
-            spsHandler = DataHandlerCache.getInstance().getSPSDataHandler(RF_SPS_LOOKUP, RF_SPS_URL);
+            spsHandler = DataHandlerCache.getInstance()
+                        .getSPSDataHandler(RF_SPS_LOOKUP, SudplanOptions.getInstance().getRfSpsUrl());
         } catch (final DataHandlerCacheException ex) {
             final String message = "cannot fetch datahandler"; // NOI18N
             LOG.error(message, ex);
@@ -312,7 +311,8 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
         final DataHandler inputDH;
         try {
-            inputDH = DataHandlerCache.getInstance().getSOSDataHandler(RF_SOS_LOOKUP, RF_SOS_URL);
+            inputDH = DataHandlerCache.getInstance()
+                        .getSOSDataHandler(RF_SOS_LOOKUP, SudplanOptions.getInstance().getRfSosUrl());
         } catch (final DataHandlerCacheException ex) {
             final String message = "cannot fetch datahandler"; // NOI18N
             LOG.error(message, ex);
@@ -496,7 +496,10 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
             NbBundle.getMessage(
                 RainfallDownscalingModelManager.class,
                 "RainfallDownscalingModelManager.prepareExecution().progress.save"));
-        final RainfallRunInfo runInfo = new RainfallRunInfo(runId, RF_SPS_LOOKUP, RF_SPS_URL);
+        final RainfallRunInfo runInfo = new RainfallRunInfo(
+                runId,
+                RF_SPS_LOOKUP,
+                SudplanOptions.getInstance().getRfSpsUrl());
         try {
             final ObjectMapper mapper = new ObjectMapper();
             final StringWriter writer = new StringWriter();
