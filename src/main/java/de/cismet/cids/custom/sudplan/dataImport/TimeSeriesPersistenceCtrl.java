@@ -39,6 +39,7 @@ import de.cismet.cids.custom.sudplan.StatusPanel;
 import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
 import de.cismet.cids.custom.sudplan.TimeSeriesTrashBin;
 import de.cismet.cids.custom.sudplan.TimeseriesTransmitter;
+import de.cismet.cids.custom.sudplan.converter.AbstractConverterChoosePanelCtrl;
 import de.cismet.cids.custom.sudplan.converter.TimeSeriesAggregator;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -185,7 +186,7 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
                                             + unknownResFileName);              // NOI18N
 
                                 final Object converter = wizard.getProperty(
-                                        TimeSeriesImportWizardAction.PROP_CONVERTER);
+                                        AbstractConverterChoosePanelCtrl.PROP_CONVERTER);
                                 tsBean.setProperty("converter", converter.getClass().getName()); // NOI18N
 
                                 if (LOG.isDebugEnabled()) {

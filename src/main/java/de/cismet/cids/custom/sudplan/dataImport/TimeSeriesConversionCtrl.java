@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.util.concurrent.Future;
 
 import de.cismet.cids.custom.sudplan.StatusPanel;
+import de.cismet.cids.custom.sudplan.converter.AbstractConverterChoosePanelCtrl;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 
 import de.cismet.tools.CismetThreadPool;
@@ -71,7 +72,7 @@ public class TimeSeriesConversionCtrl extends AbstractWizardPanelCtrl implements
                     public void run() {
                         final File importFile = (File)wizard.getProperty(TimeSeriesImportWizardAction.PROP_INPUT_FILE);
                         final TimeseriesConverter converter = (TimeseriesConverter)wizard.getProperty(
-                                TimeSeriesImportWizardAction.PROP_CONVERTER);
+                                AbstractConverterChoosePanelCtrl.PROP_CONVERTER);
 
                         try {
                             final FileInputStream fin = new FileInputStream(importFile);

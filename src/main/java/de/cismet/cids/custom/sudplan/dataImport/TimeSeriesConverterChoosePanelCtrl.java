@@ -9,7 +9,8 @@ package de.cismet.cids.custom.sudplan.dataImport;
 
 import org.openide.WizardDescriptor;
 
-import java.awt.Component;
+import de.cismet.cids.custom.sudplan.converter.AbstractConverterChoosePanel;
+import de.cismet.cids.custom.sudplan.converter.AbstractConverterChoosePanelCtrl;
 
 /**
  * DOCUMENT ME!
@@ -17,7 +18,7 @@ import java.awt.Component;
  * @author   bfriedrich
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesConverterChoosePanelCtrl extends AbstractWizardPanelCtrl {
+public class TimeSeriesConverterChoosePanelCtrl extends AbstractConverterChoosePanelCtrl {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -35,27 +36,7 @@ public class TimeSeriesConverterChoosePanelCtrl extends AbstractWizardPanelCtrl 
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public Component getComponent() {
+    public AbstractConverterChoosePanel getComponent() {
         return this.comp;
-    }
-
-    @Override
-    protected void read(final WizardDescriptor wizard) {
-        this.comp.init();
-        wizard.putProperty(
-            WizardDescriptor.PROP_INFO_MESSAGE,
-            java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/dataImport/Bundle").getString(
-                "TimeSeriesConverterChoosePanelCtrl.read(WizardDescriptor).wizard.putProperty(String,String)"));
-    }
-
-    @Override
-    protected void store(final WizardDescriptor wizard) {
-        wizard.putProperty(TimeSeriesImportWizardAction.PROP_CONVERTER, this.comp.getConverter());
-        wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, null);
-    }
-
-    @Override
-    public boolean isValid() {
-        return true;
     }
 }

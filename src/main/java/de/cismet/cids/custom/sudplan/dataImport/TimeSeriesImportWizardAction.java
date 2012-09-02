@@ -42,7 +42,6 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String PROP_INPUT_FILE = "__prop_input_file__"; // NOI18N
-    public static final String PROP_CONVERTER = "__prop_converter__";   // NOI18N
     public static final String PROP_TIMESERIES = "__prop_timeseries__"; // NOI18N
     public static final String PROP_BEAN = "__prop_bean__";             // NOI18N
 
