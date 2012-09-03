@@ -7,8 +7,9 @@
 ****************************************************/
 package de.cismet.cids.custom.objectactions.sudplan;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import de.cismet.cids.custom.sudplan.rainfall.RainfallDownscalingWizardAction;
 
@@ -27,6 +28,9 @@ public final class TimeseriesActionsProvider implements CidsBeanActionsProvider 
 
     @Override
     public Collection<CidsBeanAction> getActions() {
-        return Arrays.asList(ActionProviderFactory.getCidsBeanAction(RainfallDownscalingWizardAction.class));
+        final List<CidsBeanAction> ret = new ArrayList<CidsBeanAction>(1);
+        ret.add(ActionProviderFactory.getCidsBeanAction(RainfallDownscalingWizardAction.class));
+
+        return ret;
     }
 }

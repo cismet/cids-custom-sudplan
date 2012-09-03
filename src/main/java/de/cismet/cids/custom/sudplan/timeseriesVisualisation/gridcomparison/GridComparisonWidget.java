@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -22,9 +23,6 @@ import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import java.net.URL;
-
-import java.text.DecimalFormat;
 import java.text.MessageFormat;
 
 import java.util.LinkedList;
@@ -32,13 +30,11 @@ import java.util.List;
 import java.util.MissingResourceException;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.UIManager;
 
-import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.gridcomparison.LayerStyle.Entry;
 
 import de.cismet.cismap.commons.BoundingBox;
@@ -64,30 +60,6 @@ public class GridComparisonWidget extends javax.swing.JPanel {
 
     private static final transient Logger LOG = Logger.getLogger(GridComparisonWidget.class);
 
-    private static ImageIcon ICON_LAYER_INVISIBLE = null;
-    private static ImageIcon ICON_LAYER_VISIBLE = null;
-
-    static {
-        final URL iconLayerInvisibleUrl = GridComparisonWidget.class.getResource(
-                "GridComparisonWidget_SlidableWMSServiceLayerGroup_invisible.png");
-        final URL iconLayerVisibleUrl = GridComparisonWidget.class.getResource(
-                "GridComparisonWidget_SlidableWMSServiceLayerGroup_visible.png");
-
-        if (iconLayerInvisibleUrl == null) {
-            LOG.warn("The icon for invisible layers can't be loaded.");
-        }
-        if (iconLayerVisibleUrl == null) {
-            LOG.warn("The icon for visible layers can't be loaded.");
-        }
-
-        if (iconLayerInvisibleUrl != null) {
-            ICON_LAYER_INVISIBLE = new ImageIcon(iconLayerInvisibleUrl);
-        }
-        if (iconLayerVisibleUrl != null) {
-            ICON_LAYER_VISIBLE = new ImageIcon(iconLayerVisibleUrl);
-        }
-    }
-
     //~ Instance fields --------------------------------------------------------
 
     private final LayerStylesChangeListener layerStylesChangeListener;
@@ -108,13 +80,20 @@ public class GridComparisonWidget extends javax.swing.JPanel {
     private javax.swing.JComboBox cmbLayerStyle;
     private javax.swing.JComboBox cmbSecondOperand;
     private de.cismet.cids.custom.sudplan.timeseriesVisualisation.gridcomparison.DistributionComponent disDistributions;
-    private javax.swing.Box.Filler filler1;
-    private javax.swing.Box.Filler gluFiller;
+    private javax.swing.Box.Filler gluLayerStyle;
+    private javax.swing.Box.Filler gluMain;
+    private javax.swing.Box.Filler gluOperationHints;
     private javax.swing.JLabel lblFirstOperand;
+    private javax.swing.JLabel lblOperationHintMax;
+    private javax.swing.JLabel lblOperationHintMin;
     private javax.swing.JLabel lblSecondOperand;
     private de.cismet.cids.custom.sudplan.timeseriesVisualisation.gridcomparison.LayerStyleComponent lscLayerStyle;
+    private javax.swing.JPanel pnlLayerStyle;
+    private javax.swing.JPanel pnlLayerStyleAdditionalInformation;
+    private javax.swing.JPanel pnlOperationHints;
     private javax.swing.JSlider sldContrastResult;
     private javax.swing.JSlider sldTimestamp;
+    private javax.swing.Box.Filler strCmbLayerStyle;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -130,11 +109,7 @@ public class GridComparisonWidget extends javax.swing.JPanel {
 
         initComponents();
 
-        StaticSwingTools.enableSliderToolTips(
-            sldContrastResult,
-            new MessageFormat("Contrast: {0,number,#0.0}"),
-            .1D); // ,
-// new DecimalFormat("#0.0"));
+        StaticSwingTools.enableSliderToolTips(sldContrastResult, new MessageFormat("Contrast: {0,number,#0.0}"), .1D);
 
         cmbFirstOperand.setRenderer(new SlidableWMSServiceLayerGroupCellRenderer());
         cmbSecondOperand.setRenderer(new SlidableWMSServiceLayerGroupCellRenderer());
@@ -158,6 +133,8 @@ public class GridComparisonWidget extends javax.swing.JPanel {
         cmbComparisonMethod.setPrototypeDisplayValue(cmbComparisonMethodNoSelection);
         cmbFirstOperand.setPrototypeDisplayValue(nullValueForLayerCmbs);
         cmbSecondOperand.setPrototypeDisplayValue(nullValueForLayerCmbs);
+
+        lscLayerStyle.setVisible(false);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -171,23 +148,62 @@ public class GridComparisonWidget extends javax.swing.JPanel {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
+        disDistributions =
+            new de.cismet.cids.custom.sudplan.timeseriesVisualisation.gridcomparison.DistributionComponent();
+        pnlOperationHints = new javax.swing.JPanel();
+        lblOperationHintMin = new javax.swing.JLabel();
+        lblOperationHintMax = new javax.swing.JLabel();
+        gluOperationHints = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 0));
         cmbFirstOperand = new javax.swing.JComboBox();
         lblFirstOperand = new javax.swing.JLabel();
         lblSecondOperand = new javax.swing.JLabel();
         cmbSecondOperand = new javax.swing.JComboBox();
         sldTimestamp = new javax.swing.JSlider();
         cmbComparisonMethod = new javax.swing.JComboBox();
-        gluFiller = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+        gluMain = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(0, 32767));
         sldContrastResult = new javax.swing.JSlider();
-        lscLayerStyle = new de.cismet.cids.custom.sudplan.timeseriesVisualisation.gridcomparison.LayerStyleComponent();
         cmbLayerStyle = new javax.swing.JComboBox();
-        disDistributions =
-            new de.cismet.cids.custom.sudplan.timeseriesVisualisation.gridcomparison.DistributionComponent();
-        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 10),
-                new java.awt.Dimension(0, 10),
-                new java.awt.Dimension(32767, 10));
+        strCmbLayerStyle = new javax.swing.Box.Filler(new java.awt.Dimension(0, 20),
+                new java.awt.Dimension(0, 20),
+                new java.awt.Dimension(32767, 20));
+        pnlLayerStyle = new javax.swing.JPanel();
+        lscLayerStyle = new de.cismet.cids.custom.sudplan.timeseriesVisualisation.gridcomparison.LayerStyleComponent();
+        gluLayerStyle = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 32767));
+        pnlLayerStyleAdditionalInformation = new javax.swing.JPanel();
+
+        pnlOperationHints.setLayout(new java.awt.GridBagLayout());
+
+        lblOperationHintMin.setText(org.openide.util.NbBundle.getMessage(
+                GridComparisonWidget.class,
+                "GridComparisonWidget.lblOperationHintMin.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        pnlOperationHints.add(lblOperationHintMin, gridBagConstraints);
+
+        lblOperationHintMax.setText(org.openide.util.NbBundle.getMessage(
+                GridComparisonWidget.class,
+                "GridComparisonWidget.lblOperationHintMax.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_END;
+        pnlOperationHints.add(lblOperationHintMax, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.1;
+        pnlOperationHints.add(gluOperationHints, gridBagConstraints);
 
         setName(org.openide.util.NbBundle.getMessage(GridComparisonWidget.class, "GridComparisonWidget.name")); // NOI18N
         setLayout(new java.awt.GridBagLayout());
@@ -282,7 +298,7 @@ public class GridComparisonWidget extends javax.swing.JPanel {
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 0.1;
-        add(gluFiller, gridBagConstraints);
+        add(gluMain, gridBagConstraints);
 
         sldContrastResult.setMaximum(160);
         sldContrastResult.setMinimum(1);
@@ -302,13 +318,6 @@ public class GridComparisonWidget extends javax.swing.JPanel {
         gridBagConstraints.weightx = 0.3;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(sldContrastResult, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
-        add(lscLayerStyle, gridBagConstraints);
 
         cmbLayerStyle.setEnabled(false);
         cmbLayerStyle.setRenderer(new LayerStyleCellRenderer());
@@ -323,20 +332,47 @@ public class GridComparisonWidget extends javax.swing.JPanel {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         add(cmbLayerStyle, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
-        add(disDistributions, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        add(filler1, gridBagConstraints);
+        add(strCmbLayerStyle, gridBagConstraints);
+
+        pnlLayerStyle.setLayout(new java.awt.GridBagLayout());
+
+        lscLayerStyle.setMinimumSize(new java.awt.Dimension(0, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        pnlLayerStyle.add(lscLayerStyle, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 1.0;
+        pnlLayerStyle.add(gluLayerStyle, gridBagConstraints);
+
+        pnlLayerStyleAdditionalInformation.setLayout(new java.awt.BorderLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.1;
+        pnlLayerStyle.add(pnlLayerStyleAdditionalInformation, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(pnlLayerStyle, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
     /**
@@ -345,15 +381,21 @@ public class GridComparisonWidget extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void cmbComparisonMethodActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmbComparisonMethodActionPerformed
+        pnlLayerStyleAdditionalInformation.removeAll();
+
         final Object operationObj = cmbComparisonMethod.getSelectedItem();
         if (!(operationObj instanceof GridComparator.Operation)) {
             operation = null;
-            disDistributions.setVisible((firstOperand != null) && (secondOperand != null) && (layerStyle != null));
+            if ((firstOperand != null) && (secondOperand != null) && (layerStyle != null)) {
+                pnlLayerStyleAdditionalInformation.add(disDistributions, BorderLayout.CENTER);
+            }
+
             sldContrastResult.setValue(10);
             sldContrastResult.setEnabled(false);
+
+            lscLayerStyle.setLayerStyle(layerStyle);
         } else {
             operation = (GridComparator.Operation)operationObj;
-            disDistributions.setVisible(false);
             sldContrastResult.setEnabled(true);
         }
 
@@ -382,6 +424,39 @@ public class GridComparisonWidget extends javax.swing.JPanel {
 
                 lscLayerStyle.setLayerStyle(modifiedLayerStyle);
                 sldContrastResult.setEnabled(true);
+
+                lblOperationHintMin.setText(NbBundle.getMessage(
+                        GridComparisonWidget.class,
+                        "GridComparisonWidget.cmbComparisonMethodActionPerformed(ActionEvent).lblOperationHintMin.operation.subtraction",
+                        NbBundle.getMessage(
+                            GridComparisonWidget.class,
+                            "GridComparisonWidget.cmbComparisonMethodActionPerformed(ActionEvent).operation.subtraction.firstOperand"),
+                        NbBundle.getMessage(
+                            GridComparisonWidget.class,
+                            "GridComparisonWidget.cmbComparisonMethodActionPerformed(ActionEvent).operation.subtraction.secondOperand")));
+                lblOperationHintMax.setText(NbBundle.getMessage(
+                        GridComparisonWidget.class,
+                        "GridComparisonWidget.cmbComparisonMethodActionPerformed(ActionEvent).lblOperationHintMax.operation.subtraction",
+                        NbBundle.getMessage(
+                            GridComparisonWidget.class,
+                            "GridComparisonWidget.cmbComparisonMethodActionPerformed(ActionEvent).operation.subtraction.firstOperand"),
+                        NbBundle.getMessage(
+                            GridComparisonWidget.class,
+                            "GridComparisonWidget.cmbComparisonMethodActionPerformed(ActionEvent).operation.subtraction.secondOperand")));
+                lblOperationHintMin.setToolTipText(NbBundle.getMessage(
+                        GridComparisonWidget.class,
+                        "GridComparisonWidget.cmbComparisonMethodActionPerformed(ActionEvent).lblOperationHintMin.operation.subtraction",
+                        GridComparisonLayerProvider.generateMenuRepresentation(firstOperand),
+                        GridComparisonLayerProvider.generateMenuRepresentation(secondOperand)));
+                lblOperationHintMax.setToolTipText(NbBundle.getMessage(
+                        GridComparisonWidget.class,
+                        "GridComparisonWidget.cmbComparisonMethodActionPerformed(ActionEvent).lblOperationHintMax.operation.subtraction",
+                        GridComparisonLayerProvider.generateMenuRepresentation(firstOperand),
+                        GridComparisonLayerProvider.generateMenuRepresentation(secondOperand)));
+
+                pnlOperationHints.setVisible(true);
+
+                pnlLayerStyleAdditionalInformation.add(pnlOperationHints, BorderLayout.CENTER);
 
                 break;
             }
@@ -566,6 +641,13 @@ public class GridComparisonWidget extends javax.swing.JPanel {
      */
     private void refreshFeature() {
         if (feature != null) {
+            if ((firstOperand != null) && (firstOperand.getPNode() != null)) {
+                firstOperand.getPNode().setVisible(true);
+            }
+            if ((secondOperand != null) && (secondOperand.getPNode() != null)) {
+                secondOperand.getPNode().setVisible(true);
+            }
+
             CismapBroker.getInstance().getMappingComponent().getFeatureCollection().removeFeature(feature);
         }
 
@@ -580,18 +662,51 @@ public class GridComparisonWidget extends javax.swing.JPanel {
         if (Double.isNaN(contrast)) {
             result = gridComparator.compare(operation);
         } else {
-            result = gridComparator.compare(operation, 0D, contrast, 0D);
+            result = gridComparator.compare(operation, contrast);
+        }
+
+        final String nameOfFeature;
+        switch (operation) {
+            case SUBTRACTION: {
+                nameOfFeature = NbBundle.getMessage(
+                        GridComparisonWidget.class,
+                        "GridComparisonWidget.refreshFeature().operation.subtraction",
+                        GridComparisonLayerProvider.generateMenuRepresentation(firstOperand),
+                        GridComparisonLayerProvider.generateMenuRepresentation(secondOperand));
+
+                break;
+            }
+            case AVERAGE: {
+                nameOfFeature = NbBundle.getMessage(
+                        GridComparisonWidget.class,
+                        "GridComparisonWidget.refreshFeature().operation.average",
+                        GridComparisonLayerProvider.generateMenuRepresentation(firstOperand),
+                        GridComparisonLayerProvider.generateMenuRepresentation(secondOperand));
+                break;
+            }
+            default: {
+                nameOfFeature = NbBundle.getMessage(
+                        GridComparisonWidget.class,
+                        "GridComparisonWidget.refreshFeature().operation.default",
+                        GridComparisonLayerProvider.generateMenuRepresentation(firstOperand),
+                        GridComparisonLayerProvider.generateMenuRepresentation(secondOperand));
+            }
         }
 
         if ((result != null) && !result.isEmpty()) {
-            // final Geometry geometry =
-            // CrsTransformer.transformToGivenCrs(((SlidableWMSServiceLayerGroup)firstOperandObj)
-            // .getBoundingBox().getGeometry(), "EPSG:3021");
             final Geometry geometry = ((SlidableWMSServiceLayerGroup)firstOperand).getBoundingBox().getGeometry();
             feature = new SlidingImagesFeature(result, geometry);
             feature.setSliderPosition(sldTimestamp.getValue());
+            feature.setName(nameOfFeature);
             CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(feature);
             sldTimestamp.setEnabled(true);
+
+            if ((firstOperand != null) && (firstOperand.getPNode() != null)) {
+                firstOperand.getPNode().setVisible(false);
+            }
+            if ((secondOperand != null) && (secondOperand.getPNode() != null)) {
+                secondOperand.getPNode().setVisible(false);
+            }
         }
     }
 
@@ -738,8 +853,8 @@ public class GridComparisonWidget extends javax.swing.JPanel {
             }
 
             gridComparator = new GridComparator(
-                    GridComparisonWidget.this.secondOperand,
                     GridComparisonWidget.this.firstOperand,
+                    GridComparisonWidget.this.secondOperand,
                     layerStyle,
                     (float)cropX,
                     (float)cropY,
@@ -874,14 +989,6 @@ public class GridComparisonWidget extends javax.swing.JPanel {
             if (value instanceof SlidableWMSServiceLayerGroup) {
                 final SlidableWMSServiceLayerGroup layer = (SlidableWMSServiceLayerGroup)value;
                 setText(GridComparisonLayerProvider.generateMenuRepresentation(layer));
-
-                if ((ICON_LAYER_INVISIBLE != null) && (ICON_LAYER_VISIBLE != null)) {
-                    if (layer.isVisible()) {
-                        setIcon(ICON_LAYER_VISIBLE);
-                    } else {
-                        setIcon(ICON_LAYER_INVISIBLE);
-                    }
-                }
 
                 if (!layer.isEnabled()) {
                     setBackground(UIManager.getDefaults().getColor("ComboBox.disabledBackground")); // NOI18N

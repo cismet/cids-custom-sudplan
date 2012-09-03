@@ -7,8 +7,9 @@
 ****************************************************/
 package de.cismet.cids.custom.objectactions.sudplan;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import de.cismet.cids.custom.sudplan.local.wupp.RunGeoCPMWizardAction;
 
@@ -27,6 +28,9 @@ public final class GeocpmConfigurationActionsProvider implements CidsBeanActions
 
     @Override
     public Collection<CidsBeanAction> getActions() {
-        return Arrays.asList(ActionProviderFactory.getCidsBeanAction(RunGeoCPMWizardAction.class));
+        final List<CidsBeanAction> ret = new ArrayList<CidsBeanAction>(1);
+        ret.add(ActionProviderFactory.getCidsBeanAction(RunGeoCPMWizardAction.class));
+
+        return ret;
     }
 }

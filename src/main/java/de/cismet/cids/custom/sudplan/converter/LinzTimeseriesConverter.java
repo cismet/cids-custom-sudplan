@@ -14,6 +14,7 @@ import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.io.BufferedReader;
@@ -41,7 +42,7 @@ import de.cismet.cids.custom.sudplan.Variable;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = Converter.class)
-public final class LinzTimeseriesConverter implements TimeseriesConverter {
+public final class LinzTimeseriesConverter implements TimeseriesConverter, FormatHint {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -92,7 +93,7 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter {
             ts.setTSProperty(PropertyNames.DESCRIPTION, "imported_linz_timeseries_" + System.currentTimeMillis());
 
             while (line != null) {
-                final String[] split = line.split("   ");              // NOI18N
+                final String[] split = line.split("\\w+");             // NOI18N
                 if (split.length == 1) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("token without value: " + split[0]); // NOI18N
@@ -186,6 +187,44 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter {
 
     @Override
     public String toString() {
-        return "Linz Converter";
+        return getFormatDisplayName();
+    }
+
+    @Override
+    public String getFormatName() {
+        return "linz-timeseries-converter"; // NOI18N
+    }
+
+    @Override
+    public String getFormatDisplayName() {
+        return NbBundle.getMessage(
+                LinzTimeseriesConverter.class,
+                "LinzTimeseriesConverter.this.name"); // NOI18N
+    }
+
+    @Override
+    public String getFormatHtmlName() {
+        return null;
+    }
+
+    @Override
+    public String getFormatDescription() {
+        return NbBundle.getMessage(
+                LinzTimeseriesConverter.class,
+                "LinzTimeseriesConverter.getFormatDescription().description"); // NOI18N
+    }
+
+    @Override
+    public String getFormatHtmlDescription() {
+        return NbBundle.getMessage(
+                LinzTimeseriesConverter.class,
+                "LinzTimeseriesConverter.getFormatHtmlDescription().description"); // NOI18N
+    }
+
+    @Override
+    public Object getFormatExample() {
+        return NbBundle.getMessage(
+                LinzTimeseriesConverter.class,
+                "LinzTimeseriesConverter.getFormatExample().description"); // NOI18N
     }
 }

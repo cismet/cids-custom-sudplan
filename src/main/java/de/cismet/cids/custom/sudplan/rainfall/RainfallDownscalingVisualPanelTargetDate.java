@@ -70,10 +70,15 @@ public final class RainfallDownscalingVisualPanelTargetDate extends javax.swing.
         sldYears.setMinimum(model.getBeginYear());
         sldYears.setMaximum(model.getEndYear());
 
-        final boolean freqAdjust = (model.getFrequencyAdjustment() == null) ? false : model.getFrequencyAdjustment();
-        chkFreqAdjust.setSelected(freqAdjust);
+        // default is without frequency adjustment
+        if (model.getFrequencyAdjustment() == null) {
+            model.setFrequencyAdjustment(Boolean.FALSE);
+        }
+
+        chkFreqAdjust.setSelected(model.getFrequencyAdjustment());
         chkFreqAdjust.setEnabled(!model.isIdfDownscaling());
 
+        // default is target year 2050
         if (model.getTargetYear() == null) {
             txtYear.setText("2050"); // NOI18N
         } else {

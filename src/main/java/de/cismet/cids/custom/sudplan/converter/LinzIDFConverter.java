@@ -9,6 +9,8 @@ package de.cismet.cids.custom.sudplan.converter;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -25,7 +27,7 @@ import de.cismet.cids.custom.sudplan.IDFCurve;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class LinzIDFConverter implements IDFConverter {
+public final class LinzIDFConverter implements IDFConverter, FormatHint {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -40,7 +42,7 @@ public final class LinzIDFConverter implements IDFConverter {
             final BufferedReader r = new BufferedReader(new InputStreamReader(from));
             String line;
             while ((line = r.readLine()) != null) {
-                if (line.startsWith("#")) {
+                if (line.startsWith("#")) { // NOI18N
                     // comments, ignore
                     continue;
                 }
@@ -112,6 +114,36 @@ public final class LinzIDFConverter implements IDFConverter {
 
     @Override
     public String toString() {
-        return "Linz IDF Converter"; // NOI18N
+        return getFormatDisplayName();
+    }
+
+    @Override
+    public String getFormatName() {
+        return "linz-idf-converter"; // NOI18N
+    }
+
+    @Override
+    public String getFormatDisplayName() {
+        return NbBundle.getMessage(LinzIDFConverter.class, "LinzIDFConverter.getFormatDisplayName().description"); // NOI18N
+    }
+
+    @Override
+    public String getFormatHtmlName() {
+        return null;
+    }
+
+    @Override
+    public String getFormatDescription() {
+        return NbBundle.getMessage(LinzIDFConverter.class, "LinzIDFConverter.getFormatDescription().description"); // NOI18N
+    }
+
+    @Override
+    public String getFormatHtmlDescription() {
+        return NbBundle.getMessage(LinzIDFConverter.class, "LinzIDFConverter.getFormatHtmlDescription().description"); // NOI18N
+    }
+
+    @Override
+    public Object getFormatExample() {
+        return NbBundle.getMessage(LinzIDFConverter.class, "LinzIDFConverter.getFormatExample().description"); // NOI18N
     }
 }

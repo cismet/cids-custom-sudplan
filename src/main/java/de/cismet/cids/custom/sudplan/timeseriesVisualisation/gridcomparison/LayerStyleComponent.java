@@ -188,27 +188,7 @@ public class LayerStyleComponent extends JComponent {
 
     @Override
     public Dimension getMinimumSize() {
-        if (layerStyle == null) {
-            return super.getMinimumSize();
-        }
-
-        final FontMetrics fontMetrics = getFontMetrics(getFont());
-        final int charWidth = fontMetrics.charWidth('0');
-        final int charHeight = fontMetrics.getHeight();
-
-        final List<Entry> colorMap = layerStyle.getColorMap();
-
-        if ((colorMap != null) || !colorMap.isEmpty()) {
-            int charCount = 0;
-
-            for (final Entry entry : colorMap) {
-                charCount += Double.toString(entry.getValue()).length();
-            }
-
-            return new Dimension(charCount * charWidth, charHeight);
-        }
-
-        return super.getMinimumSize();
+        return getPreferredSize();
     }
 
     @Override
@@ -230,10 +210,25 @@ public class LayerStyleComponent extends JComponent {
                 charCount += Double.toString(entry.getValue()).length();
             }
 
-            return new Dimension((charCount * charWidth) + (colorMap.size() * 2), charHeight + 2);
+            return new Dimension((charCount * charWidth) + (colorMap.size() * 2), charHeight + 5);
         }
 
         return super.getPreferredSize();
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        if (layerStyle == null) {
+            return super.getMaximumSize();
+        }
+
+        final List<Entry> colorMap = layerStyle.getColorMap();
+
+        if ((colorMap != null) || !colorMap.isEmpty()) {
+            return getPreferredSize();
+        }
+
+        return super.getMaximumSize();
     }
 
     /**

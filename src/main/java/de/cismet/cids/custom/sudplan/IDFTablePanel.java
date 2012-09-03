@@ -7,38 +7,17 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
-import org.apache.log4j.Logger;
-
-import org.codehaus.jackson.map.ObjectMapper;
-
 import org.openide.util.WeakListeners;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
+import java.awt.FontMetrics;
 import java.awt.event.ActionListener;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import java.awt.geom.AffineTransform;
-
-import java.io.IOException;
-import java.io.StringReader;
 
 import java.util.List;
 
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
@@ -47,8 +26,6 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import de.cismet.cids.custom.sudplan.converter.EulerComputationWizardAction;
-
-import de.cismet.cids.dynamics.CidsBean;
 
 /**
  * DOCUMENT ME!
@@ -60,22 +37,24 @@ public class IDFTablePanel extends javax.swing.JPanel {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final transient Logger LOG = Logger.getLogger(IDFTablePanel.class);
-    private static final int HEADER_TEXT_VERTICAL = 0;
-    private static final int HEADER_TEXT_HORIZONTAL = 1;
+// private static final transient Logger LOG = Logger.getLogger(IDFTablePanel.class);
+    private static final int DURATION_COLUMN_WIDTH = 40;
 
     //~ Instance fields --------------------------------------------------------
 
-    private transient CidsBean cidsBeanIDFcurve;
+    private transient IDFCurve idfCurve;
     private transient int selectedColIndex;
     private transient int selectedRowStart;
     private transient int selectedRowEnd;
     private final JPopupMenu popup;
-    private final JMenuItem menuItem;
+    private final JMenuItem eulerMenuItem;
     private final ActionListener popupL;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane spIDF;
+    private javax.swing.JLabel lblDuration;
+    private javax.swing.JLabel lblFrequency;
+    private javax.swing.JLabel lblHeaderSpace;
+    private javax.swing.JScrollPane spIDFTable;
     private javax.swing.JTable tblIDF;
     // End of variables declaration//GEN-END:variables
 
@@ -84,22 +63,42 @@ public class IDFTablePanel extends javax.swing.JPanel {
     /**
      * Creates new form IDFTablePanel.
      *
-     * @param  cidsBeanIDFcurve  curve DOCUMENT ME!
+     * @param  idfCurve  cidsBeanIDFcurve curve DOCUMENT ME!
      */
-    public IDFTablePanel(final CidsBean cidsBeanIDFcurve) {
-        this.cidsBeanIDFcurve = cidsBeanIDFcurve;
+    public IDFTablePanel(final IDFCurve idfCurve) {
+        this.idfCurve = idfCurve;
 
         initComponents();
+
+        lblDuration.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
+        lblDuration.setForeground(UIManager.getColor("TableHeader.foreground"));
+        lblDuration.setBackground(UIManager.getColor("TableHeader.background"));
+        lblDuration.setFont(UIManager.getFont("TableHeader.font"));
+
+        lblFrequency.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
+        lblFrequency.setForeground(UIManager.getColor("TableHeader.foreground"));
+        lblFrequency.setBackground(UIManager.getColor("TableHeader.background"));
+        lblFrequency.setFont(UIManager.getFont("TableHeader.font"));
+
+        lblHeaderSpace.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
+        lblHeaderSpace.setForeground(UIManager.getColor("TableHeader.foreground"));
+        lblHeaderSpace.setBackground(UIManager.getColor("TableHeader.background"));
+        lblHeaderSpace.setFont(UIManager.getFont("TableHeader.font"));
+
+        Font font = lblFrequency.getFont();
+        font = font.deriveFont(Font.BOLD);
+        lblFrequency.setFont(font);
 
         init();
 
         popup = new JPopupMenu();
-        popup.add(menuItem = new JMenuItem(
+        popup.add(eulerMenuItem = new JMenuItem(
                     org.openide.util.NbBundle.getMessage(
                         IDFTablePanel.class,
                         "IDFTablePanle(CidsBean).menuItem.computation")));
+        eulerMenuItem.setEnabled(false);
         popupL = new EulerComputationWizardAction(this);
-        menuItem.addActionListener(WeakListeners.create(ActionListener.class, popupL, menuItem));
+        eulerMenuItem.addActionListener(WeakListeners.create(ActionListener.class, popupL, eulerMenuItem));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -109,17 +108,17 @@ public class IDFTablePanel extends javax.swing.JPanel {
      *
      * @return  DOCUMENT ME!
      */
-    public CidsBean getCidsBeanIDFcurve() {
-        return cidsBeanIDFcurve;
+    public IDFCurve getIDFcurve() {
+        return idfCurve;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  cidsBeanIDFcurve  DOCUMENT ME!
+     * @param  idfCurve  cidsBeanIDFcurve DOCUMENT ME!
      */
-    public void setCidsBeanIDFcurve(final CidsBean cidsBeanIDFcurve) {
-        this.cidsBeanIDFcurve = cidsBeanIDFcurve;
+    public void setIDFcurve(final IDFCurve idfCurve) {
+        this.idfCurve = idfCurve;
     }
 
     /**
@@ -178,31 +177,18 @@ public class IDFTablePanel extends javax.swing.JPanel {
 
     /**
      * DOCUMENT ME!
-     *
-     * @throws  IllegalStateException  DOCUMENT ME!
      */
     private void init() {
         tblIDF.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         tblIDF.getTableHeader().setReorderingAllowed(false);
         tblIDF.setCellSelectionEnabled(true);
 
-        final String json = (String)cidsBeanIDFcurve.getProperty("uri"); // NOI18N
-        final ObjectMapper mapper = new ObjectMapper();
-        final IDFCurve curve;
-        try {
-            curve = mapper.readValue(new StringReader(json), IDFCurve.class);
-        } catch (IOException ex) {
-            final String message = "cannot read idf data from uri";      // NOI18N
-            LOG.error(message, ex);
-            throw new IllegalStateException(message, ex);
-        }
-
-        final List<Integer> frequencies = curve.getFrequencies();
+        final List<Integer> frequencies = idfCurve.getFrequencies();
         final Object[] columnHeaders = new Object[frequencies.size() + 1];
-        columnHeaders[0] = "<html>Frequency /</br>Duration</html>";
+        columnHeaders[0] = "";
         System.arraycopy(frequencies.toArray(), 0, columnHeaders, 1, columnHeaders.length - 1);
 
-        final IDFTableModel model = new IDFTableModel(curve.getDurationIntensityRows(), columnHeaders);
+        final IDFTableModel model = new IDFTableModel(idfCurve.getDurationIntensityRows(), columnHeaders);
 
         tblIDF.setModel(model);
 
@@ -212,17 +198,11 @@ public class IDFTablePanel extends javax.swing.JPanel {
         for (int i = 0; i < tcm.getColumnCount(); ++i) {
             tcm.getColumn(i).setCellRenderer(renderer);
             tcm.getColumn(i).setHeaderRenderer(renderer);
+
+            if (i == 0) {
+                tcm.getColumn(i).setPreferredWidth(DURATION_COLUMN_WIDTH);
+            }
         }
-        final TableHeaderExtensions leftHeader = new TableHeaderExtensions(tblIDF, spIDF, HEADER_TEXT_VERTICAL);
-
-        spIDF.setRowHeaderView(leftHeader);
-        spIDF.setColumnHeaderView(new JButton("Frequency") {
-
-                @Override
-                public Dimension getPreferredSize() {
-                    return new Dimension(20, 100);
-                }
-            });
 
         tblIDF.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
@@ -237,9 +217,9 @@ public class IDFTablePanel extends javax.swing.JPanel {
                     final int rowIndexEnd = tblIDF.getSelectionModel().getMaxSelectionIndex();
 
                     if ((colIndexStart != colIndexEnd) || (rowIndexStart != 0)) {
-                        menuItem.setEnabled(false);
+                        eulerMenuItem.setEnabled(false);
                     } else {
-                        menuItem.setEnabled(true);
+                        eulerMenuItem.setEnabled(true);
 
                         setSelectedColIndex(colIndexEnd);
                         setSelectedRowStart(rowIndexStart);
@@ -256,15 +236,18 @@ public class IDFTablePanel extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        final java.awt.GridBagConstraints gridBagConstraints;
+        java.awt.GridBagConstraints gridBagConstraints;
 
-        spIDF = new javax.swing.JScrollPane();
+        spIDFTable = new javax.swing.JScrollPane();
         tblIDF = new javax.swing.JTable();
+        lblFrequency = new javax.swing.JLabel();
+        lblDuration = new javax.swing.JLabel();
+        lblHeaderSpace = new javax.swing.JLabel();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        spIDF.setPreferredSize(new java.awt.Dimension(452, 300));
+        spIDFTable.setPreferredSize(new java.awt.Dimension(452, 300));
 
         tblIDF.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {
@@ -285,18 +268,66 @@ public class IDFTablePanel extends javax.swing.JPanel {
                     tblIDFMouseReleased(evt);
                 }
             });
-        spIDF.setViewportView(tblIDF);
+        spIDFTable.setViewportView(tblIDF);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(spIDF, gridBagConstraints);
-    } // </editor-fold>//GEN-END:initComponents
+        add(spIDFTable, gridBagConstraints);
+
+        lblFrequency.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblFrequency.setText(org.openide.util.NbBundle.getMessage(
+                IDFTablePanel.class,
+                "IDFTablePanel.lblFrequency.text")); // NOI18N
+        lblFrequency.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        lblFrequency.setOpaque(true);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        add(lblFrequency, gridBagConstraints);
+
+        lblDuration.setText(org.openide.util.NbBundle.getMessage(
+                IDFTablePanel.class,
+                "IDFTablePanel.lblDuration.text")); // NOI18N
+        lblDuration.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        lblDuration.setMaximumSize(new java.awt.Dimension(23, 23));
+        lblDuration.setMinimumSize(new java.awt.Dimension(23, 23));
+        lblDuration.setOpaque(true);
+        lblDuration.setPreferredSize(new java.awt.Dimension(23, 23));
+        lblDuration.addComponentListener(new java.awt.event.ComponentAdapter() {
+
+                @Override
+                public void componentResized(final java.awt.event.ComponentEvent evt) {
+                    lblDurationComponentResized(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weighty = 1.0;
+        add(lblDuration, gridBagConstraints);
+
+        lblHeaderSpace.setText(org.openide.util.NbBundle.getMessage(
+                IDFTablePanel.class,
+                "IDFTablePanel.lblHeaderSpace.text")); // NOI18N
+        lblHeaderSpace.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        lblHeaderSpace.setOpaque(true);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        add(lblHeaderSpace, gridBagConstraints);
+    }                                                  // </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
@@ -315,6 +346,30 @@ public class IDFTablePanel extends javax.swing.JPanel {
     private void tblIDFMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_tblIDFMousePressed
         showPopup(evt);
     }                                                                      //GEN-LAST:event_tblIDFMousePressed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void lblDurationComponentResized(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_lblDurationComponentResized
+        final int width = lblDuration.getWidth() + lblDuration.getInsets().left + lblDuration.getInsets().right;
+        lblDuration.setText(org.openide.util.NbBundle.getMessage(
+                IDFTablePanel.class,
+                "IDFTablePanel.lblDurationComponentResized(ComponentEvent).lblDuration.text"));
+        final FontMetrics fm = lblDuration.getGraphics().getFontMetrics();
+        final int height = -fm.getStringBounds(lblDuration.getText(), lblDuration.getGraphics()).getBounds().width;
+        if ((width == 0) || (height == 0)) {
+            return;
+        }
+        Font font = lblDuration.getFont();
+        font = font.deriveFont(Font.BOLD);
+        final AffineTransform at = new AffineTransform();
+        at.rotate(-1.57d);
+        at.translate(height / 2, width / 2);
+        font = font.deriveFont(at);
+        lblDuration.setFont(font);
+    }                                                                                   //GEN-LAST:event_lblDurationComponentResized
 
     /**
      * DOCUMENT ME!
@@ -374,18 +429,11 @@ public class IDFTablePanel extends javax.swing.JPanel {
 
         @Override
         public String getColumnName(final int i) {
-            if ((columns != null) && (i < columns.length)) {
+            if ((columns != null) && (i < columns.length) && (i != 0)) {
                 final String frequency = String.valueOf(columns[i]);
-
-                final StringBuilder s = new StringBuilder(frequency);
-                if (frequency.equals("1")) { // NOI18N
-                    s.append(" year");
-                } else {
-                    s.append(" years");
-                }
-                return s.toString();
+                return frequency;
             }
-            return null;
+            return "";
         }
 
         @Override
@@ -402,13 +450,9 @@ public class IDFTablePanel extends javax.swing.JPanel {
         public Object getValueAt(final int i, final int i1) {
             if ((data != null) && (i < data.length) && (i1 < data[i].length)) {
                 final String value = String.valueOf(data[i][i1]);
-                final StringBuilder s = new StringBuilder(value);
-                if ((i1 == 0) && (i >= 0)) {
-                    s.append(" min");
-                }
-                return s.toString();
+                return value;
             }
-            return null;
+            return "";
         }
 
         @Override
@@ -442,8 +486,13 @@ public class IDFTablePanel extends javax.swing.JPanel {
                 final int column) {
             final Component c;
 
-            if ((column == 0) || (row == -1)) {
+            if ((value != null) && ((column == 0) || (row == -1))) {
                 final JButton b = new JButton(value.toString());
+                b.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
+                b.setForeground(UIManager.getColor("TableHeader.foreground"));
+                b.setBackground(UIManager.getColor("TableHeader.background"));
+                b.setFont(UIManager.getFont("TableHeader.font"));
+
                 if (column == 0) {
                     b.setHorizontalAlignment(JButton.RIGHT);
                 } else {
@@ -461,124 +510,6 @@ public class IDFTablePanel extends javax.swing.JPanel {
             }
 
             return c;
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private static final class IDFSelectionModel extends DefaultListSelectionModel {
-
-        // TODO: tbd
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class TableHeaderExtensions extends JComponent implements AdjustmentListener {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private JTable table;
-        private JScrollPane parent;
-        private Header header;
-        private int position;
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new TableRowHeader object.
-         *
-         * @param  table         DOCUMENT ME!
-         * @param  parent        DOCUMENT ME!
-         * @param  textPosition  DOCUMENT ME!
-         */
-        public TableHeaderExtensions(final JTable table, final JScrollPane parent, final int textPosition) {
-            this.table = table;
-            this.parent = parent;
-            this.position = textPosition;
-            this.parent.getVerticalScrollBar().addAdjustmentListener(this);
-            this.parent.getHorizontalScrollBar().addAdjustmentListener(this);
-            header = new Header(20, 40, textPosition, "Duration");
-            setPreferredSize(new Dimension(20, 60));
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        protected void paintComponent(final Graphics g) {
-            super.paintComponent(g);
-            if (position == HEADER_TEXT_VERTICAL) {
-                int height = 0;
-                for (int i = 0; i < table.getRowCount(); i++) {
-                    height += table.getRowHeight(i);
-                }
-                SwingUtilities.paintComponent(g, header, this, 0, 0, 20, height);
-            } else {
-                int width = 0;
-                for (int i = 0; i < table.getColumnCount(); i++) {
-                    width += table.getColumnModel().getColumn(i).getWidth();
-                }
-                SwingUtilities.paintComponent(g, header, this, 0, 0, width, 20);
-            }
-        }
-
-        @Override
-        public void adjustmentValueChanged(final AdjustmentEvent ae) {
-            repaint();
-        }
-
-        //~ Inner Classes ------------------------------------------------------
-
-        /**
-         * Stellt den Knopf für eine Reihe dar.
-         *
-         * @version  $Revision$, $Date$
-         */
-        private class Header extends JButton {
-
-            //~ Constructors ---------------------------------------------------
-
-            /**
-             * DOCUMENT ME!
-             *
-             * @param  width     DOCUMENT ME!
-             * @param  height    row DOCUMENT ME!
-             * @param  position  DOCUMENT ME!
-             * @param  title     DOCUMENT ME!
-             */
-            public Header(final int width, final int height, final int position, final String title) {
-                setText(title);
-                this.setText("Duration");
-                this.setForeground(tblIDF.getForeground());
-                this.setBackground(tblIDF.getBackground());
-                this.setHorizontalAlignment(SwingConstants.CENTER);
-                this.setVerticalTextPosition(SwingConstants.CENTER);
-                this.setHorizontalTextPosition(SwingConstants.CENTER);
-                this.setVerticalAlignment(SwingConstants.CENTER);
-                this.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
-
-                int h = 0;
-                for (int i = 0; i < tblIDF.getRowCount(); i++) {
-                    h += tblIDF.getRowHeight(i);
-                }
-                h += tblIDF.getTableHeader().getHeight();
-
-                Font font = this.getFont();
-                font = font.deriveFont(Font.BOLD);
-                if (position == HEADER_TEXT_VERTICAL) {
-                    final AffineTransform at = new AffineTransform();
-                    at.rotate(-1.57d);
-                    at.translate(-30, 5);
-                    font = font.deriveFont(at);
-                }
-                this.setFont(font);
-                this.setPreferredSize(new Dimension(20, 20));
-            }
         }
     }
 }

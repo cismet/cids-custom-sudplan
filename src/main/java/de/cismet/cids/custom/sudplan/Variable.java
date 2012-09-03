@@ -67,7 +67,6 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
     public static final Variable LOCAL_Q = new Variable(
             "urn:ogc:def:property:OGC:LocalQ", // NOI18N
             NbBundle.getMessage(Variable.class, "Variable.LOCAL_Q.localisedName")); // NOI18N
-
     public static final Variable COUT = new Variable(
             "urn:ogc:def:property:OGC:cout", // NOI18N
             NbBundle.getMessage(Variable.class, "Variable.COUT.localisedName")); // NOI18N

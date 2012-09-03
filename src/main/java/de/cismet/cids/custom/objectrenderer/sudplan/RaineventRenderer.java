@@ -7,40 +7,21 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
-import org.apache.log4j.Logger;
-
-import org.jfree.chart.ChartColor;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.labels.ItemLabelAnchor;
-import org.jfree.chart.labels.ItemLabelPosition;
-import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.renderer.category.StackedBarRenderer;
-import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.ui.TextAnchor;
+import org.openide.util.NbBundle;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.EventQueue;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
-
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.LineBorder;
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
-import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.RaineventPanel;
+import de.cismet.cids.custom.sudplan.geocpmrest.io.Rainevent;
 
 import de.cismet.tools.gui.TitleComponentProvider;
 
@@ -52,23 +33,14 @@ import de.cismet.tools.gui.TitleComponentProvider;
  */
 public class RaineventRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider {
 
-    //~ Static fields/initializers ---------------------------------------------
-
-    private static final Logger LOG = Logger.getLogger(RaineventRenderer.class);
-
     //~ Instance fields --------------------------------------------------------
 
     private final transient RunGeoCPMTitleComponent titleComponent;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkForecast;
     private javax.swing.JLabel lblDescription;
-    private javax.swing.JLabel lblInterval;
-    private javax.swing.JLabel lblMinutes;
-    private javax.swing.JLabel lblName;
-    private javax.swing.JLabel lblShowDescription;
-    private javax.swing.JLabel lblShowInterval;
-    private javax.swing.JLabel lblShowName;
-    private javax.swing.JPanel pnlChart;
+    private javax.swing.JLabel lblDescriptionValue;
+    private javax.swing.JPanel pnlRainevent;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
@@ -95,62 +67,29 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         java.awt.GridBagConstraints gridBagConstraints;
         bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
-        lblName = new javax.swing.JLabel();
         lblDescription = new javax.swing.JLabel();
-        lblInterval = new javax.swing.JLabel();
         chkForecast = new javax.swing.JCheckBox();
-        pnlChart = new javax.swing.JPanel();
-        lblMinutes = new javax.swing.JLabel();
-        lblShowName = new javax.swing.JLabel();
-        lblShowInterval = new javax.swing.JLabel();
-        lblShowDescription = new javax.swing.JLabel();
+        pnlRainevent = new javax.swing.JPanel();
+        lblDescriptionValue = new javax.swing.JLabel();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        lblName.setText(org.openide.util.NbBundle.getMessage(
+        lblDescription.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
+        lblDescription.setText(org.openide.util.NbBundle.getMessage(
                 RaineventRenderer.class,
-                "RaineventRenderer.lblName.text")); // NOI18N
+                "RaineventRenderer.lblDescription.text"));                 // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblName, gridBagConstraints);
-
-        lblDescription.setText(org.openide.util.NbBundle.getMessage(
-                RaineventRenderer.class,
-                "RaineventRenderer.lblDescription.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblDescription, gridBagConstraints);
-
-        lblInterval.setText(org.openide.util.NbBundle.getMessage(
-                RaineventRenderer.class,
-                "RaineventRenderer.lblInterval.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblInterval, gridBagConstraints);
 
         chkForecast.setText(org.openide.util.NbBundle.getMessage(
                 RaineventRenderer.class,
                 "RaineventRenderer.chkForecast.text")); // NOI18N
         chkForecast.setContentAreaFilled(false);
-
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.forecast}"),
-                chkForecast,
-                org.jdesktop.beansbinding.BeanProperty.create("selected"));
-        bindingGroup.addBinding(binding);
-
         chkForecast.addItemListener(new java.awt.event.ItemListener() {
 
                 @Override
@@ -159,84 +98,46 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
                 }
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 0);
         add(chkForecast, gridBagConstraints);
 
-        pnlChart.setLayout(new javax.swing.BoxLayout(pnlChart, javax.swing.BoxLayout.LINE_AXIS));
+        pnlRainevent.setOpaque(false);
+        pnlRainevent.setLayout(new java.awt.BorderLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 0.8;
-        add(pnlChart, gridBagConstraints);
+        add(pnlRainevent, gridBagConstraints);
 
-        lblMinutes.setText(org.openide.util.NbBundle.getMessage(
-                RaineventRenderer.class,
-                "RaineventRenderer.lblMinutes.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 10);
-        add(lblMinutes, gridBagConstraints);
+        lblDescriptionValue.setVerticalAlignment(javax.swing.SwingConstants.TOP);
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+        final org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.name}"),
-                lblShowName,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
+                lblDescriptionValue,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding.setSourceNullValue(NbBundle.getMessage(
+                RaineventRenderer.class,
+                "RaineventRenderer.lblDescriptionValue.text.nullSourceValue"));       // NOI18N
+        binding.setSourceUnreadableValue(NbBundle.getMessage(
+                RaineventRenderer.class,
+                "RaineventRenderer.lblDescriptionValue.text.unreadableSourceValue")); // NOI18N
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblShowName, gridBagConstraints);
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.interval}"),
-                lblShowInterval,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("\"Dataset error\"");
-        bindingGroup.addBinding(binding);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblShowInterval, gridBagConstraints);
-
-        lblShowDescription.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
-                lblShowDescription,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
-        bindingGroup.addBinding(binding);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblShowDescription, gridBagConstraints);
+        add(lblDescriptionValue, gridBagConstraints);
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
@@ -262,45 +163,49 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
 
         final String data = (String)cidsBean.getProperty("data");
         final Integer interval = (Integer)cidsBean.getProperty("interval");
-        final String name = (String)cidsBean.getProperty("name");
 
-        final Runnable r = new Runnable() {
+        final String[] valuesSplit = data.split(":");
+
+        final List<Double> values = new ArrayList<Double>();
+        try {
+            for (final String s : valuesSplit) {
+                values.add(new Double(s));
+            }
+        } catch (NumberFormatException e) {
+            SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        if (pnlRainevent != null) {
+                            pnlRainevent.removeAll();
+                        }
+                        final JLabel lblError = new JLabel(
+                                org.openide.util.NbBundle.getMessage(
+                                    RaineventRenderer.class,
+                                    "RaineventRenderer.init().lblError.text"));
+                        lblError.setForeground(Color.red);
+                        pnlRainevent.add(
+                            lblError,
+                            BorderLayout.CENTER);
+                    }
+                });
+            return;
+        }
+
+        final Rainevent rainevent = new Rainevent(interval, values);
+
+        SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-                    try {
-                        if (pnlChart != null) {
-                            pnlChart.removeAll();
-                            final BarChart chart = new BarChart(name, data, interval);
-                            chart.setBorder(new LineBorder(Color.black, 1));
-                            pnlChart.add(chart, BorderLayout.CENTER);
-                        }
-
-                        Component parent = RaineventRenderer.this.getParent();
-                        Component current = RaineventRenderer.this;
-
-                        while (parent != null) {
-                            current = parent;
-                            parent = parent.getParent();
-                        }
-
-                        if (current instanceof JFrame) {
-                            ((JFrame)current).pack();
-                        } else {
-                            current.invalidate();
-                            current.validate();
-                        }
-                    } catch (Exception ex) {
-                        LOG.error("Cannot create BarChart", ex);
+                    if (pnlRainevent != null) {
+                        pnlRainevent.removeAll();
                     }
+                    pnlRainevent.add(new RaineventPanel(rainevent), BorderLayout.CENTER);
+                    RaineventRenderer.this.invalidate();
+                    RaineventRenderer.this.validate();
                 }
-            };
-
-        if (EventQueue.isDispatchThread()) {
-            r.run();
-        } else {
-            EventQueue.invokeLater(r);
-        }
+            });
     }
 
     @Override
@@ -313,119 +218,5 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         super.setTitle(title);
 
         titleComponent.setTitle(title);
-    }
-
-    //~ Inner Classes ----------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class BarChart extends JPanel {
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new BarChart object.
-         *
-         * @param  title     DOCUMENT ME!
-         * @param  data      DOCUMENT ME!
-         * @param  interval  DOCUMENT ME!
-         */
-        public BarChart(final String title, final String data, final int interval) {
-            final DefaultCategoryDataset dataset = createDataset(data, interval);
-            final JFreeChart chart = createChart(dataset, title);
-            final ChartPanel chartPanel = new ChartPanel(chart, false);
-            this.setLayout(new BorderLayout());
-            this.add(chartPanel, BorderLayout.CENTER);
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param   data      DOCUMENT ME!
-         * @param   interval  DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         *
-         * @throws  IllegalStateException  DOCUMENT ME!
-         */
-        private DefaultCategoryDataset createDataset(final String data, final int interval) {
-            final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-//            // row keys
-
-            final String[] values = data.split(":");
-            int steps = interval;
-
-            // Zwei Nachkommastellen im englischen Format
-            final NumberFormat nf = new DecimalFormat("#0.00", new DecimalFormatSymbols(Locale.ENGLISH));
-
-            for (int i = 0; i < values.length; i++) {
-                try {
-                    final String s = nf.format(Double.parseDouble(values[i]));
-                    final Double val = new Double(s);
-                    dataset.addValue(val.doubleValue(), "[l/(ha*s)]", String.valueOf(steps));
-                    steps += interval;
-                } catch (NumberFormatException e) {
-                    final String message = "Cannot format double value";
-                    throw new IllegalStateException(message, e);
-                }
-            }
-
-            return dataset;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param   dataset  DOCUMENT ME!
-         * @param   title    DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        private JFreeChart createChart(final DefaultCategoryDataset dataset, final String title) {
-            final JFreeChart chart = ChartFactory.createBarChart(
-                    title,
-                    org.openide.util.NbBundle.getMessage(
-                        RaineventRenderer.class,
-                        "RaineventRenderer.createChart(DefaultCategoryDataset,String).xAxis"),
-                    org.openide.util.NbBundle.getMessage(
-                        RaineventRenderer.class,
-                        "RaineventRenderer.createChart(DefaultCategoryDataset,String).yAxis"),
-                    dataset,
-                    PlotOrientation.VERTICAL,
-                    false,
-                    false,
-                    false);
-
-            // set the background color for the chart...
-            chart.setBackgroundPaint(Color.white);
-
-            // get a reference to the plot for further customisation...
-            final CategoryPlot plot = chart.getCategoryPlot();
-            plot.setBackgroundPaint(Color.lightGray);
-            plot.setDomainGridlinePaint(Color.white);
-            plot.setRangeGridlinePaint(Color.white);
-
-            // set the range axis to display integers only...
-            final NumberAxis rangeAxis = (NumberAxis)plot.getRangeAxis();
-            rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-            rangeAxis.setUpperMargin(0.15);
-
-            final StackedBarRenderer renderer = new StackedBarRenderer(false);
-            renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-            renderer.setBaseItemLabelsVisible(true);
-            renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(
-                    ItemLabelAnchor.OUTSIDE12,
-                    TextAnchor.BOTTOM_CENTER));
-            renderer.setSeriesPaint(0, ChartColor.VERY_LIGHT_BLUE);
-            renderer.setShadowVisible(false);
-            chart.getCategoryPlot().setRenderer(renderer);
-
-            return chart;
-        }
     }
 }

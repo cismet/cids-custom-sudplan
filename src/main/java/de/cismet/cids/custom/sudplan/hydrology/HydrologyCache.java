@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.SudplanOptions;
 import de.cismet.cids.custom.sudplan.Variable;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -68,7 +69,7 @@ public final class HydrologyCache {
      * @throws  IllegalStateException  DOCUMENT ME!
      */
     private HydrologyCache() {
-        hypeClient = new SudPlanHypeAPI("79.125.2.136"); // NOI18N
+        hypeClient = new SudPlanHypeAPI(SudplanOptions.getInstance().getHdHypeIp());
         simulationScenarios = new HashSet<Scenario>();
 
         Scenario calScenario = null;

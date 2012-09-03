@@ -16,6 +16,11 @@ import java.awt.Component;
 
 import javax.swing.event.ChangeListener;
 
+import de.cismet.cids.custom.sudplan.local.linz.EtaInput;
+import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
+
+import de.cismet.cids.dynamics.CidsBean;
+
 /**
  * DOCUMENT ME!
  *
@@ -70,6 +75,50 @@ public final class WizardPanelMetadata implements WizardDescriptor.Panel {
      */
     String getDescription() {
         return description;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getDefaultDescription() {
+        final StringBuilder sb = new StringBuilder();
+        boolean isSwmmRun = false;
+        if (wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN) != null) {
+            sb.append("SWMM Projekt: ");
+            sb.append(((CidsBean)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN)).getProperty(
+                    "title"));
+            sb.append('\n');
+        }
+
+        if (wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT) != null) {
+            isSwmmRun = true;
+            final SwmmInput swmmInput = (SwmmInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT);
+
+            sb.append("SWMM Eingabedatei: ").append(swmmInput.getInpFile()).append('\n');
+            sb.append("SWMM Startdatum: ").append(SwmmInput.DATE_FORMAT.format(swmmInput.getStartDate())).append('\n');
+            sb.append("SWMM Enddatum: ").append(SwmmInput.DATE_FORMAT.format(swmmInput.getEndDate())).append('\n');
+            int i = 0;
+            for (final String timeseries : swmmInput.getTimeseriesURLs()) {
+                i++;
+                sb.append("Zeitreihe #").append(i).append(": ").append(timeseries).append('\n');
+            }
+        }
+
+        if (wizard.getProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT) != null) {
+            final EtaInput etaInput = (EtaInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT);
+            if (!isSwmmRun) {
+                sb.append("SWMM Szenario: ").append(etaInput.getSwmmRunName()).append('\n');
+            } else {
+                sb.append("ETA Berechnung: ja").append('\n');
+            }
+            sb.append("# ETA Konfigurationen: ").append(etaInput.getEtaConfigurations().size()).append('\n');
+        } else if (isSwmmRun) {
+            sb.append("ETA Berechnung: nein").append('\n');
+        }
+
+        return sb.toString();
     }
 
     @Override

@@ -30,13 +30,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Properties;
 
-import de.cismet.cids.custom.sudplan.AbstractAsyncModelManager;
-import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
-import de.cismet.cids.custom.sudplan.DataHandlerCache;
-import de.cismet.cids.custom.sudplan.DataHandlerCacheException;
-import de.cismet.cids.custom.sudplan.Manager;
-import de.cismet.cids.custom.sudplan.ManagerType;
-import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.*;
 import de.cismet.cids.custom.sudplan.SMSUtils.Model;
 import de.cismet.cids.custom.sudplan.airquality.AirqualityDownscalingOutput.Result;
 
@@ -65,12 +59,11 @@ public final class AirqualityDownscalingModelManager extends AbstractAsyncModelM
     public static final String PARAM_N_X = "n_x";                             // NOI18N
     public static final String PARAM_N_Y = "n_y";                             // NOI18N
     public static final String PARAM_EMISSION_SCENARIO = "emission_scenario"; // NOI18N
+    public static final String PARAM_DESCRIPTION = "description";             // NOI18N
 
-    public static final String AQ_SOS_LOOKUP = "airquality_sos_lookup";                                           // NOI18N
-    public static final String AQ_SPS_LOOKUP = "airquality_sps_lookup";                                           // NOI18N
-    public static final String AQ_SOS_URL = "http://sudplan.ait.ac.at:8086/?SERVICE=SOS&REQUEST=GetCapabilities"; // NOI18N
-    public static final String AQ_SPS_URL = "http://sudplan.ait.ac.at:8087/?SERVICE=SPS&REQUEST=GetCapabilities"; // NOI18N
-    public static final String AQ_TS_DS_PROCEDURE = "AirQuality_Timeseries_Downscaling";                          // NOI18N
+    public static final String AQ_SOS_LOOKUP = "airquality_sos_lookup";                  // NOI18N
+    public static final String AQ_SPS_LOOKUP = "airquality_sps_lookup";                  // NOI18N
+    public static final String AQ_TS_DS_PROCEDURE = "AirQuality_Timeseries_Downscaling"; // NOI18N
 
     public static final String AQ_RESULT_KEY_URL = "ts:result_service_url";   // NOI18N
     public static final String AQ_RESULT_KEY_TYPE = "ts:result_service_type"; // NOI18N
@@ -96,11 +89,6 @@ public final class AirqualityDownscalingModelManager extends AbstractAsyncModelM
         }
 
         final AirqualityDownscalingWatchable watchable = (AirqualityDownscalingWatchable)getWatchable();
-
-        // TODO: Necessary?
-        final Manager manager = SMSUtils.loadManagerFromRun(cidsBean, ManagerType.INPUT);
-        manager.setCidsBean((CidsBean)cidsBean.getProperty("modelinput")); // NOI18N
-
         final AirqualityDownscalingOutput output = new AirqualityDownscalingOutput();
 
         try {
@@ -149,7 +137,10 @@ public final class AirqualityDownscalingModelManager extends AbstractAsyncModelM
                 AirqualityDownscalingModelManager.class,
                 "AirqualityDownscalingModelManager.prepareExecution().progress.save")); // NOI18N
 
-        final AirqualityDownscalingRunInfo runInfo = new AirqualityDownscalingRunInfo(runId, AQ_SPS_LOOKUP, AQ_SPS_URL);
+        final AirqualityDownscalingRunInfo runInfo = new AirqualityDownscalingRunInfo(
+                runId,
+                AQ_SPS_LOOKUP,
+                SudplanOptions.getInstance().getAqSpsUrl());
 
         try {
             final ObjectMapper mapper = new ObjectMapper();
@@ -258,7 +249,8 @@ public final class AirqualityDownscalingModelManager extends AbstractAsyncModelM
 
         final DataHandler dataHandler;
         try {
-            dataHandler = DataHandlerCache.getInstance().getSPSDataHandler(AQ_SPS_LOOKUP, AQ_SPS_URL);
+            dataHandler = DataHandlerCache.getInstance()
+                        .getSPSDataHandler(AQ_SPS_LOOKUP, SudplanOptions.getInstance().getAqSpsUrl());
         } catch (final DataHandlerCacheException ex) {
             final String message = "Can't fetch datahandler."; // NOI18N
             LOG.error(message, ex);
@@ -278,7 +270,6 @@ public final class AirqualityDownscalingModelManager extends AbstractAsyncModelM
         final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); // NOI18N
 
         timeseries.setValue(now, PARAM_CLIMATE_SCENARIO, input.getScenario());
-        // TODO: Make dynamic?!
         timeseries.setValue(now, PARAM_COORDINATE_SYSTEM, input.getSrs()); // NOI18N
         timeseries.setValue(now, PARAM_EMISSION_SCENARIO, input.getDatabase());
         timeseries.setValue(now, PARAM_END_TIME, dateFormat.format(input.getEndDate()));
@@ -289,13 +280,12 @@ public final class AirqualityDownscalingModelManager extends AbstractAsyncModelM
         timeseries.setValue(now, PARAM_X_MIN, Double.toString(input.getLowerleft().x));
         timeseries.setValue(now, PARAM_Y_MAX, Double.toString(input.getUpperright().y));
         timeseries.setValue(now, PARAM_Y_MIN, Double.toString(input.getLowerleft().y));
+        timeseries.setValue(now, PARAM_DESCRIPTION, input.getDescription());
 
         timeseries.setValue(now, PropertyNames.TaskAction, PropertyNames.TaskActionStart);
 
         datapoint.putTimeSeries(timeseries);
 
-        // the f****n handler does not know about the new task, thus asking for it results in no datapoints, we do a
-        // special implementation to overcome this s**t
         runningTask = datapoint;
 
         return (String)datapoint.getProperties().get(PropertyNames.TASK_ID);
