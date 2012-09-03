@@ -34,6 +34,7 @@ import java.util.concurrent.Future;
 import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
 import de.cismet.cids.custom.sudplan.ProgressEvent;
 import de.cismet.cids.custom.sudplan.Resolution;
+import de.cismet.cids.custom.sudplan.SudplanOptions;
 import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
 import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
@@ -184,7 +185,7 @@ public final class CalibrationWatchable extends AbstractModelRunWatchable {
             final TimeseriesRetrieverConfig cfg = new TimeseriesRetrieverConfig(
                     TimeseriesRetrieverConfig.PROTOCOL_HYPE,
                     null,
-                    new URL("http://79.125.2.136"), // NOI18N
+                    new URL("http://" + SudplanOptions.getInstance().getHdHypeIp()), // NOI18N
                     tsProcedure,
                     String.valueOf(runinfo.getBasinId()),
                     Variable.COUT.getPropertyKey(),
