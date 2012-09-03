@@ -14,6 +14,7 @@ import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.io.BufferedReader;
@@ -41,7 +42,7 @@ import de.cismet.cids.custom.sudplan.Variable;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = Converter.class)
-public final class WuppertalTimeseriesConverter implements TimeseriesConverter {
+public final class WuppertalTimeseriesConverter implements TimeseriesConverter, FormatHint {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -120,7 +121,7 @@ public final class WuppertalTimeseriesConverter implements TimeseriesConverter {
                         }
                     } else if (TOKEN_UNIT.equals(key)) {
                         if (value.equals("mm/h")) {         // NOI18N
-                            ts.setTSProperty(TimeSeries.VALUE_UNITS, new String[] { Unit.MM.getPropertyKey() });
+                            ts.setTSProperty(TimeSeries.VALUE_UNITS, new String[] { Unit.MM_H.getPropertyKey() });
                         } else {
                             ts.setTSProperty(TimeSeries.VALUE_UNITS, new String[] { value });
                         }
@@ -238,6 +239,44 @@ public final class WuppertalTimeseriesConverter implements TimeseriesConverter {
 
     @Override
     public String toString() {
-        return "Wuppertal Converter";
+        return getFormatDisplayName();
+    }
+
+    @Override
+    public String getFormatName() {
+        return "wupp-timeseries-converter"; // NOI18N
+    }
+
+    @Override
+    public String getFormatDisplayName() {
+        return NbBundle.getMessage(
+                WuppertalTimeseriesConverter.class,
+                "WuppertalTimeseriesConverter.this.name"); // NOI18N
+    }
+
+    @Override
+    public String getFormatHtmlName() {
+        return null;
+    }
+
+    @Override
+    public String getFormatDescription() {
+        return NbBundle.getMessage(
+                WuppertalTimeseriesConverter.class,
+                "WuppertalTimeseriesConverter.getFormatDescription().description"); // NOI18N
+    }
+
+    @Override
+    public String getFormatHtmlDescription() {
+        return NbBundle.getMessage(
+                WuppertalTimeseriesConverter.class,
+                "WuppertalTimeseriesConverter.getFormatHtmlDescription().description"); // NOI18N
+    }
+
+    @Override
+    public Object getFormatExample() {
+        return NbBundle.getMessage(
+                WuppertalTimeseriesConverter.class,
+                "WuppertalTimeseriesConverter.getFormatExample().description"); // NOI18N
     }
 }

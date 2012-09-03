@@ -5,15 +5,16 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.local.wupp;
+package de.cismet.cids.custom.sudplan.data.io;
 
-import Sirius.navigator.connection.SessionManager;
-import Sirius.navigator.exception.ConnectionException;
 import Sirius.navigator.ui.ComponentRegistry;
 
-import Sirius.server.newuser.User;
-
 import org.apache.log4j.Logger;
+
+import org.codehaus.jackson.map.ObjectMapper;
+
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
@@ -27,14 +28,19 @@ import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
+import java.io.StringWriter;
+
 import java.text.MessageFormat;
 
-import java.util.concurrent.*;
+import java.util.logging.Level;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
 
-import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
+import de.cismet.cids.custom.sudplan.IDFCurve;
+import de.cismet.cids.custom.sudplan.SMSUtils;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.CidsClientToolbarItem;
 
@@ -43,15 +49,14 @@ import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 /**
  * DOCUMENT ME!
  *
- * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
 @org.openide.util.lookup.ServiceProvider(service = CidsClientToolbarItem.class)
-public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction implements CidsClientToolbarItem {
+public final class IDFImportWizardAction extends AbstractCidsBeanAction implements CidsClientToolbarItem {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final transient Logger LOG = Logger.getLogger(ImportGeoCPMWizardAction.class);
+    private static final transient Logger LOG = Logger.getLogger(IDFImportWizardAction.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -60,20 +65,20 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates a new ImportGeoCPMWizardAction object.
+     * Creates a new RainfallDownscalingWizardAction object.
      */
-    public ImportGeoCPMWizardAction() {
-        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/local/wupp/geocpm_import.png", false)); // NOI18N
+    public IDFImportWizardAction() {
+        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/data/io/idf_import.png", false)); // NOI18N
 
         putValue(
             Action.SHORT_DESCRIPTION,
-            NbBundle.getMessage(ImportGeoCPMWizardAction.class, "ImportGeoCPMWizardAction.shortDescription")); // NOI18N
+            NbBundle.getMessage(IDFImportWizardAction.class, "IDFImportWizardAction.shortDescription")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * EDT only !
      *
      * @return  DOCUMENT ME!
      */
@@ -82,9 +87,10 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
 
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
-                    new ImportGeoCPMWizardPanelCFGSelect(),
-                    new ImportGeoCPMWizardPanelMetadata(),
-                    new ImportGeoCPMWizardPanelUpload()
+                    new WizardPanelChooseFileImport(),
+                    new IDFImportWizardPanelChooseConverter(),
+                    new WizardPanelConversionForward(),
+                    new WizardPanelMetadata(SMSUtils.TABLENAME_IDFCURVE)
                 };
 
             final String[] steps = new String[panels.length];
@@ -123,8 +129,8 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
     @Override
     public void actionPerformed(final ActionEvent e) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
-        wizard.setTitleFormat(new MessageFormat("{0}"));                                                               // NOI18N
-        wizard.setTitle(NbBundle.getMessage(ImportGeoCPMWizardAction.class, "ImportGeoCPMWizardAction.wizard.title")); // NOI18N
+        wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
+        wizard.setTitle("IDF Import");
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -132,21 +138,40 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
         dialog.setVisible(true);
         dialog.toFront();
 
-        final boolean cancelled = wizard.getValue() != WizardDescriptor.FINISH_OPTION;
+        if (wizard.getValue() == WizardDescriptor.FINISH_OPTION) {
+            try {
+                final IDFCurve idfCurve = (IDFCurve)wizard.getProperty(WizardPanelConversionForward.PROP_CONVERTED);
+                final CidsBean idfBean = (CidsBean)wizard.getProperty(WizardPanelMetadata.PROP_BEAN);
+                final Object converter = wizard.getProperty(AbstractConverterChoosePanelCtrl.PROP_CONVERTER);
+                final ObjectMapper mapper = new ObjectMapper();
+                final StringWriter writer = new StringWriter();
 
-        if (cancelled) {
-            for (final Object o : getPanels()) {
-                if (o instanceof Cancellable) {
-                    ((Cancellable)o).cancel();
+                mapper.writeValue(writer, idfCurve);
+
+                idfBean.setProperty("uri", writer.toString());                    // NOI18N
+                idfBean.setProperty("converter", converter.getClass().getName()); // NOI18N
+                idfBean.persist();
+
+                // TODO: reload catalogue
+            } catch (final Exception ex) {
+                final String message = "could not persist idf bean"; // NOI18N
+                LOG.error(message, ex);
+
+                final ErrorInfo info = new ErrorInfo("Persist error", message, null, "ERROR", ex, Level.SEVERE, null);
+                JXErrorPane.showDialog(ComponentRegistry.getRegistry().getMainWindow(), info);
+            }
+        } else {
+            for (final WizardDescriptor.Panel panel : this.panels) {
+                if (panel instanceof Cancellable) {
+                    ((Cancellable)panel).cancel();
                 }
             }
         }
-        // there is no need to do anything, when finished successfully
     }
 
     @Override
     public String getSorterString() {
-        return "Z"; // NOI18N
+        return "ZZZZZZZZ"; // NOI18N
     }
 
     @Override
@@ -156,28 +181,6 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
 
     @Override
     public boolean isEnabled() {
-        final User user = SessionManager.getSession().getUser();
-        final Callable<Boolean> enable = new Callable<Boolean>() {
-
-                @Override
-                public Boolean call() throws Exception {
-                    try {
-                        // TODO: introduce proper attribute
-                        return SessionManager.getProxy().hasConfigAttr(user, ""); // NOI18N
-                    } catch (final ConnectionException ex) {
-                        LOG.warn("cannot check for config attr", ex);             // NOI18N
-                        return false;
-                    }
-                }
-            };
-
-        final Future<Boolean> future = SudplanConcurrency.getSudplanGeneralPurposePool().submit(enable);
-        try {
-            return future.get(300, TimeUnit.MILLISECONDS);
-        } catch (final Exception ex) {
-            LOG.warn("cannot get result of enable future", ex); // NOI18N
-
-            return false;
-        }
+        return true;
     }
 }
