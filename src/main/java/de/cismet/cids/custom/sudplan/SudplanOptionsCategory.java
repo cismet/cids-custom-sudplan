@@ -27,17 +27,22 @@ public final class SudplanOptionsCategory extends AbstractOptionsCategory {
     //~ Methods ----------------------------------------------------------------
 
     @Override
+    public int getOrder() {
+        return -100000000;
+    }
+
+    @Override
     public Icon getIcon() {
-        return ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/sudplan.png", false);
+        return ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/sudplan.png", false); // NOI18N
     }
 
     @Override
     public String getName() {
-        return "Sudplan";
+        return "Sudplan"; // NOI18N
     }
 
     @Override
     public String getTooltip() {
-        return "Sudplan specific options"; // NOI18N
+        return "Sudplan specific options";
     }
 }

@@ -34,6 +34,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionListener;
 
+import de.cismet.cids.custom.sudplan.SudplanOptionsCategory;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.gridcomparison.LayerStyle.Entry;
 
 import de.cismet.lookupoptions.AbstractOptionsPanel;
@@ -56,7 +57,7 @@ public class LayerStylesOptionsPanel extends AbstractOptionsPanel implements Opt
 
     private static final String OPTION_NAME = NbBundle.getMessage(
             LayerStylesOptionsPanel.class,
-            "LayerStylesOptionsPanel.OPTION_NAME");
+            "LayerStylesOptionsPanel.OPTION_NAME"); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -85,7 +86,7 @@ public class LayerStylesOptionsPanel extends AbstractOptionsPanel implements Opt
      * Creates new form LayerStylesOptionsPanel.
      */
     public LayerStylesOptionsPanel() {
-        super(OPTION_NAME, LayerStylesOptionsCategory.class);
+        super(OPTION_NAME, SudplanOptionsCategory.class);
 
         layerStylesModel = new DefaultListModel();
 
@@ -96,6 +97,11 @@ public class LayerStylesOptionsPanel extends AbstractOptionsPanel implements Opt
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    @Override
+    public int getOrder() {
+        return 2;
+    }
 
     /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
