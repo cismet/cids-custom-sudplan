@@ -179,7 +179,8 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
                 CPRC,
                 CRUN,
                 CTMP,
-                GWAT
+                GWAT,
+                SMDF
             };
     }
 

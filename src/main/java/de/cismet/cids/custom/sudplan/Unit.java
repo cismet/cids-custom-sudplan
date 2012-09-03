@@ -22,47 +22,50 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final Unit M = new Unit("urn:ogc:def:uom:OGC:m", "Meter");              // NOI18N
-    public static final Unit CM = new Unit("urn:ogc:def:uom:OGC:cm", "Centimeter");       // NOI18N
+    public static final Unit M = new Unit("urn:ogc:def:uom:OGC:m", "Meter");                                            // NOI18N
+    public static final Unit CM = new Unit("urn:ogc:def:uom:OGC:cm", "Centimeter");                                     // NOI18N
     public static final Unit MM = new Unit(
-            "urn:ogc:def:uom:OGC:mm",                                                     // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.MILLIMETERS.localisedName"));           // NOI18N
+            "urn:ogc:def:uom:OGC:mm",                                                                                   // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.MILLIMETERS.localisedName"));                                         // NOI18N
     public static final Unit PPM = new Unit(
-            "urn:ogc:def:uom:OGC:ppm",                                                    // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.PARTS_PER_MILLION.localisedName"));     // NOI18N
+            "urn:ogc:def:uom:OGC:ppm",                                                                                  // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.PARTS_PER_MILLION.localisedName"));                                   // NOI18N
     public static final Unit PPB = new Unit(
-            "urn:ogc:def:uom:OGC:ppb",                                                    // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.PARTS_PER_BILLION.localisedName"));     // NOI18N
+            "urn:ogc:def:uom:OGC:ppb",                                                                                  // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.PARTS_PER_BILLION.localisedName"));                                   // NOI18N
     public static final Unit KELVIN = new Unit(
-            "urn:ogc:def:uom:OGC:K",                                                      // NOI18N
+            "urn:ogc:def:uom:OGC:K",                                                                                    // NOI18N
             NbBundle.getMessage(
                 Unit.class,
-                "Unit.KELVIN.localisedName"));                                            // NOI18N
+                "Unit.KELVIN.localisedName"));                                                                          // NOI18N
     public static final Unit M3S = new Unit(
-            "urn:org:def:uom:OGC:m3s",                                                    // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.M3S.localisedName"));                   // NOI18N
+            "urn:org:def:uom:OGC:m3s",                                                                                  // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.M3S.localisedName"));                                                 // NOI18N
     public static final Unit LS = new Unit(
-            "l/s",                                                                        // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.LS.localisedName"));                    // NOI18N
+            "l/s",                                                                                                      // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.LS.localisedName"));                                                  // NOI18N
     public static final Unit M3 = new Unit(
-            "m^3",                                                                        // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.M3.localisedName"));                    // NOI18N
+            "m^3",                                                                                                      // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.M3.localisedName"));                                                  // NOI18N
     public static final Unit MM_MIN = new Unit(
-            "mm/min",                                                                     // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.MM_MIN.localisedName"));                // NOI18N
+            "mm/min",                                                                                                   // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.MM_MIN.localisedName"));                                              // NOI18N
     public static final Unit MG_L = new Unit(
-            "mg/l",                                                                       // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.MG_L.localisedName"));                  // NOI18N
+            "mg/l",                                                                                                     // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.MG_L.localisedName"));                                                // NOI18N
     public static final Unit METERS = new Unit(
-            "m",                                                                          // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.METERS.localisedName"));                // NOI18N
+            "m",                                                                                                        // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.METERS.localisedName"));                                              // NOI18N
     public static final Unit KG = new Unit(
-            "kg",                                                                         // NOI18N
-            NbBundle.getMessage(Unit.class, "Unit.KG.localisedName"));                    // NOI18N
+            "kg",                                                                                                       // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.KG.localisedName"));                                                  // NOI18N
     public static final Unit MM_H = new Unit(
-            "mm/h",                                                                       // NOI18N
-            org.openide.util.NbBundle.getMessage(Unit.class, "Unit.MM_H.localisedName")); // NOI18N
-    public static final Unit L_S_HA = new Unit("l/s*ha", NbBundle.getMessage(Unit.class, "Unit.L_S_HA.localisedName"));
+            "mm/h",                                                                                                     // NOI18N
+            org.openide.util.NbBundle.getMessage(Unit.class, "Unit.MM_H.localisedName"));                               // NOI18N
+    public static final Unit L_S_HA = new Unit("l/s*ha", NbBundle.getMessage(Unit.class, "Unit.L_S_HA.localisedName")); // NOI18N
+    public static final Unit CELSIUS = new Unit(
+            "urn:org:def:uom:OGC:Celcius",                                                                              // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.CELSIUS.localisedName"));                                             // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -94,6 +97,7 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
      */
     private Unit(final String propertyKey, final String localisedName) {
         super(localisedName);
+
         this.propertyKey = propertyKey;
     }
 
@@ -132,7 +136,8 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
     public static Unit[] values() {
         return new Unit[] {
                 MM, PPB, PPM, KELVIN,
-                M3S, LS, M3, MM_MIN, MG_L, METERS, KG
+                M3S, LS, M3, MM_MIN,
+                MG_L, METERS, KG, CELSIUS
             };
     }
 }

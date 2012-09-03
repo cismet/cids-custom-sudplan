@@ -51,9 +51,8 @@ public class DoCalibrationVisualPanelMetadata extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     void init() {
-        if (txtName.getText().isEmpty()) {
-            txtName.setText("Calibration Run");
-        }
+        bindingGroup.unbind();
+        bindingGroup.bind();
 
         txtName.requestFocus();
         txtName.setCaretPosition(txtName.getText().length());
