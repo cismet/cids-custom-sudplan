@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.ListIterator;
 
 import de.cismet.cismap.commons.MappingModel;
-import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
@@ -418,17 +417,6 @@ public final class ShowUpstreamAreasForAreaAction extends AbstractWFSFeatureRetr
                 bufferCandidate = gf.createPolygon((LinearRing)((Polygon)bufferCandidate).getExteriorRing(),
                         new LinearRing[0]);
                 bufferCandidate = TopologyPreservingSimplifier.simplify(bufferCandidate, 0.1);
-
-                try {
-                    final DefaultStyledFeature dsf = new DefaultStyledFeature();
-                    final DefaultStyledFeature dsf2 = new DefaultStyledFeature();
-                    dsf.setGeometry(bufferedGeom);
-                    dsf2.setGeometry(bufferCandidate);
-                    CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(dsf);
-                    CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(dsf2);
-                } catch (final Exception e) {
-                    LOG.fatal("fail", e);
-                }
 
                 final StringBuilder sb = new StringBuilder();
 
