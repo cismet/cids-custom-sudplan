@@ -77,6 +77,8 @@ public final class HydrologyTimeseriesConverter implements TimeseriesConverter, 
         try {
             br = new BufferedReader(new InputStreamReader(from));
 
+            // skip the header line
+            br.readLine();
             String line = br.readLine();
 
             final TimeSeriesImpl ts = new TimeSeriesImpl();
@@ -108,7 +110,10 @@ public final class HydrologyTimeseriesConverter implements TimeseriesConverter, 
 
                     final Date date = DATEFORMAT.parse(key);
                     final float val = NUMBERFORMAT.parse(value.trim()).floatValue();
-                    ts.setValue(new TimeStamp(date), PropertyNames.VALUE, val);
+                    // -9999 is ignore value
+                    if (-9999 != val) {
+                        ts.setValue(new TimeStamp(date), PropertyNames.VALUE, val);
+                    }
                 }
 
                 if (Thread.currentThread().isInterrupted()) {
@@ -164,6 +169,7 @@ public final class HydrologyTimeseriesConverter implements TimeseriesConverter, 
 
             final StringBuilder sb = new StringBuilder();
             final String lineSep = System.getProperty("line.separator"); // NOI18N
+            sb.append("Date   Value").append(lineSep);                   // NOI18N
 
             final Iterator<TimeStamp> it = to.getTimeStamps().iterator();
             while (it.hasNext()) {
