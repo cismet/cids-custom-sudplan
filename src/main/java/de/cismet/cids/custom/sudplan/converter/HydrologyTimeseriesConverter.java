@@ -92,7 +92,7 @@ public final class HydrologyTimeseriesConverter implements TimeseriesConverter, 
             ts.setTSProperty(PropertyNames.DESCRIPTION, "imported_hydrology_timeseries_" + System.currentTimeMillis());
 
             while (line != null) {
-                final String[] split = line.split("\\w+");             // NOI18N
+                final String[] split = line.split("\\s+");             // NOI18N
                 if (split.length == 1) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("token without value: " + split[0]); // NOI18N
