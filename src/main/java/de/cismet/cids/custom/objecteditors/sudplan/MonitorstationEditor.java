@@ -122,7 +122,8 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
     private void initContext() {
         cboContext.removeAllItems();
         for (final MonitorstationContext context : MonitorstationContext.values()) {
-            cboContext.addItem(context);
+            if(context.isCSContext())
+                cboContext.addItem(context);
         }
         cboContext.setRenderer(new ContextRenderer());
     }

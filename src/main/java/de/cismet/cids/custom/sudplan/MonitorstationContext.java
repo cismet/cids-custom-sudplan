@@ -53,6 +53,10 @@ public final class MonitorstationContext extends LocalisedEnum<MonitorstationCon
     public String getKey() {
         return key;
     }
+    
+    public boolean isCSContext(){
+        return !key.startsWith("LI"); // NOI18N
+    }
 
     /**
      * DOCUMENT ME!
@@ -79,7 +83,7 @@ public final class MonitorstationContext extends LocalisedEnum<MonitorstationCon
      * @return  DOCUMENT ME!
      */
     public static MonitorstationContext[] values() {
-        return new MonitorstationContext[] { AQ, HD, RF };
+        return new MonitorstationContext[] { AQ, HD, RF, LI_RF, LI_WI, LI_WO, LI_HY };
     }
 
     @Override
