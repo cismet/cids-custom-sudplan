@@ -20,6 +20,10 @@ public final class MonitorstationContext extends LocalisedEnum<MonitorstationCon
     public static final MonitorstationContext AQ = new MonitorstationContext("AQ", "Air Quality");
     public static final MonitorstationContext HD = new MonitorstationContext("HD", "Hydrology");
     public static final MonitorstationContext RF = new MonitorstationContext("RF", "Rainfall");
+    public static final MonitorstationContext LI_RF = new MonitorstationContext("LI-RF", "Linz Rainfall");
+    public static final MonitorstationContext LI_WI = new MonitorstationContext("LI-WI", "Linz WWTP Inflow Sensors");
+    public static final MonitorstationContext LI_WO = new MonitorstationContext("LI-WO", "Linz WWTP Outflow Sensors");
+    public static final MonitorstationContext LI_HY = new MonitorstationContext("LI-HY", "Linz Hydraulics Sensors");
 
     //~ Instance fields --------------------------------------------------------
 
