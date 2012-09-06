@@ -144,15 +144,14 @@ public class MonitorstationRenderer extends AbstractCidsBeanRenderer {
             }
 
             final String[] split = type.split(":", 2); // NOI18N
-            
-            assert split.length == 1 || split.length == 2 : "illegal type definition: " + type; // NOI18N
+
+            assert (split.length == 1) || (split.length == 2) : "illegal type definition: " + type; // NOI18N
 
             final String ctxKey = split[0];
             lblContextValue.setText(MonitorstationContext.getMonitorstationContext(ctxKey).getLocalisedName());
 
-            
-            if(split.length == 2){
-                if(LOG.isDebugEnabled()){
+            if (split.length == 2) {
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("assuming type with variable description:" + type); // NOI18N
                 }
 
