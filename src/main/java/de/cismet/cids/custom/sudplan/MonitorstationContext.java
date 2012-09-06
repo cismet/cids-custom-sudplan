@@ -53,8 +53,13 @@ public final class MonitorstationContext extends LocalisedEnum<MonitorstationCon
     public String getKey() {
         return key;
     }
-    
-    public boolean isCSContext(){
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isCSContext() {
         return !key.startsWith("LI"); // NOI18N
     }
 
