@@ -7,12 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.data.io;
 
-import Sirius.navigator.connection.SessionManager;
-import Sirius.navigator.exception.ConnectionException;
-import Sirius.navigator.types.treenode.RootTreeNode;
-import Sirius.navigator.ui.ComponentRegistry;
-import Sirius.navigator.ui.tree.MetaCatalogueTree;
-
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
 import org.apache.log4j.Logger;
@@ -28,12 +22,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.Future;
-
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 
 import de.cismet.cids.custom.sudplan.StatusPanel;
 import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
@@ -226,7 +216,6 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
                             deleteTransmittedFiles();
                         }
 
-                        updateCatalogueTree();
                         comp.setBusy(false);
 
                         synchronized (TimeSeriesPersistenceCtrl.this) {
@@ -253,39 +242,6 @@ public class TimeSeriesPersistenceCtrl extends AbstractWizardPanelCtrl implement
 
             transmittedFiles.clear();
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     */
-    private void updateCatalogueTree() {
-        final MetaCatalogueTree catalogueTree = ComponentRegistry.getRegistry().getCatalogueTree();
-        final DefaultTreeModel catalogueTreeModel = (DefaultTreeModel)catalogueTree.getModel();
-
-        RootTreeNode rootTreeNode = null;
-        try {
-            rootTreeNode = new RootTreeNode(SessionManager.getProxy().getRoots());
-        } catch (ConnectionException ex) {
-            LOG.error("Updating catalogue tree after successful TimeSeries import failed.", ex);
-            return;
-        }
-
-        catalogueTreeModel.setRoot(rootTreeNode);
-        catalogueTreeModel.reload();
-
-        TreePath selectionPath = catalogueTree.getSelectionPath();
-        final Enumeration<TreePath> expandedPaths = catalogueTree.getExpandedDescendants(new TreePath(
-                    catalogueTreeModel.getRoot()));
-
-        if (selectionPath == null) {
-            while (expandedPaths.hasMoreElements()) {
-                final TreePath expandedPath = expandedPaths.nextElement();
-                if ((selectionPath == null) || (selectionPath.getPathCount() < selectionPath.getPathCount())) {
-                    selectionPath = expandedPath;
-                }
-            }
-        }
-        catalogueTree.exploreSubtree(selectionPath);
     }
 
     @Override

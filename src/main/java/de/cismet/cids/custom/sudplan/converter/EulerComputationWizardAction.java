@@ -10,10 +10,7 @@ package de.cismet.cids.custom.sudplan.converter;
 import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.ui.ComponentRegistry;
 
-import Sirius.server.middleware.types.MetaClass;
-import Sirius.server.middleware.types.MetaObject;
-
-import org.codehaus.jackson.map.ObjectMapper;
+import org.apache.log4j.Logger;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
@@ -23,9 +20,6 @@ import org.openide.util.NbBundle;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
-
-import java.io.IOException;
-import java.io.StringReader;
 
 import java.text.MessageFormat;
 
@@ -60,6 +54,9 @@ public class EulerComputationWizardAction extends AbstractCidsBeanAction {
     public static final String PROP_EULER2_RESULT = "__prop_euler2_result__";
     public static final String PROP_EULER2_INTERVAL = "__prop_euler2_interval__";
     public static final String PROP_EULER_ARITHMETIC = "__prop_euler_arithmetic__";
+
+    /** LOGGER. */
+    private static final transient Logger LOG = Logger.getLogger(EulerComputationWizardAction.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -186,23 +183,26 @@ public class EulerComputationWizardAction extends AbstractCidsBeanAction {
                 final Iterator iterator = result.keySet().iterator();
                 while (iterator.hasNext()) {
                     final int key = (Integer)iterator.next();
-                    final double value = (Double)result.get(key);
+                    final double value = result.get(key);
                     data.append(value);
                     if (key != result.lastKey()) {
-                        data.append(":");
+                        data.append(":"); // NOI18N
                     }
                 }
 
-                rainevent.setProperty("data", data.toString());
+                rainevent.setProperty("data", data.toString()); // NOI18N
 
                 rainevent = rainevent.persist();
                 final ComponentRegistry reg = ComponentRegistry.getRegistry();
                 reg.getDescriptionPane().gotoMetaObject(rainevent.getMetaObject(), null);
+
+                ComponentRegistry.getRegistry().getCatalogueTree().requestRefreshNode("rainfall.rainevent");
             } catch (final Exception ex) {
                 final String title = "Cannot perform Euler-Computation";
                 final String message = org.openide.util.NbBundle.getMessage(
                         EulerComputationWizardPanelCompute.class,
                         "EulerComputationWizardAction.actionPerformed(ActionEvent).errorCreatingRainevent");
+                LOG.error(message, ex);
                 JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
                     title,
                     message,
