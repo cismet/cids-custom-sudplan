@@ -564,6 +564,8 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                 CidsBean deltaConfiguration = createDeltaConfiguration(wizard);
                 deltaConfiguration = deltaConfiguration.persist();
 
+                DeltaConfigurationListWidged.getInstance().fireConfigsChanged();
+
                 // Step 2: create new delta surface and save it
                 CidsBean newDeltaSurface = createDeltaSurface(wizard, deltaConfiguration);
                 newDeltaSurface = newDeltaSurface.persist();
