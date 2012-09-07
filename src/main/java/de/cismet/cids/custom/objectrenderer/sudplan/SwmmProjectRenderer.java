@@ -518,8 +518,8 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
 
             try {
                 overflowVolume = Float.valueOf(this.fldOverflowVolume.getText());
-            } catch (Throwable t) {
-                LOG.warn(t.getMessage());
+            } catch (Exception e) {
+                LOG.warn(e.getMessage(), e);
             }
 
             final CsoByOverflowSearch csoByOverflowSearch = new CsoByOverflowSearch(swmmRun, overflowVolume);

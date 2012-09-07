@@ -297,8 +297,8 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                 eventDetectionUpdater = new EventDetectionUpdater(currentSensorType);
                 SudplanConcurrency.getSudplanGeneralPurposePool().execute(eventDetectionUpdater);
             }
-        } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
             progressBar.setIndeterminate(false);
             org.openide.awt.Mnemonics.setLocalizedText(
                 progressLabel,
@@ -604,8 +604,8 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                     final TimeSeries timeSeries = loadEvents(sensor);
                     exportAction.setTimeSeries(timeSeries);
                     eventDetectionTableModel = new EventDetectionTableModel(timeSeries);
-                } catch (Throwable t) {
-                    LOG.error("EventDetectionUpdater: could not retrieve event detection values: " + t.getMessage(), t);
+                } catch (Exception e) {
+                    LOG.error("EventDetectionUpdater: could not retrieve event detection values: " + e.getMessage(), e);
                     run = false;
                     EventQueue.invokeLater(new Runnable() {
 

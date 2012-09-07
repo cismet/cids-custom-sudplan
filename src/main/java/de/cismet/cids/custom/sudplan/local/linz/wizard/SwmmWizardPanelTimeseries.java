@@ -98,8 +98,8 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
         try {
             this.startDate = this.swmmInput.getStartDateTimestamp();
             this.endDate = this.swmmInput.getEndDateTimestamp();
-        } catch (Throwable t) {
-            LOG.error("could not set start and end date timestamps", t);
+        } catch (Exception e) {
+            LOG.error("could not set start and end date timestamps: " + e.getLocalizedMessage(), e);
             this.startDate = null;
             this.endDate = null;
         }
@@ -266,8 +266,8 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
 
                 i++;
             }
-        } catch (Throwable t) {
-            LOG.error("could not check time intervall of timseries", t);
+        } catch (Exception e) {
+            LOG.error("could not check time intervall of timseries: " + e.getLocalizedMessage(), e);
             this.validTimeIntervall = false;
         }
 
