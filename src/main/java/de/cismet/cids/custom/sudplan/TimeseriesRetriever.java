@@ -277,6 +277,18 @@ public final class TimeseriesRetriever {
 
             location += config.getOffering() + ".csv";
 
+            final TimeInterval timeInterval = config.getInterval();
+            if (timeInterval != null) {
+                location += "?from=";
+                location += TimeseriesRetrieverConfig.NETCDF_DATEFORMAT.format(timeInterval.getStart().asDate());
+                location += "&to=";
+                location += TimeseriesRetrieverConfig.NETCDF_DATEFORMAT.format(timeInterval.getEnd().asDate());
+            }
+
+            if (TimeseriesRetrieverConfig.NETCDF_LIMITED.equals(config.getProcedure())) {
+                location += (timeInterval != null) ? "&limited=1" : "?limited=1";
+            }
+
             LOG.info("retrieving timeseries for offering '" + config.getOffering()
                         + "' and observed property '" + config.getObsProp()
                         + "' from location '" + location + "'");

@@ -5,16 +5,13 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.data.io;
+package de.cismet.cids.custom.sudplan.local.linz;
 
 import Sirius.navigator.ui.ComponentRegistry;
-
-import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
-import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 
 import java.awt.Component;
@@ -24,44 +21,25 @@ import java.awt.event.ActionEvent;
 
 import java.text.MessageFormat;
 
-import javax.swing.Action;
 import javax.swing.JComponent;
 
-import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
-
-import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
+import de.cismet.cids.custom.sudplan.converter.LinzNetcdfConverter;
+import de.cismet.cids.custom.sudplan.data.io.*;
 
 /**
  * DOCUMENT ME!
  *
  * @version  $Revision$, $Date$
  */
-public class TimeSeriesExportWizardAction extends AbstractCidsBeanAction {
-
-    //~ Static fields/initializers ---------------------------------------------
-
-    public static final String PROP_TIMESERIES = "__prop_timeseries__";             // NOI18N
-    public static final String PROP_TS_RETRIEVER_CFG = "__prop_ts_retriever_cfg__"; // NOI18N
-
-    //~ Instance fields --------------------------------------------------------
-
-    protected transient WizardDescriptor.Panel[] panels;
-
-    private transient TimeSeries timeSeries;
-
-    private transient TimeseriesRetrieverConfig timeseriesRetrieverConfig;
+public final class LinzTimeSeriesExportWizardAction extends TimeSeriesExportWizardAction {
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RainfallDownscalingWizardAction object.
      */
-    public TimeSeriesExportWizardAction() {
-        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/data/io/ts_export.png", false)); // NOI18N
-
-        putValue(
-            Action.SHORT_DESCRIPTION,
-            NbBundle.getMessage(TimeSeriesExportWizardAction.class, "TimeSeriesExportWizardAction.shortDescription")); // NOI18N
+    public LinzTimeSeriesExportWizardAction() {
+        super();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -71,12 +49,12 @@ public class TimeSeriesExportWizardAction extends AbstractCidsBeanAction {
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     protected WizardDescriptor.Panel[] getPanels() {
         assert EventQueue.isDispatchThread() : "can only be called from EDT"; // NOI18N
 
         if (panels == null) {
             panels = new WizardDescriptor.Panel[] {
-                    new TimeSeriesConverterChoosePanelCtrl(),
                     new WizardPanelFileExport(),
                     new TimeSeriesExportWizardPanelConvert()
                 };
@@ -112,61 +90,21 @@ public class TimeSeriesExportWizardAction extends AbstractCidsBeanAction {
     /**
      * DOCUMENT ME!
      *
-     * @param  timeSeries  DOCUMENT ME!
-     */
-    public void setTimeSeries(final TimeSeries timeSeries) {
-        this.timeSeries = timeSeries;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public TimeSeries getTimeSeries() {
-        return timeSeries;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public TimeseriesRetrieverConfig getTimeseriesRetrieverConfig() {
-        return timeseriesRetrieverConfig;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  timeseriesRetrieverConfig  DOCUMENT ME!
-     */
-    public void setTimeseriesRetrieverConfig(final TimeseriesRetrieverConfig timeseriesRetrieverConfig) {
-        this.timeseriesRetrieverConfig = timeseriesRetrieverConfig;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return super.isEnabled() && ((timeSeries != null) || (timeseriesRetrieverConfig != null));
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @param  e  DOCUMENT ME!
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
-        wizard.setTitleFormat(new MessageFormat("{0}"));                                    // NOI18N
+        wizard.setTitleFormat(new MessageFormat("{0}"));                                        // NOI18N
         wizard.setTitle(NbBundle.getMessage(
-                TimeSeriesExportWizardAction.class,
-                "TimeSeriesExportWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
+                LinzTimeSeriesExportWizardAction.class,
+                "LinzTimeSeriesExportWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
 
-        assert (timeSeries != null) || (timeseriesRetrieverConfig != null) : "time series must not be null"; // NOI18N
+        assert (this.getTimeSeries() != null) || (this.getTimeseriesRetrieverConfig() != null) : "time series must not be null"; // NOI18N
 
-        wizard.putProperty(PROP_TIMESERIES, timeSeries);
-        wizard.putProperty(PROP_TS_RETRIEVER_CFG, timeseriesRetrieverConfig);
+        wizard.putProperty(PROP_TIMESERIES, this.getTimeSeries());
+        wizard.putProperty(PROP_TS_RETRIEVER_CFG, this.getTimeseriesRetrieverConfig());
+        wizard.putProperty(AbstractConverterChoosePanelCtrl.PROP_CONVERTER, new LinzNetcdfConverter(true));
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();

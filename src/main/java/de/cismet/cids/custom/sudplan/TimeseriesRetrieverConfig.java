@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 
@@ -44,6 +45,9 @@ public final class TimeseriesRetrieverConfig {
     public static final String PROTOCOL_DAV = "dav";       // NOI18N
     public static final String PROTOCOL_HYPE = "hype";     // NOI18N
     public static final String PROTOCOL_NETCDF = "netcdf"; // NOI18N
+
+    public static final String NETCDF_LIMITED = "limited"; // NOI18N
+    public static final DateFormat NETCDF_DATEFORMAT = new SimpleDateFormat("yyyyMMdd");
 
     private static final String TOKEN_TIMEINTERVAL = "ts:interval";
     private static final Pattern PATTERN = Pattern.compile("[\\],\\[](\\w+);(\\w+)[\\],\\[]");
@@ -123,9 +127,14 @@ public final class TimeseriesRetrieverConfig {
         final String changedOffering;
         final String changedProcedure;
         if (PROTOCOL_NETCDF.equals(this.getProtocol())) {
-            LOG.warn(PROTOCOL_NETCDF + " does not support changing of resolutions ("
-                        + resolution.getPrecision() + ")");
-            return this;
+            if (Resolution.HOUR.getPrecision().equals(resolution.getPrecision())) {
+                changedOffering = this.offering;
+                changedProcedure = NETCDF_LIMITED;
+            } else {
+                LOG.warn(PROTOCOL_NETCDF + " does not support resolution '"
+                            + resolution.getPrecision() + "'");
+                return this;
+            }
         } else if (PROTOCOL_DAV.equals(this.getProtocol())) {
             changedOffering = this.offering.replaceFirst("_unknown$", '_' + resolution.getPrecision());                  // NOI18N
             changedProcedure = this.procedure.replaceFirst("prec:unknown", "prec:" + resolution.getPrecision());         // NOI18N
@@ -133,6 +142,7 @@ public final class TimeseriesRetrieverConfig {
             changedOffering = this.offering.replaceFirst("prec_\\d+[YMdhms]", "prec_" + resolution.getOfferingSuffix()); // NOI18N
             changedProcedure = this.procedure.replaceFirst("prec:\\d+[YMs]", "prec:" + resolution.getPrecision());       // NOI18N
         }
+
         if (LOG.isDebugEnabled()) {
             LOG.debug(MessageFormat.format(
                     "Changed offering {0} to {1} and procedure {2} to {3}",
