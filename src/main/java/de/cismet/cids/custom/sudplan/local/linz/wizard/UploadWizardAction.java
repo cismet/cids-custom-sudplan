@@ -275,10 +275,10 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("new SWMM Bean #" + newSwmmBean.getProperty("id") + " deleted successfully");
                     }
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     LOG.error("removal of new SWMM Bean #" + newSwmmBean.getProperty("id") + " failed: "
-                                + t.getLocalizedMessage(),
-                        t);
+                                + e.getLocalizedMessage(),
+                        e);
                 }
             } else {
                 if (LOG.isDebugEnabled()) {
@@ -362,18 +362,18 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
 
                     try {
                         httpClient.getConnectionManager().shutdown();
-                    } catch (Throwable t) {
-                        LOG.warn("could not close httpClient connection", t);
+                    } catch (Exception e) {
+                        LOG.warn("could not close httpClient connection", e);
                     }
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("uploaded file '" + inpFile + "' successfully deleted from "
                                     + UploadWizardAction.SWMM_WEBDAV_HOST);
                     }
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     LOG.error("removal of uploaded file '" + inpFile + "' from "
                                 + UploadWizardAction.SWMM_WEBDAV_HOST + " failed: "
-                                + t.getLocalizedMessage(),
-                        t);
+                                + e.getLocalizedMessage(),
+                        e);
                 }
             }
 

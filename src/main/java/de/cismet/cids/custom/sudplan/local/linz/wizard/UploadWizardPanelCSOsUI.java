@@ -400,8 +400,8 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
                             ((CardLayout)cardPanel.getLayout()).show(cardPanel, "csos");
                         }
                     });
-            } catch (Throwable t) {
-                LOG.error("CsoCopyThread: could not copy CSOs: " + t.getMessage(), t);
+            } catch (Exception e) {
+                LOG.error("CsoCopyThread: could not copy CSOs: " + e.getMessage(), e);
                 model.setCopyCSOsErroneous(true);
                 EventQueue.invokeLater(new Runnable() {
 
