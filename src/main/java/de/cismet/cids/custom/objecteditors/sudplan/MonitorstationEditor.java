@@ -9,6 +9,8 @@ package de.cismet.cids.custom.objecteditors.sudplan;
 
 import Sirius.navigator.tools.MetaObjectChangeEvent;
 import Sirius.navigator.tools.MetaObjectChangeSupport;
+import Sirius.navigator.ui.ComponentRegistry;
+import Sirius.navigator.ui.tree.MetaCatalogueTree;
 
 import Sirius.server.middleware.types.MetaObject;
 
@@ -399,6 +401,8 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
                 final MetaObjectChangeEvent moce = new MetaObjectChangeEvent(this, oldMo, newMo);
                 MetaObjectChangeSupport.getDefault().fireMetaObjectChanged(moce);
             }
+
+            // TODO: soft refresh when the editor won't do a hard refresh anymore
         }
     }
 
