@@ -532,10 +532,6 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                     } else {
                         showOrigButtonNeeded = true;
                     }
-                    resolution = TimeSeriesRendererUtil.getPreviewResolution(config);
-                    if (TimeseriesChartPanel.this.showPrevRes && (resolution != null)) {
-                        config = config.changeResolution(resolution);
-                    }
 
                     // if TimeSeries data is located on DAV, we can assume that it is encoded in the
                     // internal format (TimeSeriesSerializer)
@@ -543,6 +539,11 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                         converter = TimeSeriesSerializer.getInstance();
                     } else {
                         converter = configs.get(config);
+                    }
+
+                    resolution = TimeSeriesRendererUtil.getPreviewResolution(config);
+                    if (TimeseriesChartPanel.this.showPrevRes && (resolution != null)) {
+                        config = config.changeResolution(resolution);
                     }
 
                     tsFuture = TimeseriesRetriever.getInstance().retrieve(config, converter);
