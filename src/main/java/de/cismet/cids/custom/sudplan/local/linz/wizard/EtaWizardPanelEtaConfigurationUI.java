@@ -141,8 +141,8 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                     ((CardLayout)cardPanel.getLayout()).show(cardPanel, "csos");
                 }
             }
-        } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
             progressBar.setIndeterminate(false);
             org.openide.awt.Mnemonics.setLocalizedText(
                 progressLabel,
@@ -420,8 +420,8 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                         LOG.debug("CsoUpdater: loading results");
                     }
                     etaConfigurationTableModel = initCSOs(model.getSwmmProjectId());
-                } catch (Throwable t) {
-                    LOG.error("CsoUpdater: could not retrieve CSOs: " + t.getMessage(), t);
+                } catch (Exception e) {
+                    LOG.error("CsoUpdater: could not retrieve CSOs: " + e.getMessage(), e);
                     run = false;
                     EventQueue.invokeLater(new Runnable() {
 

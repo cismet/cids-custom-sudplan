@@ -223,8 +223,8 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
                 try {
                     etaOutputs.add(this.getEtaOutput(modelOutputBean));
                     etaRunNames.add((String)modelOutputBean.getProperty("name"));
-                } catch (Throwable t) {
-                    LOG.error("could not process model output '" + modelOutputBean + "': " + t.getMessage(), t);
+                } catch (Exception e) {
+                    LOG.error("could not process model output '" + modelOutputBean + "': " + e.getMessage(), e);
                 }
             }
 

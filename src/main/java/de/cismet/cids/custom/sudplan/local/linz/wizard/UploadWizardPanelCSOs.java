@@ -97,8 +97,8 @@ public final class UploadWizardPanelCSOs implements WizardDescriptor.Panel {
             this.setSelectedSwmmProject(Integer.valueOf(
                     this.wizardDescriptor.getProperty(
                         UploadWizardAction.PROP_SELECTED_SWMM_PROJECT_ID).toString()));
-        } catch (Throwable t) {
-            LOG.warn("could not set swmm project id, setting to default (-1)", t);
+        } catch (Exception e) {
+            LOG.warn("could not set swmm project id, setting to default (-1)", e);
             this.setSelectedSwmmProject(-1);
         }
 

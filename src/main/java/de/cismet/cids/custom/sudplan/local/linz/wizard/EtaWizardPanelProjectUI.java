@@ -143,9 +143,9 @@ public final class EtaWizardPanelProjectUI extends JPanel {
             sb.append(" ORDER BY ").append(ca.getValue());               // NOI18N
         }
 
-        final MetaObject[] metaObjects;
+        final MetaObject[] swmmProjects;
         try {
-            metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
+            swmmProjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
         } catch (final ConnectionException ex) {
             final String message = "cannot get swmm project meta objects from database"; // NOI18N
             LOG.error(message, ex);
@@ -153,8 +153,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
         }
 
         final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
-        for (int i = 0; i < metaObjects.length; ++i) {
-            comboBoxModel.addElement(metaObjects[i].getBean());
+        for (int i = 0; i < swmmProjects.length; ++i) {
+            comboBoxModel.addElement(swmmProjects[i].getBean());
         }
 
         this.cobProjects.setModel(comboBoxModel);
@@ -163,6 +163,13 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 ItemListener.class,
                 this.projectListener,
                 this.cobProjects));
+
+        this.cobProjects.setSelectedIndex(-1);
+        if (swmmProjects.length > 0) {
+            this.cobProjects.setSelectedIndex(0);
+        } else {
+            LOG.warn("no SWMM projects found!?");
+        }
     }
 
     /**
