@@ -363,8 +363,8 @@ public class SwmmWatchable extends AbstractModelRunWatchable {
                     LOG.debug(type);
                 }
             }
-        } catch (Throwable t) {
-            LOG.warn("cannot determine types of value keys: " + t.getMessage(), t);
+        } catch (Exception e) {
+            LOG.warn("cannot determine types of value keys: " + e.getMessage(), e);
         }
 
         final String[] nodes = (String[])resultTS.getValue(timeStamp, "nodes");

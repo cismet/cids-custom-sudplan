@@ -71,7 +71,12 @@ public class CsoOverflowComparisionPanel extends javax.swing.JPanel {
      */
     public void setSwmmResults(final Collection<CidsBean> swmmResults) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("setSwmmResults: " + swmmResults.size());
+            LOG.debug("setSwmmResults for Cso Overflow Comparision: " + swmmResults.size());
+        }
+
+        if (swmmResults.isEmpty()) {
+            LOG.warn("empty SWMM results list");
+            return;
         }
 
         final DefaultCategoryDataset dataset = new DefaultCategoryDataset();

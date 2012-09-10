@@ -7,8 +7,10 @@
 ****************************************************/
 package de.cismet.cids.custom.objectactions.sudplan;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import de.cismet.cids.custom.sudplan.local.wupp.EditBreakingEdgeAction;
 
@@ -27,6 +29,9 @@ public final class GeocpmBreakingEdgeActionsProvider implements CidsBeanActionsP
 
     @Override
     public Collection<CidsBeanAction> getActions() {
-        return Arrays.asList(ActionProviderFactory.getCidsBeanAction(EditBreakingEdgeAction.class));
+        final List<CidsBeanAction> ret = new ArrayList<CidsBeanAction>(1);
+        ret.add(ActionProviderFactory.getCidsBeanAction(EditBreakingEdgeAction.class));
+
+        return ret;
     }
 }

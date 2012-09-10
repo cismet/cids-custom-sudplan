@@ -35,11 +35,11 @@ import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
 import de.cismet.cids.custom.sudplan.ProgressEvent;
 import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.SudplanOptions;
 import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
 import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.TimeseriesTransmitter;
-import de.cismet.cids.custom.sudplan.Variable;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -143,10 +143,10 @@ public final class SimulationWatchable extends AbstractModelRunWatchable {
                 final TimeseriesRetrieverConfig cfg = new TimeseriesRetrieverConfig(
                         TimeseriesRetrieverConfig.PROTOCOL_HYPE,
                         null,
-                        new URL("http://79.125.2.136"), // NOI18N
+                        new URL("http://" + SudplanOptions.getInstance().getHdHypeIp()), // NOI18N
                         tsProcedure,
                         String.valueOf(runinfo.getBasinId()),
-                        Variable.COUT.getPropertyKey(),
+                        HydrologyCache.getInstance().getVariableForVar(var).getPropertyKey(),
                         tsOffering,
                         null,
                         interval);
@@ -170,7 +170,7 @@ public final class SimulationWatchable extends AbstractModelRunWatchable {
                         new URL(TimeSeriesRemoteHelper.DAV_HOST),
                         tsProcedure,
                         String.valueOf(runinfo.getBasinId()),
-                        Variable.COUT.getPropertyKey(),
+                        HydrologyCache.getInstance().getVariableForVar(var).getPropertyKey(),
                         tsOffering,
                         null,
                         null);

@@ -127,9 +127,9 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
     protected String getReloadId() {
         try {
             final SwmmInput swmmInput = (SwmmInput)getUR();
-            return "project_id" + swmmInput.getSwmmProject() + "_scenarios"; // NOI18N
+            return "local.linz." + swmmInput.getSwmmProject() + ".swmm.scenarios"; // NOI18N
         } catch (final Exception e) {
-            LOG.warn("cannot fetch reload id", e);                           // NOI18N
+            LOG.warn("cannot fetch reload id", e);                                 // NOI18N
             return null;
         }
     }
@@ -197,12 +197,12 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("finished downloading timeseries from WEBDAV");
                 }
-            } catch (Throwable t) {
+            } catch (Exception e) {
                 final String message = "Could not download rain timeseries from '"
                             + config.getProtocol() + "'";
-                LOG.error(message, t);
+                LOG.error(message, e);
                 this.fireBroken(message);
-                throw new IOException(message, t);
+                throw new IOException(message, e);
             }
         } else {
             final String message = "Unsupported timeseries protocol: '" + config.getProtocol() + "'";
@@ -326,10 +326,10 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
         try {
             spsTask.setParameter("start", isoDf.format(swmmInput.getStartDate()));
             spsTask.setParameter("end", isoDf.format(swmmInput.getEndDate()));
-        } catch (Throwable t) {
-            LOG.error(t.getMessage());
-            this.fireBroken(t.getMessage());
-            throw new IOException(t.getMessage(), t);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            this.fireBroken(e.getMessage());
+            throw new IOException(e.getMessage(), e);
         }
 
         spsTask.setParameter("dat", modelOffering);

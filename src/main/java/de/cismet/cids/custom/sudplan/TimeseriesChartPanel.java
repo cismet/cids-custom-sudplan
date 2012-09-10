@@ -16,8 +16,6 @@ import org.apache.log4j.Logger;
 import org.jfree.chart.JFreeChart;
 import org.jfree.util.Log;
 
-import org.openide.util.WeakListeners;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
@@ -37,9 +35,9 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.*;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.border.LineBorder;
@@ -534,10 +532,6 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                     } else {
                         showOrigButtonNeeded = true;
                     }
-                    resolution = TimeSeriesRendererUtil.getPreviewResolution(config);
-                    if (TimeseriesChartPanel.this.showPrevRes && (resolution != null)) {
-                        config = config.changeResolution(resolution);
-                    }
 
                     // if TimeSeries data is located on DAV, we can assume that it is encoded in the
                     // internal format (TimeSeriesSerializer)
@@ -545,6 +539,11 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                         converter = TimeSeriesSerializer.getInstance();
                     } else {
                         converter = configs.get(config);
+                    }
+
+                    resolution = TimeSeriesRendererUtil.getPreviewResolution(config);
+                    if (TimeseriesChartPanel.this.showPrevRes && (resolution != null)) {
+                        config = config.changeResolution(resolution);
                     }
 
                     tsFuture = TimeseriesRetriever.getInstance().retrieve(config, converter);

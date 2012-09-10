@@ -9,13 +9,15 @@ package de.cismet.cids.custom.objectrenderer.sudplan;
 
 import org.apache.log4j.Logger;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import org.openide.util.NbBundle;
 
-import java.awt.BorderLayout;
+import java.io.StringReader;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
-import de.cismet.cids.custom.sudplan.IDFChartPanel;
-import de.cismet.cids.custom.sudplan.IDFTablePanel;
+import de.cismet.cids.custom.sudplan.IDFCurve;
+import de.cismet.cids.custom.sudplan.IDFCurvePanel;
 
 /**
  * DOCUMENT ME!
@@ -31,11 +33,9 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkForecast;
+    private javax.swing.JLabel lblDescription;
+    private javax.swing.JLabel lblShowDescription;
     private javax.swing.JLabel lblStatus;
-    private javax.swing.JLabel lblUnit;
-    private javax.swing.JLabel lblUnitValue;
-    private javax.swing.JLabel lblYear;
-    private javax.swing.JLabel lblYearValue;
     private javax.swing.JPanel pnlFiller;
     private javax.swing.JPanel pnlIdf;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
@@ -66,10 +66,8 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         pnlIdf = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         chkForecast = new javax.swing.JCheckBox();
-        lblYear = new javax.swing.JLabel();
-        lblYearValue = new javax.swing.JLabel();
-        lblUnit = new javax.swing.JLabel();
-        lblUnitValue = new javax.swing.JLabel();
+        lblDescription = new javax.swing.JLabel();
+        lblShowDescription = new javax.swing.JLabel();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
@@ -78,7 +76,7 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         pnlFiller.setLayout(new java.awt.BorderLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
@@ -93,7 +91,7 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -104,7 +102,7 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         chkForecast.setContentAreaFilled(false);
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.forecast}"),
                 chkForecast,
@@ -112,6 +110,13 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         binding.setSourceNullValue(false);
         bindingGroup.addBinding(binding);
 
+        chkForecast.addItemListener(new java.awt.event.ItemListener() {
+
+                @Override
+                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
+                    chkForecastItemStateChanged(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -119,62 +124,76 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(chkForecast, gridBagConstraints);
 
-        lblYear.setText(NbBundle.getMessage(IdfCurveRenderer.class, "IdfCurveRenderer.lblYear.text")); // NOI18N
+        lblDescription.setFont(new java.awt.Font("Lucida Grande", 1, 13));                                           // NOI18N
+        lblDescription.setText(NbBundle.getMessage(IdfCurveRenderer.class, "IdfCurveRenderer.lblDescription.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblYear, gridBagConstraints);
+        add(lblDescription, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.year}"),
-                lblYearValue,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
+                lblShowDescription,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding.setSourceNullValue(NbBundle.getMessage(
+                IdfCurveRenderer.class,
+                "IdfCurveRenderer.lblDescriptionValue.text.nullSourceValue"));       // NOI18N
+        binding.setSourceUnreadableValue(NbBundle.getMessage(
+                IdfCurveRenderer.class,
+                "IdfCurveRenderer.lblDescriptionValue.text.unreadableSourceValue")); // NOI18N
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblYearValue, gridBagConstraints);
-
-        lblUnit.setText(org.openide.util.NbBundle.getMessage(IdfCurveRenderer.class, "IdfCurveRenderer.lblUnit.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblUnit, gridBagConstraints);
-
-        lblUnitValue.setText(NbBundle.getMessage(IdfCurveRenderer.class, "IdfCurveRenderer.lblUnitValue.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblUnitValue, gridBagConstraints);
+        add(lblShowDescription, gridBagConstraints);
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkForecastItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkForecastItemStateChanged
+        if (cidsBean != null) {
+            final Boolean forecast = (Boolean)cidsBean.getProperty("forecast");
+            if (forecast != null) {
+                chkForecast.setSelected(forecast.booleanValue());
+            } else {
+                chkForecast.setSelected(false);
+            }
+        }
+    }                                                                              //GEN-LAST:event_chkForecastItemStateChanged
 
     @Override
     protected void init() {
         bindingGroup.unbind();
         bindingGroup.bind();
 
-        try {
-            pnlIdf.removeAll();
-            pnlIdf.add(new IDFTablePanel(cidsBean));
-            pnlFiller.removeAll();
-            pnlFiller.add(new IDFChartPanel(cidsBean), BorderLayout.CENTER);
-        } catch (final Exception ex) {
-            LOG.error("cannot initialise IDF renderer", ex); // NOI18N
+        pnlIdf.removeAll();
 
-            lblStatus.setText("ERROR: " + ex.getMessage()); // NOI18N
+        final String json = (String)cidsBean.getProperty("uri");
+        final ObjectMapper mapper = new ObjectMapper();
+        final IDFCurve curve;
+        try {
+            curve = mapper.readValue(new StringReader(json), IDFCurve.class);
+            final Boolean forecast = (Boolean)cidsBean.getProperty("forecast");
+            final Integer year = (Integer)cidsBean.getProperty("year");
+            curve.setForecast(forecast);
+            curve.setCenterYear(year);
+            pnlIdf.add(new IDFCurvePanel(curve));
+        } catch (Exception ex) {
+            final String message = "Cannot inizialize IDFCurveRenderer!"; // NOI18N
+            LOG.error(message, ex);
         }
     }
 }

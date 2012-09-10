@@ -28,7 +28,6 @@ import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnectionManager;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
@@ -39,9 +38,6 @@ import static org.junit.Assert.*;
  */
 public class TimeSeriesTestUtil 
 {
-    public static final String      DAV_HOST = "http://sudplan.cismet.de/tsDav/";
-    public static final Credentials CREDS = new UsernamePasswordCredentials("tsDav", "RHfio2l4wrsklfghj");
-
     
     private TimeSeriesTestUtil() {}
     
@@ -142,14 +138,14 @@ public class TimeSeriesTestUtil
     
     public static HttpClient createHttpClient()
     {
-        return createHttpClient(DAV_HOST, CREDS);
+        return createHttpClient(TimeSeriesRemoteHelper.DAV_HOST, TimeSeriesRemoteHelper.DAV_CREDS);
     }
     
     
     public static void removeRemoteFile(final String host, final Credentials creds, final String file) throws Exception
     {
         final HttpClient   client = TimeSeriesTestUtil.createHttpClient();
-        final DeleteMethod del = new DeleteMethod(TimeSeriesTestUtil.DAV_HOST + file);
+        final DeleteMethod del = new DeleteMethod(TimeSeriesRemoteHelper.DAV_HOST + file);
 
 
         try {
@@ -168,6 +164,6 @@ public class TimeSeriesTestUtil
     
     public static void removeRemoteFile(final String file) throws Exception
     {
-        removeRemoteFile(DAV_HOST, CREDS, file);
+        removeRemoteFile(TimeSeriesRemoteHelper.DAV_HOST, TimeSeriesRemoteHelper.DAV_CREDS, file);
     }
 }

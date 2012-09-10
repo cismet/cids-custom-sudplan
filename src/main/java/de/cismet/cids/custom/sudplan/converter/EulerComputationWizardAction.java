@@ -10,10 +10,7 @@ package de.cismet.cids.custom.sudplan.converter;
 import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.ui.ComponentRegistry;
 
-import Sirius.server.middleware.types.MetaClass;
-import Sirius.server.middleware.types.MetaObject;
-
-import org.codehaus.jackson.map.ObjectMapper;
+import org.apache.log4j.Logger;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
@@ -23,9 +20,6 @@ import org.openide.util.NbBundle;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
-
-import java.io.IOException;
-import java.io.StringReader;
 
 import java.text.MessageFormat;
 
@@ -60,6 +54,9 @@ public class EulerComputationWizardAction extends AbstractCidsBeanAction {
     public static final String PROP_EULER2_RESULT = "__prop_euler2_result__";
     public static final String PROP_EULER2_INTERVAL = "__prop_euler2_interval__";
     public static final String PROP_EULER_ARITHMETIC = "__prop_euler_arithmetic__";
+
+    /** LOGGER. */
+    private static final transient Logger LOG = Logger.getLogger(EulerComputationWizardAction.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -109,34 +106,18 @@ public class EulerComputationWizardAction extends AbstractCidsBeanAction {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-        final CidsBean cidsBean = model.getCidsBeanIDFcurve();
-        assert cidsBean != null : "cidsbean not set";                            // NOI18N
-        assert cidsBean.getMetaObject() != null : "cidsbean without metaobject"; // NOI18N
-
-        final MetaObject mo = cidsBean.getMetaObject();
-        final MetaClass mc = mo.getMetaClass();
-
-        assert mc != null : "metaobject without metaclass"; // NOI18N
+        final IDFCurve idfCurve = model.getIDFcurve();
+        assert idfCurve != null : "idfCurve not set"; // NOI18N
 
         final boolean forecast;
 
-        if (cidsBean.getProperty("forecast") == null) {
+        if (idfCurve.getForecast() == null) {
             forecast = false;
         } else {
-            forecast = (Boolean)cidsBean.getProperty("forecast");
+            forecast = idfCurve.getForecast();
         }
 
-        final String json = (String)cidsBean.getProperty("uri");    // NOI18N
-        final ObjectMapper mapper = new ObjectMapper();
-        final IDFCurve idfcurve;
-        try {
-            idfcurve = mapper.readValue(new StringReader(json), IDFCurve.class);
-        } catch (IOException ex) {
-            final String message = "cannot read idf data from uri"; // NOI18N
-            throw new IllegalStateException(message, ex);
-        }
-
-        final int interval = idfcurve.getData().firstKey();
+        final int interval = idfCurve.getData().firstKey();
         assert interval > 0 : "interval cannot be negative or 0";
 
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
@@ -153,8 +134,8 @@ public class EulerComputationWizardAction extends AbstractCidsBeanAction {
         final SortedMap<Integer, Double> raindata = new TreeMap<Integer, Double>();
 
         for (int i = rowIndexStart; i <= rowIndexEnd; i++) {
-            final Integer duration = (Integer)idfcurve.getDurationIntensityRows()[i][0];
-            final Double value = (Double)idfcurve.getDurationIntensityRows()[i][colIndexEnd];
+            final Integer duration = (Integer)idfCurve.getDurationIntensityRows()[i][0];
+            final Double value = (Double)idfCurve.getDurationIntensityRows()[i][colIndexEnd];
             if ((duration != null) && (value != null)) {
                 raindata.put(duration, value);
             }
@@ -202,23 +183,26 @@ public class EulerComputationWizardAction extends AbstractCidsBeanAction {
                 final Iterator iterator = result.keySet().iterator();
                 while (iterator.hasNext()) {
                     final int key = (Integer)iterator.next();
-                    final double value = (Double)result.get(key);
+                    final double value = result.get(key);
                     data.append(value);
                     if (key != result.lastKey()) {
-                        data.append(":");
+                        data.append(":"); // NOI18N
                     }
                 }
 
-                rainevent.setProperty("data", data.toString());
+                rainevent.setProperty("data", data.toString()); // NOI18N
 
                 rainevent = rainevent.persist();
                 final ComponentRegistry reg = ComponentRegistry.getRegistry();
                 reg.getDescriptionPane().gotoMetaObject(rainevent.getMetaObject(), null);
+
+                ComponentRegistry.getRegistry().getCatalogueTree().requestRefreshNode("rainfall.rainevent");
             } catch (final Exception ex) {
                 final String title = "Cannot perform Euler-Computation";
                 final String message = org.openide.util.NbBundle.getMessage(
                         EulerComputationWizardPanelCompute.class,
                         "EulerComputationWizardAction.actionPerformed(ActionEvent).errorCreatingRainevent");
+                LOG.error(message, ex);
                 JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
                     title,
                     message,

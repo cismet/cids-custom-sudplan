@@ -36,11 +36,10 @@ public final class SwmmInput {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String TABLENAME_SWMM_PROJECT = "SWMM_PROJECT";        // NOI18N
+    public static final String TABLENAME_SWMM_PROJECT = "SWMM_PROJECT"; // NOI18N
     public static final String TABLENAME_MONITOR_STATION = "monitorstation";
     public static final String TABLENAME_MONITOR_STATION_TYPE = "monitorstationtype";
-    public static final String MONITOR_STATION_TYPE = "Linz Regenmessstation"; // NOI18N
-    public static final String FLD_MONITOR_STATION_TYPE = "name";              // NOI18N
+    public static final String FLD_MONITOR_STATION_TYPE = "name";       // NOI18N
     public static final String FK_MONITOR_STATION_TYPE = "type";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
     public static final String PROP_TIMESERIES = "timeseries";

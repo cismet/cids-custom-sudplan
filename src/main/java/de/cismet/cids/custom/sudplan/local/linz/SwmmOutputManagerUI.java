@@ -12,7 +12,6 @@
  */
 package de.cismet.cids.custom.sudplan.local.linz;
 
-import Sirius.navigator.resource.PropertyManager;
 import Sirius.navigator.ui.ComponentRegistry;
 
 import org.apache.log4j.Logger;
@@ -36,6 +35,8 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 
+import de.cismet.tools.PropertyReader;
+
 /**
  * DOCUMENT ME!
  *
@@ -46,21 +47,22 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String GEOSERVER_HOST_PROPERTY = "sudplan.geoserver-host";
+    private static final PropertyReader propertyReader;
+    private static final String FILE_PROPERTY = "/de/cismet/cids/custom/sudplan/repositories.properties";
 
+    private static final String GEOSERVER_HOST;
     private static final XBoundingBox LINZ_BB = new XBoundingBox(13.979, 48.102, 14.521, 48.473, "EPSG:4326", false);
-    // public static final String GEOSERVER_HOST = "http://schlob-pc:9987";
-    public static final String SWMM_WMS_TEMPLATE = "geoserver/sudplan/wms?service=WMS"
-                + "&version=1.1.0&request=GetMap&layers=%LAYERS%"
-                + "&styles=&bbox=<cismap:boundingBox>&width=<cismap:width>"
-                + "&height=<cismap:height>&srs=EPSG:4326"
-                + "&format=image%2Fpng&TRANSPARENT=TRUE";
+    private static final String GEOSERVER_SWMM_LAYER_TEMPLATE;
 
     private static final transient Logger LOG = Logger.getLogger(SwmmOutputManagerUI.class);
 
-    //~ Instance fields --------------------------------------------------------
+    static {
+        propertyReader = new PropertyReader(FILE_PROPERTY);
+        GEOSERVER_HOST = propertyReader.getProperty("GEOSERVER_HOST");
+        GEOSERVER_SWMM_LAYER_TEMPLATE = propertyReader.getProperty("GEOSERVER_SWMM_LAYER_TEMPLATE");
+    }
 
-    private final String geoserverHost;
+    //~ Instance fields --------------------------------------------------------
 
     private final transient SwmmOutputManager outputManager;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -78,19 +80,6 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
      * @param  outputManager  DOCUMENT ME!
      */
     public SwmmOutputManagerUI(final SwmmOutputManager outputManager) {
-        // TODO: Better Visualisation (Charts?), Links to CSOs
-
-        if (PropertyManager.getManager().getProperties().getProperty(GEOSERVER_HOST_PROPERTY)
-                    != null) {
-            this.geoserverHost = PropertyManager.getManager().getProperties().getProperty(GEOSERVER_HOST_PROPERTY);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("sudplan.geoserver-host set to '" + geoserverHost + "'");
-            }
-        } else {
-            LOG.warn("sudplan.geoserver-host property not set, setting to default 'http://sudplan.cismet.de/'");
-            geoserverHost = "http://sudplan.cismet.de/";
-        }
-
         this.outputManager = outputManager;
         initComponents();
         init();
@@ -101,7 +90,7 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
     /**
      * DOCUMENT ME!
      */
-    protected void init() {
+    protected final void init() {
         try {
             final SwmmOutput swmmOutput = outputManager.getUR();
             final ArrayList<CsoOverflow> csoOverflows = new ArrayList<CsoOverflow>(swmmOutput.getCsoOverflows().size());
@@ -192,7 +181,7 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
             LOG.info("showing result of SWMM RUN '" + swmmOutput.getSwmmRunName()
                         + "' (" + swmmOutput.getSwmmRun() + ") in layer '" + layerName + "'");
 
-            final String wmsURL = geoserverHost + (SWMM_WMS_TEMPLATE.replace("%LAYERS%", layerName));
+            final String wmsURL = GEOSERVER_HOST + (GEOSERVER_SWMM_LAYER_TEMPLATE.replace("%LAYERS%", layerName));
             if (LOG.isDebugEnabled()) {
                 LOG.debug(wmsURL);
             }
@@ -328,7 +317,7 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
                     return NbBundle.getMessage(SwmmOutputManagerUI.class, "SwmmOutputManagerUI.column.frequency");
                 }
                 default: {
-                    return "";
+                    return "n/a";
                 }
             }
         }

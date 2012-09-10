@@ -143,9 +143,9 @@ public final class EtaWizardPanelProjectUI extends JPanel {
             sb.append(" ORDER BY ").append(ca.getValue());               // NOI18N
         }
 
-        final MetaObject[] metaObjects;
+        final MetaObject[] swmmProjects;
         try {
-            metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
+            swmmProjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
         } catch (final ConnectionException ex) {
             final String message = "cannot get swmm project meta objects from database"; // NOI18N
             LOG.error(message, ex);
@@ -153,8 +153,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
         }
 
         final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
-        for (int i = 0; i < metaObjects.length; ++i) {
-            comboBoxModel.addElement(metaObjects[i].getBean());
+        for (int i = 0; i < swmmProjects.length; ++i) {
+            comboBoxModel.addElement(swmmProjects[i].getBean());
         }
 
         this.cobProjects.setModel(comboBoxModel);
@@ -163,6 +163,13 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 ItemListener.class,
                 this.projectListener,
                 this.cobProjects));
+
+        this.cobProjects.setSelectedIndex(-1);
+        if (swmmProjects.length > 0) {
+            this.cobProjects.setSelectedIndex(0);
+        } else {
+            LOG.warn("no SWMM projects found!?");
+        }
     }
 
     /**
@@ -171,6 +178,9 @@ public final class EtaWizardPanelProjectUI extends JPanel {
      * @param  swmmScenarios  DOCUMENT ME!
      */
     private void initScenarioList(final List<CidsBean> swmmScenarios) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("loading " + swmmScenarios + " SWMM Sceanrios");
+        }
         final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
         for (final CidsBean swmmScenario : swmmScenarios) {
             comboBoxModel.addElement(swmmScenario);
@@ -182,6 +192,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 this.scenarioListener,
                 this.cobScenarios));
 
+        // fire selection event
+        this.cobScenarios.setSelectedIndex(-1);
         this.cobScenarios.setSelectedIndex(0);
     }
 
@@ -225,8 +237,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 EtaWizardPanelProjectUI.class,
                 "EtaWizardPanelProjectUI.lblDescription.text")); // NOI18N
 
-        taProjectDescriptionText.setColumns(20);
         taProjectDescriptionText.setEditable(false);
+        taProjectDescriptionText.setColumns(20);
         taProjectDescriptionText.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         taProjectDescriptionText.setRows(3);
 
@@ -289,10 +301,8 @@ public final class EtaWizardPanelProjectUI extends JPanel {
                 EtaWizardPanelProjectUI.class,
                 "EtaWizardPanelProjectUI.lblScenarios.text")); // NOI18N
 
-        cobScenarios.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Scenario #1" }));
-
-        taScenarioDescriptionText.setColumns(20);
         taScenarioDescriptionText.setEditable(false);
+        taScenarioDescriptionText.setColumns(20);
         taScenarioDescriptionText.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         taScenarioDescriptionText.setRows(3);
         jScrollPane2.setViewportView(taScenarioDescriptionText);

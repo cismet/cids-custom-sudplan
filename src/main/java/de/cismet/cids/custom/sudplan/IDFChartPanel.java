@@ -7,10 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
-import org.apache.log4j.Logger;
-
-import org.codehaus.jackson.map.ObjectMapper;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -26,12 +22,9 @@ import org.jfree.ui.RectangleInsets;
 import java.awt.BorderLayout;
 import java.awt.Color;
 
-import java.io.IOException;
-import java.io.StringReader;
-
 import java.util.Iterator;
 
-import de.cismet.cids.dynamics.CidsBean;
+import javax.swing.BorderFactory;
 
 /**
  * DOCUMENT ME!
@@ -41,13 +34,11 @@ import de.cismet.cids.dynamics.CidsBean;
  */
 public class IDFChartPanel extends javax.swing.JPanel {
 
-    //~ Static fields/initializers ---------------------------------------------
-
-    private static final transient Logger LOG = Logger.getLogger(IDFChartPanel.class);
-
     //~ Instance fields --------------------------------------------------------
 
-    private final transient CidsBean cidsBean;
+// private static final transient Logger LOG = Logger.getLogger(IDFChartPanel.class);
+
+    private final transient IDFCurve idfCurve;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel pnlChart;
     // End of variables declaration//GEN-END:variables
@@ -57,10 +48,10 @@ public class IDFChartPanel extends javax.swing.JPanel {
     /**
      * Creates new form IDFChartPanel.
      *
-     * @param  idfcurve  DOCUMENT ME!
+     * @param  idfCurve  DOCUMENT ME!
      */
-    public IDFChartPanel(final CidsBean idfcurve) {
-        this.cidsBean = idfcurve;
+    public IDFChartPanel(final IDFCurve idfCurve) {
+        this.idfCurve = idfCurve;
         initComponents();
         init();
     }
@@ -92,32 +83,21 @@ public class IDFChartPanel extends javax.swing.JPanel {
 
     /**
      * DOCUMENT ME!
-     *
-     * @throws  IllegalStateException  DOCUMENT ME!
      */
     private void init() {
-        final String json = (String)cidsBean.getProperty("uri");    // NOI18N
-        final ObjectMapper mapper = new ObjectMapper();
-        final IDFCurve curve;
-        try {
-            curve = mapper.readValue(new StringReader(json), IDFCurve.class);
-        } catch (IOException ex) {
-            final String message = "cannot read idf data from uri"; // NOI18N
-            LOG.error(message, ex);
-            throw new IllegalStateException(message, ex);
-        }
+        final XYDataset dataset = createDataset(idfCurve);
+        final String xAxisTitle = org.openide.util.NbBundle.getMessage(
+                IDFChartPanel.class,
+                "IDFChartPanel.init().xAxisTitle");
+        final String yAxisTitle = org.openide.util.NbBundle.getMessage(
+                IDFChartPanel.class,
+                "IDFChartPanel.init().yAxisTitle");
 
-        // Create Chart
-        final XYDataset dataset = createDataset(curve);
-        final String name = (String)cidsBean.getProperty("name"); // NOI18N
-        final String xAxisTitle = "Duration (min)";
-        final String yAxisTitle = "Intensity (mm/h)";
-
-        final JFreeChart chart = createChart(dataset, name, xAxisTitle, yAxisTitle);
+        final JFreeChart chart = createChart(dataset, null, xAxisTitle, yAxisTitle);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setMouseZoomable(true, true);
         chartPanel.setMouseWheelEnabled(true);
-        chartPanel.setPopupMenu(null);
+        chartPanel.setBorder(BorderFactory.createLineBorder(Color.black, 1));
         pnlChart.add(chartPanel, BorderLayout.CENTER);
     }
 
@@ -134,9 +114,13 @@ public class IDFChartPanel extends javax.swing.JPanel {
             final Iterator iterator = curve.getData().keySet().iterator();
             final StringBuilder seriesTitle = new StringBuilder(String.valueOf(frequency));
             if (frequency <= 1) {
-                seriesTitle.append(" year");
+                seriesTitle.append(org.openide.util.NbBundle.getMessage(
+                        IDFChartPanel.class,
+                        "IDFChartPanel.createDataset(IDFCurve).seriesTitle.oneYear"));
             } else {
-                seriesTitle.append(" years");
+                seriesTitle.append(org.openide.util.NbBundle.getMessage(
+                        IDFChartPanel.class,
+                        "IDFChartPanel.createDataset(IDFCurve).seriesTitle.severalYears"));
             }
             final XYSeries series = new XYSeries(seriesTitle.toString());
             while (iterator.hasNext()) {

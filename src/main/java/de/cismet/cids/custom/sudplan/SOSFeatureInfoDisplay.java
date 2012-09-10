@@ -66,14 +66,15 @@ import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
 
-import de.cismet.cids.custom.sudplan.dataExport.TimeSeriesExportWizardAction;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSignature;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;
@@ -126,9 +127,6 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
 
     //~ Instance fields --------------------------------------------------------
 
-    // NOI18N
-    // NOI18N
-    // NOI18N
     private transient String scenario;
     private transient String obsProp;
     private transient String procedure;
@@ -159,6 +157,7 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
     private final transient ActionListener resL;
     private final transient ActionListener holdL;
     private final transient ActionListener aggrL;
+    private final transient Object displayLock;
     /**
      * Used by {@link TimeSeriesDisplayer} for busy indication. Note that Serialization should not be necessary as only
      * one {@link TimeSeriesDisplayer} instance can access this attribute simultaneously.
@@ -198,6 +197,7 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
                 FeatureInfoDisplayKey.ANY_SERVER,
                 FeatureInfoDisplayKey.ANY_LAYER));
 
+        displayLock = new Object();
         holdFeatures = new HashMap<Integer, SignaturedFeature>();
         holdListeners = new HashSet<HoldListener>();
         tsListChangedL = new TimeServiesListChangedListenerImpl();
@@ -690,7 +690,7 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
             final Iterator<HoldListener> it;
 
             synchronized (holdListeners) {
-                it = holdListeners.iterator();
+                it = new HashSet<HoldListener>(holdListeners).iterator();
             }
 
             final HoldFeatureChangeEvent event = new HoldFeatureChangeEvent(holdFeatures.values(), this);
@@ -745,7 +745,9 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
         if (LOG.isDebugEnabled()) {
             LOG.debug("set aggregationDisplay list");
         }
-        aggregateableDisplays = list;
+        synchronized (displayLock) {
+            aggregateableDisplays = list;
+        }
 
         if (checkAggregateDisplaysTimeSeriesCount()) {
             setAggregateButtonForAllDisplaysEnabled(true);
@@ -762,8 +764,8 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
     private void setAggregateButtonForAllDisplaysEnabled(final boolean aFlag) {
         final Iterator<AggregateableFeatureInfoDisplay> it;
 
-        synchronized (aggregateableDisplays) {
-            it = aggregateableDisplays.iterator();
+        synchronized (displayLock) {
+            it = new HashSet<AggregateableFeatureInfoDisplay>(aggregateableDisplays).iterator();
         }
 
         while (it.hasNext()) {
@@ -791,8 +793,8 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
      */
     private boolean checkAggregateDisplaysTimeSeriesCount() {
         final Iterator<AggregateableFeatureInfoDisplay> it;
-        synchronized (aggregateableDisplays) {
-            it = aggregateableDisplays.iterator();
+        synchronized (displayLock) {
+            it = new HashSet<AggregateableFeatureInfoDisplay>(aggregateableDisplays).iterator();
         }
         while (it.hasNext()) {
             final AggregateableFeatureInfoDisplay d = it.next();
@@ -892,24 +894,17 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
                 LOG.debug("action listener aggregate variables button");
             }
 
-//            holdCheckBox.setSelected(false);
-//            holdCheckBox.setEnabled(false);
             final TimeSeriesVisualisation methodOverviewVis = TimeSeriesVisualisationFactory.getInstance()
                         .createVisualisation(VisualisationType.SIMPLE);
             final Iterator<AggregateableFeatureInfoDisplay> it;
 
-            synchronized (aggregateableDisplays) {
-                it = aggregateableDisplays.iterator();
+            synchronized (displayLock) {
+                it = new HashSet<AggregateableFeatureInfoDisplay>(aggregateableDisplays).iterator();
             }
             while (it.hasNext()) {
                 final AggregateableFeatureInfoDisplay d = it.next();
                 if (d instanceof SOSFeatureInfoDisplay) {
                     final SOSFeatureInfoDisplay sosDisplay = (SOSFeatureInfoDisplay)d;
-//                    if (SOSFeatureInfoDisplay.this.equals(sosDisplay)) {
-//                        continue;
-//                    }
-//                    sosDisplay.setHoldFlag(false);
-//                    sosDisplay.enableHoldFlag(false);
                     final Collection<TimeSeries> companionTimeSeries = sosDisplay.getTsVis().getTimeSeriesCollection();
                     for (final TimeSeries ts : companionTimeSeries) {
                         methodOverviewVis.addTimeSeries(ts);
@@ -917,7 +912,6 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
                 }
             }
             final String[] var = obsProp.split(":");
-//            tabPane.add("Method Overview - " + var[var.length - 1], methodOverviewVis.getVisualisationUI());
             final String tabTitle = NbBundle.getMessage(
                     SOSFeatureInfoDisplay.class,
                     "SOSFeatureInfoDisplay.modelComparisonTabTitle") + " - " + var[var.length - 1]; // NOI18N
@@ -930,8 +924,6 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
             if (tabIndex == -1) {
                 tabPane.add(tabTitle,
                     tabComponent);
-//                tabPane.setTabComponentAt(tabPane.indexOfTab(tabTitle),
-//                    new CustomTabComponentRenderer(tabTitle, tabPane));
                 tabPane.setTabComponentAt(tabPane.indexOfTab(tabTitle),
                     new JLabel(tabTitle));
             } else {
@@ -973,14 +965,6 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
         public void selectionChanged(final TimeSeriesSelectionEvent evt) {
             final Collection<TimeSeries> selectedTS = evt.getSelectedTs();
 
-//            if (selectedTS.size() == 1) {
-//                ((TimeSeriesExportWizardAction)btnExport.getAction()).setTimeSeries(selectedTS.iterator().next());
-//                btnExport.setEnabled(true);
-//            } else {
-//                ((TimeSeriesExportWizardAction)btnExport.getAction()).setTimeSeries(null);
-//                btnExport.setEnabled(false);
-//            }
-
             final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
             mc.getRubberBandLayer().removeAllChildren();
             mc.getTmpFeatureLayer().removeAllChildren();
@@ -1018,7 +1002,7 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
 
                 final Iterator<Integer> it;
                 synchronized (holdFeatures) {
-                    it = holdFeatures.keySet().iterator();
+                    it = new HashSet<Integer>(holdFeatures.keySet()).iterator();
                 }
                 int featureToRemove = -1;
                 while (it.hasNext()) {
@@ -1155,21 +1139,21 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
 
             if (envelope == null) {
                 return null;
-            } else if (envelope.contains(this.coordinate.x, this.coordinate.y)) {
-                final TimeSeries simpleTS = timeseries.slice(new TimeInterval(
-                            TimeInterval.Openness.OPEN,
-                            TimeStamp.NEGATIVE_INFINITY,
-                            TimeStamp.POSITIVE_INFINITY,
-                            TimeInterval.Openness.OPEN));
-                simpleTS.setTSProperty(TimeSeries.OBSERVEDPROPERTY, humanReadableObsProp);
-                for (final TimeStamp ts : timeStamps) {
-                    simpleTS.setValue(ts, valueKey, timeseries.getValue(ts, valueKey));
-                }
-
-                return simpleTS;
             }
 
-            return null;
+            // FIXME: PE HD hack because SOS does not deliver correct time series, should be testing for correct
+            // coordinates (see history) (mscholl)
+            final TimeSeries simpleTS = timeseries.slice(new TimeInterval(
+                        TimeInterval.Openness.OPEN,
+                        TimeStamp.NEGATIVE_INFINITY,
+                        TimeStamp.POSITIVE_INFINITY,
+                        TimeInterval.Openness.OPEN));
+            simpleTS.setTSProperty(TimeSeries.OBSERVEDPROPERTY, humanReadableObsProp);
+            for (final TimeStamp ts : timeStamps) {
+                simpleTS.setValue(ts, valueKey, timeseries.getValue(ts, valueKey));
+            }
+
+            return simpleTS;
         }
 
         @Override
@@ -1221,10 +1205,8 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
                     if (checkAggregateDisplaysTimeSeriesCount()) {
                         setAggregateButtonForAllDisplaysEnabled(true);
                     }
-//                    btnAggregateTimeSeriesVisualisations.setEnabled(true);
                 } else {
                     setAggregateButtonForAllDisplaysEnabled(false);
-//                    btnAggregateTimeSeriesVisualisations.setEnabled(false);
                 }
 
                 Container parent = SOSFeatureInfoDisplay.this;
@@ -1235,13 +1217,6 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
                 }
                 parent.invalidate();
                 parent.validate();
-//                SwingUtilities.invokeLater(new Runnable() {
-//
-//                        @Override
-//                        public void run() {
-//                            tsVis.resizeScrollbar();
-//                        }
-//                    });
             } catch (final CancellationException ex) {
                 final String message = "action was cancelled";                          // NOI18N
                 if (LOG.isDebugEnabled()) {
@@ -1359,7 +1334,6 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
                         ex);
                 }
             }
-//        final BufferedImage bi = new BufferedImage(24, 24, BufferedImage.TYPE_INT_ARGB);
             final Graphics2D g2 = (Graphics2D)featureIcon.getSubimage(xPos, yPos, overlayWidth, overlayHeight)
                         .getGraphics();
 

@@ -277,6 +277,18 @@ public final class TimeseriesRetriever {
 
             location += config.getOffering() + ".csv";
 
+            final TimeInterval timeInterval = config.getInterval();
+            if (timeInterval != null) {
+                location += "?from=";
+                location += TimeseriesRetrieverConfig.NETCDF_DATEFORMAT.format(timeInterval.getStart().asDate());
+                location += "&to=";
+                location += TimeseriesRetrieverConfig.NETCDF_DATEFORMAT.format(timeInterval.getEnd().asDate());
+            }
+
+            if (TimeseriesRetrieverConfig.NETCDF_LIMITED.equals(config.getProcedure())) {
+                location += (timeInterval != null) ? "&limited=1" : "?limited=1";
+            }
+
             LOG.info("retrieving timeseries for offering '" + config.getOffering()
                         + "' and observed property '" + config.getObsProp()
                         + "' from location '" + location + "'");
@@ -408,7 +420,9 @@ public final class TimeseriesRetriever {
                 ts.setTSProperty(TimeSeries.VALUE_JAVA_CLASS_NAMES, new String[] { Float.class.getName() });
                 ts.setTSProperty(TimeSeries.VALUE_TYPES, new String[] { TimeSeries.VALUE_TYPE_NUMBER });
                 ts.setTSProperty(TimeSeries.VALUE_OBSERVED_PROPERTY_URNS, new String[] { config.getObsProp() });
-                ts.setTSProperty(TimeSeries.VALUE_UNITS, new String[] { Unit.M3S.getPropertyKey() });
+                ts.setTSProperty(
+                    TimeSeries.VALUE_UNITS,
+                    new String[] { hypeVarUnit(config.getObservedProperty()).getPropertyKey() });
 
                 for (final Sample sample : tsSamples) {
                     final Date date = sample.getDate().toDateMidnight().toDate();
@@ -422,6 +436,33 @@ public final class TimeseriesRetriever {
                 final String message = "cannot fetch timeseries from hype: " + config; // NOI18N
                 LOG.error(message, ex);
                 throw new TimeseriesRetrieverException(message, ex);
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   var  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         *
+         * @throws  IllegalArgumentException  DOCUMENT ME!
+         */
+        private Unit hypeVarUnit(final Variable var) {
+            if (Variable.COUT.equals(var)) {
+                return Unit.M3S;
+            } else if (Variable.CRUN.equals(var)) {
+                return Unit.MM;
+            } else if (Variable.CPRC.equals(var)) {
+                return Unit.MM;
+            } else if (Variable.CTMP.equals(var)) {
+                return Unit.CELSIUS;
+            } else if (Variable.GWAT.equals(var)) {
+                return Unit.METERS;
+            } else if (Variable.SMDF.equals(var)) {
+                return Unit.MM;
+            } else {
+                throw new IllegalArgumentException("unknown hype var: " + var); // NOI18N
             }
         }
     }

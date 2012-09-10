@@ -214,6 +214,9 @@ public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.J
             run = false;
         }
 
+        /**
+         * DOCUMENT ME!
+         */
         @Override
         public void run() {
             long count = 0;
@@ -255,6 +258,11 @@ public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.J
 
         //~ Methods ------------------------------------------------------------
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void valueChanged(final ListSelectionEvent e) {
             model.fireChangeEvent();

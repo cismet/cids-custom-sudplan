@@ -89,8 +89,8 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
             selectedSwmmProject = Integer.valueOf(
                     this.wizardDescriptor.getProperty(
                         UploadWizardAction.PROP_SELECTED_SWMM_PROJECT_ID).toString());
-        } catch (Throwable t) {
-            LOG.warn("could not set swmm project id, setting to default (-1)", t);
+        } catch (Exception e) {
+            LOG.warn("could not set swmm project id, setting to default (-1)", e);
             selectedSwmmProject = -1;
         }
 
@@ -133,8 +133,8 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
 
             wizardDescriptor.putProperty(UploadWizardAction.PROP_SELECTED_SWMM_PROJECT_ID, this.selectedSwmmProject);
             wizardDescriptor.putProperty(UploadWizardAction.PROP_NEW_SWMM_PROJECT_BEAN, this.newSwmmProjectBean);
-        } catch (Throwable t) {
-            LOG.error("could not set property of SWMM Input File", t);
+        } catch (Exception e) {
+            LOG.error("could not set property of SWMM Input File", e);
         }
     }
 
@@ -210,8 +210,8 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
 //            if (LOG.isDebugEnabled()) {
 //                LOG.debug("title set to " + title);
 //            }
-        } catch (Throwable t) {
-            LOG.error("could not set title of new project to " + title, t);
+        } catch (Exception e) {
+            LOG.error("could not set title of new project to " + title, e);
         }
     }
 
@@ -233,8 +233,8 @@ public final class UploadWizardPanelProject implements WizardDescriptor.Panel {
     public void setDescription(final String description) {
         try {
             newSwmmProjectBean.setProperty("description", description);
-        } catch (Throwable t) {
-            LOG.error("could not set description of new project to " + description, t);
+        } catch (Exception e) {
+            LOG.error("could not set description of new project to " + description, e);
         }
     }
 

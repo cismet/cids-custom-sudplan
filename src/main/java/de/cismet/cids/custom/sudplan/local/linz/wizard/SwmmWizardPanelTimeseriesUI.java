@@ -147,8 +147,8 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
             // this.timeseriesTableModel.setSelectedTimeseries(model.getTimeseriesIds());
             // this.tblTimeseries.setModel(this.timeseriesTableModel);
 
-        } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
 
             progressBar.setIndeterminate(false);
             org.openide.awt.Mnemonics.setLocalizedText(
@@ -475,8 +475,8 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
                         LOG.debug("TimeseriesUpdater: loading results");
                     }
                     timeseriesTableModel = initTimeseries(model.getStationIds(), model.isForecast());
-                } catch (Throwable t) {
-                    LOG.error("TimeseriesUpdater: could not retrieve timeseries: " + t.getMessage(), t);
+                } catch (Exception e) {
+                    LOG.error("TimeseriesUpdater: could not retrieve timeseries: " + e.getMessage(), e);
                     run = false;
                     EventQueue.invokeLater(new Runnable() {
 
