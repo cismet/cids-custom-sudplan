@@ -30,6 +30,7 @@ public class SudplanOptionsPanel extends AbstractOptionsPanel {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lblAQSosUrl;
     private javax.swing.JLabel lblAQSpsUrl;
+    private javax.swing.JLabel lblAqEdbUrl;
     private javax.swing.JLabel lblHDHypeIp;
     private javax.swing.JLabel lblRFSosUrl;
     private javax.swing.JLabel lblRFSpsUrl;
@@ -39,6 +40,7 @@ public class SudplanOptionsPanel extends AbstractOptionsPanel {
     private javax.swing.JPanel pnlRF;
     private javax.swing.JTextField txtAQSosUrl;
     private javax.swing.JTextField txtAQSpsUrl;
+    private javax.swing.JTextField txtAqEdbUrl;
     private javax.swing.JTextField txtHDHypeIp;
     private javax.swing.JTextField txtRFSosUrl;
     private javax.swing.JTextField txtRFSpsUrl;
@@ -76,10 +78,13 @@ public class SudplanOptionsPanel extends AbstractOptionsPanel {
         final Element aq = new Element("airquality");   // NOI18N
         final Element aqSosUrl = new Element("sosUrl"); // NOI18N
         final Element aqSpsUrl = new Element("spsUrl"); // NOI18N
+        final Element aqEdbUrl = new Element("edbUrl"); // NOI18N
         aqSosUrl.setText(txtAQSosUrl.getText());
         aqSpsUrl.setText(txtAQSpsUrl.getText());
+        aqEdbUrl.setText(txtAqEdbUrl.getText());
         aq.addContent(aqSosUrl);
         aq.addContent(aqSpsUrl);
+        aq.addContent(aqEdbUrl);
         cs.addContent(aq);
 
         final Element hd = new Element("hydrology");  // NOI18N
@@ -128,12 +133,16 @@ public class SudplanOptionsPanel extends AbstractOptionsPanel {
         final Element aq = cs.getChild("airquality");   // NOI18N
         final Element aqSosUrl = aq.getChild("sosUrl"); // NOI18N
         final Element aqSpsUrl = aq.getChild("spsUrl"); // NOI18N
+        final Element aqEdbUrl = aq.getChild("edbUrl"); // NOI18N
         final String aqSos = aqSosUrl.getText();
         final String aqSps = aqSpsUrl.getText();
+        final String aqEdb = aqEdbUrl.getText();
         txtAQSosUrl.setText(aqSos);
         txtAQSpsUrl.setText(aqSps);
+        txtAqEdbUrl.setText(aqEdb);
         opts.setAqSosUrl(aqSos);
         opts.setAqSpsUrl(aqSps);
+        opts.setAqEdbUrl(aqEdb);
 
         final Element hd = cs.getChild("hydrology");  // NOI18N
         final Element hypeIp = hd.getChild("hypeIp"); // NOI18N
@@ -167,6 +176,8 @@ public class SudplanOptionsPanel extends AbstractOptionsPanel {
         lblAQSpsUrl = new javax.swing.JLabel();
         txtAQSosUrl = new javax.swing.JTextField();
         txtAQSpsUrl = new javax.swing.JTextField();
+        lblAqEdbUrl = new javax.swing.JLabel();
+        txtAqEdbUrl = new javax.swing.JTextField();
         pnlHD = new javax.swing.JPanel();
         lblHDHypeIp = new javax.swing.JLabel();
         txtHDHypeIp = new javax.swing.JTextField();
@@ -229,6 +240,25 @@ public class SudplanOptionsPanel extends AbstractOptionsPanel {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         pnlAQ.add(txtAQSpsUrl, gridBagConstraints);
+
+        lblAqEdbUrl.setText(NbBundle.getMessage(SudplanOptionsPanel.class, "SudplanOptionsPanel.lblAqEdbUrl.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlAQ.add(lblAqEdbUrl, gridBagConstraints);
+
+        txtAqEdbUrl.setText(NbBundle.getMessage(SudplanOptionsPanel.class, "SudplanOptionsPanel.txtAqEdbUrl.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlAQ.add(txtAqEdbUrl, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;

@@ -25,11 +25,12 @@ public final class SudplanOptions {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String PROP_AQ_SOS_URL = "aqSosUrl";
-    public static final String PROP_AQ_SPS_URL = "aqSpsUrl";
-    public static final String PROP_HD_HYPE_IP = "hdHypeIp";
-    public static final String PROP_RF_SOS_URL = "rfSosUrl";
-    public static final String PROP_RF_SPS_URL = "rfSpsUrl";
+    public static final String PROP_AQ_SOS_URL = "aqSosUrl"; // NOI18N
+    public static final String PROP_AQ_SPS_URL = "aqSpsUrl"; // NOI18N
+    public static final String PROP_AQ_EDB_URL = "aqEdbUrl"; // NOI18N
+    public static final String PROP_HD_HYPE_IP = "hdHypeIp"; // NOI18N
+    public static final String PROP_RF_SOS_URL = "rfSosUrl"; // NOI18N
+    public static final String PROP_RF_SPS_URL = "rfSpsUrl"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -84,11 +85,17 @@ public final class SudplanOptions {
      * @return  DOCUMENT ME!
      */
     public Map<String, Object> clearProperties() {
-        final Map<String, Object> ret = new HashMap<String, Object>(properties);
+        try {
+            rwLock.writeLock().lock();
 
-        properties.clear();
+            final Map<String, Object> ret = new HashMap<String, Object>(properties);
 
-        return ret;
+            properties.clear();
+
+            return ret;
+        } finally {
+            rwLock.writeLock().unlock();
+        }
     }
 
     /**
@@ -302,6 +309,24 @@ public final class SudplanOptions {
      */
     public void setRfSpsUrl(final String rfSpsUrl) {
         setProperty(PROP_RF_SPS_URL, rfSpsUrl);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getAqEdbUrl() {
+        return (String)getProperty(PROP_AQ_EDB_URL);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  aqEdbUrl  DOCUMENT ME!
+     */
+    public void setAqEdbUrl(final String aqEdbUrl) {
+        setProperty(PROP_AQ_EDB_URL, rwLock);
     }
 
     //~ Inner Classes ----------------------------------------------------------
