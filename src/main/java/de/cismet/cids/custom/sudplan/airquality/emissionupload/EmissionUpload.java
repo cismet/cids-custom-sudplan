@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import de.cismet.cids.custom.sudplan.SudplanOptions;
+
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.security.WebAccessManager;
@@ -71,15 +73,28 @@ public class EmissionUpload /*implements Runnable*/ {
 
     static {
         URL intermediateURL = null;
+        // careful, if this class is loaded during the application bootstrap the property may not have been loaded yet.
+        // in such case use the waitForInit option
+        final String edbUrl = SudplanOptions.getInstance().getAqEdbUrl();
         try {
-            intermediateURL = new URL("http://85.24.165.10/cgi-bin/sudplan_emscenario_add.cgi");
-        } catch (MalformedURLException ex) {
+            intermediateURL = new URL(edbUrl);
+        } catch (final MalformedURLException ex) {
             LOG.warn(
-                "Couldn't create an URL object for 'http://85.24.165.10/cgi-bin/sudplan_emscenario_add.cgi'. Emission database upload won't work.",
+                "Couldn't create an URL object for '"                // NOI18N
+                        + edbUrl
+                        + "'. Emission database upload won't work.", // NOI18N
                 ex);
         }
 
         UPLOAD_URL = intermediateURL;
+    }
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new EmissionUpload object.
+     */
+    private EmissionUpload() {
     }
 
     //~ Methods ----------------------------------------------------------------
