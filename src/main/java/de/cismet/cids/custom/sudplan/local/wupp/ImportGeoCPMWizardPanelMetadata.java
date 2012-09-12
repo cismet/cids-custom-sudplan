@@ -9,6 +9,7 @@ package de.cismet.cids.custom.sudplan.local.wupp;
 
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import org.apache.log4j.Logger;
 
@@ -16,7 +17,6 @@ import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
-import org.openide.util.WeakListeners;
 
 import java.awt.Component;
 
@@ -95,7 +95,7 @@ public final class ImportGeoCPMWizardPanelMetadata implements WizardDescriptor.P
         if (cidsBean == null) {
             try {
                 // FIXME: hardcoded domain
-                final MetaClass mc = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", "geocpm_configuration"); // NOI18N
+                final MetaClass mc = ClassCacheMultiple.getMetaClass(SMSUtils.DOMAIN_SUDPLAN_WUPP, "geocpm_configuration"); // NOI18N
                 final MetaObject mo = mc.getEmptyInstance();
                 cidsBean = mo.getBean();
             } catch (final Exception ex) {

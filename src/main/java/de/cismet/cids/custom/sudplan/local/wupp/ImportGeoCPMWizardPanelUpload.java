@@ -11,6 +11,7 @@ import Sirius.navigator.connection.SessionManager;
 
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import org.apache.log4j.Logger;
 
@@ -299,11 +300,11 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
 
 //                                 FIXME: hardcoded domain
                                 final MetaClass mc = ClassCacheMultiple.getMetaClass(
-                                        "SUDPLAN-WUPP", // NOI18N
+                                        SMSUtils.DOMAIN_SUDPLAN_WUPP, // NOI18N
                                         "geocpm_configuration"); // NOI18N
 
                                 final MetaObject mo = SessionManager.getProxy()
-                                            .getMetaObject(geocpmId, mc.getID(), "SUDPLAN-WUPP");                        // NOI18N
+                                            .getMetaObject(geocpmId, mc.getID(), SMSUtils.DOMAIN_SUDPLAN_WUPP);                        // NOI18N
                                 final CidsBean importBean = mo.getBean();
                                 importBean.setProperty("name", cfgBean.getProperty("name"));                             // NOI18N
                                 importBean.setProperty("description", cfgBean.getProperty("description"));               // NOI18N
