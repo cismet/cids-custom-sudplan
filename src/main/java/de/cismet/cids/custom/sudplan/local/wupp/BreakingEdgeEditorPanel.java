@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.logging.Level;
 
+import javax.swing.event.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -38,13 +39,16 @@ import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 import de.cismet.cids.dynamics.CidsBean;
 
+import de.cismet.cismap.commons.Refreshable;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+
 /**
  * DOCUMENT ME!
  *
  * @author   jlauter
  * @version  $Revision$, $Date$
  */
-public class BreakingEdgeEditorPanel extends javax.swing.JPanel {
+public class BreakingEdgeEditorPanel extends javax.swing.JPanel implements Refreshable {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -52,7 +56,7 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    protected transient CidsBean originalBean;
+    private transient CidsBean originalBean;
     private transient boolean isOriginalBreakingEdge;
     private transient CidsBean selectedConfig;
     private final transient ListSelectionListener selL;
@@ -95,6 +99,11 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel {
 
     //~ Methods ----------------------------------------------------------------
 
+    @Override
+    public void refresh() {
+        this.repaint();
+    }
+
     /**
      * DOCUMENT ME!
      *
@@ -105,7 +114,7 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel {
         if (cidsBean == null) {
             return;
         }
-
+        this.selectedConfig = DeltaConfigurationListWidged.getInstance().getSelectedConfig();
         this.isOriginalBreakingEdge = isOriginalBreakingEdge;
         this.originalBean = cidsBean;
 
@@ -129,6 +138,7 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel {
                     } else {
                         txtNewHeight.setText(String.valueOf(deltaHeight.multiply(new BigDecimal(100)).intValue()));
                     }
+                    setSaveButtonEnabled();
                 }
             };
 
@@ -137,8 +147,6 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel {
         } else {
             EventQueue.invokeLater(r);
         }
-
-        setSaveButtonEnabled();
     }
 
     /**
@@ -169,6 +177,7 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel {
                 public void run() {
                     btnSave.setToolTipText(message);
                     btnSave.setEnabled(enable);
+                    CismapBroker.getInstance().getMappingComponent().repaint();
                 }
             };
         if (EventQueue.isDispatchThread()) {
@@ -418,19 +427,6 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel {
      */
     class DocumentListenerHeight implements DocumentListener {
 
-        //~ Instance fields ----------------------------------------------------
-
-        private final SLDConverter sldConverter;
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new DocumentListenerHeight object.
-         */
-        public DocumentListenerHeight() {
-            sldConverter = new SLDConverter();
-        }
-
         //~ Methods ------------------------------------------------------------
 
         @Override
@@ -439,7 +435,7 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel {
 
                     @Override
                     public void run() {
-                        sldHeight.setValue(sldConverter.convertForward(txtNewHeight.getText()));
+                        CismapBroker.getInstance().getMappingComponent().repaint();
                     }
                 };
 
@@ -457,7 +453,7 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel {
 
                     @Override
                     public void run() {
-                        sldHeight.setValue(sldConverter.convertForward(txtNewHeight.getText()));
+                        CismapBroker.getInstance().getMappingComponent().repaint();
                     }
                 };
 
@@ -475,7 +471,7 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel {
 
                     @Override
                     public void run() {
-                        sldHeight.setValue(sldConverter.convertForward(txtNewHeight.getText()));
+                        CismapBroker.getInstance().getMappingComponent().repaint();
                     }
                 };
 
