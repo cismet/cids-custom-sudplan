@@ -11,7 +11,6 @@ import Sirius.navigator.connection.SessionManager;
 
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
-import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import org.apache.log4j.Logger;
 
@@ -31,6 +30,7 @@ import java.util.concurrent.Future;
 
 import javax.swing.event.ChangeListener;
 
+import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.StatusPanel;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.geocpmrest.GeoCPMRestClient;
@@ -304,7 +304,7 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
                                         "geocpm_configuration"); // NOI18N
 
                                 final MetaObject mo = SessionManager.getProxy()
-                                            .getMetaObject(geocpmId, mc.getID(), SMSUtils.DOMAIN_SUDPLAN_WUPP);                        // NOI18N
+                                            .getMetaObject(geocpmId, mc.getID(), SMSUtils.DOMAIN_SUDPLAN_WUPP);          // NOI18N
                                 final CidsBean importBean = mo.getBean();
                                 importBean.setProperty("name", cfgBean.getProperty("name"));                             // NOI18N
                                 importBean.setProperty("description", cfgBean.getProperty("description"));               // NOI18N

@@ -94,8 +94,9 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
     // TODO: create clean init code and use jtree for visualisation
     private void initInputList() throws WizardInitialisationException {
         // FIXME: hardcoded domain
-        MetaClass mc = ClassCacheMultiple.getMetaClass(SMSUtils.DOMAIN_SUDPLAN_WUPP, 
-                                                       SMSUtils.TABLENAME_GEOCPM_CONFIGURATION);
+        MetaClass mc = ClassCacheMultiple.getMetaClass(
+                SMSUtils.DOMAIN_SUDPLAN_WUPP,
+                SMSUtils.TABLENAME_GEOCPM_CONFIGURATION);
 
         if (mc == null) {
             throw new WizardInitialisationException("cannot fetch geocpm configuration metaclass"); // NOI18N
@@ -127,8 +128,8 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
             dlm.addElement(metaObjects[i].getBean());
         }
 
-        mc = ClassCacheMultiple.getMetaClass(SMSUtils.DOMAIN_SUDPLAN_WUPP, 
-                                             SMSUtils.TABLENAME_DELTA_CONFIGURATION);
+        mc = ClassCacheMultiple.getMetaClass(SMSUtils.DOMAIN_SUDPLAN_WUPP,
+                SMSUtils.TABLENAME_DELTA_CONFIGURATION);
 
         if (mc == null) {
             throw new WizardInitialisationException("cannot fetch delta configuration metaclass"); // NOI18N

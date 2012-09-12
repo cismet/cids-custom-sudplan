@@ -9,7 +9,6 @@ package de.cismet.cids.custom.sudplan.local.wupp;
 
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
-import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import org.apache.log4j.Logger;
 
@@ -24,6 +23,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.event.ChangeListener;
+
+import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -95,11 +96,13 @@ public final class ImportGeoCPMWizardPanelMetadata implements WizardDescriptor.P
         if (cidsBean == null) {
             try {
                 // FIXME: hardcoded domain
-                final MetaClass mc = ClassCacheMultiple.getMetaClass(SMSUtils.DOMAIN_SUDPLAN_WUPP, "geocpm_configuration"); // NOI18N
+                final MetaClass mc = ClassCacheMultiple.getMetaClass(
+                        SMSUtils.DOMAIN_SUDPLAN_WUPP,
+                        "geocpm_configuration");                        // NOI18N
                 final MetaObject mo = mc.getEmptyInstance();
                 cidsBean = mo.getBean();
             } catch (final Exception ex) {
-                LOG.error("cannot initialise wizard visual panel", ex);                                       // NOI18N
+                LOG.error("cannot initialise wizard visual panel", ex); // NOI18N
                 initialisationException = ex;
 
                 changeSupport.fireChange();
