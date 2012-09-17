@@ -326,7 +326,7 @@ public final class SudplanOptions {
      * @param  aqEdbUrl  DOCUMENT ME!
      */
     public void setAqEdbUrl(final String aqEdbUrl) {
-        setProperty(PROP_AQ_EDB_URL, rwLock);
+        setProperty(PROP_AQ_EDB_URL, aqEdbUrl);
     }
 
     //~ Inner Classes ----------------------------------------------------------
