@@ -7,13 +7,32 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.wupp;
 
+import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.ui.ComponentRegistry;
+
+import Sirius.server.middleware.types.MetaClass;
+import Sirius.server.middleware.types.MetaObject;
+
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
 import org.openide.WizardDescriptor;
 
 import java.awt.Component;
 
+import java.util.logging.Level;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
+
 import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.cids.navigator.utils.ClassCacheMultiple;
+
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -30,10 +49,19 @@ public class SurfaceManipulationWizardPanelMetadataConfig extends AbstractWizard
     private transient String description;
     private transient Boolean isConfigNew;
     private transient CidsBean selectedConfig;
-//    private transient Boolean isDescChanged = false;
+    private transient Boolean isConfigLocked = false;
     private transient Boolean isSelectionChanged;
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Boolean isConfigLocked() {
+        return isConfigLocked;
+    }
 
     /**
      * DOCUMENT ME!
@@ -106,6 +134,37 @@ public class SurfaceManipulationWizardPanelMetadataConfig extends AbstractWizard
         selectedConfig = (CidsBean)wizard.getProperty(SurfaceManipulationWizardAction.PROP_DELTA_CONFIG);
         isSelectionChanged = (Boolean)wizard.getProperty(SurfaceManipulationWizardAction.PROP_CONFIG_SELECTION_CHANGED);
 
+        // Check the lock state
+        try {
+            final CidsBean configToCheck = SurfaceManipulationWizardAction.reloadConfiguration(selectedConfig);
+
+            final Boolean locked = (Boolean)configToCheck.getProperty("locked");
+
+            if (locked == null) {
+                throw new IllegalStateException("cannot check the locked state from the delta configuration");
+            }
+
+            isConfigLocked = locked.booleanValue();
+        } catch (IllegalStateException ise) {
+            JXErrorPane.showDialog(
+                ComponentRegistry.getRegistry().getMainWindow(),
+                new ErrorInfo(
+                    "Fehler",
+                    "Es ist ein Fehler beim überprüfen der Änderungskonfiguration aufgetreten.",
+                    null,
+                    "EDITOR",
+                    ise,
+                    Level.WARNING,
+                    null));
+
+            isConfigLocked = true;
+        }
+
+        if (isConfigLocked) {
+            // Reset the selected configuration to null
+            wizard.putProperty(SurfaceManipulationWizardAction.PROP_DELTA_CONFIG, null);
+        }
+
         if (isSelectionChanged) {
             if (isConfigNew) {
                 name = null;
@@ -134,6 +193,12 @@ public class SurfaceManipulationWizardPanelMetadataConfig extends AbstractWizard
         wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, null);
         wizard.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, null);
 
+        if (isConfigLocked) {
+            wizard.putProperty(
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                "Die Konfiguration wurde gesperrt!");
+            return false;
+        }
         if ((name == null) || name.isEmpty() || name.matches(" +")) {
             wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Please specify a name");
             return false;

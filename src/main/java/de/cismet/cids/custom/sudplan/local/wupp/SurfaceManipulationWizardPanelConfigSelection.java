@@ -34,18 +34,18 @@ public class SurfaceManipulationWizardPanelConfigSelection extends AbstractWizar
     private transient Boolean isConfigModelNew;
     private transient Boolean isSelectionChanged;
     private transient CidsBean deltaSurfaceToAdd;
+    private transient MetaObject[] overlappingSurfaces;
 
     //~ Methods ----------------------------------------------------------------
 
-// /**
-// * public Boolean isIsConfigModelNew() { return isConfigModelNew; }.
-// *
-// * @param  isConfigModelNew  DOCUMENT ME!
-// */
-// public void setIsConfigModelNew(final Boolean isConfigModelNew) {
-// this.isConfigModelNew = isConfigModelNew;
-////        changeSupport.fireChange();
-//    }
+    /**
+     * /** * public Boolean isIsConfigModelNew() { return isConfigModelNew; }. * * @param isConfigModelNew DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public MetaObject[] getOverlappingSurfaces() {
+        return overlappingSurfaces;
+    }
 
     /**
      * DOCUMENT ME!
@@ -113,6 +113,8 @@ public class SurfaceManipulationWizardPanelConfigSelection extends AbstractWizar
         isConfigModelNew = (Boolean)wizard.getProperty(SurfaceManipulationWizardAction.PROP_DELTA_CONFIG_IS_NEW);
         isSelectionChanged = (Boolean)wizard.getProperty(SurfaceManipulationWizardAction.PROP_CONFIG_SELECTION_CHANGED);
         deltaSurfaceToAdd = (CidsBean)wizard.getProperty(SurfaceManipulationWizardAction.PROP_ADD_DELTA_SURFACE);
+        overlappingSurfaces = (MetaObject[])wizard.getProperty(
+                SurfaceManipulationWizardAction.PROP_OVERLAPPING_SURFACES);
         component.init();
     }
 

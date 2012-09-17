@@ -80,16 +80,21 @@ public class SurfaceManipulationVisualPanelMetadataConfig extends javax.swing.JP
 
         if (!isNew) {
             txtName.setEnabled(false);
+            if (!model.isConfigLocked()) {
+                txaDescription.setEnabled(true);
+                EventQueue.invokeLater(new Runnable() {
 
-            EventQueue.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        txaDescription.requestFocus();
-                    }
-                });
+                        @Override
+                        public void run() {
+                            txaDescription.requestFocus();
+                        }
+                    });
+            } else {
+                txaDescription.setEnabled(false);
+            }
         } else {
             txtName.setEnabled(true);
+            txaDescription.setEnabled(true);
             txtName.setSelectionStart(0);
             txtName.setSelectionEnd(txtName.getText().length());
 

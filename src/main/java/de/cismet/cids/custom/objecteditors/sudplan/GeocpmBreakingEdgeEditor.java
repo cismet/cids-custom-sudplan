@@ -8,6 +8,7 @@
 package de.cismet.cids.custom.objecteditors.sudplan;
 
 import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.ui.ComponentRegistry;
 
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
@@ -23,7 +24,6 @@ import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.decorator.SortOrder;
 import org.jdesktop.swingx.error.ErrorInfo;
 
-import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
@@ -55,7 +55,7 @@ import javax.swing.event.ListSelectionListener;
 import de.cismet.cids.custom.objecteditors.sudplan.DeltaBreakingEdgeEditor.BEHeightConverter;
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.SMSUtils;
-import de.cismet.cids.custom.sudplan.local.wupp.DeltaConfigurationList;
+import de.cismet.cids.custom.sudplan.local.wupp.DeltaConfigurationListWidged;
 import de.cismet.cids.custom.tostringconverter.sudplan.DeltaConfigurationToStringConverter;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -84,9 +84,8 @@ import de.cismet.cismap.navigatorplugin.CidsFeature;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
-@org.openide.util.lookup.ServiceProvider(service = DeltaConfigurationList.class)
-public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implements EditorSaveListener,
-    DeltaConfigurationList {
+
+public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implements EditorSaveListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -152,13 +151,7 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
 
         initComponents();
         btnNew.setText("");
-//        btnNew.setIcon(new javax.swing.ImageIcon(
-//                getClass().getResource("/de/cismet/cids/custom/objecteditors/sudplan/geocpm_delta_new_16.png")));
         btnNew.setToolTipText("Create a new delta configuration");
-//        lblHeading1.setIcon(new javax.swing.ImageIcon(
-//                getClass().getResource("/de/cismet/cids/custom/sudplan/geocpm_delta_16.png")));
-//        lblHeading2.setIcon(new javax.swing.ImageIcon(
-//                getClass().getResource("/de/cismet/cids/custom/sudplan/breaking_edge_beta_16.png")));
 
         heightConv = new BEHeightConverter();
 
@@ -392,7 +385,8 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
 
             final String query = "select " + mc.getID() + "," + mc.getPrimaryKey() + " from " // NOI18N
                         + mc.getTableName()
-                        + " where original_object = " + id;                                   // NOI18N
+                        + " where original_object = " + id
+                        + " AND locked = false";                                              // NOI18N
 
             final MetaObject[] deltaCfgObjects = SessionManager.getProxy()
                         .getMetaObjectByQuery(SessionManager.getSession().getUser(),
@@ -425,8 +419,54 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
 
     @Override
     public boolean prepareForSave() {
+        final CidsBean selectedConfig = (CidsBean)lstDeltaCfgs.getSelectedValue();
+
+        if (!selectedConfig.hasArtificialChangeFlag()) {
+            // Check the locked state from selected configuration
+            try {
+                final CidsBean configToCheck = reloadConfiguration(selectedConfig);
+
+                final Boolean locked = (Boolean)configToCheck.getProperty("locked");
+
+                if (locked == null) {
+                    throw new IllegalStateException("cannot check the locked state from the delta configuration");
+                }
+
+                if (locked.booleanValue()) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Die ausgewählte Änderungskonfiguration wurde gesperrt! Das Speichern ist nicht möglich.",
+                        "Speichern Fehlgeschlagen",
+                        JOptionPane.ERROR_MESSAGE);
+                    // Reset the bean at the list and reload delta configuration editor
+                    final DefaultListModel dlm = (DefaultListModel)lstDeltaCfgs.getModel();
+                    dlm.removeElement(selectedConfig);
+                    dlm.addElement(configToCheck);
+                    lstDeltaCfgs.setSelectedValue(configToCheck, true);
+                    setCurrentDeltaBreakingEdge(null);
+                    deltaCfgEditor.setCidsBean(configToCheck);
+                    return false;
+                }
+            } catch (Exception ex) {
+                final String message = "cannot check locked state from config: " + selectedConfig; // NOI18N
+                LOG.error(message, ex);
+
+                JXErrorPane.showDialog(
+                    this,
+                    new ErrorInfo(
+                        "Fehler beim Überprüfen",
+                        "Beim Überprüfen auf Sperrung der Änderungskonfiguration ist ein Fehler aufgetreten.",
+                        null,
+                        "EDITOR",
+                        ex,
+                        Level.WARNING,
+                        null));
+
+                return false;
+            }
+        }
         // saving is kind of a cfg change as it changed selection to nothing
-        beforeDeltaCfgChange((CidsBean)lstDeltaCfgs.getSelectedValue());
+        beforeDeltaCfgChange(selectedConfig);
 
         final DefaultListModel dlm = (DefaultListModel)lstDeltaCfgs.getModel();
         final Enumeration<?> e = dlm.elements();
@@ -437,9 +477,12 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
                 deltaCfgBean = (CidsBean)e.nextElement();
                 deltaCfgBean.persist();
             }
-            final DeltaConfigurationList deltaConfigurationList = Lookup.getDefault()
-                        .lookup(DeltaConfigurationList.class);
-            deltaConfigurationList.fireConfigsChanged();
+
+            final Integer investID = (Integer)selectedConfig.getProperty("original_object.investigation_area.id");
+            ComponentRegistry.getRegistry()
+                    .getCatalogueTree()
+                    .requestRefreshNode("wupp.investigation_area." + investID + ".config");
+            DeltaConfigurationListWidged.getInstance().fireConfigsChanged();
         } catch (final Exception ex) {
             final String message = "cannot persist config: " + deltaCfgBean; // NOI18N
             LOG.error(message, ex);
@@ -622,13 +665,21 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
         }
     }
 
-    @Override
-    public void fireConfigsChanged() {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   deltaConfig  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    public CidsBean reloadConfiguration(final CidsBean deltaConfig) {
         try {
-            if (cidsBean == null) {
-                return;
+            if ((deltaConfig == null)) {
+                throw new IllegalStateException(
+                    "delta configuration cannot be null");
             }
-            final Object selectedConfig = lstDeltaCfgs.getSelectedValue();
             final MetaClass mc = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", "delta_configuration");   // NOI18N
             if (mc == null) {
                 throw new IllegalStateException(
@@ -640,45 +691,38 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
                 throw new IllegalStateException("cannot get geocpm configuration id: " + cidsBean); // NOI18N
             }
 
+            final Integer deltaId = (Integer)deltaConfig.getProperty("id");
+            if (deltaId == null) {
+                throw new IllegalStateException("cannot get delta configuration id: " + deltaConfig);
+            }
+
             final String query = "select " + mc.getID() + "," + mc.getPrimaryKey() + " from " // NOI18N
                         + mc.getTableName()
-                        + " where original_object = " + id;                                   // NOI18N
+                        + " where original_object = " + id
+                        + " AND id = " + deltaId;                                             // NOI18N
 
             final MetaObject[] deltaCfgObjects = SessionManager.getProxy()
                         .getMetaObjectByQuery(SessionManager.getSession().getUser(),
                             query,
                             SMSUtils.DOMAIN_SUDPLAN_WUPP);
 
-            final DefaultListModel model = new DefaultListModel();
-            for (final MetaObject mo : deltaCfgObjects) {
-                model.addElement(mo.getBean());
+            if ((deltaCfgObjects == null) || (deltaCfgObjects.length <= 0) || (deltaCfgObjects.length > 1)
+                        || (deltaCfgObjects[0] == null)) {
+                throw new IllegalStateException(
+                    "cannot reload, because there is no configuration or more than one are found: "
+                            + deltaConfig);
             }
 
-            lstDeltaCfgs.setModel(model);
-            lstDeltaCfgs.setSortOrder(SortOrder.ASCENDING);
-            lstDeltaCfgs.setSelectedValue(selectedConfig, true);
+            final MetaObject mo = deltaCfgObjects[0];
+            final CidsBean configToCheck = mo.getBean();
+
+            return configToCheck;
         } catch (final Exception ex) {
-            final String message = "cannot initialise editor"; // NOI18N
+            final String message = "cannot check for locked state from selected delta configuration"; // NOI18N
             LOG.error(message, ex);
 
             throw new IllegalStateException(message, ex);
         }
-    }
-
-    @Override
-    public CidsBean getSelectedConfig() {
-        // nothing to do
-        return null;
-    }
-
-    @Override
-    public void addSelectionListener(final ListSelectionListener l) {
-        // nothing to do
-    }
-
-    @Override
-    public void removeSelectionListener(final ListSelectionListener l) {
-        // nothing to do
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -753,6 +797,8 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
                 newCfgBean.setProperty("original_object", origBean); // NOI18N
                 newCfgBean.setProperty("name", "Neue Konfiguration");
                 newCfgBean.setProperty("description", "Bitte Beschreibung einfügen");
+                newCfgBean.setProperty("locked", false);
+                newCfgBean.setArtificialChangeFlag(true);
 
                 ((DefaultListModel)lstDeltaCfgs.getModel()).addElement(newCfgBean);
                 lstDeltaCfgs.setSortOrder(SortOrder.ASCENDING);
@@ -785,13 +831,12 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
         public void valueChanged(final ListSelectionEvent e) {
             final CidsBean bean = (CidsBean)lstDeltaCfgs.getSelectedValue();
 
-            final Collection<CidsBean> dbes = (Collection)bean.getProperty("delta_breaking_edges"); // NOI18N
-
-            if (currentDeltaCfgBean != null) {
+            if ((currentDeltaCfgBean != null)) {
                 beforeDeltaCfgChange(currentDeltaCfgBean);
             }
 
             if (bean != null) {
+                final Collection<CidsBean> dbes = (Collection)bean.getProperty("delta_breaking_edges"); // NOI18N
                 deltaCfgEditor.setCidsBean(bean);
 
                 boolean createNew = true;
@@ -876,7 +921,8 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
                                 && (bean.getMetaObject().getMetaClass() != null)) {
                         // l.setIcon(new ImageIcon(bean.getMetaObject().getMetaClass().getIconData()));
                         l.setIcon(new javax.swing.ImageIcon(
-                                getClass().getResource("/de/cismet/cids/custom/sudplan/geocpm_delta_16.png")));
+                                getClass().getResource(
+                                    "/de/cismet/cids/custom/sudplan/local/wupp/geocpm_delta_16.png")));
                     }
                 }
             }

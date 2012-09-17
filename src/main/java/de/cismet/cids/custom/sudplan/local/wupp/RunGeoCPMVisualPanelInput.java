@@ -65,11 +65,9 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
     /**
      * Creates new form RunGeoCPMVisualPanelInput.
      *
-     * @param   model  DOCUMENT ME!
-     *
-     * @throws  WizardInitialisationException  DOCUMENT ME!
+     * @param  model  DOCUMENT ME!
      */
-    public RunGeoCPMVisualPanelInput(final RunGeoCPMWizardPanelInput model) throws WizardInitialisationException {
+    public RunGeoCPMVisualPanelInput(final RunGeoCPMWizardPanelInput model) {
         this.model = model;
         listL = new SelectionListener();
 
@@ -79,9 +77,6 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
                 "RunGeoCPMVisualPanelInput.this.name")); // NOI18N
 
         initComponents();
-
-        // TODO: create default bindable jlist
-        initInputList();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -136,6 +131,7 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
         sb = new StringBuilder();
         sb.append("SELECT ").append(mc.getID()).append(',').append(mc.getPrimaryKey()); // NOI18N
         sb.append(" FROM ").append(mc.getTableName());                                  // NOI18N
+        sb.append(" where locked = false");
 
         ca = mc.getClassAttribute("sortingColumn");        // NOI18N
         if (ca != null) {
@@ -167,8 +163,13 @@ public class RunGeoCPMVisualPanelInput extends javax.swing.JPanel {
 
     /**
      * DOCUMENT ME!
+     *
+     * @throws  WizardInitialisationException  DOCUMENT ME!
      */
-    void init() {
+    void init() throws WizardInitialisationException {
+        // TODO: create default bindable jlist
+        initInputList();
+
         if (model.getInput() == null) {
             lstAvailableInput.getSelectionModel().clearSelection();
         }

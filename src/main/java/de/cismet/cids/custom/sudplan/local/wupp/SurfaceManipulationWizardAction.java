@@ -90,6 +90,7 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
     public static final String PROP_DELTA_CONFIG_DESCRIPTION = "__prop_delta_config_description__";
     public static final String PROP_CONFIG_SELECTION_CHANGED = "__prop_config_selection_changed__";
     public static final String PROP_ADD_DELTA_SURFACE = "__prop_add_delta_surface__";
+    public static final String PROP_OVERLAPPING_SURFACES = "__prop_overlapping_surfaces__";
 
     private static final int MAX_COUNT_CONFLICTS_TO_WARN_USER = 30;
 
@@ -231,23 +232,24 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-        if (!addToConfiguration) {
-            assert source != null : "cannot perform action on empty source"; // NOI18N
-        }
-
         // Set all global search results to null because new action is performing
         geoCPMConfigurations = null;
         overlappingSurfaces = null;
         geoCPMBreakingEdges = null;
-
-        if (!startConflictSearch()) {
-            return;
+        if (!addToConfiguration) {
+            assert source != null : "cannot perform action on empty source"; // NOI18N
+            if (!startConflictSearch()) {
+                return;
+            }
+        } else {
+            overlappingSurfaces = searchGeometry((Geometry)deltaSurfaceToAdd.getProperty("geom.geo_field"),
+                    SMSUtils.TABLENAME_DELTA_SURFACE);
         }
 
         isSurfaceConflict = (overlappingSurfaces != null) && (overlappingSurfaces.length > 0);
         isBreakingedgeConflict = (geoCPMBreakingEdges != null) && (geoCPMBreakingEdges.length > 0);
 
-        if (isSurfaceConflict || isBreakingedgeConflict) {
+        if (!addToConfiguration && (isSurfaceConflict || isBreakingedgeConflict)) {
             startConflictDialog();
         } else {
             startWizardDialog();
@@ -380,7 +382,7 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                                         final ErrorInfo errorInfo = new ErrorInfo(
                                                 "Prepare wizard error",
                                                 "Error while preparing wizard",
-                                                "The wizard could not prepared",
+                                                null,
                                                 "ERROR",
                                                 e,
                                                 Level.SEVERE,
@@ -550,6 +552,7 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
             wizard.putProperty(PROP_INITIAL_CONFIG, geoCPMConfigurations[0].getBean());
             wizard.putProperty(PROP_ADD_DELTA_SURFACE, null);
         }
+        wizard.putProperty(PROP_OVERLAPPING_SURFACES, overlappingSurfaces);
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -562,6 +565,13 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
             try {
                 // Step 1: create new configuration or alter the description and save it
                 CidsBean deltaConfiguration = createDeltaConfiguration(wizard);
+                if (deltaConfiguration == null) {
+                    JOptionPane.showMessageDialog(
+                        ComponentRegistry.getRegistry().getMainWindow(),
+                        "",
+                        "Speichern Fehlgeschlagen",
+                        JOptionPane.ERROR_MESSAGE);
+                }
                 deltaConfiguration = deltaConfiguration.persist();
 
                 DeltaConfigurationListWidged.getInstance().fireConfigsChanged();
@@ -579,6 +589,19 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                 // Step 4: show result in DescriptionPane
                 final ComponentRegistry reg = ComponentRegistry.getRegistry();
                 reg.getDescriptionPane().gotoMetaObject(newDeltaSurface.getMetaObject(), null);
+            } catch (final IllegalStateException ise) {
+                final String message = "Cannot check or save the delta configuration.";
+                LOG.error(message, ise);
+                JXErrorPane.showDialog(
+                    ComponentRegistry.getRegistry().getMainWindow(),
+                    new ErrorInfo(
+                        "Fehler",
+                        "Es ist ein Fehler beim speichern aufgetreten.",
+                        null,
+                        "EDITOR",
+                        ise,
+                        Level.WARNING,
+                        null));
             } catch (final Exception ex) {
                 final String message = "Cannot save the surface manipulation.";
                 LOG.error(message, ex);
@@ -656,7 +679,8 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
      *
      * @return  DOCUMENT ME!
      *
-     * @throws  Exception  DOCUMENT ME!
+     * @throws  Exception              DOCUMENT ME!
+     * @throws  IllegalStateException  DOCUMENT ME!
      */
     private CidsBean createDeltaConfiguration(final WizardDescriptor wizard) throws Exception {
         final CidsBean selectedConfig = (CidsBean)wizard.getProperty(PROP_DELTA_CONFIG);
@@ -677,9 +701,79 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
 
             return newDeltaConfig;
         } else {
+            // last Check for the locked state
+
+            final CidsBean configToCheck = reloadConfiguration(selectedConfig);
+
+            final Boolean locked = (Boolean)configToCheck.getProperty("locked");
+
+            if (locked == null) {
+                throw new IllegalStateException(
+                    "Die Überprüfung der Sperrung der Änderungskonfiguration konnte nicht durchgeführt werden.");
+            }
+
+            if (locked.booleanValue()) {
+                throw new IllegalStateException(
+                    "Die ausgewählte Änderungskonfiguration wurde gesperrt! Das Speichern ist nicht möglich.");
+            }
+
             selectedConfig.setProperty("description", desc);
 
             return selectedConfig;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   deltaConfig  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    public static CidsBean reloadConfiguration(final CidsBean deltaConfig) {
+        try {
+            if ((deltaConfig == null)) {
+                throw new IllegalStateException(
+                    "delta configuration cannot be null");
+            }
+            final MetaClass mc = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", "delta_configuration");   // NOI18N
+            if (mc == null) {
+                throw new IllegalStateException(
+                    "illegal domain for this operation, mc 'delta_configuration@SUDPLAN-WUPP' not found"); // NOI18N
+            }
+
+            final Integer deltaId = (Integer)deltaConfig.getProperty("id");
+            if (deltaId == null) {
+                throw new IllegalStateException("cannot get delta configuration id: " + deltaConfig);
+            }
+
+            final String query = "select " + mc.getID() + "," + mc.getPrimaryKey() + " from " // NOI18N
+                        + mc.getTableName()
+                        + " where id = " + deltaId;                                           // NOI18N
+
+            final MetaObject[] deltaCfgObjects = SessionManager.getProxy()
+                        .getMetaObjectByQuery(SessionManager.getSession().getUser(),
+                            query,
+                            SMSUtils.DOMAIN_SUDPLAN_WUPP);
+
+            if ((deltaCfgObjects == null) || (deltaCfgObjects.length <= 0) || (deltaCfgObjects.length > 1)
+                        || (deltaCfgObjects[0] == null)) {
+                throw new IllegalStateException(
+                    "cannot reload, because there is no configuration or more than one are found: "
+                            + deltaConfig);
+            }
+
+            final MetaObject mo = deltaCfgObjects[0];
+            final CidsBean configToCheck = mo.getBean();
+
+            return configToCheck;
+        } catch (final Exception ex) {
+            final String message = "cannot check for locked state from selected delta configuration"; // NOI18N
+            LOG.error(message, ex);
+
+            throw new IllegalStateException(message, ex);
         }
     }
 
@@ -716,16 +810,8 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                             SMSUtils.DOMAIN_SUDPLAN_WUPP);
             return metaObjects;
         } catch (ConnectionException ex) {
-//            try {
-//                final MetaObject[] metaObjects = SessionManager.getProxy()
-//                            .getMetaObjectByQuery(SessionManager.getSession().getUser(),
-//                                query,
-//                                SessionManager.getSession().getUser().getDomain());
-//                return metaObjects;
-//            } catch (ConnectionException cex) {
             LOG.error("Can't connect to domain " + SMSUtils.DOMAIN_SUDPLAN_WUPP, ex);
             return null;
-//            }
         }
     }
 

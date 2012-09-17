@@ -329,7 +329,7 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel implements Refre
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnSaveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnSaveActionPerformed
+    private void btnSaveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         if (originalBean == null) {
             return;
         }
@@ -342,6 +342,10 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel implements Refre
                 @Override
                 public void run() {
                     try {
+                        final Boolean isLocked = (Boolean)selectedConfig.getProperty("locked");
+                        if ((isLocked != null) && isLocked.booleanValue()) {
+                            throw new IllegalStateException("The configuration is locked! Changes are not possible.");
+                        }
                         final BigDecimal newHeight = beHeightConverter.convertReverse(txtNewHeight.getText());
 
                         if (isOriginalBreakingEdge) {
@@ -377,6 +381,14 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel implements Refre
                             originalBean.setProperty("height", newHeight);
                             originalBean.persist();
                         }
+                        
+                        final Integer investID = (Integer)selectedConfig.getProperty("original_object.investigation_area.id");
+                        ComponentRegistry.getRegistry()
+                                .getCatalogueTree()
+                                .requestRefreshNode("wupp.investigation_area." + investID + ".config");
+                        DeltaConfigurationListWidged.getInstance().fireConfigsChanged();
+                        
+                        
                     } catch (Exception e) {
                         LOG.error("cannot create delta breaking edge", e);
                         final ErrorInfo errorInfo = new ErrorInfo(
@@ -397,10 +409,7 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel implements Refre
                     }
                 }
             });
-
-        // TODO update the bean in all other parts like object katalogue, editor, renderer ...
-
-    } //GEN-LAST:event_btnSaveActionPerformed
+    }//GEN-LAST:event_btnSaveActionPerformed
 
     //~ Inner Classes ----------------------------------------------------------
 

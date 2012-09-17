@@ -7,17 +7,35 @@
 ****************************************************/
 package de.cismet.cids.custom.objecteditors.sudplan;
 
+import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.ui.ComponentRegistry;
+
+import Sirius.server.middleware.types.MetaClass;
+import Sirius.server.middleware.types.MetaObject;
+
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
 import java.util.Collection;
+import java.util.logging.Level;
 
+import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
 import javax.swing.event.DocumentListener;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
+import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.local.wupp.DeltaConfigurationListWidged;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.editors.EditorClosedEvent;
 import de.cismet.cids.editors.EditorSaveListener;
+
+import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 /**
  * DOCUMENT ME!
@@ -26,6 +44,10 @@ import de.cismet.cids.editors.EditorSaveListener;
  * @version  $Revision$, $Date$
  */
 public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implements EditorSaveListener {
+
+    //~ Instance fields --------------------------------------------------------
+
+    private final transient boolean editable;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkLocked;
@@ -57,12 +79,8 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
      * @param  editable  DOCUMENT ME!
      */
     public DeltaConfigurationEditor(final boolean editable) {
+        this.editable = editable;
         initComponents();
-
-        if (!editable) {
-            txtName.setEditable(false);
-            txaDescription.setEditable(false);
-        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -101,12 +119,7 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblName, gridBagConstraints);
 
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.name}"),
-                txtName,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, this, org.jdesktop.beansbinding.ELProperty.create("${cidsBean.name}"), txtName, org.jdesktop.beansbinding.BeanProperty.create("text"));
         binding.setSourceNullValue("<not set>");
         bindingGroup.addBinding(binding);
 
@@ -119,9 +132,7 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(txtName, gridBagConstraints);
 
-        lblDescription.setText(NbBundle.getMessage(
-                DeltaConfigurationEditor.class,
-                "DeltaConfigurationEditor.lblDescription.text")); // NOI18N
+        lblDescription.setText(NbBundle.getMessage(DeltaConfigurationEditor.class, "DeltaConfigurationEditor.lblDescription.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -132,13 +143,9 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
 
         txaDescription.setColumns(20);
         txaDescription.setRows(5);
+        txaDescription.setMinimumSize(new java.awt.Dimension(0, 50));
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
-                txaDescription,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, this, org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"), txaDescription, org.jdesktop.beansbinding.BeanProperty.create("text"));
         binding.setSourceNullValue("<not set>");
         bindingGroup.addBinding(binding);
 
@@ -149,12 +156,12 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jScrollPane1, gridBagConstraints);
 
-        lblLocked.setText(NbBundle.getMessage(
-                DeltaConfigurationEditor.class,
-                "DeltaConfigurationEditor.lblLocked.text")); // NOI18N
+        lblLocked.setText(NbBundle.getMessage(DeltaConfigurationEditor.class, "DeltaConfigurationEditor.lblLocked.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
@@ -163,22 +170,19 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblLocked, gridBagConstraints);
 
-        chkLocked.setText(NbBundle.getMessage(
-                DeltaConfigurationEditor.class,
-                "DeltaConfigurationEditor.chkLocked.text")); // NOI18N
+        chkLocked.setText(NbBundle.getMessage(DeltaConfigurationEditor.class, "DeltaConfigurationEditor.chkLocked.text")); // NOI18N
         chkLocked.setContentAreaFilled(false);
-        chkLocked.setEnabled(false);
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.locked}"),
-                chkLocked,
-                org.jdesktop.beansbinding.BeanProperty.create("selected"));
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ, this, org.jdesktop.beansbinding.ELProperty.create("${cidsBean.locked}"), chkLocked, org.jdesktop.beansbinding.BeanProperty.create("selected"));
         binding.setSourceNullValue(false);
         binding.setSourceUnreadableValue(false);
         bindingGroup.addBinding(binding);
 
+        chkLocked.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkLockedItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
@@ -187,9 +191,7 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(chkLocked, gridBagConstraints);
 
-        lblLinkedBreakingEdges.setText(NbBundle.getMessage(
-                DeltaConfigurationEditor.class,
-                "DeltaConfigurationEditor.lblLinkedBreakingEdges.text")); // NOI18N
+        lblLinkedBreakingEdges.setText(NbBundle.getMessage(DeltaConfigurationEditor.class, "DeltaConfigurationEditor.lblLinkedBreakingEdges.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -215,23 +217,38 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
 
         jPanel1.setOpaque(false);
 
-        final org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
+        org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 527, Short.MAX_VALUE));
+            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 369, Short.MAX_VALUE)
+        );
         jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 87, Short.MAX_VALUE));
+            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 124, Short.MAX_VALUE)
+        );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 5;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.weighty = 0.8;
         add(jPanel1, gridBagConstraints);
 
         bindingGroup.bind();
-    } // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void chkLockedItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkLockedItemStateChanged
+        if (cidsBean != null) {
+            final Boolean locked = (Boolean)cidsBean.getProperty("locked");
+            if (locked != null) {
+                chkLocked.setSelected(locked.booleanValue());
+            } else {
+                chkLocked.setSelected(false);
+            }
+        }
+    }//GEN-LAST:event_chkLockedItemStateChanged
 
     @Override
     protected void init() {
@@ -244,9 +261,12 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
 
         // NOTE: maybe they want to edit the description and name anyway
         final Boolean locked = (Boolean)cidsBean.getProperty("locked"); // NOI18N
-        if ((locked != null) && locked) {
+        if (((locked != null) && locked) || !editable) {
             txtName.setEditable(false);
             txaDescription.setEditable(false);
+        } else {
+            txtName.setEditable(true);
+            txaDescription.setEditable(true);
         }
     }
 
@@ -257,7 +277,104 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
 
     @Override
     public boolean prepareForSave() {
+        try {
+            final CidsBean configToCheck = reloadConfiguration(cidsBean);
+
+            final Boolean locked = (Boolean)configToCheck.getProperty("locked");
+
+            if (locked == null) {
+                throw new IllegalStateException("cannot check the locked state from the delta configuration");
+            }
+
+            if (locked.booleanValue()) {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Die ausgewählte Änderungskonfiguration wurde gesperrt! Das Speichern ist nicht möglich.",
+                    "Speichern Fehlgeschlagen",
+                    JOptionPane.ERROR_MESSAGE);
+
+                return false;
+            }
+        } catch (Exception ex) {
+            JXErrorPane.showDialog(
+                this,
+                new ErrorInfo(
+                    "Fehler beim Überprüfen",
+                    "Beim Überprüfen auf Sperrung der Änderungskonfiguration ist ein Fehler aufgetreten.",
+                    null,
+                    "EDITOR",
+                    ex,
+                    Level.WARNING,
+                    null));
+
+            return false;
+        }
+
+        final Integer investID = (Integer)cidsBean.getProperty("original_object.investigation_area.id");
+        ComponentRegistry.getRegistry()
+                .getCatalogueTree()
+                .requestRefreshNode("wupp.investigation_area." + investID + ".config");
+        DeltaConfigurationListWidged.getInstance().fireConfigsChanged();
+
         return true;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   deltaConfig  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    public CidsBean reloadConfiguration(final CidsBean deltaConfig) {
+        try {
+            if ((deltaConfig == null)) {
+                throw new IllegalStateException(
+                    "delta configuration cannot be null");
+            }
+            final MetaClass mc = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", "delta_configuration");   // NOI18N
+            if (mc == null) {
+                throw new IllegalStateException(
+                    "illegal domain for this operation, mc 'delta_configuration@SUDPLAN-WUPP' not found"); // NOI18N
+            }
+
+            final Integer id = (Integer)cidsBean.getProperty("geocpm_configuration_id.id");         // NOI18N
+            if (id == null) {
+                throw new IllegalStateException("cannot get geocpm configuration id: " + cidsBean); // NOI18N
+            }
+
+            final Integer deltaId = (Integer)deltaConfig.getProperty("id");
+            if (deltaId == null) {
+                throw new IllegalStateException("cannot get delta configuration id: " + deltaConfig);
+            }
+
+            final String query = "select " + mc.getID() + "," + mc.getPrimaryKey() + " from " // NOI18N
+                        + mc.getTableName()
+                        + " where original_object = " + id
+                        + " AND id = " + deltaId;                                             // NOI18N
+
+            final MetaObject[] deltaCfgObjects = SessionManager.getProxy()
+                        .getMetaObjectByQuery(SessionManager.getSession().getUser(),
+                            query,
+                            SMSUtils.DOMAIN_SUDPLAN_WUPP);
+
+            if ((deltaCfgObjects == null) || (deltaCfgObjects.length <= 0) || (deltaCfgObjects.length > 1)
+                        || (deltaCfgObjects[0] == null)) {
+                throw new IllegalStateException(
+                    "cannot reload, because there is no configuration or more than one are found: "
+                            + deltaConfig);
+            }
+
+            final MetaObject mo = deltaCfgObjects[0];
+            final CidsBean configToCheck = mo.getBean();
+
+            return configToCheck;
+        } catch (final Exception ex) {
+            final String message = "cannot check for locked state from selected delta configuration"; // NOI18N
+            throw new IllegalStateException(message, ex);
+        }
     }
 
     /**
