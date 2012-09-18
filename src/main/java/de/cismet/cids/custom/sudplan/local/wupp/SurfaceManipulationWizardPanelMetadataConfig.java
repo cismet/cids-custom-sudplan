@@ -8,13 +8,19 @@
 package de.cismet.cids.custom.sudplan.local.wupp;
 
 import Sirius.navigator.ui.ComponentRegistry;
-import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
-import de.cismet.cids.dynamics.CidsBean;
-import java.awt.Component;
-import java.util.logging.Level;
+
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
+
 import org.openide.WizardDescriptor;
+
+import java.awt.Component;
+
+import java.util.logging.Level;
+
+import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 /**
  * DOCUMENT ME!
@@ -178,16 +184,26 @@ public class SurfaceManipulationWizardPanelMetadataConfig extends AbstractWizard
         if (isConfigLocked) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelMetadataConfig.class, "SurfaceManipulationWizardPanelMetadataConfig.isValid().warnLocked"));
+                org.openide.util.NbBundle.getMessage(
+                    SurfaceManipulationWizardPanelMetadataConfig.class,
+                    "SurfaceManipulationWizardPanelMetadataConfig.isValid().warnLocked"));
             return false;
         }
         if ((name == null) || name.isEmpty() || name.matches(" +")) {
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelMetadataConfig.class, "SurfaceManipulationWizardPanelMetadataConfig.isValid().noName"));
+            wizard.putProperty(
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                org.openide.util.NbBundle.getMessage(
+                    SurfaceManipulationWizardPanelMetadataConfig.class,
+                    "SurfaceManipulationWizardPanelMetadataConfig.isValid().noName"));
             return false;
         }
 
         if ((description == null) || description.isEmpty() || description.matches(" +")) {
-            wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelMetadataConfig.class, "SurfaceManipulationWizardPanelMetadataConfig.isValid().noDescription"));
+            wizard.putProperty(
+                WizardDescriptor.PROP_INFO_MESSAGE,
+                org.openide.util.NbBundle.getMessage(
+                    SurfaceManipulationWizardPanelMetadataConfig.class,
+                    "SurfaceManipulationWizardPanelMetadataConfig.isValid().noDescription"));
         }
         return true;
     }

@@ -15,15 +15,12 @@ import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
 
-import org.openide.util.Exceptions;
 import org.openide.util.WeakListeners;
 
 import java.awt.Component;
 import java.awt.EventQueue;
 
 import javax.swing.*;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -77,7 +74,9 @@ public class SurfaceManipulationVisualPanelConfigSelection extends javax.swing.J
         }
         selL = new ListSelectionListenerImpl();
 
-        this.setName(org.openide.util.NbBundle.getMessage(SurfaceManipulationVisualPanelConfigSelection.class, "SurfaceManipulationVisualPanelConfigSelection.SurfaceManipulationVisualPanelConfigSelection(SurfaceManipulationWizardPanelConfigSelection).name"));
+        this.setName(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationVisualPanelConfigSelection.class,
+                "SurfaceManipulationVisualPanelConfigSelection.SurfaceManipulationVisualPanelConfigSelection(SurfaceManipulationWizardPanelConfigSelection).name"));
         initComponents();
 
         lstConfigurations.setCellRenderer(new ListCellRendererImpl());
@@ -100,7 +99,9 @@ public class SurfaceManipulationVisualPanelConfigSelection extends javax.swing.J
         final DefaultListModel lstModel = new DefaultListModel();
 
         final DefaultListModel loadModel = new DefaultListModel();
-        loadModel.addElement(org.openide.util.NbBundle.getMessage(SurfaceManipulationVisualPanelConfigSelection.class, "SurfaceManipulationVisualPanelConfigSelection.init().loadModel.element"));
+        loadModel.addElement(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationVisualPanelConfigSelection.class,
+                "SurfaceManipulationVisualPanelConfigSelection.init().loadModel.element"));
         lstConfigurations.setModel(loadModel);
 
         EventQueue.invokeLater(new Runnable() {

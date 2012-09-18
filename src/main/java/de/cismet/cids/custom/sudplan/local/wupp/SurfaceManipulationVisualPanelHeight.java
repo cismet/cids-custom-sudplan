@@ -75,7 +75,9 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
             throw new IllegalStateException("model instance must not be null");
         }
 
-        this.setName(org.openide.util.NbBundle.getMessage(SurfaceManipulationVisualPanelHeight.class, "SurfaceManipulationVisualPanelHeight.SurfaceManipulationVisualPanelHeight(SurfaceManipulationWizardPanelHeight).name"));
+        this.setName(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationVisualPanelHeight.class,
+                "SurfaceManipulationVisualPanelHeight.SurfaceManipulationVisualPanelHeight(SurfaceManipulationWizardPanelHeight).name"));
 
         initComponents();
         spnHeight.setModel(new SpinnerNumberModel(0, -Double.MAX_VALUE, Double.MAX_VALUE, SPINNER_STEPS));
@@ -93,7 +95,9 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
 
         chL = new ChangeListenerImpl();
         spnHeight.addChangeListener(WeakListeners.change(chL, spnHeight));
-        spnHeight.setToolTipText(org.openide.util.NbBundle.getMessage(SurfaceManipulationVisualPanelHeight.class, "SurfaceManipulationVisualPanelHeight.SurfaceManipulationVisualPanelHeight(SurfaceManipulationWizardPanelHeight).spnHeight.toolTipText"));
+        spnHeight.setToolTipText(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationVisualPanelHeight.class,
+                "SurfaceManipulationVisualPanelHeight.SurfaceManipulationVisualPanelHeight(SurfaceManipulationWizardPanelHeight).spnHeight.toolTipText"));
 
         aL = new ActionListenerImpl();
         rbAdjacentSurface.addActionListener(WeakListeners.create(ActionListener.class, aL, rbAdjacentSurface));

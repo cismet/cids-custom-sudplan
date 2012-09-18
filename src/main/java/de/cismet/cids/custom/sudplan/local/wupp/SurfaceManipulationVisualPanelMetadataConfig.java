@@ -50,7 +50,9 @@ public class SurfaceManipulationVisualPanelMetadataConfig extends javax.swing.JP
             throw new IllegalStateException("model instance must not be null");
         }
 
-        this.setName(org.openide.util.NbBundle.getMessage(SurfaceManipulationVisualPanelMetadataConfig.class, "SurfaceManipulationVisualPanelMetadataConfig.SurfaceManipulationVisualPanelMetadataConfig(SurfaceManipulationWizardPanelMetadataConfig).name"));
+        this.setName(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationVisualPanelMetadataConfig.class,
+                "SurfaceManipulationVisualPanelMetadataConfig.SurfaceManipulationVisualPanelMetadataConfig(SurfaceManipulationWizardPanelMetadataConfig).name"));
 
         initComponents();
 

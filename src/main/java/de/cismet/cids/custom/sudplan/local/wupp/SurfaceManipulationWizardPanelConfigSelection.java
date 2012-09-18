@@ -134,12 +134,16 @@ public class SurfaceManipulationWizardPanelConfigSelection extends AbstractWizar
         if (configModel == null) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelConfigSelection.class, "SurfaceManipulationWizardPanelConfigSelection.isValid().noModel"));
+                org.openide.util.NbBundle.getMessage(
+                    SurfaceManipulationWizardPanelConfigSelection.class,
+                    "SurfaceManipulationWizardPanelConfigSelection.isValid().noModel"));
             return false;
         } else if ((configModel != null) && (isConfigModelNew != null) && isConfigModelNew.booleanValue()) {
             wizard.putProperty(
                 WizardDescriptor.PROP_INFO_MESSAGE,
-                org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelConfigSelection.class, "SurfaceManipulationWizardPanelConfigSelection.isValid().createNewModel"));
+                org.openide.util.NbBundle.getMessage(
+                    SurfaceManipulationWizardPanelConfigSelection.class,
+                    "SurfaceManipulationWizardPanelConfigSelection.isValid().createNewModel"));
         }
         return true;
     }
