@@ -158,10 +158,14 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel implements Refre
 
         if (isOriginalBreakingEdge) {
             if (selectedConfig == null) {
-                message = "Please select a configuration from the configuration widged";
+                message = org.openide.util.NbBundle.getMessage(
+                        BreakingEdgeEditorPanel.class,
+                        "BreakingEdgeEditorPanel.setSaveButtonEnabled.btnSave.toolTipText1");
                 enable = false;
             } else if ((txtNewHeight.getText() == null) || txtNewHeight.getText().isEmpty()) {
-                message = "Please specify a height";
+                message = org.openide.util.NbBundle.getMessage(
+                        BreakingEdgeEditorPanel.class,
+                        "BreakingEdgeEditorPanel.setSaveButtonEnabled.btnSave.toolTipText2");
                 enable = false;
             } else {
                 message = null;
@@ -329,7 +333,7 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel implements Refre
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnSaveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+    private void btnSaveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnSaveActionPerformed
         if (originalBean == null) {
             return;
         }
@@ -365,7 +369,9 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel implements Refre
                                         SMSUtils.DOMAIN_SUDPLAN_WUPP,
                                         SMSUtils.TABLENAME_DELTA_BREAKING_EDGE);
 
-                                final String defaultName = "Neu";
+                                final String defaultName = org.openide.util.NbBundle.getMessage(
+                                        BreakingEdgeEditorPanel.class,
+                                        "BreakingEdgeEditorPanel.btnSaveActionPerformed(ActionEvent).defaultName");
                                 deltaBk.setProperty("name", defaultName);
                                 deltaBk.setProperty(TOOL_TIP_TEXT_KEY, ui);
                                 deltaBk.setProperty("original_object", originalBean);
@@ -381,19 +387,22 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel implements Refre
                             originalBean.setProperty("height", newHeight);
                             originalBean.persist();
                         }
-                        
-                        final Integer investID = (Integer)selectedConfig.getProperty("original_object.investigation_area.id");
+
+                        final Integer investID = (Integer)selectedConfig.getProperty(
+                                "original_object.investigation_area.id");
                         ComponentRegistry.getRegistry()
                                 .getCatalogueTree()
                                 .requestRefreshNode("wupp.investigation_area." + investID + ".config");
                         DeltaConfigurationListWidged.getInstance().fireConfigsChanged();
-                        
-                        
                     } catch (Exception e) {
                         LOG.error("cannot create delta breaking edge", e);
                         final ErrorInfo errorInfo = new ErrorInfo(
-                                "Create delta breaking edge error",
-                                "Error while creating delta breaking edge",
+                                org.openide.util.NbBundle.getMessage(
+                                    BreakingEdgeEditorPanel.class,
+                                    "BreakingEdgeEditorPanel.btnSaveActionPerformed(ActionEvent).ErrorInfo.header"),
+                                org.openide.util.NbBundle.getMessage(
+                                    BreakingEdgeEditorPanel.class,
+                                    "BreakingEdgeEditorPanel.btnSaveActionPerformed(ActionEvent).ErrorInfo.message"),
                                 null,
                                 "ERROR",
                                 e,
@@ -409,7 +418,7 @@ public class BreakingEdgeEditorPanel extends javax.swing.JPanel implements Refre
                     }
                 }
             });
-    }//GEN-LAST:event_btnSaveActionPerformed
+    } //GEN-LAST:event_btnSaveActionPerformed
 
     //~ Inner Classes ----------------------------------------------------------
 

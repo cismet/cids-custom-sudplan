@@ -7,32 +7,14 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.wupp;
 
-import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.ui.ComponentRegistry;
-
-import Sirius.server.middleware.types.MetaClass;
-import Sirius.server.middleware.types.MetaObject;
-
+import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
+import de.cismet.cids.dynamics.CidsBean;
+import java.awt.Component;
+import java.util.logging.Level;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
-
 import org.openide.WizardDescriptor;
-
-import java.awt.Component;
-
-import java.util.logging.Level;
-
-import javax.swing.DefaultListModel;
-import javax.swing.JOptionPane;
-
-import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
-import de.cismet.cids.custom.sudplan.SMSUtils;
-
-import de.cismet.cids.dynamics.CidsBean;
-
-import de.cismet.cids.navigator.utils.ClassCacheMultiple;
-
-import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -196,16 +178,16 @@ public class SurfaceManipulationWizardPanelMetadataConfig extends AbstractWizard
         if (isConfigLocked) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Die Konfiguration wurde gesperrt!");
+                org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelMetadataConfig.class, "SurfaceManipulationWizardPanelMetadataConfig.isValid().warnLocked"));
             return false;
         }
         if ((name == null) || name.isEmpty() || name.matches(" +")) {
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Please specify a name");
+            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelMetadataConfig.class, "SurfaceManipulationWizardPanelMetadataConfig.isValid().noName"));
             return false;
         }
 
         if ((description == null) || description.isEmpty() || description.matches(" +")) {
-            wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, "You are encouraged to enter a description");
+            wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelMetadataConfig.class, "SurfaceManipulationWizardPanelMetadataConfig.isValid().noDescription"));
         }
         return true;
     }

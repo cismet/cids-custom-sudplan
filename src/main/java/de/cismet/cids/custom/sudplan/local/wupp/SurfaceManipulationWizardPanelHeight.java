@@ -94,7 +94,7 @@ public final class SurfaceManipulationWizardPanelHeight extends AbstractWizardPa
         wizard.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, null);
 
         if (height.doubleValue() == 0.0d) {
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Please manipulate the height");
+            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelHeight.class, "SurfaceManipulationWizardPanelHeight.isValid().noHeight"));
             return false;
         }
 

@@ -119,7 +119,12 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblName, gridBagConstraints);
 
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, this, org.jdesktop.beansbinding.ELProperty.create("${cidsBean.name}"), txtName, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.name}"),
+                txtName,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
         binding.setSourceNullValue("<not set>");
         bindingGroup.addBinding(binding);
 
@@ -132,7 +137,9 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(txtName, gridBagConstraints);
 
-        lblDescription.setText(NbBundle.getMessage(DeltaConfigurationEditor.class, "DeltaConfigurationEditor.lblDescription.text")); // NOI18N
+        lblDescription.setText(NbBundle.getMessage(
+                DeltaConfigurationEditor.class,
+                "DeltaConfigurationEditor.lblDescription.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -145,7 +152,12 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
         txaDescription.setRows(5);
         txaDescription.setMinimumSize(new java.awt.Dimension(0, 50));
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, this, org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"), txaDescription, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
+                txaDescription,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
         binding.setSourceNullValue("<not set>");
         bindingGroup.addBinding(binding);
 
@@ -161,7 +173,9 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jScrollPane1, gridBagConstraints);
 
-        lblLocked.setText(NbBundle.getMessage(DeltaConfigurationEditor.class, "DeltaConfigurationEditor.lblLocked.text")); // NOI18N
+        lblLocked.setText(NbBundle.getMessage(
+                DeltaConfigurationEditor.class,
+                "DeltaConfigurationEditor.lblLocked.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
@@ -170,19 +184,28 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblLocked, gridBagConstraints);
 
-        chkLocked.setText(NbBundle.getMessage(DeltaConfigurationEditor.class, "DeltaConfigurationEditor.chkLocked.text")); // NOI18N
+        chkLocked.setText(NbBundle.getMessage(
+                DeltaConfigurationEditor.class,
+                "DeltaConfigurationEditor.chkLocked.text")); // NOI18N
         chkLocked.setContentAreaFilled(false);
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ, this, org.jdesktop.beansbinding.ELProperty.create("${cidsBean.locked}"), chkLocked, org.jdesktop.beansbinding.BeanProperty.create("selected"));
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean.locked}"),
+                chkLocked,
+                org.jdesktop.beansbinding.BeanProperty.create("selected"));
         binding.setSourceNullValue(false);
         binding.setSourceUnreadableValue(false);
         bindingGroup.addBinding(binding);
 
         chkLocked.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                chkLockedItemStateChanged(evt);
-            }
-        });
+
+                @Override
+                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
+                    chkLockedItemStateChanged(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
@@ -191,7 +214,9 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(chkLocked, gridBagConstraints);
 
-        lblLinkedBreakingEdges.setText(NbBundle.getMessage(DeltaConfigurationEditor.class, "DeltaConfigurationEditor.lblLinkedBreakingEdges.text")); // NOI18N
+        lblLinkedBreakingEdges.setText(NbBundle.getMessage(
+                DeltaConfigurationEditor.class,
+                "DeltaConfigurationEditor.lblLinkedBreakingEdges.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -217,16 +242,12 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
 
         jPanel1.setOpaque(false);
 
-        org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
+        final org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 369, Short.MAX_VALUE)
-        );
+            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 369, Short.MAX_VALUE));
         jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 124, Short.MAX_VALUE)
-        );
+            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 124, Short.MAX_VALUE));
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -237,9 +258,14 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
         add(jPanel1, gridBagConstraints);
 
         bindingGroup.bind();
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
-    private void chkLockedItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkLockedItemStateChanged
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkLockedItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkLockedItemStateChanged
         if (cidsBean != null) {
             final Boolean locked = (Boolean)cidsBean.getProperty("locked");
             if (locked != null) {
@@ -248,7 +274,7 @@ public class DeltaConfigurationEditor extends AbstractCidsBeanRenderer implement
                 chkLocked.setSelected(false);
             }
         }
-    }//GEN-LAST:event_chkLockedItemStateChanged
+    }                                                                            //GEN-LAST:event_chkLockedItemStateChanged
 
     @Override
     protected void init() {

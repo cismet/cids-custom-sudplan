@@ -95,12 +95,12 @@ public class SurfaceManipulationWizardPanelMetadataSurface extends AbstractWizar
         wizard.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, null);
 
         if ((name == null) || name.isEmpty() || name.matches(" +")) {
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Please specify a name");
+            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelMetadataSurface.class, "SurfaceManipulationWizardPanelMetadataSurface.isValid().noName"));
             return false;
         }
 
         if ((description == null) || description.isEmpty() || description.matches(" +")) {
-            wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, "You are encouraged to enter a description");
+            wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelMetadataSurface.class, "SurfaceManipulationWizardPanelMetadataSurface.isValid().noDescription"));
         }
         return true;
     }

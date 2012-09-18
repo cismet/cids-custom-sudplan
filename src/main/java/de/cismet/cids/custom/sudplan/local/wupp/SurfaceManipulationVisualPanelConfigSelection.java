@@ -77,7 +77,7 @@ public class SurfaceManipulationVisualPanelConfigSelection extends javax.swing.J
         }
         selL = new ListSelectionListenerImpl();
 
-        this.setName("Select Surface Model");
+        this.setName(org.openide.util.NbBundle.getMessage(SurfaceManipulationVisualPanelConfigSelection.class, "SurfaceManipulationVisualPanelConfigSelection.SurfaceManipulationVisualPanelConfigSelection(SurfaceManipulationWizardPanelConfigSelection).name"));
         initComponents();
 
         lstConfigurations.setCellRenderer(new ListCellRendererImpl());
@@ -100,7 +100,7 @@ public class SurfaceManipulationVisualPanelConfigSelection extends javax.swing.J
         final DefaultListModel lstModel = new DefaultListModel();
 
         final DefaultListModel loadModel = new DefaultListModel();
-        loadModel.addElement("Loading available models");
+        loadModel.addElement(org.openide.util.NbBundle.getMessage(SurfaceManipulationVisualPanelConfigSelection.class, "SurfaceManipulationVisualPanelConfigSelection.init().loadModel.element"));
         lstConfigurations.setModel(loadModel);
 
         EventQueue.invokeLater(new Runnable() {

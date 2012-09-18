@@ -150,8 +150,8 @@ public class DeltaConfigurationListWidged extends javax.swing.JPanel implements 
 
                 @Override
                 protected MetaObject[] doInBackground() throws Exception {
-                    // FIXME: Do not load all configuration just the configuration from the initial configuration
-                    // where the user work with
+                    // FIXME: Do not load all configuration just the configuration from the initial configuration where
+                    // the user work with
 
                     final MetaClass mc = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", "delta_configuration");   // NOI18N
                     if (mc == null) {

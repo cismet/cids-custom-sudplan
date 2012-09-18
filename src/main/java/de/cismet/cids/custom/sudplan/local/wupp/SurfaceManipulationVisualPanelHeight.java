@@ -40,8 +40,6 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
 
     private static final transient Logger LOG = Logger.getLogger(SurfaceManipulationVisualPanelHeight.class);
     private static final String NUMBER_FORMAT = "#,##0.00";
-    private static final double SPINNER_MAX_NUMBER = 1000.0d;
-    private static final double SPINNER_MIN_NUMBER = -1000.0d;
     private static final double SPINNER_STEPS = 0.50d;
 
     //~ Instance fields --------------------------------------------------------
@@ -77,7 +75,7 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
             throw new IllegalStateException("model instance must not be null");
         }
 
-        this.setName("Change height");
+        this.setName(org.openide.util.NbBundle.getMessage(SurfaceManipulationVisualPanelHeight.class, "SurfaceManipulationVisualPanelHeight.SurfaceManipulationVisualPanelHeight(SurfaceManipulationWizardPanelHeight).name"));
 
         initComponents();
         spnHeight.setModel(new SpinnerNumberModel(0, -Double.MAX_VALUE, Double.MAX_VALUE, SPINNER_STEPS));
@@ -95,7 +93,7 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
 
         chL = new ChangeListenerImpl();
         spnHeight.addChangeListener(WeakListeners.change(chL, spnHeight));
-        spnHeight.setToolTipText("Red color for reducing / Blue color for increasing the Surface");
+        spnHeight.setToolTipText(org.openide.util.NbBundle.getMessage(SurfaceManipulationVisualPanelHeight.class, "SurfaceManipulationVisualPanelHeight.SurfaceManipulationVisualPanelHeight(SurfaceManipulationWizardPanelHeight).spnHeight.toolTipText"));
 
         aL = new ActionListenerImpl();
         rbAdjacentSurface.addActionListener(WeakListeners.create(ActionListener.class, aL, rbAdjacentSurface));

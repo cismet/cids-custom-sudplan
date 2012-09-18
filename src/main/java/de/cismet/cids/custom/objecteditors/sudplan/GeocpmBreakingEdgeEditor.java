@@ -151,7 +151,9 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
 
         initComponents();
         btnNew.setText("");
-        btnNew.setToolTipText("Create a new delta configuration");
+        btnNew.setToolTipText(org.openide.util.NbBundle.getMessage(
+                GeocpmBreakingEdgeEditor.class,
+                "GeocpmBreakingEdgeEditor.btnNew.toolTipText"));
 
         heightConv = new BEHeightConverter();
 
@@ -435,8 +437,12 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
                 if (locked.booleanValue()) {
                     JOptionPane.showMessageDialog(
                         this,
-                        "Die ausgewählte Änderungskonfiguration wurde gesperrt! Das Speichern ist nicht möglich.",
-                        "Speichern Fehlgeschlagen",
+                        org.openide.util.NbBundle.getMessage(
+                            GeocpmBreakingEdgeEditor.class,
+                            "GeocpmBreakingEdgeEditor.prepareForSave().JOptionPane.showMessageDialog.errorMessage"),
+                        org.openide.util.NbBundle.getMessage(
+                            GeocpmBreakingEdgeEditor.class,
+                            "GeocpmBreakingEdgeEditor.prepareForSave().JOptionPane.showMessageDialog.errorHeader"),
                         JOptionPane.ERROR_MESSAGE);
                     // Reset the bean at the list and reload delta configuration editor
                     final DefaultListModel dlm = (DefaultListModel)lstDeltaCfgs.getModel();
@@ -454,8 +460,12 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
                 JXErrorPane.showDialog(
                     this,
                     new ErrorInfo(
-                        "Fehler beim Überprüfen",
-                        "Beim Überprüfen auf Sperrung der Änderungskonfiguration ist ein Fehler aufgetreten.",
+                        org.openide.util.NbBundle.getMessage(
+                            GeocpmBreakingEdgeEditor.class,
+                            "GeocpmBreakingEdgeEditor.prepareForSave().JXErrorPane.showDialog.ErrorInfo.header"),
+                        org.openide.util.NbBundle.getMessage(
+                            GeocpmBreakingEdgeEditor.class,
+                            "GeocpmBreakingEdgeEditor.prepareForSave().JXErrorPane.showDialog.ErrorInfo.message"),
                         null,
                         "EDITOR",
                         ex,
@@ -490,8 +500,12 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
             JXErrorPane.showDialog(
                 this,
                 new ErrorInfo(
-                    "Fehler beim Speichern",
-                    "Beim Speichern ist ein Fehler aufgetreten.",
+                    org.openide.util.NbBundle.getMessage(
+                        GeocpmBreakingEdgeEditor.class,
+                        "GeocpmBreakingEdgeEditor.prepareForSave().JXErrorPane.showDialog2.ErrorInfo.header"),
+                    org.openide.util.NbBundle.getMessage(
+                        GeocpmBreakingEdgeEditor.class,
+                        "GeocpmBreakingEdgeEditor.prepareForSave().JXErrorPane.showDialog2.ErrorInfo.message"),
                     "Das Speichern von Änderungskonfiguration '"
                             + deltaCfgBean
                             + " ist fehlgeschlagen.",
@@ -593,7 +607,11 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
 
                                 @Override
                                 public void run() {
-                                    lblHeadingMap.setText(text + "( Loading... )");
+                                    lblHeadingMap.setText(
+                                        text
+                                                + org.openide.util.NbBundle.getMessage(
+                                                    GeocpmBreakingEdgeEditor.class,
+                                                    "GeocpmBreakingEdgeEditor.initMap().retrievalStarted(RetrievalEvent).lblHeadingMap.text"));
                                 }
                             });
                     }
@@ -608,7 +626,11 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
 
                                 @Override
                                 public void run() {
-                                    lblHeadingMap.setText(text + "( Double click preview to add )");
+                                    lblHeadingMap.setText(
+                                        text
+                                                + org.openide.util.NbBundle.getMessage(
+                                                    GeocpmBreakingEdgeEditor.class,
+                                                    "GeocpmBreakingEdgeEditor.initMap().retrievalComplete(RetrievalEvent).lblHeadingMap.text"));
                                 }
                             });
                     }
@@ -619,7 +641,11 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
 
                                 @Override
                                 public void run() {
-                                    lblHeadingMap.setText(text + "( Retrieval Aborted )");
+                                    lblHeadingMap.setText(
+                                        text
+                                                + org.openide.util.NbBundle.getMessage(
+                                                    GeocpmBreakingEdgeEditor.class,
+                                                    "GeocpmBreakingEdgeEditor.initMap().retrievalAborted(RetrievalEvent).lblHeadingMap.text"));
                                 }
                             });
                     }
@@ -630,7 +656,11 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
 
                                 @Override
                                 public void run() {
-                                    lblHeadingMap.setText(text + "( Retrieval Error )");
+                                    lblHeadingMap.setText(
+                                        text
+                                                + org.openide.util.NbBundle.getMessage(
+                                                    GeocpmBreakingEdgeEditor.class,
+                                                    "GeocpmBreakingEdgeEditor.initMap().retrievalError(RetrievalEvent).lblHeadingMap.text"));
                                 }
                             });
                     }

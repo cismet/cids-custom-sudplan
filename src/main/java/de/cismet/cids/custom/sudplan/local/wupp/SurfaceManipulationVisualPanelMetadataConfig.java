@@ -50,7 +50,7 @@ public class SurfaceManipulationVisualPanelMetadataConfig extends javax.swing.JP
             throw new IllegalStateException("model instance must not be null");
         }
 
-        this.setName("Add metadata to model");
+        this.setName(org.openide.util.NbBundle.getMessage(SurfaceManipulationVisualPanelMetadataConfig.class, "SurfaceManipulationVisualPanelMetadataConfig.SurfaceManipulationVisualPanelMetadataConfig(SurfaceManipulationWizardPanelMetadataConfig).name"));
 
         initComponents();
 

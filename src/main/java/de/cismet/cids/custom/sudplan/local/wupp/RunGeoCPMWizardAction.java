@@ -164,9 +164,8 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
                 attachScenario(modelRun, wizard);
 
                 SMSUtils.executeAndShowRun(modelRun);
-                
-                lockInputConfig(wizard);
 
+                lockInputConfig(wizard);
             } catch (final Exception ex) {
                 // TODO: proper error panel
                 final String message = "Cannot perform geocpm run";

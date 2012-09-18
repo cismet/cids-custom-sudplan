@@ -134,12 +134,12 @@ public class SurfaceManipulationWizardPanelConfigSelection extends AbstractWizar
         if (configModel == null) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Please select a new or existing Digital Surface Model");
+                org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelConfigSelection.class, "SurfaceManipulationWizardPanelConfigSelection.isValid().noModel"));
             return false;
         } else if ((configModel != null) && (isConfigModelNew != null) && isConfigModelNew.booleanValue()) {
             wizard.putProperty(
                 WizardDescriptor.PROP_INFO_MESSAGE,
-                "New creation of delta Digital Surface Model");
+                org.openide.util.NbBundle.getMessage(SurfaceManipulationWizardPanelConfigSelection.class, "SurfaceManipulationWizardPanelConfigSelection.isValid().createNewModel"));
         }
         return true;
     }
