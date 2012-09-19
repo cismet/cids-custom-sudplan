@@ -112,22 +112,21 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
                         null,
                         null);
                 dsBean.setProperty("uri", config.toUrl()); // NOI18N
-                dsBean.setProperty("station", rfBean.getProperty("station")); // NOI18N
             } else {
                 final ObjectMapper mapper = new ObjectMapper();
                 final StringWriter sw = new StringWriter();
 
                 mapper.writeValue(sw, watchable.getResultCurve());
 
-                dsBean.setProperty("uri", sw.toString());               // NOI18N
-                dsBean.setProperty("geom", rfBean.getProperty("geom")); // NOI18N
-                dsBean.setProperty("year", input.getTargetYear());      // NOI18N
+                dsBean.setProperty("uri", sw.toString());          // NOI18N
+                dsBean.setProperty("year", input.getTargetYear()); // NOI18N
             }
 
             dsBean.setProperty("name", rfObjName + " downscaled (taskid=" + watchable.getRunId() + ")"); // NOI18N
             dsBean.setProperty("converter", rfBean.getProperty("converter"));                            // NOI18N
             dsBean.setProperty("description", "Downscaled rainfall object");                             // NOI18N
             dsBean.setProperty("forecast", Boolean.TRUE);                                                // NOI18N
+            dsBean.setProperty("station", rfBean.getProperty("station"));                                // NOI18N
 
             dsBean = dsBean.persist();
         } catch (final Exception ex) {
@@ -211,7 +210,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
         if (input == null) {
             ts.setValue(now, "coordinate_system", "EPSG:4326");                                                // NOI18N
-            final Geometry geom = (Geometry)rfObj.getProperty("geom.geo_field");                               // NOI18N
+            final Geometry geom = (Geometry)rfObj.getProperty("station.geom.geo_field");                       // NOI18N
             ts.setValue(now, "coordinate_x", String.valueOf(geom.getCentroid().getX()));                       // NOI18N
             ts.setValue(now, "coordinate_y", String.valueOf(geom.getCentroid().getY()));                       // NOI18N
             ts.setValue(now, "historical_year", (Integer)rfObj.getProperty("year") + "-01-01T00:00:00-00:00"); // NOI18N
