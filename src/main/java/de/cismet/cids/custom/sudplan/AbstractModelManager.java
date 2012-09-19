@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.EventQueue;
@@ -26,7 +25,6 @@ import java.io.StringWriter;
 import java.sql.Timestamp;
 
 import java.util.GregorianCalendar;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -56,10 +54,10 @@ public abstract class AbstractModelManager implements ModelManager {
 
     private static final transient Logger LOG = Logger.getLogger(AbstractModelManager.class);
     // NOTE: maybe we need a per-cidsbean dispatch thread, but this should do
-    private static final ExecutorService progressDispatcher;
-
+    private static final ExecutorService PROGRESS_DISPATCHER;
+    
     static {
-        progressDispatcher = CismetExecutors.newSingleThreadExecutor(
+        PROGRESS_DISPATCHER = CismetExecutors.newSingleThreadExecutor(
                 SudplanConcurrency.createThreadFactory("model-progress-dispatcher")); // NOI18N
     }
 
@@ -223,7 +221,7 @@ public abstract class AbstractModelManager implements ModelManager {
                 }
             };
 
-        return progressDispatcher.submit(fireStarted);
+        return PROGRESS_DISPATCHER.submit(fireStarted);
     }
 
     /**
@@ -273,7 +271,7 @@ public abstract class AbstractModelManager implements ModelManager {
                 }
             };
 
-        progressDispatcher.submit(fireProgressed);
+        PROGRESS_DISPATCHER.submit(fireProgressed);
     }
 
     /**
@@ -370,7 +368,7 @@ public abstract class AbstractModelManager implements ModelManager {
                 }
             };
 
-        progressDispatcher.submit(fireBroken);
+        PROGRESS_DISPATCHER.submit(fireBroken);
     }
 
     /**
@@ -523,7 +521,7 @@ public abstract class AbstractModelManager implements ModelManager {
                 }
             };
 
-        progressDispatcher.submit(fireFinished);
+        PROGRESS_DISPATCHER.submit(fireFinished);
     }
 
     /**
