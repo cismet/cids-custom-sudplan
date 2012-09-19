@@ -25,8 +25,15 @@ import java.io.StringWriter;
 import java.sql.Timestamp;
 
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -55,10 +62,27 @@ public abstract class AbstractModelManager implements ModelManager {
     private static final transient Logger LOG = Logger.getLogger(AbstractModelManager.class);
     // NOTE: maybe we need a per-cidsbean dispatch thread, but this should do
     private static final ExecutorService PROGRESS_DISPATCHER;
-    
+
+    // only instances with cidsbeans are stored, not any "unbound" instances
+    // the key is the hashcode of the internal string representation of a metaobject identifier consisting of object id
+    // and classKey (<objectId>@<classId>@<domain>, e.g. 3539@32@SUDPLAN)
+    // the value is a weakhashmap that only stores keys, never values, thus only the keySet() is relevant for iteration
+    private static final Map<Integer, WeakHashMap<AbstractModelManager, Object>> INSTANCES;
+    // we don't need a reentrant rwlock for INSTANCES because read operations are only done by doFireEvent and
+    // doFireEvent in turn is always executed from the PROGRESS_DISPATCHER which is a single threa executor. thus there
+    // will never be more than one read lock at the same time
+    private static final Object INSTANCES_LOCK;
+    private static final ScheduledExecutorService INSTANCE_CLEANER;
+
     static {
         PROGRESS_DISPATCHER = CismetExecutors.newSingleThreadExecutor(
                 SudplanConcurrency.createThreadFactory("model-progress-dispatcher")); // NOI18N
+        INSTANCE_CLEANER = Executors.newScheduledThreadPool(
+                1,
+                SudplanConcurrency.createThreadFactory("model-instance-cleaner"));    // NOI18N
+        INSTANCES = new HashMap<Integer, WeakHashMap<AbstractModelManager, Object>>();
+        INSTANCES_LOCK = new Object();
+        INSTANCE_CLEANER.scheduleAtFixedRate(new InstanceCleaner(), 300, 60, TimeUnit.SECONDS);
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -162,7 +186,36 @@ public abstract class AbstractModelManager implements ModelManager {
 
     @Override
     public void setCidsBean(final CidsBean cidsBean) {
+        if (this.cidsBean != null) {
+            LOG.warn("manager seems to be reused, but instance cache does not support this: [manager=" + this + "|old="
+                        + this.cidsBean + "|new=" + cidsBean + "]");
+        }
+
         this.cidsBean = cidsBean;
+
+        if (cidsBean != null) {
+            final Integer keyHash = getKeyHash();
+
+            synchronized (INSTANCES_LOCK) {
+                if (!INSTANCES.containsKey(keyHash)) {
+                    INSTANCES.put(keyHash, new WeakHashMap<AbstractModelManager, Object>(5));
+                }
+
+                INSTANCES.get(keyHash).put(this, null);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Integer getKeyHash() {
+        final MetaObject mo = cidsBean.getMetaObject();
+        final String objKey = mo.getID() + "@" + mo.getClassKey(); // NOI18N
+
+        return objKey.intern().hashCode();
     }
 
     @Override
@@ -179,6 +232,24 @@ public abstract class AbstractModelManager implements ModelManager {
             LOG.debug("removeProgressListener: " + progressL);
         }
         progressSupport.removeProgressListener(progressL);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  event  DOCUMENT ME!
+     */
+    private void doFireEvent(final ProgressEvent event) {
+        final Integer hash = getKeyHash();
+
+        synchronized (INSTANCES_LOCK) {
+            final WeakHashMap<AbstractModelManager, Object> mMap = INSTANCES.get(hash);
+            if (mMap != null) {
+                for (final AbstractModelManager instance : mMap.keySet()) {
+                    instance.progressSupport.fireEvent(event);
+                }
+            }
+        }
     }
 
     /**
@@ -215,9 +286,7 @@ public abstract class AbstractModelManager implements ModelManager {
                         throw new IllegalStateException(message, ex);
                     }
 
-                    progressSupport.fireEvent(new ProgressEvent(
-                            AbstractModelManager.this,
-                            ProgressEvent.State.STARTED));
+                    doFireEvent(new ProgressEvent(AbstractModelManager.this, ProgressEvent.State.STARTED));
                 }
             };
 
@@ -262,7 +331,7 @@ public abstract class AbstractModelManager implements ModelManager {
                         return;
                     }
 
-                    progressSupport.fireEvent(new ProgressEvent(
+                    doFireEvent(new ProgressEvent(
                             AbstractModelManager.this,
                             ProgressEvent.State.PROGRESSING,
                             step,
@@ -361,7 +430,7 @@ public abstract class AbstractModelManager implements ModelManager {
                         }
                     }
 
-                    progressSupport.fireEvent(new ProgressEvent(
+                    doFireEvent(new ProgressEvent(
                             AbstractModelManager.this,
                             ProgressEvent.State.BROKEN,
                             message));
@@ -515,7 +584,7 @@ public abstract class AbstractModelManager implements ModelManager {
                         throw new IllegalStateException(message, ex);
                     }
 
-                    progressSupport.fireEvent(new ProgressEvent(
+                    doFireEvent(new ProgressEvent(
                             AbstractModelManager.this,
                             ProgressEvent.State.FINISHED));
                 }
@@ -587,5 +656,31 @@ public abstract class AbstractModelManager implements ModelManager {
     @Override
     public RunInfo getRunInfo() {
         return SMSUtils.getRunInfo(cidsBean, DefaultRunInfo.class);
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private static final class InstanceCleaner implements Runnable {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void run() {
+            synchronized (INSTANCES_LOCK) {
+                final Set<Integer> keySet = INSTANCES.keySet();
+                for (final Integer hash : keySet) {
+                    final WeakHashMap mMap = INSTANCES.get(hash);
+                    if ((mMap == null) || mMap.isEmpty()) {
+                        // removes it from the map, see Map#keyset()
+                        keySet.remove(hash);
+                    }
+                }
+            }
+        }
     }
 }
