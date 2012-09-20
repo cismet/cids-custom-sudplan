@@ -160,6 +160,7 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         bindingGroup.bind();
 
         titleComponent.setCidsBean(cidsBean);
+        titleComponent.setTitle((String)cidsBean.getProperty("name"));
 
         final String data = (String)cidsBean.getProperty("data");
         final Integer interval = (Integer)cidsBean.getProperty("interval");
@@ -215,8 +216,6 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
 
     @Override
     public void setTitle(final String title) {
-        super.setTitle(title);
-
         titleComponent.setTitle(title);
     }
 }

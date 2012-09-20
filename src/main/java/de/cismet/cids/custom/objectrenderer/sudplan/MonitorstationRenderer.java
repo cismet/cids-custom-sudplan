@@ -138,21 +138,27 @@ public class MonitorstationRenderer extends AbstractCidsBeanRenderer {
 
         if (type != null) {
             if ("R".equals(type)) {
-                LOG.warn("old monitor station type: " + cidsBean);
+                LOG.warn("old monitor station type: " + cidsBean); // NOI18N
 
                 return;
             }
 
             final String[] split = type.split(":", 2); // NOI18N
 
-            assert split.length == 2 : "illegal type definition: " + type; // NOI18N
+            assert (split.length == 1) || (split.length == 2) : "illegal type definition: " + type; // NOI18N
 
             final String ctxKey = split[0];
             lblContextValue.setText(MonitorstationContext.getMonitorstationContext(ctxKey).getLocalisedName());
 
-            final String[] vars = split[1].split(","); // NOI18N
-            for (final String var : vars) {
-                setVarSelected(Variable.getVariable(var), true);
+            if (split.length == 2) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("assuming type with variable description:" + type); // NOI18N
+                }
+
+                final String[] vars = split[1].split(","); // NOI18N
+                for (final String var : vars) {
+                    setVarSelected(Variable.getVariable(var), true);
+                }
             }
         }
     }

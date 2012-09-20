@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import org.openide.util.NbBundle;
+
 /**
  * DOCUMENT ME!
  *
@@ -17,9 +19,27 @@ public final class MonitorstationContext extends LocalisedEnum<MonitorstationCon
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final MonitorstationContext AQ = new MonitorstationContext("AQ", "Air Quality");
-    public static final MonitorstationContext HD = new MonitorstationContext("HD", "Hydrology");
-    public static final MonitorstationContext RF = new MonitorstationContext("RF", "Rainfall");
+    public static final MonitorstationContext AQ = new MonitorstationContext(
+            "AQ", // NOI18N
+            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.AQ.localisedName")); // NOI18N
+    public static final MonitorstationContext HD = new MonitorstationContext(
+            "HD", // NOI18N
+            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.HD.localisedName")); // NOI18N
+    public static final MonitorstationContext RF = new MonitorstationContext(
+            "RF", // NOI18N
+            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.RF.localisedName")); // NOI18N
+    public static final MonitorstationContext LI_RF = new MonitorstationContext(
+            "LI-RF", // NOI18N
+            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-RF.localisedName")); // NOI18N
+    public static final MonitorstationContext LI_WI = new MonitorstationContext(
+            "LI-WI", // NOI18N
+            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-WI.localisedName")); // NOI18N
+    public static final MonitorstationContext LI_WO = new MonitorstationContext(
+            "LI-WO", // NOI18N
+            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-WO.localisedName")); // NOI18N
+    public static final MonitorstationContext LI_HY = new MonitorstationContext(
+            "LI-HY", // NOI18N
+            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-HY.localisedName")); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -53,6 +73,15 @@ public final class MonitorstationContext extends LocalisedEnum<MonitorstationCon
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isCSContext() {
+        return !key.startsWith("LI"); // NOI18N
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   key  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -75,7 +104,7 @@ public final class MonitorstationContext extends LocalisedEnum<MonitorstationCon
      * @return  DOCUMENT ME!
      */
     public static MonitorstationContext[] values() {
-        return new MonitorstationContext[] { AQ, HD, RF };
+        return new MonitorstationContext[] { AQ, HD, RF, LI_RF, LI_WI, LI_WO, LI_HY };
     }
 
     @Override

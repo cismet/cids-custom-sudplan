@@ -56,10 +56,10 @@ public class IdfCurveFeatureRenderer extends CustomCidsFeatureRenderer {
         initComponents();
         BufferedImage image = null;
         try {
-            final InputStream is = getClass().getResourceAsStream("rainfall_feature_icon_unselected.png"); // NOI18N
+            final InputStream is = getClass().getResourceAsStream("rain.png"); // NOI18N
             image = ImageIO.read(is);
         } catch (final IOException ex) {
-            LOG.warn("cannot load idf curve feature icon", ex);                                            // NOI18N
+            LOG.warn("cannot load idf curve feature icon", ex);                // NOI18N
         }
 
         rainPointSymbolUnselected = image;

@@ -7,6 +7,13 @@
 ****************************************************/
 package de.cismet.cids.custom.objecteditors.sudplan;
 
+import Sirius.navigator.tools.MetaObjectChangeEvent;
+import Sirius.navigator.tools.MetaObjectChangeSupport;
+import Sirius.navigator.ui.ComponentRegistry;
+import Sirius.navigator.ui.tree.MetaCatalogueTree;
+
+import Sirius.server.middleware.types.MetaObject;
+
 import org.apache.log4j.Logger;
 
 import org.jdesktop.swingx.JXErrorPane;
@@ -47,6 +54,10 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
 
     /** LOGGER. */
     private static final transient Logger LOG = Logger.getLogger(MonitorstationEditor.class);
+
+    //~ Instance fields --------------------------------------------------------
+
+    private transient MetaObject oldMo;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JComboBox cboContext = new javax.swing.JComboBox();
@@ -113,7 +124,9 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
     private void initContext() {
         cboContext.removeAllItems();
         for (final MonitorstationContext context : MonitorstationContext.values()) {
-            cboContext.addItem(context);
+            if (context.isCSContext()) {
+                cboContext.addItem(context);
+            }
         }
         cboContext.setRenderer(new ContextRenderer());
     }
@@ -261,6 +274,8 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
      */
     @Override
     protected void init() {
+        oldMo = cidsBean.getMetaObject();
+
         DefaultCustomObjectEditor.setMetaClassInformationToMetaClassStoreComponentsInBindingGroup(
             bindingGroup,
             cidsBean);
@@ -370,7 +385,25 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
      */
     @Override
     public void editorClosed(final EditorClosedEvent event) {
-        // noop
+        if (EditorSaveStatus.SAVE_SUCCESS == event.getStatus()) {
+            final MetaObject newMo = event.getSavedBean().getMetaObject();
+
+            // FIXME: this is not ok, the old mo is currently not present anymore, however, in our case everything
+            // works as expected
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("old metaobject id = " + oldMo.getID()); // NOI18N
+            }
+
+            if (oldMo.getID() < 0) {
+                final MetaObjectChangeEvent moce = new MetaObjectChangeEvent(this, null, newMo);
+                MetaObjectChangeSupport.getDefault().fireMetaObjectAdded(moce);
+            } else {
+                final MetaObjectChangeEvent moce = new MetaObjectChangeEvent(this, oldMo, newMo);
+                MetaObjectChangeSupport.getDefault().fireMetaObjectChanged(moce);
+            }
+
+            // TODO: soft refresh when the editor won't do a hard refresh anymore
+        }
     }
 
     /**

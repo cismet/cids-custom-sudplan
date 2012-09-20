@@ -47,7 +47,7 @@ public final class TimeSeriesRendererUtil {
      */
     public static Resolution getPreviewResolution(final TimeseriesRetrieverConfig config) {
         if (config.getProtocol().equals(TimeseriesRetrieverConfig.PROTOCOL_NETCDF)) {
-            return Resolution.DAY;
+            return Resolution.HOUR;
         } else if (config.getProtocol().equals(TimeseriesRetrieverConfig.PROTOCOL_DAV)) {
             return Resolution.DAY;
         } else {

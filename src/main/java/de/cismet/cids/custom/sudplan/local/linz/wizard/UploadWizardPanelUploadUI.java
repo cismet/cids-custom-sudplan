@@ -461,8 +461,8 @@ public final class UploadWizardPanelUploadUI extends javax.swing.JPanel {
             try {
                 fileInputStream.close();
                 httpClient.getConnectionManager().shutdown();
-            } catch (Throwable t) {
-                LOG.warn("could not close input stream of file '" + inpFile.getName() + "'", t);
+            } catch (Exception e) {
+                LOG.warn("could not close input stream of file '" + inpFile.getName() + "'", e);
             }
 
             setProgress(100);

@@ -52,7 +52,8 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(LinzNetcdfConverter.class);
-    public static final transient String NAN = "nan";
+    private static final transient String NAN = "nan";
+    private static final transient String NEG_INF = "-Inf";
     private static final transient DateFormat DATEFORMAT;
     private static final transient DateFormat TS_DATEFORMAT;
     private static final transient NumberFormat NUMBERFORMAT;
@@ -261,7 +262,9 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
 
                         for (int i = 3; i < split.length; i++) {
                             final String value = split[i];
-                            final float val = NAN.equals(value) ? -1.0f : NUMBERFORMAT.parse(value).floatValue();
+
+                            final float val = (NAN.equals(value) || NEG_INF.equals(value))
+                                ? -1.0f : NUMBERFORMAT.parse(value).floatValue();
 
                             timeSeries.setValue(new TimeStamp(startDate),
                                 VALUE_KEYS[i - 1], val);
@@ -271,7 +274,8 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
                         final Date date = DATEFORMAT.parse(key);
                         for (int i = 1; i < split.length; i++) {
                             final String value = split[i];
-                            final float val = NAN.equals(value) ? -1.0f : NUMBERFORMAT.parse(value).floatValue();
+                            final float val = (NAN.equals(value) || NEG_INF.equals(value))
+                                ? -1.0f : NUMBERFORMAT.parse(value).floatValue();
 
                             timeSeries.setValue(new TimeStamp(date),
                                 VALUE_KEYS[i - 1], val);
@@ -287,7 +291,7 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
                     final Date startDate = DATEFORMAT.parse(event_start);
                     final Date endDate = DATEFORMAT.parse(event_end);
 
-                    if (!NAN.equals(value)) {
+                    if (!NAN.equals(value) && !NEG_INF.equals(value)) {
                         final GregorianCalendar calendar = new GregorianCalendar();
                         final float val = NUMBERFORMAT.parse(value).floatValue();
                         calendar.setTime(startDate);
@@ -303,7 +307,7 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
                 } else {
                     final String value = split[position];
 
-                    if (!NAN.equals(value)) {
+                    if (!NAN.equals(value) && !NEG_INF.equals(value)) {
                         final String key = split[0];
                         final Date date = DATEFORMAT.parse(key);
                         final float val = NUMBERFORMAT.parse(value).floatValue();

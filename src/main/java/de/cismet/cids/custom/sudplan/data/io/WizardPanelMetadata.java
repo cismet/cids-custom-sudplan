@@ -111,6 +111,8 @@ public class WizardPanelMetadata extends AbstractWizardPanelCtrl {
 
         wizard.putProperty(PROP_BEAN, this.cidsBean);
 
+        comp.finalise();
+
         wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, null);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Leaving store(WizardDescriptor)"); // NOI18N

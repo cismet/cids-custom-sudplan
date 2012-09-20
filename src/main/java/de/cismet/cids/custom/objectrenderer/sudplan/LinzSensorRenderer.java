@@ -17,11 +17,9 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 
 import org.apache.commons.httpclient.Credentials;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import org.openide.awt.Mnemonics;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.CardLayout;
@@ -32,13 +30,9 @@ import java.io.IOException;
 import java.util.concurrent.Future;
 
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.table.AbstractTableModel;
 
-import de.cismet.cids.client.tools.DevelopmentTools;
-
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
-import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
 import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
@@ -46,8 +40,8 @@ import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.converter.LinzNetcdfConverter;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 import de.cismet.cids.custom.sudplan.data.io.TimeSeriesExportWizardAction;
+import de.cismet.cids.custom.sudplan.local.linz.LinzTimeSeriesExportWizardAction;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
-import de.cismet.cids.custom.sudplan.local.linz.wizard.EtaWizardPanelEtaConfigurationUI;
 import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -140,7 +134,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient TimeSeriesExportWizardAction exportAction = new TimeSeriesExportWizardAction();
+    private final transient TimeSeriesExportWizardAction exportAction = new LinzTimeSeriesExportWizardAction();
 
     private final transient LinzSensorTitleComponent linzSensorTitleComponent = new LinzSensorTitleComponent();
     private transient Sensor currentSensorType;
@@ -303,8 +297,8 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                 eventDetectionUpdater = new EventDetectionUpdater(currentSensorType);
                 SudplanConcurrency.getSudplanGeneralPurposePool().execute(eventDetectionUpdater);
             }
-        } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
             progressBar.setIndeterminate(false);
             org.openide.awt.Mnemonics.setLocalizedText(
                 progressLabel,
@@ -610,8 +604,8 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                     final TimeSeries timeSeries = loadEvents(sensor);
                     exportAction.setTimeSeries(timeSeries);
                     eventDetectionTableModel = new EventDetectionTableModel(timeSeries);
-                } catch (Throwable t) {
-                    LOG.error("EventDetectionUpdater: could not retrieve event detection values: " + t.getMessage(), t);
+                } catch (Exception e) {
+                    LOG.error("EventDetectionUpdater: could not retrieve event detection values: " + e.getMessage(), e);
                     run = false;
                     EventQueue.invokeLater(new Runnable() {
 

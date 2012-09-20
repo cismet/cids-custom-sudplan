@@ -333,6 +333,81 @@
         "sww:wwtp_linz_id": "SUDPLAN Sensor Network L-PCOUT"
       }, 
       "opensdm:name": "water_level_max"
+    }, 
+    {
+      "@id": "http://fswwwww1.tu-graz.ac.at:8080/datasets/linz-wwtp-pcout_events/event_duration", 
+      "@type": "nc:variable", 
+      "opensdm:data": {
+        "cf:description": "duration of the rain event", 
+        "cf:long_name": "duration of the rain event", 
+        "cf:units": "minutes", 
+        "nc:data_type": "float64", 
+        "nc:dimensions": [
+          "event_dimension"
+        ], 
+        "nc:variable_name": "event_duration"
+      }, 
+      "opensdm:name": "event_duration"
+    }, 
+    {
+      "@id": "http://fswwwww1.tu-graz.ac.at:8080/datasets/linz-wwtp-pcout_events/overflow_duration", 
+      "@type": "nc:variable", 
+      "opensdm:data": {
+        "cf:description": "duration of the rain event discharge", 
+        "cf:long_name": "duration of the rain event discharge", 
+        "cf:units": "minutes", 
+        "nc:data_type": "float64", 
+        "nc:dimensions": [
+          "event_dimension"
+        ], 
+        "nc:variable_name": "overflow_duration"
+      }, 
+      "opensdm:name": "overflow_duration"
+    }, 
+    {
+      "@id": "http://fswwwww1.tu-graz.ac.at:8080/datasets/linz-wwtp-pcout_events/mass_balance_TSSeq_pcin", 
+      "@type": "nc:variable", 
+      "opensdm:data": {
+        "cf:description": "mass balance in the inflow of the primary clarifier", 
+        "cf:long_name": "mass balance in the inflow of the primary clarifier", 
+        "cf:units": "kg", 
+        "nc:data_type": "float64", 
+        "nc:dimensions": [
+          "event_dimension"
+        ], 
+        "nc:variable_name": "mass_balance_TSSeq_pcin"
+      }, 
+      "opensdm:name": "mass_balance_TSSeq_pcin"
+    }, 
+    {
+      "@id": "http://fswwwww1.tu-graz.ac.at:8080/datasets/linz-wwtp-pcout_events/mass_balance_TSSeq_pcout", 
+      "@type": "nc:variable", 
+      "opensdm:data": {
+        "cf:description": "mass balance in the outflow of the primary clarifier", 
+        "cf:long_name": "mass balance in the outlow of the primary clarifier", 
+        "cf:units": "kg", 
+        "nc:data_type": "float64", 
+        "nc:dimensions": [
+          "event_dimension"
+        ], 
+        "nc:variable_name": "mass_balance_TSSeq_pcout"
+      }, 
+      "opensdm:name": "mass_balance_TSSeq_pcout"
+    }, 
+    {
+      "@id": "http://fswwwww1.tu-graz.ac.at:8080/datasets/linz-wwtp-pcout_events/mass_balance_sedimentation_efficiency", 
+      "@type": "nc:variable", 
+      "opensdm:data": {
+        "cf:description": "sedimentation efficiency in the primary clarifier for the rain event", 
+        "cf:long_name": "sedimentation efficiency in the primary clarifier for the rain event", 
+        "cf:units": "percent", 
+        "nc:data_type": "float64", 
+        "nc:dimensions": [
+          "event_dimension"
+        ], 
+        "nc:variable_name": "mass_balance_sedimentation_efficiency"
+      }, 
+      "opensdm:name": "mass_balance_sedimentation_efficiency"
     }
   ], 
   "opensdm:data": {
