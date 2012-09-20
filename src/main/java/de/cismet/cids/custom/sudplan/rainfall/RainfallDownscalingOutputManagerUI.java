@@ -109,8 +109,8 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
      * @throws  IllegalStateException  DOCUMENT ME!
      */
     private void init() {
-        final CidsBean inputTs = model.fetchInputRFObj();
-        final CidsBean resultTs = model.fetchResultRFObj();
+        final CidsBean inputObj = model.fetchInputRFObj();
+        final CidsBean resultObj = model.fetchResultRFObj();
 
         final JPanel resultPanel;
         final JPanel inputPanel;
@@ -121,8 +121,8 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
             final TimeseriesRetrieverConfig inputCfg;
 
             try {
-                resultCfg = TimeseriesRetrieverConfig.fromUrl((String)resultTs.getProperty("uri")); // NOI18N
-                inputCfg = TimeseriesRetrieverConfig.fromUrl((String)inputTs.getProperty("uri"));   // NOI18N
+                resultCfg = TimeseriesRetrieverConfig.fromUrl((String)resultObj.getProperty("uri")); // NOI18N
+                inputCfg = TimeseriesRetrieverConfig.fromUrl((String)inputObj.getProperty("uri"));   // NOI18N
 
                 resultPanel = new JPanel();
                 resultPanel.setOpaque(false);
@@ -155,14 +155,20 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
             tblStatisticalResults.setPreferredScrollableViewportSize(tblStatisticalResults.getPreferredSize());
         } else {
             final ObjectMapper mapper = new ObjectMapper();
-            final String uriInput = (String)inputTs.getProperty("uri");   // NOI18N
-            final String uriResult = (String)resultTs.getProperty("uri"); // NOI18N
+            final String uriInput = (String)inputObj.getProperty("uri");   // NOI18N
+            final String uriResult = (String)resultObj.getProperty("uri"); // NOI18N
 
             final IDFCurve idfInput;
             final IDFCurve idfResult;
             try {
                 idfInput = mapper.readValue(uriInput, IDFCurve.class);
                 idfResult = mapper.readValue(uriResult, IDFCurve.class);
+
+                final Integer inputYear = (Integer)inputObj.getProperty("year");   // NOI18N
+                final Integer resultYear = (Integer)resultObj.getProperty("year"); // NOI18N
+
+                idfInput.setCenterYear(inputYear);
+                idfResult.setCenterYear(resultYear);
             } catch (final Exception ex) {
                 final String message = "cannot read idf data from uri"; // NOI18N
                 LOG.error(message, ex);
