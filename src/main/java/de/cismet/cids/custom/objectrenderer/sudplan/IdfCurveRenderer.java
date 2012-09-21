@@ -7,11 +7,15 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import Sirius.navigator.ui.RequestsFullSizeComponent;
+
 import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
 import org.openide.util.NbBundle;
+
+import java.awt.EventQueue;
 
 import java.io.StringReader;
 
@@ -25,7 +29,7 @@ import de.cismet.cids.custom.sudplan.IDFCurvePanel;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
-public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
+public class IdfCurveRenderer extends AbstractCidsBeanRenderer implements RequestsFullSizeComponent {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -36,7 +40,6 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
     private javax.swing.JLabel lblDescription;
     private javax.swing.JLabel lblShowDescription;
     private javax.swing.JLabel lblStatus;
-    private javax.swing.JPanel pnlFiller;
     private javax.swing.JPanel pnlIdf;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
@@ -62,7 +65,6 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         java.awt.GridBagConstraints gridBagConstraints;
         bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
-        pnlFiller = new javax.swing.JPanel();
         pnlIdf = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         chkForecast = new javax.swing.JCheckBox();
@@ -71,17 +73,6 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
-
-        pnlFiller.setOpaque(false);
-        pnlFiller.setLayout(new java.awt.BorderLayout());
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        add(pnlFiller, gridBagConstraints);
 
         pnlIdf.setOpaque(false);
         pnlIdf.setLayout(new java.awt.BorderLayout());
@@ -96,6 +87,7 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
         add(pnlIdf, gridBagConstraints);
 
         chkForecast.setText(NbBundle.getMessage(IdfCurveRenderer.class, "IdfCurveRenderer.chkForecast.text")); // NOI18N
@@ -191,7 +183,24 @@ public class IdfCurveRenderer extends AbstractCidsBeanRenderer {
             curve.setForecast(forecast);
             curve.setCenterYear(year);
             pnlIdf.add(new IDFCurvePanel(curve));
-        } catch (Exception ex) {
+
+            final Runnable r = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        pnlIdf.removeAll();
+                        pnlIdf.add(new IDFCurvePanel(curve));
+                        IdfCurveRenderer.this.invalidate();
+                        IdfCurveRenderer.this.validate();
+                    }
+                };
+
+            if (EventQueue.isDispatchThread()) {
+                r.run();
+            } else {
+                EventQueue.invokeLater(r);
+            }
+        } catch (final Exception ex) {
             final String message = "Cannot inizialize IDFCurveRenderer!"; // NOI18N
             LOG.error(message, ex);
         }
