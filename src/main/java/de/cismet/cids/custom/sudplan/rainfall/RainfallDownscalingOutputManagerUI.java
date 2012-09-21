@@ -140,7 +140,7 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
                     final DefaultTableModel dtm = (DefaultTableModel)tblStatisticalResults.getModel();
                     for (int i = 0; i < statData.length; ++i) {
                         for (int j = 0; j < statData[i].length; ++j) {
-                            dtm.setValueAt(statData[i][j] + "%", j, i + 1);
+                            dtm.setValueAt(round(statData[i][j], 1) + "%", j, i + 1);
                         }
                     }
                 }
@@ -191,6 +191,22 @@ public class RainfallDownscalingOutputManagerUI extends javax.swing.JPanel {
 
         hypRun.setText((String)runBean.getProperty("name"));     // NOI18N
         hypInput.setText((String)inputBean.getProperty("name")); // NOI18N
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   d      DOCUMENT ME!
+     * @param   scale  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static double round(final double d, final int scale) {
+        final long factor = Math.round(Math.pow(10, scale));
+
+        final double rounded = Math.floor((d * factor) + 0.5d);
+
+        return rounded / factor;
     }
 
     /**
