@@ -122,8 +122,8 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
                 descSb.append("Downscaled TimeSeries '").append(rfObjName);
                 descSb.append("', target year ").append(input.getTargetYear());
                 descSb.append(", frequency adjustment: ").append(input.isFrequencyAdjustment());
-                descSb.append(", start: ").append(dateFormat.format(timeInterval.getStart()));
-                descSb.append(", end: ").append(dateFormat.format(timeInterval.getEnd()));
+                descSb.append(", start: ").append(dateFormat.format(timeInterval.getStart().asDate()));
+                descSb.append(", end: ").append(dateFormat.format(timeInterval.getEnd().asDate()));
                 descSb.append(", scenario: ").append(input.getScenario());
                 dsBean.setProperty("description", descSb.toString());
             } else {
