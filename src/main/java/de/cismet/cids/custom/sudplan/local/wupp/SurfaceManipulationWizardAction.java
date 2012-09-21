@@ -630,7 +630,7 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                     ComponentRegistry.getRegistry().getMainWindow(),
                     new ErrorInfo(
                         "Fehler",
-                        "Es ist ein Fehler beim speichern aufgetreten.",
+                        "Es ist ein Fehler beim Speichern aufgetreten.",
                         null,
                         "EDITOR",
                         ise,
@@ -641,7 +641,7 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                 LOG.error(message, ex);
                 JOptionPane.showMessageDialog(
                     ComponentRegistry.getRegistry().getMainWindow(),
-                    "Die Oberflächen manipulation kann nicht gespeichert werden!",
+                    "Die Oberflächenänderung kann nicht gespeichert werden!",
                     "Fehler",
                     JOptionPane.ERROR_MESSAGE);
             } finally {

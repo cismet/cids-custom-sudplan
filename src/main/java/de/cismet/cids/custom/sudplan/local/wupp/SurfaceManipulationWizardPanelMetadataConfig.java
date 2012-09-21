@@ -138,7 +138,7 @@ public class SurfaceManipulationWizardPanelMetadataConfig extends AbstractWizard
                 ComponentRegistry.getRegistry().getMainWindow(),
                 new ErrorInfo(
                     "Fehler",
-                    "Es ist ein Fehler beim überprüfen der Änderungskonfiguration aufgetreten.",
+                    "Es ist ein Fehler beim Überprüfen der Änderungskonfiguration aufgetreten.",
                     null,
                     "EDITOR",
                     ise,
