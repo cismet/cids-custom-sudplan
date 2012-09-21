@@ -230,7 +230,7 @@
         <dependency>
             <groupId>eu.hansolo</groupId>
             <artifactId>SteelSeries</artifactId>
-            <version>3.9.16</version>
+            <version>3.9.26</version>
             <exclusions> 
                 <exclusion>
                     <groupId>xerces</groupId>

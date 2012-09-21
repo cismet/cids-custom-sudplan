@@ -55,7 +55,7 @@ public abstract class AbstractModelManager implements ModelManager {
     private static final transient Logger LOG = Logger.getLogger(AbstractModelManager.class);
     // NOTE: maybe we need a per-cidsbean dispatch thread, but this should do
     private static final ExecutorService PROGRESS_DISPATCHER;
-    
+
     static {
         PROGRESS_DISPATCHER = CismetExecutors.newSingleThreadExecutor(
                 SudplanConcurrency.createThreadFactory("model-progress-dispatcher")); // NOI18N
