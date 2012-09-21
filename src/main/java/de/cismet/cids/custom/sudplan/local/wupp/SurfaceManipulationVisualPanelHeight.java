@@ -39,15 +39,14 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(SurfaceManipulationVisualPanelHeight.class);
-    private static final String NUMBER_FORMAT = "#,##0.00";
-    private static final double SPINNER_STEPS = 0.50d;
+    private static final String NUMBER_FORMAT = "#,##0.00"; // NOI18N
+    private static final double SPINNER_STEPS = 0.05d;
 
     //~ Instance fields --------------------------------------------------------
 
     private final transient SurfaceManipulationWizardPanelHeight model;
     private final transient ChangeListener chL;
     private final transient ActionListener aL;
-//    private final transient SpinnerModelImpl spinnerModel;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup bgType;
@@ -87,11 +86,10 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         final DecimalFormat decimalFormat = (DecimalFormat)intFormatter.getFormat();
         decimalFormat.applyPattern(NUMBER_FORMAT);
 
+        // FIXME: mscholl: why french format symbols? why format symbols anyway?
         final DecimalFormatSymbols frSymbols = new DecimalFormatSymbols(Locale.FRENCH); // 2 345 678.5
         frSymbols.setDecimalSeparator('.');
         decimalFormat.setDecimalFormatSymbols(frSymbols);
-
-//        spnHeight.setEditor(new JSpinner.NumberEditor(spnHeight, NUMBER_FORMAT));
 
         chL = new ChangeListenerImpl();
         spnHeight.addChangeListener(WeakListeners.change(chL, spnHeight));
@@ -120,7 +118,6 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         }
 
         Boolean seaType = model.isSeaType();
-        // model.setHeight(spinnerModel.getDoubleValue());
         if (seaType == null) {
             seaType = false;
             model.setSeaType(seaType.booleanValue());
@@ -252,27 +249,6 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         add(lblUnit, gridBagConstraints);
     }                                                                  // </editor-fold>//GEN-END:initComponents
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    final JDialog dialog = new JDialog();
-                    dialog.setContentPane(
-                        new SurfaceManipulationVisualPanelHeight(new SurfaceManipulationWizardPanelHeight()));
-                    dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-                    dialog.setLocationRelativeTo(null);
-                    dialog.pack();
-                    dialog.setVisible(true);
-                }
-            });
-    }
-
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -289,9 +265,9 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
             final Double value = (Double)((JSpinner.NumberEditor)spnHeight.getEditor()).getModel().getNumber();
 
             final JFormattedTextField ftf = getTextField(spnHeight);
-            if (value.doubleValue() < 0.0d) {
+            if ((value.doubleValue() < 0.0d) && !rbSeaLevel.isSelected()) {
                 ftf.setForeground(Color.red);
-            } else if (value.doubleValue() > 0.0d) {
+            } else if ((value.doubleValue() > 0.0d) && !rbSeaLevel.isSelected()) {
                 ftf.setForeground(Color.blue);
             } else {
                 ftf.setForeground(Color.black);
@@ -312,6 +288,7 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         @Override
         public void actionPerformed(final ActionEvent ae) {
             model.setSeaType(rbSeaLevel.isSelected());
+            chL.stateChanged(null);
         }
     }
 }
