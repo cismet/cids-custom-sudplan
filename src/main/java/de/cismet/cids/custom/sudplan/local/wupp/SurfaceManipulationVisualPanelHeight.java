@@ -51,6 +51,8 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup bgType;
     private javax.swing.Box.Filler filler1;
+    private javax.swing.Box.Filler filler2;
+    private javax.swing.Box.Filler filler3;
     private javax.swing.JLabel lblHeight;
     private javax.swing.JLabel lblUnit;
     private javax.swing.JPanel pnlType;
@@ -171,8 +173,15 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(32767, 32767));
+        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 32767));
         lblUnit = new javax.swing.JLabel();
+        filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 32767));
 
+        setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
         lblHeight.setText(org.openide.util.NbBundle.getMessage(
@@ -199,6 +208,7 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
                 org.openide.util.NbBundle.getMessage(
                     SurfaceManipulationVisualPanelHeight.class,
                     "SurfaceManipulationVisualPanelHeight.pnlType.border.title"))); // NOI18N
+        pnlType.setOpaque(false);
         pnlType.setLayout(new java.awt.GridBagLayout());
 
         bgType.add(rbSeaLevel);
@@ -227,6 +237,11 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         pnlType.add(filler1, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.weighty = 1.0;
+        pnlType.add(filler2, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -234,7 +249,6 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(pnlType, gridBagConstraints);
 
@@ -247,6 +261,11 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblUnit, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.weighty = 1.0;
+        add(filler3, gridBagConstraints);
     }                                                                  // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
