@@ -57,6 +57,7 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
     private transient URL dsOrigRes;
     private transient Float[][] dsStatRes;
     private transient IDFCurve curve;
+    private transient TimeInterval timeInterval;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -286,6 +287,13 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
 
                         URL url = new URL(TimeSeriesRemoteHelper.DAV_HOST + "/" + tsName + "_" + runId + "_unknown"); // NOI18N
 
+                        final TimeStamp[] timeStampsArray = ts.getTimeStampsArray();
+                        timeInterval = new TimeInterval(
+                                TimeInterval.Openness.CLOSED,
+                                timeStampsArray[0],
+                                timeStampsArray[timeStampsArray.length - 1],
+                                TimeInterval.Openness.CLOSED);
+
                         TimeseriesTransmitter.getInstance().put(url, ts, TimeSeriesRemoteHelper.DAV_CREDS);
 
                         dsOrigRes = url;
@@ -407,5 +415,14 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
      */
     public IDFCurve getResultCurve() {
         return curve;
+    }
+
+    /**
+     * Get the value of timeInterval.
+     *
+     * @return  the value of timeInterval
+     */
+    public TimeInterval getTimeInterval() {
+        return timeInterval;
     }
 }
