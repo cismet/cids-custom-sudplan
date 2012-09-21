@@ -48,8 +48,6 @@ import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import de.cismet.cids.custom.sudplan.DeltaSurfaceConflictPanel;
-import de.cismet.cids.custom.sudplan.DeltaSurfacePreparePanel;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
