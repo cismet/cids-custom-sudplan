@@ -12,6 +12,7 @@ import Sirius.server.middleware.types.MetaClass;
 import at.ac.ait.enviro.sudplan.util.PropertyNames;
 import at.ac.ait.enviro.tsapi.handler.DataHandler;
 import at.ac.ait.enviro.tsapi.handler.Datapoint;
+import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
@@ -30,6 +31,8 @@ import java.io.InputStream;
 import java.io.StringWriter;
 
 import java.net.URL;
+
+import java.text.SimpleDateFormat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -98,6 +101,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
                 final String resultFullName = urlString.substring(urlString.lastIndexOf('/') + 1);
                 final String resultName = resultFullName.substring(0, resultFullName.lastIndexOf('_'));
                 final String resultRes = resultFullName.substring(resultFullName.lastIndexOf('_') + 1);
+                final TimeInterval timeInterval = watchable.getTimeInterval();
                 final TimeseriesRetrieverConfig config = new TimeseriesRetrieverConfig(
                         TimeseriesRetrieverConfig.PROTOCOL_DAV,
                         null,
@@ -110,8 +114,18 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
                         Variable.PRECIPITATION.getPropertyKey(),
                         resultFullName,
                         null,
-                        null);
+                        watchable.getTimeInterval());
                 dsBean.setProperty("uri", config.toUrl()); // NOI18N
+
+                final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+                final StringBuilder descSb = new StringBuilder();
+                descSb.append("Downscaled TimeSeries '").append(rfObjName);
+                descSb.append("', target year ").append(input.getTargetYear());
+                descSb.append(", frequency adjustment: ").append(input.isFrequencyAdjustment());
+                descSb.append(", start: ").append(dateFormat.format(timeInterval.getStart()));
+                descSb.append(", end: ").append(dateFormat.format(timeInterval.getEnd()));
+                descSb.append(", scenario: ").append(input.getScenario());
+                dsBean.setProperty("description", descSb.toString());
             } else {
                 final ObjectMapper mapper = new ObjectMapper();
                 final StringWriter sw = new StringWriter();
@@ -120,13 +134,13 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
                 dsBean.setProperty("uri", sw.toString());          // NOI18N
                 dsBean.setProperty("year", input.getTargetYear()); // NOI18N
+                dsBean.setProperty("description", "Downscaled rainfall object");
             }
 
-            dsBean.setProperty("name", rfObjName + " downscaled (taskid=" + watchable.getRunId() + ")"); // NOI18N
-            dsBean.setProperty("converter", rfBean.getProperty("converter"));                            // NOI18N
-            dsBean.setProperty("description", "Downscaled rainfall object");                             // NOI18N
-            dsBean.setProperty("forecast", Boolean.TRUE);                                                // NOI18N
-            dsBean.setProperty("station", rfBean.getProperty("station"));                                // NOI18N
+            dsBean.setProperty("name", rfObjName + " downscaled (" + cidsBean.getProperty("name").toString() + ")"); // NOI18N
+            dsBean.setProperty("converter", rfBean.getProperty("converter"));                                        // NOI18N                             // NOI18N
+            dsBean.setProperty("forecast", Boolean.TRUE);                                                            // NOI18N
+            dsBean.setProperty("station", rfBean.getProperty("station"));                                            // NOI18N
 
             dsBean = dsBean.persist();
         } catch (final Exception ex) {
