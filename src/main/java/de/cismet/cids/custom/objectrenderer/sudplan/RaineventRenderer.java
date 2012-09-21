@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import Sirius.navigator.ui.RequestsFullSizeComponent;
+
 import org.openide.util.NbBundle;
 
 import java.awt.BorderLayout;
@@ -31,7 +33,8 @@ import de.cismet.tools.gui.TitleComponentProvider;
  * @author   jimmy.lauter@cismet.de
  * @version  $Revision$, $Date$
  */
-public class RaineventRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider {
+public class RaineventRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider,
+    RequestsFullSizeComponent {
 
     //~ Instance fields --------------------------------------------------------
 
