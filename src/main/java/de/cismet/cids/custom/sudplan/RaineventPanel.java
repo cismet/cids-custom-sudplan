@@ -92,6 +92,10 @@ public class RaineventPanel extends javax.swing.JPanel {
                 "RaineventPanel.createExportRaineventButton().tooltiptext"));
         btnExport.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cids/custom/sudplan/data/io/ts_export.png")));
+
+        // TODO: enable if export action is available
+        btnExport.setEnabled(false);
+
         return btnExport;
     }
 
