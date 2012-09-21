@@ -15,12 +15,13 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 import de.cismet.cids.custom.sudplan.MonitorstationContext;
 
@@ -41,6 +42,8 @@ public class VisualPanelMetadata extends javax.swing.JPanel {
     private static final Logger LOG = Logger.getLogger(VisualPanelMetadata.class);
 
     //~ Instance fields --------------------------------------------------------
+
+    private final transient PropertyChangeListener pcL;
 
     private final transient WizardPanelMetadata ctrl;
     private transient CidsBean cidsBean;
@@ -75,34 +78,14 @@ public class VisualPanelMetadata extends javax.swing.JPanel {
                         + "must not be null"); // NOI18N
         }
 
-        stationIcon = ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/monitor_16.png", false); // NOI18N
+        this.ctrl = ctrl;
+        this.pcL = new BeanChangeListener();
+        this.stationIcon = ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/monitor_16.png", false); // NOI18N
 
         initComponents();
 
         this.setName(java.util.ResourceBundle.getBundle("de/cismet/cids/custom/sudplan/data/io/Bundle").getString(
                 "TimeSeriesMetaDataPanel.this.name"));
-        this.ctrl = ctrl;
-
-        final DocumentListener docListener = new DocumentListener() {
-
-                @Override
-                public void insertUpdate(final DocumentEvent de) {
-                    ctrl.fireChangeEvent();
-                }
-
-                @Override
-                public void removeUpdate(final DocumentEvent de) {
-                    ctrl.fireChangeEvent();
-                }
-
-                @Override
-                public void changedUpdate(final DocumentEvent de) {
-                    ctrl.fireChangeEvent();
-                }
-            };
-
-        this.txtName.getDocument().addDocumentListener(docListener);
-        this.txtDescription.getDocument().addDocumentListener(docListener);
 
         this.cboStation.addActionListener(new ActionListener() {
 
@@ -135,6 +118,7 @@ public class VisualPanelMetadata extends javax.swing.JPanel {
         }
 
         this.cidsBean = this.ctrl.getCidsBean();
+
         this.txtName.setText("");
         this.txtDescription.setText("");
         this.cboStation.setSelectedIndex(-1);
@@ -151,9 +135,19 @@ public class VisualPanelMetadata extends javax.swing.JPanel {
             cidsBean);
         this.bindingGroup.unbind();
         this.bindingGroup.bind();
+
+        cidsBean.addPropertyChangeListener(pcL);
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("Leaving init()");
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void finalise() {
+        cidsBean.removePropertyChangeListener(pcL);
     }
 
     /**
@@ -306,6 +300,21 @@ public class VisualPanelMetadata extends javax.swing.JPanel {
     } // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class BeanChangeListener implements PropertyChangeListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void propertyChange(final PropertyChangeEvent evt) {
+            ctrl.fireChangeEvent();
+        }
+    }
 
     /**
      * DOCUMENT ME!

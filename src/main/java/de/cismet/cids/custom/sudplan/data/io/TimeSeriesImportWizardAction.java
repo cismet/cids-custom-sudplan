@@ -8,6 +8,7 @@
 package de.cismet.cids.custom.sudplan.data.io;
 
 import Sirius.navigator.ui.ComponentRegistry;
+import Sirius.navigator.ui.tree.MetaCatalogueTree;
 
 import org.apache.log4j.Logger;
 
@@ -27,7 +28,10 @@ import java.text.MessageFormat;
 import javax.swing.Action;
 import javax.swing.JComponent;
 
+import de.cismet.cids.custom.sudplan.MonitorstationContext;
 import de.cismet.cids.custom.sudplan.SMSUtils;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.CidsClientToolbarItem;
 
@@ -130,7 +134,41 @@ public final class TimeSeriesImportWizardAction extends AbstractCidsBeanAction i
 
         // if TS import has been canceled, cancel all running threads
         if (wizard.getValue() == WizardDescriptor.FINISH_OPTION) {
-            // TODO: reload catalogue
+            // refresh the catalogue
+            final CidsBean tsBean = (CidsBean)wizard.getProperty(WizardPanelMetadata.PROP_BEAN);
+            final CidsBean station = (CidsBean)tsBean.getProperty("station"); // NOI18N
+            final String type = (String)station.getProperty("type");          // NOI18N
+            final int indexOfColon = type.indexOf(':');
+            if (indexOfColon < 0) {
+                LOG.warn("unrecognized monitorstation type: " + type);        // NOI18N
+            } else {
+                try {
+                    final MonitorstationContext ctx = MonitorstationContext.getMonitorstationContext(type.substring(
+                                0,
+                                indexOfColon));
+
+                    final String refreshIdStation;
+                    final String refreshIdTimeseries;
+                    if (MonitorstationContext.AQ.equals(ctx)) {
+                        refreshIdStation = "airquality.monitorstation." + station.getMetaObject().getID(); // NOI18N
+                        refreshIdTimeseries = "airquality.timeseries";                                     // NOI18N
+                    } else if (MonitorstationContext.HD.equals(ctx)) {
+                        refreshIdStation = "hydrology.monitorstation." + station.getMetaObject().getID();  // NOI18N
+                        refreshIdTimeseries = "hydrology.timeseries";                                      // NOI18N
+                    } else if (MonitorstationContext.RF.equals(ctx)) {
+                        refreshIdStation = "rainfall.monitorstation." + station.getMetaObject().getID();   // NOI18N
+                        refreshIdTimeseries = "rainfall.timeseries";                                       // NOI18N
+                    } else {
+                        throw new IllegalArgumentException("unknown monitorstation context: " + ctx);      // NOI18N
+                    }
+
+                    final MetaCatalogueTree tree = ComponentRegistry.getRegistry().getCatalogueTree();
+                    tree.requestRefreshNode(refreshIdStation);
+                    tree.requestRefreshNode(refreshIdTimeseries);
+                } catch (final IllegalArgumentException ex) {
+                    LOG.warn("unrecognized monitorstation context: " + type.substring(0, indexOfColon), ex); // NOI18N
+                }
+            }
         } else {
             for (final WizardDescriptor.Panel panel : this.panels) {
                 if (panel instanceof Cancellable) {

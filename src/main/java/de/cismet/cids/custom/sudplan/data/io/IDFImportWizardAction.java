@@ -8,6 +8,7 @@
 package de.cismet.cids.custom.sudplan.data.io;
 
 import Sirius.navigator.ui.ComponentRegistry;
+import Sirius.navigator.ui.tree.MetaCatalogueTree;
 
 import org.apache.log4j.Logger;
 
@@ -19,7 +20,6 @@ import org.jdesktop.swingx.error.ErrorInfo;
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
-import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 
@@ -38,6 +38,7 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 
 import de.cismet.cids.custom.sudplan.IDFCurve;
+import de.cismet.cids.custom.sudplan.MonitorstationContext;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -152,9 +153,42 @@ public final class IDFImportWizardAction extends AbstractCidsBeanAction implemen
                 idfBean.setProperty("converter", converter.getClass().getName()); // NOI18N
                 idfBean.persist();
 
-                // TODO: reload catalogue
+                // refresh the catalogue
+                final CidsBean station = (CidsBean)idfBean.getProperty("station"); // NOI18N
+                final String type = (String)station.getProperty("type");           // NOI18N
+                final int indexOfColon = type.indexOf(':');
+                if (indexOfColon < 0) {
+                    LOG.warn("unrecognized monitorstation type: " + type);         // NOI18N
+                } else {
+                    try {
+                        final MonitorstationContext ctx = MonitorstationContext.getMonitorstationContext(type.substring(
+                                    0,
+                                    indexOfColon));
+
+                        final String refreshIdStation;
+                        final String refreshIdTimeseries;
+                        if (MonitorstationContext.AQ.equals(ctx)) {
+                            refreshIdStation = "airquality.monitorstation." + station.getMetaObject().getID(); // NOI18N
+                            refreshIdTimeseries = "airquality.idfcurve";                                       // NOI18N
+                        } else if (MonitorstationContext.HD.equals(ctx)) {
+                            refreshIdStation = "hydrology.monitorstation." + station.getMetaObject().getID();  // NOI18N
+                            refreshIdTimeseries = "hydrology.idfcurve";                                        // NOI18N
+                        } else if (MonitorstationContext.RF.equals(ctx)) {
+                            refreshIdStation = "rainfall.monitorstation." + station.getMetaObject().getID();   // NOI18N
+                            refreshIdTimeseries = "rainfall.idfcurve";                                         // NOI18N
+                        } else {
+                            throw new IllegalArgumentException("unknown monitorstation context: " + ctx);      // NOI18N
+                        }
+
+                        final MetaCatalogueTree tree = ComponentRegistry.getRegistry().getCatalogueTree();
+                        tree.requestRefreshNode(refreshIdStation);
+                        tree.requestRefreshNode(refreshIdTimeseries);
+                    } catch (final IllegalArgumentException ex) {
+                        LOG.warn("unrecognized monitorstation context: " + type.substring(0, indexOfColon), ex); // NOI18N
+                    }
+                }
             } catch (final Exception ex) {
-                final String message = "could not persist idf bean"; // NOI18N
+                final String message = "could not persist idf bean";                                             // NOI18N
                 LOG.error(message, ex);
 
                 final ErrorInfo info = new ErrorInfo("Persist error", message, null, "ERROR", ex, Level.SEVERE, null);
