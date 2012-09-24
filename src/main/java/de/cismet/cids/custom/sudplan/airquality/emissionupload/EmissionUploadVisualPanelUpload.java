@@ -80,7 +80,7 @@ public class EmissionUploadVisualPanelUpload extends javax.swing.JPanel {
         setLayout(new java.awt.GridBagLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 0.1;
         add(gluFiller, gridBagConstraints);
@@ -90,7 +90,7 @@ public class EmissionUploadVisualPanelUpload extends javax.swing.JPanel {
                 "EmissionUploadVisualPanelUpload.lblNote.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
@@ -109,8 +109,9 @@ public class EmissionUploadVisualPanelUpload extends javax.swing.JPanel {
                 getClass().getResource("/de/cismet/cids/custom/sudplan/airquality/emissionupload/upload.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(rdoUpload, gridBagConstraints);
 
@@ -126,7 +127,7 @@ public class EmissionUploadVisualPanelUpload extends javax.swing.JPanel {
                 getClass().getResource("/de/cismet/cids/custom/sudplan/airquality/emissionupload/save.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 11, 5);
         add(rdoSave, gridBagConstraints);
