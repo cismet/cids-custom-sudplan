@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -44,8 +45,10 @@ import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.dynamics.Disposable;
 
 import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.MappingModel;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
+import de.cismet.cismap.commons.rasterservice.MapService;
 
 import de.cismet.cismap.navigatorplugin.CismapPlugin;
 
@@ -421,7 +424,24 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                                         .processUrl(
                                             AirqualityDownscalingResultManager.GEOSERVER_CAPABILITIES_URL,
                                             null);
-                                CismapBroker.getInstance().getMappingComponent().getMappingModel().addLayer(layerGroup);
+
+                                final MappingModel mappingModel = CismapBroker.getInstance()
+                                            .getMappingComponent()
+                                            .getMappingModel();
+
+                                boolean removeLayer = false;
+                                for (final Object mapService : mappingModel.getRasterServices().values()) {
+                                    if (layerGroup.equals(mapService)) {
+                                        removeLayer = true;
+                                        break;
+                                    }
+                                }
+
+                                if (removeLayer) {
+                                    mappingModel.removeLayer(layerGroup);
+                                }
+
+                                mappingModel.addLayer(layerGroup);
                                 ComponentRegistry.getRegistry().showComponent("cismap");
                             }
                         } catch (final Exception ex) {

@@ -579,25 +579,6 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             throw new Exception(message);
         }
 
-        final Geometry[][] geometries = createGeometries(timeseries);
-
-        final Object valueKeysObject = timeseries.getTSProperty(TimeSeries.VALUE_KEYS);
-        final Object unitsObject = timeseries.getTSProperty(TimeSeries.VALUE_UNITS);
-        final String valueKey;
-        final String unit;
-
-        if ((valueKeysObject instanceof String[]) && (((String[])valueKeysObject).length == 1)
-                    && (unitsObject instanceof String[])
-                    && (((String[])unitsObject).length > 0)) {
-            valueKey = ((String[])valueKeysObject)[0];
-            final String unitFromTimeseries = ((String[])unitsObject)[0];
-            unit = unitFromTimeseries.substring(unitFromTimeseries.lastIndexOf(":") + 1);     // NOI18N
-        } else {
-            final String message = "The valueKey or unit of selected timeseries is invalid."; // NOI18N
-            LOG.error(message);
-            throw new Exception(message);
-        }
-
         String variable;
         if ((result.getVariable() != null) && (result.getVariable().getPropertyKey() != null)) {
             variable = result.getVariable().getPropertyKey();
@@ -637,6 +618,43 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             availableLayerNames.add(availableLayer.getName());
         }
         Collections.sort(availableLayerNames);
+
+        boolean layersAlreadyCreated = true;
+        for (final TimeStamp stamp : timeseries.getTimeStamps()) {
+            final String viewName = MessageFormat.format(
+                        DB_VIEW_NAME_PATTERN,
+                        modelId,
+                        variable,
+                        result.getResolution().getOfferingSuffix(),
+                        Long.toString(stamp.asMilis()))
+                        .toLowerCase();
+
+            layersAlreadyCreated &= Collections.binarySearch(availableLayerNames, viewName) >= 0;
+        }
+
+        if (layersAlreadyCreated) {
+            // We are done here. The result already is visualized.
+            return;
+        }
+
+        final Geometry[][] geometries = createGeometries(timeseries);
+
+        final Object valueKeysObject = timeseries.getTSProperty(TimeSeries.VALUE_KEYS);
+        final Object unitsObject = timeseries.getTSProperty(TimeSeries.VALUE_UNITS);
+        final String valueKey;
+        final String unit;
+
+        if ((valueKeysObject instanceof String[]) && (((String[])valueKeysObject).length == 1)
+                    && (unitsObject instanceof String[])
+                    && (((String[])unitsObject).length > 0)) {
+            valueKey = ((String[])valueKeysObject)[0];
+            final String unitFromTimeseries = ((String[])unitsObject)[0];
+            unit = unitFromTimeseries.substring(unitFromTimeseries.lastIndexOf(":") + 1);     // NOI18N
+        } else {
+            final String message = "The valueKey or unit of selected timeseries is invalid."; // NOI18N
+            LOG.error(message);
+            throw new Exception(message);
+        }
 
         final Connection connection;
         try {
