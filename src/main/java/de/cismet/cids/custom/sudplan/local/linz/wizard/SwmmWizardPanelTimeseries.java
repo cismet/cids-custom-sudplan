@@ -27,6 +27,7 @@ import javax.swing.event.ChangeListener;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -172,14 +173,14 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
             // FIXME: i18n
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Bitte wählen Sie mindestens eine Regenzeitreihe aus");
+                NbBundle.getMessage(SwmmWizardPanelTimeseries.class, 
+                    "SwmmWizardPanelTimeseries.error.notimeseries"));
             valid = false;
-            // FIXME: compare the intervals also here, not only in readSettings!
-            // FIXME: downscaled timeseries has not interval information !!???!!!
         } else if (!validTimeIntervall) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Der Modellzeitrum wird nicht von den ausgewählten Zeitreihen abgedeckt");
+                    NbBundle.getMessage(SwmmWizardPanelTimeseries.class, 
+                    "SwmmWizardPanelTimeseries.error.wrongtimecoverage"));
             valid = false;
         } else {
             // TODO: check time intervall!

@@ -21,6 +21,7 @@ import javax.swing.event.ChangeListener;
 
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -114,7 +115,8 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
             // FIXME: i18n
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Bitte wählen Sie mindestens eine Regenmessstation aus");
+                NbBundle.getMessage(SwmmWizardPanelStations.class, 
+                    "SwmmWizardPanelStations.error.nostation"));
             valid = false;
         } else {
             wizard.putProperty(
