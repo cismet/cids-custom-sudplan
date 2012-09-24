@@ -108,7 +108,7 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
                 }
             }
 
-            final CidsBean swmmModelOutput = SMSUtils.createModelOutput("Modellergebnisse "
+            final CidsBean swmmModelOutput = SMSUtils.createModelOutput("SWMM Results "
                             + swmmOutput.getSwmmRunName(), // NOI18N
                     swmmOutput,
                     SMSUtils.Model.SWMM);
@@ -127,9 +127,14 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
     protected String getReloadId() {
         try {
             final SwmmInput swmmInput = (SwmmInput)getUR();
-            return "local.linz." + swmmInput.getSwmmProject() + ".swmm.scenarios"; // NOI18N
+            final String reloadId = "local.linz." + swmmInput.getSwmmProject()
+                        + ".swmm.scenario." + this.cidsBean.getProperty("id"); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(reloadId);
+            }
+            return reloadId;
         } catch (final Exception e) {
-            LOG.warn("cannot fetch reload id", e);                                 // NOI18N
+            LOG.warn("cannot fetch reload id", e);                             // NOI18N
             return null;
         }
     }
