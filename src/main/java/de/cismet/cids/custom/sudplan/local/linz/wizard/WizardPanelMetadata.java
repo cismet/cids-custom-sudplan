@@ -96,26 +96,26 @@ public final class WizardPanelMetadata implements WizardDescriptor.Panel {
             isSwmmRun = true;
             final SwmmInput swmmInput = (SwmmInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT);
 
-            sb.append("SWMM Eingabedatei: ").append(swmmInput.getInpFile()).append('\n');
-            sb.append("SWMM Startdatum: ").append(SwmmInput.DATE_FORMAT.format(swmmInput.getStartDate())).append('\n');
-            sb.append("SWMM Enddatum: ").append(SwmmInput.DATE_FORMAT.format(swmmInput.getEndDate())).append('\n');
+            sb.append("SWMM INP File: ").append(swmmInput.getInpFile()).append('\n');
+            sb.append("SWMM Start Date: ").append(SwmmInput.DATE_FORMAT.format(swmmInput.getStartDate())).append('\n');
+            sb.append("SWMM End Datum: ").append(SwmmInput.DATE_FORMAT.format(swmmInput.getEndDate())).append('\n');
             int i = 0;
             for (final String timeseries : swmmInput.getTimeseriesURLs()) {
                 i++;
-                sb.append("Zeitreihe #").append(i).append(": ").append(timeseries).append('\n');
+                sb.append("Time Series #").append(i).append(": ").append(timeseries).append('\n');
             }
         }
 
         if (wizard.getProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT) != null) {
             final EtaInput etaInput = (EtaInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT);
             if (!isSwmmRun) {
-                sb.append("SWMM Szenario: ").append(etaInput.getSwmmRunName()).append('\n');
+                sb.append("SWMM Scenario: ").append(etaInput.getSwmmRunName()).append('\n');
             } else {
-                sb.append("ETA Berechnung: ja").append('\n');
+                sb.append("ETA Calcualtion: yes").append('\n');
             }
-            sb.append("# ETA Konfigurationen: ").append(etaInput.getEtaConfigurations().size()).append('\n');
+            sb.append("# ETA Configurations: ").append(etaInput.getEtaConfigurations().size()).append('\n');
         } else if (isSwmmRun) {
-            sb.append("ETA Berechnung: nein").append('\n');
+            sb.append("ETA Calculation: no").append('\n');
         }
 
         return sb.toString();
