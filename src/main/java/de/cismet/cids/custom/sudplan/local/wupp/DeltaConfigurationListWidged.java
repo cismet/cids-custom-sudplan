@@ -146,10 +146,10 @@ public class DeltaConfigurationListWidged extends javax.swing.JPanel implements 
     public final void init() {
         final Object selectedConfig = lstDeltaCfgs.getSelectedValue();
 
-        final SwingWorker<MetaObject[], Void> worker = new SwingWorker<MetaObject[], Void>() {
+        final SwingWorker<CidsBean[], Void> worker = new SwingWorker<CidsBean[], Void>() {
 
                 @Override
-                protected MetaObject[] doInBackground() throws Exception {
+                protected CidsBean[] doInBackground() throws Exception {
                     // FIXME: Do not load all configuration just the configuration from the initial configuration where
                     // the user work with
 
@@ -167,7 +167,13 @@ public class DeltaConfigurationListWidged extends javax.swing.JPanel implements 
                                     query,
                                     SMSUtils.DOMAIN_SUDPLAN_WUPP);
 
-                    return deltaCfgObjects;
+                    final CidsBean[] beans = new CidsBean[deltaCfgObjects.length];
+
+                    for (int i = 0; i < deltaCfgObjects.length; ++i) {
+                        beans[i] = deltaCfgObjects[i].getBean();
+                    }
+
+                    return beans;
                 }
 
                 @Override
@@ -177,10 +183,10 @@ public class DeltaConfigurationListWidged extends javax.swing.JPanel implements 
                             final DefaultListModel listModel = (DefaultListModel)lstDeltaCfgs.getWrappedModel();
 
                             listModel.clear();
-                            final MetaObject[] result = get();
+                            final CidsBean[] result = get();
 
-                            for (final MetaObject mo : result) {
-                                listModel.addElement(mo.getBean());
+                            for (final CidsBean bean : result) {
+                                listModel.addElement(bean);
                             }
 
                             lstDeltaCfgs.setSelectedValue(selectedConfig, true);
