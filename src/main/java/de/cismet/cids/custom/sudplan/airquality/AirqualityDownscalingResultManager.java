@@ -77,6 +77,7 @@ import de.cismet.tools.PropertyReader;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
+import it.geosolutions.geoserver.rest.encoder.GSLayerEncoder;
 
 /**
  * DOCUMENT ME!
@@ -757,9 +758,9 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 featureType.addKeyword("max:" + max);
                 featureType.addKeyword("mean:" + mean);
 
-                final GSPathAwareLayerEncoder layer = new GSPathAwareLayerEncoder();
+                final GSLayerEncoder layer = new GSLayerEncoder();
                 layer.setEnabled(true);
-                layer.setPath("/"
+                layer.setWmsPath("/"
                             + name
                             + "/"
                             + formatForWmsPath(result.getResolution()) // NOI18N
