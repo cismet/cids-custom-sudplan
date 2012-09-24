@@ -16,7 +16,6 @@ import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
-import org.openide.util.WeakListeners;
 
 import java.awt.Component;
 
@@ -24,6 +23,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.event.ChangeListener;
+
+import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -95,11 +96,13 @@ public final class ImportGeoCPMWizardPanelMetadata implements WizardDescriptor.P
         if (cidsBean == null) {
             try {
                 // FIXME: hardcoded domain
-                final MetaClass mc = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", "geocpm_configuration"); // NOI18N
+                final MetaClass mc = ClassCacheMultiple.getMetaClass(
+                        SMSUtils.DOMAIN_SUDPLAN_WUPP,
+                        "geocpm_configuration");                        // NOI18N
                 final MetaObject mo = mc.getEmptyInstance();
                 cidsBean = mo.getBean();
             } catch (final Exception ex) {
-                LOG.error("cannot initialise wizard visual panel", ex);                                       // NOI18N
+                LOG.error("cannot initialise wizard visual panel", ex); // NOI18N
                 initialisationException = ex;
 
                 changeSupport.fireChange();
@@ -172,7 +175,7 @@ public final class ImportGeoCPMWizardPanelMetadata implements WizardDescriptor.P
 
     @Override
     public void removeChangeListener(final ChangeListener l) {
-        changeSupport.addChangeListener(l);
+        changeSupport.removeChangeListener(l);
     }
 
     /**

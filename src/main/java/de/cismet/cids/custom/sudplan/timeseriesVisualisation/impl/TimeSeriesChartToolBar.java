@@ -38,7 +38,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import de.cismet.cids.custom.objectrenderer.sudplan.TimeseriesRenderer;
-import de.cismet.cids.custom.sudplan.dataExport.TimeSeriesExportWizardAction;
+import de.cismet.cids.custom.sudplan.data.io.TimeSeriesExportWizardAction;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.Controllable;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesSelectionNotification;
 import de.cismet.cids.custom.sudplan.timeseriesVisualisation.TimeSeriesVisualisation;

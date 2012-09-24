@@ -11,8 +11,10 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 
 import org.apache.log4j.Logger;
 
@@ -397,11 +399,28 @@ public final class ShowUpstreamAreasForAreaAction extends AbstractWFSFeatureRetr
                 final Geometry boundaryGeom = gf.createPolygon((LinearRing)candidate.getExteriorRing(),
                         new LinearRing[0]);
 
-                final Geometry bufferedGeom = boundaryGeom.buffer(-0.0003);
+                final Geometry bufferedGeom = boundaryGeom.buffer(-0.1);
+                Geometry bufferCandidate = null;
+                if (bufferedGeom instanceof MultiPolygon) {
+                    for (int i = 0; i < bufferedGeom.getNumGeometries(); ++i) {
+                        final Geometry g = bufferedGeom.getGeometryN(i);
+                        if ((g instanceof Polygon)
+                                    && ((bufferCandidate == null)
+                                        || (bufferCandidate.getNumPoints() < g.getNumPoints()))) {
+                            bufferCandidate = (Polygon)g;
+                        }
+                    }
+                } else {
+                    // it is still instance of Polygon
+                    bufferCandidate = bufferedGeom;
+                }
+                bufferCandidate = gf.createPolygon((LinearRing)((Polygon)bufferCandidate).getExteriorRing(),
+                        new LinearRing[0]);
+                bufferCandidate = TopologyPreservingSimplifier.simplify(bufferCandidate, 0.1);
 
                 final StringBuilder sb = new StringBuilder();
 
-                for (final Coordinate coord : bufferedGeom.getCoordinates()) {
+                for (final Coordinate coord : bufferCandidate.getCoordinates()) {
                     sb.append(coord.x);
                     sb.append(',');
                     sb.append(coord.y);

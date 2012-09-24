@@ -7,16 +7,18 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.wupp;
 
+import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.exception.ConnectionException;
 import Sirius.navigator.ui.ComponentRegistry;
 
-import org.apache.log4j.Logger;
+import Sirius.server.newuser.User;
 
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
+import org.apache.log4j.Logger;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 
@@ -27,12 +29,12 @@ import java.awt.event.ActionEvent;
 
 import java.text.MessageFormat;
 
-import java.util.logging.Level;
+import java.util.concurrent.*;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
 
-import de.cismet.cids.dynamics.CidsBean;
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 import de.cismet.cids.navigator.utils.CidsClientToolbarItem;
 
@@ -61,7 +63,7 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
      * Creates a new ImportGeoCPMWizardAction object.
      */
     public ImportGeoCPMWizardAction() {
-        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/dataImport/geocpm_import.png", false)); // NOI18N
+        super("", ImageUtilities.loadImageIcon("de/cismet/cids/custom/sudplan/local/wupp/geocpm_import.png", false)); // NOI18N
 
         putValue(
             Action.SHORT_DESCRIPTION,
@@ -154,6 +156,28 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
 
     @Override
     public boolean isEnabled() {
-        return true;
+        final User user = SessionManager.getSession().getUser();
+        final Callable<Boolean> enable = new Callable<Boolean>() {
+
+                @Override
+                public Boolean call() throws Exception {
+                    try {
+                        // TODO: introduce proper attribute
+                        return SessionManager.getProxy().hasConfigAttr(user, ""); // NOI18N
+                    } catch (final ConnectionException ex) {
+                        LOG.warn("cannot check for config attr", ex);             // NOI18N
+                        return false;
+                    }
+                }
+            };
+
+        final Future<Boolean> future = SudplanConcurrency.getSudplanGeneralPurposePool().submit(enable);
+        try {
+            return future.get(300, TimeUnit.MILLISECONDS);
+        } catch (final Exception ex) {
+            LOG.warn("cannot get result of enable future", ex); // NOI18N
+
+            return false;
+        }
     }
 }

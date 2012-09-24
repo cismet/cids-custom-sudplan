@@ -105,9 +105,9 @@ public class LinzWwtpRenderer extends javax.swing.JPanel implements BorderProvid
                         "/de/cismet/cids/custom/sudplan/local/linz/wwtp1.png"));
             secondPageImage = ImageIO.read(getClass().getResource(
                         "/de/cismet/cids/custom/sudplan/local/linz/wwtp2.png"));
-        } catch (Throwable t) {
+        } catch (Exception e) {
             firstPageImage = null;
-            LOG.error(t);
+            LOG.error(e.getMessage(), e);
         }
 
         timer = new Timer(300, new ActionListener() {

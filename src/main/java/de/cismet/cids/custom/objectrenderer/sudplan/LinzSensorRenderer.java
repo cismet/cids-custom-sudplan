@@ -7,97 +7,147 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.exception.ConnectionException;
+
+import Sirius.server.middleware.types.MetaClass;
+import Sirius.server.middleware.types.MetaObject;
+
+import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
+import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
+
+import org.apache.commons.httpclient.Credentials;
+import org.apache.log4j.Logger;
+
+import org.openide.awt.Mnemonics;
+import org.openide.util.NbBundle;
+
 import java.awt.CardLayout;
-import java.awt.LayoutManager;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.image.BufferedImage;
+import java.awt.EventQueue;
 
-import java.util.concurrent.ExecutionException;
+import java.io.IOException;
 
-import javax.imageio.ImageIO;
+import java.util.concurrent.Future;
 
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.SwingWorker;
-import javax.swing.Timer;
-import javax.swing.border.Border;
+import javax.swing.table.AbstractTableModel;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
-import de.cismet.cids.custom.sudplan.ImageUtil;
+import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
+import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
+import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
+import de.cismet.cids.custom.sudplan.converter.LinzNetcdfConverter;
+import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
+import de.cismet.cids.custom.sudplan.data.io.TimeSeriesExportWizardAction;
+import de.cismet.cids.custom.sudplan.local.linz.LinzTimeSeriesExportWizardAction;
+import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
+import de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction;
 
-import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
+import de.cismet.cids.dynamics.CidsBean;
 
-import de.cismet.tools.CismetThreadPool;
+import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
-import de.cismet.tools.gui.BorderProvider;
-import de.cismet.tools.gui.FooterComponentProvider;
 import de.cismet.tools.gui.TitleComponentProvider;
 
 /**
  * DOCUMENT ME!
  *
- * @author   thorsten
+ * @author   p-a-s-c-a-l
  * @version  $Revision$, $Date$
  */
-public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements BorderProvider,
-    CidsBeanRenderer,
-    FooterComponentProvider,
-    TitleComponentProvider,
-    ActionListener {
+public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(LinzSensorRenderer.class);
-    private static final String CARD_1 = "CARD1";
-    private static final String CARD_2 = "CARD2";
+    public static final String NETCDF_HOST = TimeSeriesRemoteHelper.NETCDF_HOST;
+    public static final Credentials NETCDF_CREDS = TimeSeriesRemoteHelper.NETCDF_CREDS;
+
+    //~ Enums ------------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    public static enum Sensor {
+
+        //~ Enum constants -----------------------------------------------------
+
+        INFLOW("inflow", "Linz WWTP Inflow Events"),    // NOI18N
+        OUTFLOW("outflow", "Linz WWTP Outflow Events"), // NOI18N
+        HYDRAULICS("hydraulics", "Linz Hydraulics Events"); // NOI18N
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final String type;
+        private String stationName;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new Sensor object.
+         *
+         * @param  type         DOCUMENT ME!
+         * @param  stationName  DOCUMENT ME!
+         */
+        private Sensor(final String type, final String stationName) {
+            this.type = type;
+            this.stationName = stationName;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public String getName() {
+            return type;
+        }
+
+        /**
+         * Get the value of stationName.
+         *
+         * @return  the value of stationName
+         */
+        public String getStationName() {
+            return stationName;
+        }
+
+        /**
+         * Set the value of stationName.
+         *
+         * @param  stationName  new value of stationName
+         */
+        public void setStationName(final String stationName) {
+            this.stationName = stationName;
+        }
+
+        @Override
+        public String toString() {
+            return type;
+        }
+    }
 
     //~ Instance fields --------------------------------------------------------
 
-    private CardLayout cardLayout = null;
-    // private String title;
-    private final Timer timer;
-    private LinzSensorRenderer.ImageResizeWorker currentResizeWorker;
-    private boolean firstPageShowing = true;
-    private transient BufferedImage wwtpSensorsImage;
-    // private transient BufferedImage secondPageImage;
+    private final transient TimeSeriesExportWizardAction exportAction = new LinzTimeSeriesExportWizardAction();
+
     private final transient LinzSensorTitleComponent linzSensorTitleComponent = new LinzSensorTitleComponent();
-
-    private final javax.swing.Timer TIMER = new javax.swing.Timer(3000, this);
-    private final javax.swing.Timer TIMER1 = new javax.swing.Timer(3500, this);
-    // private final javax.swing.Timer TIMER2 = new javax.swing.Timer(2500, this);
-
-    private boolean resizeListenerEnabled = true;
+    private transient Sensor currentSensorType;
+    private transient EventDetectionUpdater eventDetectionUpdater = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnBack;
-    private javax.swing.JButton btnForward;
-    private eu.hansolo.steelseries.gauges.Radial codDeqGauge;
-    private eu.hansolo.steelseries.gauges.Radial2Top inflowGauge;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JLabel lblBack;
-    private javax.swing.JLabel lblEtaHyd;
-    private javax.swing.JLabel lblEtaSed;
-    private javax.swing.JLabel lblForw;
-    private javax.swing.JLabel lblR720;
-    private javax.swing.JLabel lblTitle;
-    private javax.swing.JLabel lblTotalOverflow;
-    private javax.swing.JPanel panButtons;
-    private javax.swing.JPanel panControl;
-    private javax.swing.JPanel panFooter;
-    private javax.swing.JPanel panFooterLeft;
-    private javax.swing.JPanel panFooterRight;
-    private javax.swing.JPanel panPage1;
-    private javax.swing.JPanel panPage2;
-    private javax.swing.JPanel panTitle;
-    private eu.hansolo.steelseries.gauges.Radial tssSeqGauge;
-    private eu.hansolo.steelseries.gauges.Radial2Top waterLevelGauge;
-    private javax.swing.JLabel wwtpSensorsLabel;
+    private javax.swing.JPanel cardPanel;
+    private javax.swing.JPanel eventDetectionPanel;
+    private javax.swing.JButton exportButton;
+    private javax.swing.JScrollPane jScrollPaneEventDetection;
+    private javax.swing.JProgressBar progressBar;
+    private javax.swing.JLabel progressLabel;
+    private javax.swing.JPanel progressPanel;
+    private javax.swing.JTable tblEventDetection;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -107,42 +157,6 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
      */
     public LinzSensorRenderer() {
         initComponents();
-        final LayoutManager layoutManager = getLayout();
-        if (layoutManager instanceof CardLayout) {
-            cardLayout = (CardLayout)layoutManager;
-            cardLayout.show(this, CARD_1);
-        }
-
-        try {
-            wwtpSensorsImage = ImageIO.read(getClass().getResource(
-                        "/de/cismet/cids/custom/sudplan/local/linz/wwtpsensors.png"));
-        } catch (Throwable t) {
-            wwtpSensorsImage = null;
-            LOG.error(t);
-        }
-
-        timer = new Timer(300, new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        if (resizeListenerEnabled) {
-                            if (currentResizeWorker != null) {
-                                currentResizeWorker.cancel(true);
-                            }
-                            currentResizeWorker = new LinzSensorRenderer.ImageResizeWorker();
-                            CismetThreadPool.execute(currentResizeWorker);
-                        }
-                    }
-                });
-        timer.setRepeats(false);
-
-        this.addComponentListener(new ComponentAdapter() {
-
-                @Override
-                public void componentResized(final ComponentEvent e) {
-                    timer.restart();
-                }
-            });
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -156,557 +170,263 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        panFooter = new javax.swing.JPanel();
-        panButtons = new javax.swing.JPanel();
-        panFooterLeft = new javax.swing.JPanel();
-        lblBack = new javax.swing.JLabel();
-        btnBack = new javax.swing.JButton();
-        panFooterRight = new javax.swing.JPanel();
-        btnForward = new javax.swing.JButton();
-        lblForw = new javax.swing.JLabel();
-        panTitle = new javax.swing.JPanel();
-        lblTitle = new javax.swing.JLabel();
-        panPage1 = new javax.swing.JPanel();
-        lblEtaHyd = new javax.swing.JLabel();
-        lblEtaSed = new javax.swing.JLabel();
-        codDeqGauge = new eu.hansolo.steelseries.gauges.Radial();
-        tssSeqGauge = new eu.hansolo.steelseries.gauges.Radial();
-        lblR720 = new javax.swing.JLabel();
-        lblTotalOverflow = new javax.swing.JLabel();
-        waterLevelGauge = new eu.hansolo.steelseries.gauges.Radial2Top();
-        inflowGauge = new eu.hansolo.steelseries.gauges.Radial2Top();
-        panPage2 = new javax.swing.JPanel();
-        panControl = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jLabel3 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
-        wwtpSensorsLabel = new javax.swing.JLabel();
-
-        panFooter.setOpaque(false);
-        panFooter.setLayout(new java.awt.BorderLayout());
-
-        panButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 6, 0));
-        panButtons.setOpaque(false);
-        panButtons.setLayout(new java.awt.GridBagLayout());
-
-        panFooterLeft.setMaximumSize(new java.awt.Dimension(124, 40));
-        panFooterLeft.setMinimumSize(new java.awt.Dimension(124, 40));
-        panFooterLeft.setOpaque(false);
-        panFooterLeft.setPreferredSize(new java.awt.Dimension(124, 40));
-        panFooterLeft.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 10, 5));
-
-        lblBack.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        lblBack.setForeground(new java.awt.Color(255, 255, 255));
-        lblBack.setText("Current");
-        lblBack.setEnabled(false);
-        lblBack.addMouseListener(new java.awt.event.MouseAdapter() {
-
-                @Override
-                public void mouseClicked(final java.awt.event.MouseEvent evt) {
-                    lblBackMouseClicked(evt);
-                }
-            });
-        panFooterLeft.add(lblBack);
-
-        btnBack.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/arrow-left.png"))); // NOI18N
-        btnBack.setBorderPainted(false);
-        btnBack.setContentAreaFilled(false);
-        btnBack.setEnabled(false);
-        btnBack.setFocusPainted(false);
-        btnBack.setMaximumSize(new java.awt.Dimension(30, 30));
-        btnBack.setMinimumSize(new java.awt.Dimension(30, 30));
-        btnBack.setPreferredSize(new java.awt.Dimension(30, 30));
-        btnBack.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    btnBackActionPerformed(evt);
-                }
-            });
-        panFooterLeft.add(btnBack);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        panButtons.add(panFooterLeft, gridBagConstraints);
-
-        panFooterRight.setMaximumSize(new java.awt.Dimension(124, 40));
-        panFooterRight.setOpaque(false);
-        panFooterRight.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 5));
-
-        btnForward.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/arrow-right.png"))); // NOI18N
-        btnForward.setBorderPainted(false);
-        btnForward.setContentAreaFilled(false);
-        btnForward.setFocusPainted(false);
-        btnForward.setMaximumSize(new java.awt.Dimension(30, 30));
-        btnForward.setMinimumSize(new java.awt.Dimension(30, 30));
-        btnForward.setPreferredSize(new java.awt.Dimension(30, 30));
-        btnForward.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    btnForwardActionPerformed(evt);
-                }
-            });
-        panFooterRight.add(btnForward);
-
-        lblForw.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        lblForw.setForeground(new java.awt.Color(255, 255, 255));
-        lblForw.setText("Historic");
-        lblForw.addMouseListener(new java.awt.event.MouseAdapter() {
-
-                @Override
-                public void mouseClicked(final java.awt.event.MouseEvent evt) {
-                    lblForwMouseClicked(evt);
-                }
-            });
-        panFooterRight.add(lblForw);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        panButtons.add(panFooterRight, gridBagConstraints);
-
-        panFooter.add(panButtons, java.awt.BorderLayout.CENTER);
-
-        panTitle.setOpaque(false);
-        panTitle.setLayout(new java.awt.GridBagLayout());
-
-        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
-        lblTitle.setForeground(new java.awt.Color(255, 255, 255));
-        lblTitle.setText(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.lblTitle.text"));         // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(10, 15, 10, 5);
-        panTitle.add(lblTitle, gridBagConstraints);
+        eventDetectionPanel = new javax.swing.JPanel();
+        cardPanel = new javax.swing.JPanel();
+        jScrollPaneEventDetection = new javax.swing.JScrollPane();
+        tblEventDetection = new javax.swing.JTable();
+        progressPanel = new javax.swing.JPanel();
+        progressBar = new javax.swing.JProgressBar();
+        progressLabel = new javax.swing.JLabel();
+        exportButton = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(204, 204, 204));
         setMinimumSize(new java.awt.Dimension(0, 0));
         setOpaque(false);
-        setLayout(new java.awt.CardLayout());
+        setLayout(new java.awt.GridBagLayout());
 
-        panPage1.setBackground(new java.awt.Color(204, 204, 204));
-        panPage1.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 0, 15));
-        panPage1.setOpaque(false);
-        panPage1.setPreferredSize(new java.awt.Dimension(800, 500));
-        panPage1.setLayout(new java.awt.GridBagLayout());
+        eventDetectionPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                org.openide.util.NbBundle.getMessage(
+                    LinzSensorRenderer.class,
+                    "LinzSensorRenderer.eventDetectionPanel.border.title"))); // NOI18N
+        eventDetectionPanel.setOpaque(false);
+        eventDetectionPanel.setLayout(new java.awt.GridBagLayout());
 
-        lblEtaHyd.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        lblEtaHyd.setForeground(new java.awt.Color(51, 51, 51));
-        lblEtaHyd.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblEtaHyd.setText("<html><center>Chemical Oxygen Demand</center></html>");
+        cardPanel.setOpaque(false);
+        cardPanel.setLayout(new java.awt.CardLayout());
+
+        tblEventDetection.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][] {},
+                new String[] {}));
+        jScrollPaneEventDetection.setViewportView(tblEventDetection);
+
+        cardPanel.add(jScrollPaneEventDetection, "events");
+
+        progressPanel.setOpaque(false);
+        progressPanel.setLayout(new java.awt.GridBagLayout());
+
+        progressBar.setIndeterminate(true);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
-        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 40);
-        panPage1.add(lblEtaHyd, gridBagConstraints);
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 25, 5, 25);
+        progressPanel.add(progressBar, gridBagConstraints);
 
-        lblEtaSed.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        lblEtaSed.setForeground(new java.awt.Color(51, 51, 51));
-        lblEtaSed.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblEtaSed.setText("<html><center>Total Suspended Solid</center></html>");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(10, 40, 10, 10);
-        panPage1.add(lblEtaSed, gridBagConstraints);
-
-        codDeqGauge.setAreasVisible(true);
-        codDeqGauge.setFrameDesign(eu.hansolo.steelseries.tools.FrameDesign.GLOSSY_METAL);
-        codDeqGauge.setFrameEffect(eu.hansolo.steelseries.tools.FrameEffect.EFFECT_INNER_FRAME);
-        codDeqGauge.setLcdVisible(false);
-        codDeqGauge.setLedVisible(false);
-        codDeqGauge.setMaxValue(2000.0);
-        codDeqGauge.setMaximumSize(new java.awt.Dimension(400, 400));
-        codDeqGauge.setPreferredSize(new java.awt.Dimension(220, 220));
-        codDeqGauge.setSectionsVisible(true);
-        codDeqGauge.setThreshold(0.0);
-        codDeqGauge.setThresholdType(eu.hansolo.steelseries.tools.ThresholdType.ARROW);
-        codDeqGauge.setTitle("CODeq");
-        codDeqGauge.setUnitString("mg/L");
-
-        final org.jdesktop.layout.GroupLayout codDeqGaugeLayout = new org.jdesktop.layout.GroupLayout(codDeqGauge);
-        codDeqGauge.setLayout(codDeqGaugeLayout);
-        codDeqGaugeLayout.setHorizontalGroup(
-            codDeqGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
-        codDeqGaugeLayout.setVerticalGroup(
-            codDeqGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
-
+        progressLabel.setText(org.openide.util.NbBundle.getMessage(
+                LinzSensorRenderer.class,
+                "LinzSensorRenderer.progressLabel.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 0.5;
-        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 40);
-        panPage1.add(codDeqGauge, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        progressPanel.add(progressLabel, gridBagConstraints);
 
-        tssSeqGauge.setAreasVisible(true);
-        tssSeqGauge.setFrameDesign(eu.hansolo.steelseries.tools.FrameDesign.GLOSSY_METAL);
-        tssSeqGauge.setFrameEffect(eu.hansolo.steelseries.tools.FrameEffect.EFFECT_INNER_FRAME);
-        tssSeqGauge.setLcdVisible(false);
-        tssSeqGauge.setLedVisible(false);
-        tssSeqGauge.setMaxValue(1800.0);
-        tssSeqGauge.setMaximumSize(new java.awt.Dimension(400, 400));
-        tssSeqGauge.setName(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.tssSeqGauge.name")); // NOI18N
-        tssSeqGauge.setPreferredSize(new java.awt.Dimension(220, 220));
-        tssSeqGauge.setSectionsVisible(true);
-        tssSeqGauge.setThreshold(0.0);
-        tssSeqGauge.setThresholdType(eu.hansolo.steelseries.tools.ThresholdType.ARROW);
-        tssSeqGauge.setTitle("TSSeq");
-        tssSeqGauge.setUnitString("mg/L");
+        cardPanel.add(progressPanel, "progress");
 
-        final org.jdesktop.layout.GroupLayout tssSeqGaugeLayout = new org.jdesktop.layout.GroupLayout(tssSeqGauge);
-        tssSeqGauge.setLayout(tssSeqGaugeLayout);
-        tssSeqGaugeLayout.setHorizontalGroup(
-            tssSeqGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
-        tssSeqGaugeLayout.setVerticalGroup(
-            tssSeqGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 0.5;
-        gridBagConstraints.insets = new java.awt.Insets(10, 40, 10, 10);
-        panPage1.add(tssSeqGauge, gridBagConstraints);
-
-        lblR720.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        lblR720.setForeground(new java.awt.Color(51, 51, 51));
-        lblR720.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblR720.setText("<html><center>Water Level</center></html>");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
-        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 40);
-        panPage1.add(lblR720, gridBagConstraints);
-
-        lblTotalOverflow.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        lblTotalOverflow.setForeground(new java.awt.Color(51, 51, 51));
-        lblTotalOverflow.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblTotalOverflow.setText("<html><center>Inflow</center></html>");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(10, 40, 10, 10);
-        panPage1.add(lblTotalOverflow, gridBagConstraints);
-
-        waterLevelGauge.setAreasVisible(true);
-        waterLevelGauge.setFrameDesign(eu.hansolo.steelseries.tools.FrameDesign.SHINY_METAL);
-        waterLevelGauge.setGaugeType(eu.hansolo.steelseries.tools.GaugeType.TYPE1);
-        waterLevelGauge.setLedVisible(false);
-        waterLevelGauge.setMaxValue(3.0);
-        waterLevelGauge.setMaximumSize(new java.awt.Dimension(300, 300));
-        waterLevelGauge.setTitle("Water level");
-        waterLevelGauge.setTransparentAreasEnabled(true);
-        waterLevelGauge.setUnitString(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.waterLevelGauge.unitString")); // NOI18N
-
-        final org.jdesktop.layout.GroupLayout waterLevelGaugeLayout = new org.jdesktop.layout.GroupLayout(
-                waterLevelGauge);
-        waterLevelGauge.setLayout(waterLevelGaugeLayout);
-        waterLevelGaugeLayout.setHorizontalGroup(
-            waterLevelGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
-        waterLevelGaugeLayout.setVerticalGroup(
-            waterLevelGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 0.5;
-        gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 40);
-        panPage1.add(waterLevelGauge, gridBagConstraints);
-
-        inflowGauge.setToolTipText(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.inflowGauge.toolTipText")); // NOI18N
-        inflowGauge.setAreasVisible(true);
-        inflowGauge.setFrameDesign(eu.hansolo.steelseries.tools.FrameDesign.SHINY_METAL);
-        inflowGauge.setGaugeType(eu.hansolo.steelseries.tools.GaugeType.TYPE1);
-        inflowGauge.setLedVisible(false);
-        inflowGauge.setMaxValue(1200.0);
-        inflowGauge.setMaximumSize(new java.awt.Dimension(300, 300));
-        inflowGauge.setTitle("Qinflow");
-        inflowGauge.setTrackSection(600.0);
-        inflowGauge.setTrackStop(2000.0);
-        inflowGauge.setUnitString(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.inflowGauge.unitString"));  // NOI18N
-
-        final org.jdesktop.layout.GroupLayout inflowGaugeLayout = new org.jdesktop.layout.GroupLayout(inflowGauge);
-        inflowGauge.setLayout(inflowGaugeLayout);
-        inflowGaugeLayout.setHorizontalGroup(
-            inflowGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
-        inflowGaugeLayout.setVerticalGroup(
-            inflowGaugeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                0,
-                200,
-                Short.MAX_VALUE));
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 0.5;
-        gridBagConstraints.insets = new java.awt.Insets(10, 40, 0, 10);
-        panPage1.add(inflowGauge, gridBagConstraints);
-
-        add(panPage1, "CARD1");
-
-        panPage2.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        panPage2.setOpaque(false);
-        panPage2.setPreferredSize(new java.awt.Dimension(400, 400));
-        panPage2.setLayout(new java.awt.BorderLayout(15, 15));
-
-        panControl.setOpaque(false);
-        panControl.setPreferredSize(new java.awt.Dimension(800, 40));
-        panControl.setRequestFocusEnabled(false);
-        panControl.setLayout(new java.awt.GridBagLayout());
-
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.jLabel1.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 10, 10);
+        eventDetectionPanel.add(cardPanel, gridBagConstraints);
+
+        exportButton.setAction(exportAction);
+        exportButton.setText(org.openide.util.NbBundle.getMessage(
+                LinzSensorRenderer.class,
+                "LinzSensorRenderer.exportButton.text")); // NOI18N
+        exportButton.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        eventDetectionPanel.add(exportButton, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        panControl.add(jLabel1, gridBagConstraints);
-
-        jTextField1.setText(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.jTextField1.text")); // NOI18N
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    jTextField1ActionPerformed(evt);
-                }
-            });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        panControl.add(jTextField1, gridBagConstraints);
-
-        jLabel3.setText(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.jLabel3.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
-        panControl.add(jLabel3, gridBagConstraints);
-
-        jTextField2.setText(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.jTextField2.text")); // NOI18N
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    jTextField2ActionPerformed(evt);
-                }
-            });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        panControl.add(jTextField2, gridBagConstraints);
-
-        jButton1.setText("OK");
-        jButton1.setEnabled(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 10);
-        panControl.add(jButton1, gridBagConstraints);
-
-        panPage2.add(panControl, java.awt.BorderLayout.PAGE_START);
-
-        wwtpSensorsLabel.setBackground(new java.awt.Color(255, 255, 255));
-        wwtpSensorsLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        wwtpSensorsLabel.setText(org.openide.util.NbBundle.getMessage(
-                LinzSensorRenderer.class,
-                "LinzSensorRenderer.wwtpSensorsLabel.text")); // NOI18N
-        panPage2.add(wwtpSensorsLabel, java.awt.BorderLayout.CENTER);
-
-        add(panPage2, "CARD2");
+        gridBagConstraints.weighty = 1.0;
+        add(eventDetectionPanel, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void lblBackMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblBackMouseClicked
-        btnBackActionPerformed(null);
-    }                                                                       //GEN-LAST:event_lblBackMouseClicked
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnBackActionPerformed
-        cardLayout.show(this, CARD_1);
-        firstPageShowing = true;
-        timer.restart();
-        btnBack.setEnabled(false);
-        btnForward.setEnabled(true);
-        lblBack.setEnabled(false);
-        lblForw.setEnabled(true);
-    }                                                                           //GEN-LAST:event_btnBackActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnForwardActionPerformed
-        cardLayout.show(this, CARD_2);
-        firstPageShowing = false;
-        timer.restart();
-        btnBack.setEnabled(true);
-        btnForward.setEnabled(false);
-        lblBack.setEnabled(true);
-        lblForw.setEnabled(false);
-    }                                                                              //GEN-LAST:event_btnForwardActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void lblForwMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblForwMouseClicked
-        btnForwardActionPerformed(null);
-    }                                                                       //GEN-LAST:event_lblForwMouseClicked
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void jTextField1ActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_jTextField1ActionPerformed
-    {                                                                             //GEN-HEADEREND:event_jTextField1ActionPerformed
-                                                                                  // TODO add your handling code here:
-    }                                                                             //GEN-LAST:event_jTextField1ActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void jTextField2ActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_jTextField2ActionPerformed
-    {                                                                             //GEN-HEADEREND:event_jTextField2ActionPerformed
-                                                                                  // TODO add your handling code here:
-    }                                                                             //GEN-LAST:event_jTextField2ActionPerformed
-
-    @Override
-    public Border getCenterrBorder() {
-        return null;
-    }
-
-    @Override
-    public Border getFooterBorder() {
-        return null;
-    }
-
-    @Override
-    public Border getTitleBorder() {
-        return null;
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
-        if (currentResizeWorker != null) {
-            currentResizeWorker.cancel(true);
-        }
-    }
 
     @Override
     public void setTitle(final String title) {
         super.setTitle(title);
         this.linzSensorTitleComponent.setTitle(title);
-        // this.title = title;
-        // lblTitle.setText(this.title);
-    }
-
-    @Override
-    public JComponent getFooterComponent() {
-        return panFooter;
     }
 
     @Override
     public JComponent getTitleComponent() {
-        // return panTitle;
         return linzSensorTitleComponent;
     }
 
     @Override
-    public void actionPerformed(final ActionEvent e) {
-        if (e.getSource().equals(TIMER)) {
-            final double codDeq = Math.random() * 2000;
-            if ((codDeq < 1600) && (codDeq > 200)) {
-                this.codDeqGauge.setValueAnimated(codDeq);
+    protected void init() {
+        try {
+            assert this.getCidsBean() != null : "Sensor Bean must not be null!";
+
+            final String sensorName = this.getCidsBean().getProperty("name").toString().toLowerCase();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("loading event for sensor '" + sensorName + "'");
+            }
+            if (sensorName.indexOf(Sensor.HYDRAULICS.getName()) != -1) {
+                currentSensorType = Sensor.HYDRAULICS;
+            } else if (sensorName.indexOf(Sensor.INFLOW.getName()) != -1) {
+                currentSensorType = Sensor.INFLOW;
+            } else if (sensorName.indexOf(Sensor.OUTFLOW.getName()) != -1) {
+                currentSensorType = Sensor.OUTFLOW;
+            } else {
+                throw new Exception("Unsopported Sensor Type '" + sensorName
+                            + "', expected '" + Sensor.HYDRAULICS + "', '"
+                            + Sensor.OUTFLOW + "' or '" + Sensor.INFLOW + "'");
             }
 
-            final double waterLevel = Math.random() * 3;
-            if ((waterLevel > 0.2) && (waterLevel < 2.2)) {
-                this.waterLevelGauge.setValueAnimated(waterLevel);
-            }
-        }
+            if ((eventDetectionUpdater != null) && eventDetectionUpdater.isRunning()) {
+                LOG.warn("An Event Detection update thread is still running");
+                // eventDetectionUpdater.stopIt();
+            } else {
+                Mnemonics.setLocalizedText(
+                    progressLabel,
+                    NbBundle.getMessage(
+                        LinzSensorRenderer.class,
+                        "LinzSensorRenderer.progressLabel.text")); // NOI18N
+                progressBar.setIndeterminate(true);
+                ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
 
-        if (e.getSource().equals(TIMER1)) {
-            final double tssSeq = Math.random() * 2000;
-            if ((tssSeq < 1300) && (tssSeq > 175)) {
-                this.tssSeqGauge.setValueAnimated(tssSeq);
+                eventDetectionUpdater = new EventDetectionUpdater(currentSensorType);
+                SudplanConcurrency.getSudplanGeneralPurposePool().execute(eventDetectionUpdater);
             }
-
-            final double inflow = Math.random() * 1000;
-            this.inflowGauge.setValueAnimated(inflow);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            progressBar.setIndeterminate(false);
+            org.openide.awt.Mnemonics.setLocalizedText(
+                progressLabel,
+                org.openide.util.NbBundle.getMessage(
+                    LinzSensorRenderer.class,
+                    "LinzSensorRenderer.progressLabel.error")); // NOI18N
+            ((CardLayout)cardPanel.getLayout()).show(cardPanel, "progress");
         }
     }
 
-    @Override
-    protected void init() {
-        TIMER.start();
-        TIMER1.start();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   sensor  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
+    private MetaObject[] getTimeseriesBeans(final Sensor sensor) throws IOException {
+        final String domain = SessionManager.getSession().getUser().getDomain();
+        final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SwmmPlusEtaWizardAction.TABLENAME_TIMESERIES);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("retrieving event timeseries (" + SwmmPlusEtaWizardAction.TABLENAME_TIMESERIES
+                        + ")for sensor '" + sensor + "' from monitorstation '"
+                        + sensor.getStationName() + "' from domain '" + domain + "'");
+        }
+
+        if (mc == null) {
+            throw new IOException("cannot find TIMESERIES metaclass"); // NOI18N
+        }
+
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append("SELECT ")
+                .append(mc.getID())
+                .append(',')
+                .append(mc.getTableName())
+                .append('.')
+                .append(mc.getPrimaryKey()); // NOI18N
+        sb.append(" FROM ")
+                .append(mc.getTableName())
+                .append(',')
+                .append(SwmmPlusEtaWizardAction.TABLENAME_MONITOR_STATION);
+        sb.append(" WHERE ")
+                .append(mc.getTableName())
+                .append('.')
+                .append("station")
+                .append(" = ")
+                .append(SwmmInput.TABLENAME_MONITOR_STATION)
+                .append(".id")
+                .append(" AND ")
+                .append(SwmmInput.TABLENAME_MONITOR_STATION)
+                .append('.')
+                .append("name")
+                .append(" LIKE '")
+                .append(sensor.getStationName())
+                .append('\'');
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("executing SQL statement: \n" + sb);
+        }
+
+        final MetaObject[] metaObjects;
+
+        try {
+            metaObjects = SessionManager.getProxy().getMetaObjectByQuery(sb.toString(), 0);
+        } catch (final ConnectionException ex) {
+            throw new IOException("cannot get timeseries  objects from database: " + ex.getMessage(), ex);
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(metaObjects.length + " timeseries retrieved for station '" + sensor.getStationName() + "'");
+        }
+        return metaObjects;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   sensor  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
+    private TimeSeries loadEvents(final Sensor sensor) throws IOException {
+        LOG.info("loading events for '" + sensor + '\'');
+        final MetaObject[] timeseriesMoList = getTimeseriesBeans(sensor);
+
+        if (timeseriesMoList.length == 0) {
+            throw new IOException("no timeseries found for '" + sensor
+                        + "' (" + sensor.getStationName() + ")");
+        }
+
+        final TimeseriesRetriever retriever = TimeseriesRetriever.getInstance();
+        final TimeseriesConverter converter = new LinzNetcdfConverter(true);
+        final TimeSeries timeSeries;
+
+        try {
+            // we need only the first object
+            final MetaObject timeseriesMo = timeseriesMoList[0];
+            final CidsBean timeseriesBean = timeseriesMo.getBean();
+            final String uri = (String)timeseriesBean.getProperty("uri"); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("loading remote timeseries for '" + timeseriesBean.getProperty("name") + "' from '"
+                            + uri + "'");
+            }
+
+            final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(uri);
+
+            final Future<TimeSeries> result = retriever.retrieve(config, converter);
+            timeSeries = result.get();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("remote timeseries for '" + timeseriesBean.getProperty("name")
+                            + "' successully loaded");
+            }
+        } catch (Exception ex) {
+            throw new IOException("could not load timeseries '" + sensor
+                        + "' (" + sensor.getStationName() + "): " + ex.getLocalizedMessage(),
+                ex);
+        }
+
+        final int timeseriesLength = timeSeries.getTimeStampsArray().length;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("event time series loaded with length of " + timeseriesLength);
+        }
+
+        return timeSeries;
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -716,42 +436,207 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Bord
      *
      * @version  $Revision$, $Date$
      */
-    final class ImageResizeWorker extends SwingWorker<ImageIcon, Void> {
+    private class EventDetectionTableModel extends AbstractTableModel {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient Logger LOG = Logger.getLogger(LinzSensorRenderer.EventDetectionTableModel.class);
+        private final TimeSeries eventTimeseries;
+        private final TimeStamp[] timeStamps;
+        private final String[] columnNames;
+        private final String[] columnKeys;
+        private final Class[] columnClasses;
 
         //~ Constructors -------------------------------------------------------
 
         /**
-         * Creates a new ImageResizeWorker object.
+         * Creates a new EtaConfigurationTableModel object.
+         *
+         * @param   eventTimeseries  etaConfigurations metaObjects DOCUMENT ME!
+         *
+         * @throws  IllegalStateException  DOCUMENT ME!
          */
-        public ImageResizeWorker() {
+        private EventDetectionTableModel(final TimeSeries eventTimeseries) {
+            this.eventTimeseries = eventTimeseries;
+
+            final Object valueKeyObject = eventTimeseries.getTSProperty(TimeSeries.VALUE_KEYS);
+            if (valueKeyObject instanceof String[]) {
+                final String[] valueKeys = (String[])valueKeyObject;
+                this.columnNames = new String[valueKeys.length + 1];
+                this.columnKeys = new String[valueKeys.length + 1];
+                this.columnClasses = new Class[valueKeys.length + 1];
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(columnNames.length + " columns and " + valueKeys.length + " values");
+                }
+
+                this.columnNames[0] = org.openide.util.NbBundle.getMessage(
+                        LinzSensorRenderer.class,
+                        "LinzSensorRenderer.tblEventDetection.column.eventid");
+                this.columnNames[1] = org.openide.util.NbBundle.getMessage(
+                        LinzSensorRenderer.class,
+                        "LinzSensorRenderer.tblEventDetection.column.startdate");
+                this.columnNames[2] = org.openide.util.NbBundle.getMessage(
+                        LinzSensorRenderer.class,
+                        "LinzSensorRenderer.tblEventDetection.column.enddate");
+
+                this.columnKeys[0] = valueKeys[1];
+                this.columnKeys[1] = this.columnNames[1];
+                this.columnKeys[2] = valueKeys[0];
+
+                this.columnClasses[0] = String.class;
+                this.columnClasses[1] = String.class;
+                this.columnClasses[2] = String.class;
+
+                int i = 0;
+                for (final String valueKey : valueKeys) {
+                    if (i >= 2) {
+                        columnNames[i + 1] = valueKey;
+                        columnKeys[i + 1] = valueKey;
+                        columnClasses[i + 1] = Float.class;
+                    }
+                    i++;
+                }
+            } else {
+                throw new IllegalStateException("unknown value key type: " + valueKeyObject); // NOI18N
+            }
+
+            // take the #st time series for the date column
+            timeStamps = eventTimeseries.getTimeStampsArray();
         }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
-        protected ImageIcon doInBackground() throws Exception {
-            ImageIcon result = null;
-            result = new ImageIcon(ImageUtil.adjustScale(wwtpSensorsImage, wwtpSensorsLabel, 0, 0));
-
-            return result;
+        public int getRowCount() {
+            return timeStamps.length;
         }
 
         @Override
-        protected void done() {
-            if (!isCancelled()) {
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        @Override
+        public Object getValueAt(final int rowIndex, final int columnIndex) {
+            if (columnIndex == 1) {
+                // start date
+                return this.timeStamps[rowIndex];
+            } else {
+                final Object o = eventTimeseries.getValue(
+                        this.timeStamps[rowIndex],
+                        this.columnKeys[columnIndex]);
+                return o;
+            }
+        }
+
+        @Override
+        public void setValueAt(final Object value, final int row, final int col) {
+            LOG.warn("operation setValueAt(...) not supported by " + this.getClass().getName());
+        }
+
+        @Override
+        public String getColumnName(final int col) {
+            return columnNames[col];
+        }
+
+        @Override
+        public Class getColumnClass(final int col) {
+            return columnClasses[col];
+        }
+
+        @Override
+        public boolean isCellEditable(final int row, final int col) {
+            return false;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class EventDetectionUpdater implements Runnable {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient Logger LOG = Logger.getLogger(LinzSensorRenderer.EventDetectionUpdater.class);
+        private transient boolean run = true;
+        private EventDetectionTableModel eventDetectionTableModel;
+        private final Sensor sensor;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new EventDetectionUpdater object.
+         *
+         * @param  sensor  DOCUMENT ME!
+         */
+        public EventDetectionUpdater(final Sensor sensor) {
+            this.sensor = sensor;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         */
+        public void stopIt() {
+            run = false;
+            LOG.warn("EventDetectionUpdater stopped");
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public boolean isRunning() {
+            return run;
+        }
+
+        @Override
+        public void run() {
+            if (run) {
                 try {
-                    resizeListenerEnabled = false;
-                    final ImageIcon result = get();
-                    wwtpSensorsLabel.setIcon(result);
-                } catch (InterruptedException ex) {
-                    LOG.warn(ex, ex);
-                } catch (ExecutionException ex) {
-                    LOG.error(ex, ex);
-                } finally {
-                    if (currentResizeWorker == this) {
-                        currentResizeWorker = null;
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("EventDetectionUpdater: loading events for sensor '" + sensor + "'");
                     }
-                    resizeListenerEnabled = true;
+                    final TimeSeries timeSeries = loadEvents(sensor);
+                    exportAction.setTimeSeries(timeSeries);
+                    eventDetectionTableModel = new EventDetectionTableModel(timeSeries);
+                } catch (Exception e) {
+                    LOG.error("EventDetectionUpdater: could not retrieve event detection values: " + e.getMessage(), e);
+                    run = false;
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                progressBar.setIndeterminate(false);
+                                org.openide.awt.Mnemonics.setLocalizedText(
+                                    progressLabel,
+                                    org.openide.util.NbBundle.getMessage(
+                                        LinzSensorRenderer.class,
+                                        "LinzSensorRenderer.progressLabel.error")); // NOI18N
+                            }
+                        });
+                }
+
+                if (run) {
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("EventDetectionUpdater: updating loaded results in GUI");
+                                }
+                                LinzSensorRenderer.this.tblEventDetection.setModel(eventDetectionTableModel);
+                                ((CardLayout)cardPanel.getLayout()).show(cardPanel, "events");
+                                exportButton.setEnabled(true);
+                                run = false;
+                            }
+                        });
+                } else {
+                    LOG.warn("EventDetectionUpdater stopped, ignoring retrieved results");
                 }
             }
         }

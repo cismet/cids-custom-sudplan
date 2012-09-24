@@ -23,18 +23,12 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Properties;
 import java.util.Set;
 
-import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
-import de.cismet.cids.custom.sudplan.DataHandlerCache;
-import de.cismet.cids.custom.sudplan.IDFCurve;
-import de.cismet.cids.custom.sudplan.Manager;
-import de.cismet.cids.custom.sudplan.ManagerType;
-import de.cismet.cids.custom.sudplan.ProgressEvent;
-import de.cismet.cids.custom.sudplan.SMSUtils;
-import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
-import de.cismet.cids.custom.sudplan.TimeseriesTransmitter;
+import de.cismet.cids.custom.sudplan.*;
+import de.cismet.cids.custom.sudplan.ProgressEvent.State;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -61,7 +55,9 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
 
     private transient URL dsDailyRes;
     private transient URL dsOrigRes;
+    private transient Float[][] dsStatRes;
     private transient IDFCurve curve;
+    private transient TimeInterval timeInterval;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -211,7 +207,7 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                     try {
                         final DataHandler dh = DataHandlerCache.getInstance()
                                     .getSOSDataHandler(String.valueOf(System.currentTimeMillis()),
-                                        RainfallDownscalingModelManager.RF_SOS_URL);
+                                        SudplanOptions.getInstance().getRfSosUrl());
                         final Properties filter = new Properties();
                         filter.setProperty(TimeSeries.OFFERING, dsOrig);
 
@@ -252,6 +248,9 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                     final String dsDailyResult = results[3].substring(results[3].indexOf("tsf"), // NOI18N
                             results[3].length()
                                     - 1);
+                    final String dsStatisticalResult = results[4].substring(results[4].indexOf("tbl:"),
+                            results[4].length()
+                                    - 1);
                     // table results don't work! it's annoying
                     try {
                         // ds results with original resolution
@@ -261,7 +260,7 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
 
                         final DataHandler dh = DataHandlerCache.getInstance()
                                     .getSOSDataHandler(String.valueOf(System.currentTimeMillis()),
-                                        RainfallDownscalingModelManager.RF_SOS_URL);
+                                        SudplanOptions.getInstance().getRfSosUrl());
                         final Properties filter = new Properties();
                         filter.setProperty(TimeSeries.OFFERING, dsOrigResult);
 
@@ -287,6 +286,13 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                         final String tsName = URLEncoder.encode((String)tsBean.getProperty("name"), "UTF-8"); // NOI18N
 
                         URL url = new URL(TimeSeriesRemoteHelper.DAV_HOST + "/" + tsName + "_" + runId + "_unknown"); // NOI18N
+
+                        final TimeStamp[] timeStampsArray = ts.getTimeStampsArray();
+                        timeInterval = new TimeInterval(
+                                TimeInterval.Openness.CLOSED,
+                                timeStampsArray[0],
+                                timeStampsArray[timeStampsArray.length - 1],
+                                TimeInterval.Openness.CLOSED);
 
                         TimeseriesTransmitter.getInstance().put(url, ts, TimeSeriesRemoteHelper.DAV_CREDS);
 
@@ -315,6 +321,38 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
                         TimeseriesTransmitter.getInstance().put(url, ts, TimeSeriesRemoteHelper.DAV_CREDS);
 
                         dsDailyRes = url;
+
+                        // ds statistical results
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("processing ds result with daily resolution"); // NOI18N
+                        }
+
+                        filter.setProperty(TimeSeries.OFFERING, dsStatisticalResult);
+                        dps = dh.getDatapoints(filter, Access.READ);
+                        if (dps.size() != 1) {
+                            throw new IllegalStateException("there should be exactly one datapoint: "
+                                        + dsStatisticalResult); // NOI18N
+                        }
+
+                        datapoint = dps.iterator().next();
+                        ts = datapoint.getTimeSeries(new TimeInterval(
+                                    TimeInterval.Openness.OPEN,
+                                    TimeStamp.NEGATIVE_INFINITY,
+                                    TimeStamp.POSITIVE_INFINITY,
+                                    TimeInterval.Openness.OPEN));
+
+                        final TimeStamp avDataMinStamp = new TimeStamp((Date)ts.getTSProperty(
+                                    TimeSeries.AVAILABLE_DATA_MIN));
+                        final Float[] minValues = (Float[])ts.getValue(avDataMinStamp, "Minimum");
+                        final Float[] maxValues = (Float[])ts.getValue(avDataMinStamp, "Maximum");
+                        final Float[] freqValues = (Float[])ts.getValue(avDataMinStamp, "Frequency");
+
+                        final Float[][] tableData = new Float[3][];
+                        tableData[0] = minValues;
+                        tableData[1] = maxValues;
+                        tableData[2] = freqValues;
+
+                        dsStatRes = tableData;
 
                         setStatus(State.COMPLETED);
                     } catch (final Exception ex) {
@@ -353,6 +391,15 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
     }
 
     /**
+     * First min, then max, then freq.
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Float[][] getStatisticalResult() {
+        return dsStatRes;
+    }
+
+    /**
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -368,5 +415,14 @@ public final class RainfallDSWatchable extends AbstractModelRunWatchable {
      */
     public IDFCurve getResultCurve() {
         return curve;
+    }
+
+    /**
+     * Get the value of timeInterval.
+     *
+     * @return  the value of timeInterval
+     */
+    public TimeInterval getTimeInterval() {
+        return timeInterval;
     }
 }

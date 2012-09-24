@@ -1,0 +1,546 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
+package de.cismet.cids.custom.objectrenderer.sudplan;
+
+import Sirius.navigator.ui.RequestsFullSizeComponent;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
+
+import org.apache.log4j.Logger;
+
+import org.openide.util.WeakListeners;
+
+import java.awt.EventQueue;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import java.math.BigDecimal;
+
+import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+
+import de.cismet.cids.custom.sudplan.SMSUtils;
+
+import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.cids.tools.metaobjectrenderer.CidsBeanAggregationRenderer;
+
+import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
+import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
+import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
+
+import de.cismet.cismap.navigatorplugin.CidsFeature;
+
+import de.cismet.tools.gui.jtable.sorting.AlphanumComparator;
+
+/**
+ * DOCUMENT ME!
+ *
+ * @author   jlauter
+ * @version  $Revision$, $Date$
+ */
+public class DeltaSurfaceAggregationRenderer extends javax.swing.JPanel implements CidsBeanAggregationRenderer,
+    RequestsFullSizeComponent {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final Logger LOG = Logger.getLogger(DeltaSurfaceAggregationRenderer.class);
+
+    public static final String ORTHO_URL =
+        "http://geoportal.wuppertal.de:8083/deegree/wms?VERSION=1.1.1&SERVICE=WMS&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:luftbild2010&STYLES=default";
+    // Spaltenueberschriften
+    private static final String[] AGR_COMLUMN_NAMES = new String[] {
+            "Name",
+            "Description",
+            "Height",
+            "Fixed Height",
+            "Configuration"
+        };
+    // Namen der Properties -> Spalten
+    private static final String[] AGR_PROPERTY_NAMES = new String[] {
+            "name",
+            "description",
+            "height",
+            "sea_type",
+            "delta_configuration.name"
+        };
+
+    private static final int[] AGR_COMLUMN_WIDTH = new int[] { 100, 200, 40, 30, 100 };
+
+    private static final Double GEOMETRY_BUFFER = 5.0d;
+    private static final Double GEOMETRY_BUFFER_MULTIPLIER = 0.8d;
+
+    //~ Instance fields --------------------------------------------------------
+
+    private transient List<CidsBean> cidsBeans;
+    private transient DeltaSurfaceTableModel tableModel;
+    private Map<CidsBean, CidsFeature> features;
+    private final transient ListSelectionListener tblL;
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel lblMapHeader;
+    private javax.swing.JLabel lblTableHeader;
+    private de.cismet.cismap.commons.gui.MappingComponent mappingComponent;
+    private de.cismet.tools.gui.RoundedPanel pnlMap;
+    private de.cismet.tools.gui.SemiRoundedPanel pnlMapHeader;
+    private de.cismet.tools.gui.RoundedPanel pnlTable;
+    private de.cismet.tools.gui.SemiRoundedPanel pnlTableHeader;
+    private javax.swing.JScrollPane spTable;
+    private javax.swing.JTable tblDeltaSurfaces;
+    // End of variables declaration//GEN-END:variables
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates new form DeltaSurfaceAggregationRenderer.
+     */
+    public DeltaSurfaceAggregationRenderer() {
+        initComponents();
+        tblL = new TableSelectionListener();
+        tblDeltaSurfaces.getSelectionModel()
+                .addListSelectionListener(WeakListeners.create(
+                        ListSelectionListener.class,
+                        tblL,
+                        tblDeltaSurfaces.getSelectionModel()));
+    }
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+
+        pnlTable = new de.cismet.tools.gui.RoundedPanel();
+        spTable = new javax.swing.JScrollPane();
+        tblDeltaSurfaces = new javax.swing.JTable();
+        pnlTableHeader = new de.cismet.tools.gui.SemiRoundedPanel();
+        lblTableHeader = new javax.swing.JLabel();
+        pnlMap = new de.cismet.tools.gui.RoundedPanel();
+        pnlMapHeader = new de.cismet.tools.gui.SemiRoundedPanel();
+        lblMapHeader = new javax.swing.JLabel();
+        mappingComponent = new de.cismet.cismap.commons.gui.MappingComponent();
+
+        setOpaque(false);
+        setLayout(new java.awt.GridBagLayout());
+
+        pnlTable.setLayout(new java.awt.GridBagLayout());
+
+        tblDeltaSurfaces.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][] {},
+                new String[] {}));
+        spTable.setViewportView(tblDeltaSurfaces);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlTable.add(spTable, gridBagConstraints);
+
+        pnlTableHeader.setBackground(new java.awt.Color(51, 51, 51));
+        pnlTableHeader.setLayout(new java.awt.FlowLayout());
+
+        lblTableHeader.setForeground(java.awt.Color.white);
+        lblTableHeader.setText(org.openide.util.NbBundle.getMessage(
+                DeltaSurfaceAggregationRenderer.class,
+                "DeltaSurfaceAggregationRenderer.lblTableHeader.text")); // NOI18N
+        pnlTableHeader.add(lblTableHeader);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        pnlTable.add(pnlTableHeader, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(pnlTable, gridBagConstraints);
+
+        pnlMap.setLayout(new java.awt.GridBagLayout());
+
+        pnlMapHeader.setBackground(new java.awt.Color(51, 51, 51));
+        pnlMapHeader.setLayout(new java.awt.FlowLayout());
+
+        lblMapHeader.setForeground(new java.awt.Color(255, 255, 255));
+        lblMapHeader.setText(org.openide.util.NbBundle.getMessage(
+                DeltaSurfaceAggregationRenderer.class,
+                "DeltaSurfaceAggregationRenderer.lblMapHeader.text")); // NOI18N
+        pnlMapHeader.add(lblMapHeader);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        pnlMap.add(pnlMapHeader, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        pnlMap.add(mappingComponent, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(pnlMap, gridBagConstraints);
+    } // </editor-fold>//GEN-END:initComponents
+
+    @Override
+    public Collection<CidsBean> getCidsBeans() {
+        return cidsBeans;
+    }
+
+    @Override
+    public void setCidsBeans(final Collection<CidsBean> beans) {
+        if (beans instanceof List) {
+            this.cidsBeans = (List<CidsBean>)beans;
+            features = new HashMap<CidsBean, CidsFeature>(beans.size());
+
+            initMap();
+
+            final List<Object[]> tableData = new ArrayList<Object[]>();
+            for (final CidsBean deltaSurfaceBean : cidsBeans) {
+                tableData.add(cidsBean2Row(deltaSurfaceBean));
+            }
+
+            tableModel = new DeltaSurfaceTableModel(tableData.toArray(new Object[tableData.size()][]),
+                    AGR_COMLUMN_NAMES);
+            tblDeltaSurfaces.setModel(tableModel);
+            final TableColumnModel cModel = tblDeltaSurfaces.getColumnModel();
+            for (int i = 0; i < cModel.getColumnCount(); ++i) {
+                cModel.getColumn(i).setPreferredWidth(AGR_COMLUMN_WIDTH[i]);
+            }
+            decorateTableWithSorter(tblDeltaSurfaces);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void initMap() {
+        try {
+            final XBoundingBox box = boundingBoxFromPointList(cidsBeans);
+//            final Geometry geom31466 = CrsTransformer.transformToGivenCrs(box.getEnvelope(), SMSUtils.EPSG_WUPP)
+//                        .buffer(60);
+            // geom31466 = geom31466.buffer(50);
+//            final XBoundingBox bbox = new XBoundingBox(geom31466, SMSUtils.EPSG_WUPP, true);
+
+            final ActiveLayerModel mappingModel = new ActiveLayerModel();
+            mappingModel.setSrs(new Crs(SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, true, true));
+
+//            mappingModel.addHome(bbox);
+            mappingModel.addHome(new XBoundingBox(
+                    box.getX1(),
+                    box.getY1(),
+                    box.getX2(),
+                    box.getY2(),
+                    SMSUtils.EPSG_WUPP,
+                    true));
+
+            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(ORTHO_URL));
+
+            ortho.setName("Wuppertal Ortophoto"); // NOI18N
+
+            mappingModel.addLayer(ortho);
+
+            mappingComponent.setMappingModel(mappingModel);
+
+            mappingComponent.gotoInitialBoundingBox();
+
+            mappingComponent.setInteractionMode(MappingComponent.ZOOM);
+            mappingComponent.unlock();
+
+            for (final CidsBean cidsBean : cidsBeans) {
+                final CidsFeature feature = new CidsFeature(cidsBean.getMetaObject());
+                features.put(cidsBean, feature);
+            }
+            mappingComponent.getFeatureCollection().addFeatures(features.values());
+        } catch (Exception e) {
+            LOG.error("cannot initialise mapping component", e);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   deltaSurfaces  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected XBoundingBox boundingBoxFromPointList(final Collection<CidsBean> deltaSurfaces) {
+        final List<Geometry> geometries = new ArrayList<Geometry>();
+
+        for (final CidsBean deltaSurface : deltaSurfaces) {
+            try {
+                final Geometry geom = (Geometry)deltaSurface.getProperty("geom.geo_field");
+                final Geometry geom31466 = CrsTransformer.transformToGivenCrs(geom.getEnvelope(), SMSUtils.EPSG_WUPP);
+                geometries.add(geom31466);
+            } catch (Exception ex) {
+                LOG.warn(ex, ex);
+            }
+        }
+
+        final GeometryCollection geoCollection = new GeometryCollection(geometries.toArray(
+                    new Geometry[geometries.size()]),
+                new GeometryFactory());
+
+        // TODO Buffer sollte nicht konstant sein!
+        return new XBoundingBox(geoCollection.getEnvelope().buffer(GEOMETRY_BUFFER));
+    }
+
+    @Override
+    public void dispose() {
+        mappingComponent.dispose();
+    }
+
+    @Override
+    public String getTitle() {
+        String desc = "";
+        final Collection<CidsBean> beans = cidsBeans;
+        if ((beans != null) && (beans.size() > 0)) {
+            desc += beans.size() + " DeltaSurfaces ausgewählt";
+        }
+        return desc;
+    }
+
+    @Override
+    public void setTitle(final String title) {
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   deltaSurface  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected Object[] cidsBean2Row(final CidsBean deltaSurface) {
+        if (deltaSurface != null) {
+            final Object[] result = new Object[AGR_COMLUMN_NAMES.length];
+
+            for (int i = 0; i < AGR_PROPERTY_NAMES.length; ++i) {
+                final Object property = deltaSurface.getProperty(AGR_PROPERTY_NAMES[i]);
+                if (property instanceof Boolean) {
+                    result[i] = (Boolean)property;
+                } else if (property instanceof BigDecimal) {
+                    result[i] = (BigDecimal)property;
+                } else {
+                    final String propertyString;
+                    propertyString = propertyPrettyPrint(property);
+                    result[i] = propertyString;
+                }
+            }
+            return result;
+        }
+
+        return new Object[0];
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   propertyValue  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static String propertyPrettyPrint(final Object propertyValue) {
+        if (propertyValue instanceof Collection) {
+            final Collection beanCollection = (Collection)propertyValue;
+            final StringBuilder resultSB = new StringBuilder();
+            for (final Object bean : beanCollection) {
+                if (resultSB.length() != 0) {
+                    resultSB.append(", ");
+                }
+                resultSB.append(String.valueOf(bean));
+            }
+            return resultSB.toString();
+        } else if (propertyValue != null) {
+            return propertyValue.toString();
+        } else {
+            return "-";
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   tbl  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static TableRowSorter<TableModel> decorateTableWithSorter(final JTable tbl) {
+        final TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tbl.getModel());
+//        sorter.setSortsOnUpdates(true);
+        for (int i = 0; i < tbl.getColumnCount(); ++i) {
+            sorter.setComparator(i, AlphanumComparator.getInstance());
+        }
+        tbl.setRowSorter(sorter);
+        tbl.getTableHeader().addMouseListener(new TableHeaderUnsortMouseAdapter(tbl));
+        return sorter;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class DeltaSurfaceTableModel extends DefaultTableModel {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new DeltaSurfaceTableModel object.
+         *
+         * @param  data    DOCUMENT ME!
+         * @param  labels  DOCUMENT ME!
+         */
+        public DeltaSurfaceTableModel(final Object[][] data, final String[] labels) {
+            super(data, labels);
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public boolean isCellEditable(final int row, final int column) {
+            return false;
+        }
+
+        @Override
+        public Class<?> getColumnClass(final int columnIndex) {
+            if (columnIndex == 2) {
+                return BigDecimal.class;
+            }
+            if (columnIndex == 3) {
+                return Boolean.class;
+            }
+            return super.getColumnClass(columnIndex);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    static class TableHeaderUnsortMouseAdapter extends MouseAdapter {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private JTable tbl;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new TableHeaderUnsortMouseAdapter object.
+         *
+         * @param  tbl  DOCUMENT ME!
+         */
+        public TableHeaderUnsortMouseAdapter(final JTable tbl) {
+            this.tbl = tbl;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void mousePressed(final MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                tbl.getRowSorter().setSortKeys(null);
+            }
+        }
+
+        @Override
+        public void mouseReleased(final MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                tbl.getRowSorter().setSortKeys(null);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class TableSelectionListener implements ListSelectionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void valueChanged(final ListSelectionEvent lse) {
+            if (!lse.getValueIsAdjusting() && (cidsBeans != null)) {
+                final int[] indexes = tblDeltaSurfaces.getSelectedRows();
+
+                if ((indexes != null) && (indexes.length > 0)) {
+                    for (final int viewIndex : indexes) {
+                        final int modelIndex = tblDeltaSurfaces.getRowSorter().convertRowIndexToModel(viewIndex);
+                        if ((modelIndex > -1) && (modelIndex < cidsBeans.size())) {
+                            final CidsBean selectedBean = cidsBeans.get(modelIndex);
+                            final XBoundingBox boxToGoto = new XBoundingBox(features.get(selectedBean).getGeometry()
+                                            .getEnvelope().buffer(GEOMETRY_BUFFER));
+                            boxToGoto.setX1(boxToGoto.getX1()
+                                        - (GEOMETRY_BUFFER_MULTIPLIER * boxToGoto.getWidth()));
+                            boxToGoto.setX2(boxToGoto.getX2()
+                                        + (GEOMETRY_BUFFER_MULTIPLIER * boxToGoto.getWidth()));
+                            boxToGoto.setY1(boxToGoto.getY1()
+                                        - (GEOMETRY_BUFFER_MULTIPLIER * boxToGoto.getHeight()));
+                            boxToGoto.setY2(boxToGoto.getY2()
+                                        + (GEOMETRY_BUFFER_MULTIPLIER * boxToGoto.getHeight()));
+                            mappingComponent.gotoBoundingBox(boxToGoto, false, true, 500);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

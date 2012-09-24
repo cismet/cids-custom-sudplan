@@ -12,6 +12,7 @@ import Sirius.server.middleware.types.MetaClass;
 import at.ac.ait.enviro.sudplan.util.PropertyNames;
 import at.ac.ait.enviro.tsapi.handler.DataHandler;
 import at.ac.ait.enviro.tsapi.handler.Datapoint;
+import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
@@ -30,6 +31,8 @@ import java.io.InputStream;
 import java.io.StringWriter;
 
 import java.net.URL;
+
+import java.text.SimpleDateFormat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,8 +64,6 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
     public static final String PARAM_CENTER_TIME = "center_time";                       // NOI18N
     public static final String RF_SOS_LOOKUP = "rainfall_sos_lookup";                   // NOI18N
     public static final String RF_SPS_LOOKUP = "rainfall_sps_lookup";                   // NOI18N
-    public static final String RF_SOS_URL = "http://sudplan.ait.ac.at:8084/";           // NOI18N
-    public static final String RF_SPS_URL = "http://sudplan.ait.ac.at:8085/";           // NOI18N
     public static final String RF_TS_DS_PROCEDURE = "Rain_Timeseries_Downscaling";      // NOI18N
     public static final String RF_IDF_DS_PROCEDURE = "IDF_Rain_Timeseries_Downscaling"; // NOI18N
     public static final int MAX_STEPS = 5;
@@ -100,6 +101,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
                 final String resultFullName = urlString.substring(urlString.lastIndexOf('/') + 1);
                 final String resultName = resultFullName.substring(0, resultFullName.lastIndexOf('_'));
                 final String resultRes = resultFullName.substring(resultFullName.lastIndexOf('_') + 1);
+                final TimeInterval timeInterval = watchable.getTimeInterval();
                 final TimeseriesRetrieverConfig config = new TimeseriesRetrieverConfig(
                         TimeseriesRetrieverConfig.PROTOCOL_DAV,
                         null,
@@ -112,24 +114,33 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
                         Variable.PRECIPITATION.getPropertyKey(),
                         resultFullName,
                         null,
-                        null);
+                        watchable.getTimeInterval());
                 dsBean.setProperty("uri", config.toUrl()); // NOI18N
-                dsBean.setProperty("station", rfBean.getProperty("station")); // NOI18N
+
+                final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+                final StringBuilder descSb = new StringBuilder();
+                descSb.append("Downscaled TimeSeries '").append(rfObjName);
+                descSb.append("', target year ").append(input.getTargetYear());
+                descSb.append(", frequency adjustment: ").append(input.isFrequencyAdjustment());
+                descSb.append(", start: ").append(dateFormat.format(timeInterval.getStart().asDate()));
+                descSb.append(", end: ").append(dateFormat.format(timeInterval.getEnd().asDate()));
+                descSb.append(", scenario: ").append(input.getScenario());
+                dsBean.setProperty("description", descSb.toString());
             } else {
                 final ObjectMapper mapper = new ObjectMapper();
                 final StringWriter sw = new StringWriter();
 
                 mapper.writeValue(sw, watchable.getResultCurve());
 
-                dsBean.setProperty("uri", sw.toString());               // NOI18N
-                dsBean.setProperty("geom", rfBean.getProperty("geom")); // NOI18N
-                dsBean.setProperty("year", input.getTargetYear());      // NOI18N
+                dsBean.setProperty("uri", sw.toString());          // NOI18N
+                dsBean.setProperty("year", input.getTargetYear()); // NOI18N
+                dsBean.setProperty("description", "Downscaled rainfall object");
             }
 
-            dsBean.setProperty("name", rfObjName + " downscaled (taskid=" + watchable.getRunId() + ")"); // NOI18N
-            dsBean.setProperty("converter", rfBean.getProperty("converter"));                            // NOI18N
-            dsBean.setProperty("description", "Downscaled timeseries");                                  // NOI18N
-            dsBean.setProperty("forecast", Boolean.TRUE);                                                // NOI18N
+            dsBean.setProperty("name", rfObjName + " downscaled (" + cidsBean.getProperty("name").toString() + ")"); // NOI18N
+            dsBean.setProperty("converter", rfBean.getProperty("converter"));                                        // NOI18N                             // NOI18N
+            dsBean.setProperty("forecast", Boolean.TRUE);                                                            // NOI18N
+            dsBean.setProperty("station", rfBean.getProperty("station"));                                            // NOI18N
 
             dsBean = dsBean.persist();
         } catch (final Exception ex) {
@@ -152,6 +163,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
                     RainfallDownscalingModelManager.class,
                     "RainfallDownscalingModelManager.createOutputBean().output.resultName")); // NOI18N
             output.setRfObjTableName(input.getRainfallObjectTableName());
+            output.setRfStatisticalData(watchable.getStatisticalResult());
         } catch (final Exception e) {
             final String message = "cannot create model output";                              // NOI18N
             LOG.error(message, e);
@@ -183,7 +195,8 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
         final DataHandler spsHandler;
         try {
-            spsHandler = DataHandlerCache.getInstance().getSPSDataHandler(RF_SPS_LOOKUP, RF_SPS_URL);
+            spsHandler = DataHandlerCache.getInstance()
+                        .getSPSDataHandler(RF_SPS_LOOKUP, SudplanOptions.getInstance().getRfSpsUrl());
         } catch (final DataHandlerCacheException ex) {
             final String message = "cannot fetch datahandler"; // NOI18N
             LOG.error(message, ex);
@@ -211,7 +224,7 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
         if (input == null) {
             ts.setValue(now, "coordinate_system", "EPSG:4326");                                                // NOI18N
-            final Geometry geom = (Geometry)rfObj.getProperty("geom.geo_field");                               // NOI18N
+            final Geometry geom = (Geometry)rfObj.getProperty("station.geom.geo_field");                       // NOI18N
             ts.setValue(now, "coordinate_x", String.valueOf(geom.getCentroid().getX()));                       // NOI18N
             ts.setValue(now, "coordinate_y", String.valueOf(geom.getCentroid().getY()));                       // NOI18N
             ts.setValue(now, "historical_year", (Integer)rfObj.getProperty("year") + "-01-01T00:00:00-00:00"); // NOI18N
@@ -311,7 +324,8 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
 
         final DataHandler inputDH;
         try {
-            inputDH = DataHandlerCache.getInstance().getSOSDataHandler(RF_SOS_LOOKUP, RF_SOS_URL);
+            inputDH = DataHandlerCache.getInstance()
+                        .getSOSDataHandler(RF_SOS_LOOKUP, SudplanOptions.getInstance().getRfSosUrl());
         } catch (final DataHandlerCacheException ex) {
             final String message = "cannot fetch datahandler"; // NOI18N
             LOG.error(message, ex);
@@ -495,7 +509,10 @@ public final class RainfallDownscalingModelManager extends AbstractAsyncModelMan
             NbBundle.getMessage(
                 RainfallDownscalingModelManager.class,
                 "RainfallDownscalingModelManager.prepareExecution().progress.save"));
-        final RainfallRunInfo runInfo = new RainfallRunInfo(runId, RF_SPS_LOOKUP, RF_SPS_URL);
+        final RainfallRunInfo runInfo = new RainfallRunInfo(
+                runId,
+                RF_SPS_LOOKUP,
+                SudplanOptions.getInstance().getRfSpsUrl());
         try {
             final ObjectMapper mapper = new ObjectMapper();
             final StringWriter writer = new StringWriter();

@@ -94,11 +94,10 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
 
     static {
         propertyReader = new PropertyReader(FILE_PROPERTY);
-        // FIXME: replace by SWMM_WEBDAV once we gain write access to the AIT WEBDav
-        SWMM_WEBDAV_HOST = propertyReader.getProperty("DAV_HOST");
-        SWMM_WEBDAV_USERNAME = propertyReader.getProperty("DAV_USERNAME");
+        SWMM_WEBDAV_HOST = propertyReader.getProperty("SWMM_WEBDAV_HOST");
+        SWMM_WEBDAV_USERNAME = propertyReader.getProperty("SWMM_WEBDAV_USERNAME");
         SWMM_WEBDAV_PASSWORD = String.valueOf(PasswordEncrypter.decrypt(
-                    propertyReader.getProperty("DAV_PASSWORD").toCharArray(),
+                    propertyReader.getProperty("SWMM_WEBDAV_PASSWORD").toCharArray(),
                     true));
     }
 
@@ -214,20 +213,7 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
             if (LOG.isDebugEnabled()) {
                 LOG.info("wizard closed (not cancelled), new SWMM Model saved");
             }
-
-//            try {
-//                newSwmmBean.persist();
-//            } catch (final Exception ex) {
-//                final String message = "Cannot save new SWMM Model '"
-//                            + newSwmmBean + "'";
-//                LOG.error(message, ex);
-//                JOptionPane.showMessageDialog(ComponentRegistry.getRegistry().getMainWindow(),
-//                    message,
-//                    NbBundle.getMessage(
-//                        UploadWizardAction.class,
-//                        "UploadWizardAction.actionPerformed(ActionEvent).wizard.error"),
-//                    JOptionPane.ERROR_MESSAGE);
-//            }
+            ComponentRegistry.getRegistry().getCatalogueTree().requestRefreshNode("local.linz.projects");
         } else {
             final boolean uploadComplete = (Boolean)wizardDescriptor.getProperty(PROP_UPLOAD_COMPLETE);
             final boolean copyCSOsComplete = (Boolean)wizardDescriptor.getProperty(PROP_COPY_CSOS_COMPLETE);
@@ -289,10 +275,10 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("new SWMM Bean #" + newSwmmBean.getProperty("id") + " deleted successfully");
                     }
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     LOG.error("removal of new SWMM Bean #" + newSwmmBean.getProperty("id") + " failed: "
-                                + t.getLocalizedMessage(),
-                        t);
+                                + e.getLocalizedMessage(),
+                        e);
                 }
             } else {
                 if (LOG.isDebugEnabled()) {
@@ -376,18 +362,18 @@ public final class UploadWizardAction extends AbstractCidsBeanAction {
 
                     try {
                         httpClient.getConnectionManager().shutdown();
-                    } catch (Throwable t) {
-                        LOG.warn("could not close httpClient connection", t);
+                    } catch (Exception e) {
+                        LOG.warn("could not close httpClient connection", e);
                     }
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("uploaded file '" + inpFile + "' successfully deleted from "
                                     + UploadWizardAction.SWMM_WEBDAV_HOST);
                     }
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     LOG.error("removal of uploaded file '" + inpFile + "' from "
                                 + UploadWizardAction.SWMM_WEBDAV_HOST + " failed: "
-                                + t.getLocalizedMessage(),
-                        t);
+                                + e.getLocalizedMessage(),
+                        e);
                 }
             }
 

@@ -52,10 +52,10 @@ public class MonitorstationFeatureRenderer extends CustomCidsFeatureRenderer {
         initComponents();
         BufferedImage image = null;
         try {
-            final InputStream is = getClass().getResourceAsStream("rain.png"); // NOI18N
+            final InputStream is = getClass().getResourceAsStream("monitorstation.png"); // NOI18N
             image = ImageIO.read(is);
         } catch (final IOException ex) {
-            LOG.warn("cannot load station feature icon", ex);                  // NOI18N
+            LOG.warn("cannot load station feature icon", ex);                            // NOI18N
         }
 
         rainstationPointSymbolUnselected = image;

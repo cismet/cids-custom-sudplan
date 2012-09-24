@@ -52,7 +52,7 @@
         </developer>
         <developer>
             <id>pdihe</id>
-            <name>Pascal Dihé</name>
+            <name>Pascal Dih√©</name>
             <email>pascal.dihe@cismet.de</email>
             <organization>cismet GmbH</organization>
         </developer>
@@ -117,6 +117,16 @@
         <dependency>
             <groupId>at.ac.ait.enviro</groupId>
             <artifactId>ogc-gml-schemas-v3.1.1</artifactId>
+            <version>3.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>at.ac.ait.enviro</groupId>
+            <artifactId>ogc-sos-schemas-v1.0.0</artifactId>
+            <version>3.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>at.ac.ait.enviro</groupId>
+            <artifactId>ogc-sps-schemas-v1.0.0</artifactId>
             <version>3.1-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -220,7 +230,7 @@
         <dependency>
             <groupId>eu.hansolo</groupId>
             <artifactId>SteelSeries</artifactId>
-            <version>3.9.16</version>
+            <version>3.9.26</version>
             <exclusions> 
                 <exclusion>
                     <groupId>xerces</groupId>

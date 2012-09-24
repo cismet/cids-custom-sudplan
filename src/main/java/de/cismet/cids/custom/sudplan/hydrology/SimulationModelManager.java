@@ -23,8 +23,6 @@ import java.io.StringWriter;
 
 import java.text.DateFormat;
 
-import java.util.List;
-
 import de.cismet.cids.custom.sudplan.AbstractAsyncModelManager;
 import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
 import de.cismet.cids.custom.sudplan.ManagerType;

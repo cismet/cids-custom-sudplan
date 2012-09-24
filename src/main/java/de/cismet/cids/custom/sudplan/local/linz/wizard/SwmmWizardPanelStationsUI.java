@@ -28,6 +28,7 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.table.AbstractTableModel;
 
+import de.cismet.cids.custom.sudplan.MonitorstationContext;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
 
@@ -114,20 +115,13 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
                 .append(mc.getTableName())
                 .append('.')
                 .append(mc.getPrimaryKey()); // NOI18N
-        sb.append(" FROM ").append(mc.getTableName()).append(',').append(SwmmInput.TABLENAME_MONITOR_STATION_TYPE);
+        sb.append(" FROM ").append(mc.getTableName());
         sb.append(" WHERE ")
                 .append(mc.getTableName())
                 .append('.')
                 .append(SwmmInput.FK_MONITOR_STATION_TYPE)
-                .append(" = ")
-                .append(SwmmInput.TABLENAME_MONITOR_STATION_TYPE)
-                .append(".id")
-                .append(" AND ")
-                .append(SwmmInput.TABLENAME_MONITOR_STATION_TYPE)
-                .append('.')
-                .append(SwmmInput.FLD_MONITOR_STATION_TYPE)
                 .append(" LIKE '")
-                .append(SwmmInput.MONITOR_STATION_TYPE)
+                .append(MonitorstationContext.LI_RF.getKey())
                 .append('\'');
 
         final ClassAttribute ca = mc.getClassAttribute("sortingColumn");                        // NOI18N

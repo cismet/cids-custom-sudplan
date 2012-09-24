@@ -98,8 +98,8 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
         try {
             this.startDate = this.swmmInput.getStartDateTimestamp();
             this.endDate = this.swmmInput.getEndDateTimestamp();
-        } catch (Throwable t) {
-            LOG.error("could not set start and end date timestamps", t);
+        } catch (Exception e) {
+            LOG.error("could not set start and end date timestamps: " + e.getLocalizedMessage(), e);
             this.startDate = null;
             this.endDate = null;
         }
@@ -115,13 +115,27 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
                     final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(timeseries);
                     final TimeInterval timeInterval = config.getInterval();
 
-                    // FIXME: BUG in timeInterval.containsTimeStamp if (!timeInterval.containsTimeStamp(startDate) ||
-                    // !timeInterval.containsTimeStamp(endDate)) { LOG.warn("time intervall '" + timeInterval + "' of
-                    // timeseries \n<" + timeseries + ">\n does not cover selected model timespan '" + startDate + "'
-                    // <-> '" + endDate+"'"); LOG.debug(timeInterval.getStart() + " compared to " + startDate + " = "+
-                    // timeInterval.getStart().compareTo(startDate)); LOG.debug(timeInterval.getEnd() + " compared to "
-                    // + endDate + " = "+ timeInterval.getEnd().compareTo(endDate)); this.validTimeIntervall = false;
-                    // break; }
+                    if (timeInterval != null) {
+                        if (!timeInterval.containsTimeStamp(startDate)
+                                    || !timeInterval.containsTimeStamp(endDate)) {
+                            LOG.warn("time intervall '" + timeInterval
+                                        + "' of timeseries \n<" + timeseries
+                                        + ">\n does not cover selected model timespan '" + startDate + "'<-> '"
+                                        + endDate + "'");
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug(timeInterval.getStart() + " compared to " + startDate + " = "
+                                            + timeInterval.getStart().compareTo(startDate));
+                            }
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug(timeInterval.getEnd() + " compared to "
+                                            + endDate + " = " + timeInterval.getEnd().compareTo(endDate));
+                            }
+                            this.validTimeIntervall = false;
+                            break;
+                        }
+                    } else {
+                        LOG.warn("cannot check interval: timeInterval of timeseries '" + timeseries + "' is null!");
+                    }
                 }
             } else {
                 this.validTimeIntervall = false;
@@ -162,11 +176,11 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
             valid = false;
             // FIXME: compare the intervals also here, not only in readSettings!
             // FIXME: downscaled timeseries has not interval information !!???!!!
-// } else if (!validTimeIntervall) {
-// wizard.putProperty(
-// WizardDescriptor.PROP_WARNING_MESSAGE,
-// "Der Modellzeitrum wird nicht von den ausgewählten Zeitreihen abgedeckt");
-// valid = false;
+        } else if (!validTimeIntervall) {
+            wizard.putProperty(
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                "Der Modellzeitrum wird nicht von den ausgewählten Zeitreihen abgedeckt");
+            valid = false;
         } else {
             // TODO: check time intervall!
 
@@ -266,8 +280,8 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
 
                 i++;
             }
-        } catch (Throwable t) {
-            LOG.error("could not check time intervall of timseries", t);
+        } catch (Exception e) {
+            LOG.error("could not check time intervall of timseries: " + e.getLocalizedMessage(), e);
             this.validTimeIntervall = false;
         }
 

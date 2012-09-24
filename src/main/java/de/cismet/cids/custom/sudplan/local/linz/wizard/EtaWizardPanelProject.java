@@ -13,22 +13,14 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
-import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
-import java.text.ParseException;
-
 import javax.swing.event.ChangeListener;
 
 import de.cismet.cids.custom.sudplan.local.linz.EtaInput;
-import de.cismet.cids.custom.sudplan.local.linz.EtaOutput;
-import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.linz.SwmmOutput;
 import de.cismet.cids.custom.sudplan.local.wupp.*;
 
@@ -140,8 +132,8 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
                 }
 
                 wizard.putProperty(EtaWizardAction.PROP_ETA_INPUT, etaInput);
-            } catch (Throwable t) {
-                LOG.error("invalid SWMM Model Output, could not create valid ETA Input: " + t.getMessage(), t);
+            } catch (Exception e) {
+                LOG.error("invalid SWMM Model Output, could not create valid ETA Input: " + e.getMessage(), e);
             }
         }
     }
@@ -174,8 +166,8 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
                 final String json = (String)swmmOutputBean.getProperty("ur"); // NOI18N
                 final ObjectMapper mapper = new ObjectMapper();
                 mapper.readValue(json, SwmmOutput.class);
-            } catch (Throwable t) {
-                LOG.error("invalid SWMM Model Output: " + t.getMessage(), t);
+            } catch (Exception e) {
+                LOG.error("invalid SWMM Model Output: " + e.getMessage(), e);
                 wizard.putProperty(
                     WizardDescriptor.PROP_ERROR_MESSAGE,
                     NbBundle.getMessage(EtaWizardPanelProject.class, "EtaWizardPanelProject.error.invalidResults"));

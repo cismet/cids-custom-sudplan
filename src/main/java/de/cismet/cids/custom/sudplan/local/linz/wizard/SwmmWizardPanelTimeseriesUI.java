@@ -31,10 +31,14 @@ import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.JPanel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
+
+import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
@@ -60,12 +64,14 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
     private transient TimeseriesUpdater timeseriesUpdater;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel cardPanel;
+    private javax.swing.JTextArea descriptionArea;
     private javax.swing.JScrollPane jScrollPaneTimeseries;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JLabel progressLabel;
     private javax.swing.JPanel progressPanel;
     private javax.swing.JTable tblTimeseries;
     private javax.swing.JPanel timeseriesPanel;
+    private javax.swing.JPanel timeseriesView;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -86,6 +92,8 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
         this.setName(NbBundle.getMessage(
                 SwmmWizardPanelTimeseries.class,
                 "SwmmWizardPanelTimeseries.this.name")); // NOI18N
+
+        this.tblTimeseries.getSelectionModel().addListSelectionListener(new TimeseriesListener());
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -147,8 +155,8 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
             // this.timeseriesTableModel.setSelectedTimeseries(model.getTimeseriesIds());
             // this.tblTimeseries.setModel(this.timeseriesTableModel);
 
-        } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
 
             progressBar.setIndeterminate(false);
             org.openide.awt.Mnemonics.setLocalizedText(
@@ -234,11 +242,13 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
 
         timeseriesPanel = new javax.swing.JPanel();
         cardPanel = new javax.swing.JPanel();
-        jScrollPaneTimeseries = new javax.swing.JScrollPane();
-        tblTimeseries = new javax.swing.JTable();
         progressPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
         progressLabel = new javax.swing.JLabel();
+        timeseriesView = new javax.swing.JPanel();
+        jScrollPaneTimeseries = new javax.swing.JScrollPane();
+        tblTimeseries = new javax.swing.JTable();
+        descriptionArea = new javax.swing.JTextArea();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -249,13 +259,6 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
         timeseriesPanel.setLayout(new java.awt.GridBagLayout());
 
         cardPanel.setLayout(new java.awt.CardLayout());
-
-        tblTimeseries.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][] {},
-                new String[] {}));
-        jScrollPaneTimeseries.setViewportView(tblTimeseries);
-
-        cardPanel.add(jScrollPaneTimeseries, "timeseries");
 
         progressPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -277,6 +280,35 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
         progressPanel.add(progressLabel, gridBagConstraints);
 
         cardPanel.add(progressPanel, "progress");
+
+        timeseriesView.setLayout(new java.awt.GridBagLayout());
+
+        tblTimeseries.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][] {},
+                new String[] {}));
+        jScrollPaneTimeseries.setViewportView(tblTimeseries);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        timeseriesView.add(jScrollPaneTimeseries, gridBagConstraints);
+
+        descriptionArea.setColumns(40);
+        descriptionArea.setLineWrap(true);
+        descriptionArea.setRows(4);
+        descriptionArea.setEnabled(false);
+        descriptionArea.setFocusable(false);
+        descriptionArea.setMinimumSize(new java.awt.Dimension(200, 35));
+        descriptionArea.setOpaque(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 1, 0, 1);
+        timeseriesView.add(descriptionArea, gridBagConstraints);
+
+        cardPanel.add(timeseriesView, "timeseries");
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -344,6 +376,17 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
         @Override
         public int getColumnCount() {
             return columnNames.length;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   row  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public CidsBean getTimeseriesBean(final int row) {
+            return this.timeseries[row].getBean();
         }
 
         @Override
@@ -475,8 +518,8 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
                         LOG.debug("TimeseriesUpdater: loading results");
                     }
                     timeseriesTableModel = initTimeseries(model.getStationIds(), model.isForecast());
-                } catch (Throwable t) {
-                    LOG.error("TimeseriesUpdater: could not retrieve timeseries: " + t.getMessage(), t);
+                } catch (Exception e) {
+                    LOG.error("TimeseriesUpdater: could not retrieve timeseries: " + e.getMessage(), e);
                     run = false;
                     EventQueue.invokeLater(new Runnable() {
 
@@ -507,6 +550,28 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
                         });
                 } else {
                     LOG.warn("TimeseriesUpdater stopped, ignoring retrieved results");
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class TimeseriesListener implements ListSelectionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void valueChanged(final ListSelectionEvent e) {
+            if (!e.getValueIsAdjusting()) {
+                final CidsBean timeseriesBean = ((TimeseriesTableModel)tblTimeseries.getModel()).getTimeseriesBean(
+                        e.getLastIndex());
+
+                if ((timeseriesBean != null) && (timeseriesBean.getProperty("description") != null)) {
+                    descriptionArea.setText(timeseriesBean.getProperty("description").toString());
                 }
             }
         }

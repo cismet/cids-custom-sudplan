@@ -9,6 +9,8 @@ package de.cismet.cids.custom.sudplan.converter;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -28,7 +30,7 @@ import de.cismet.cids.custom.sudplan.IDFCurve;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class WuppertalIDFConverter implements IDFConverter {
+public final class WuppertalIDFConverter implements IDFConverter, FormatHint {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -127,6 +129,42 @@ public final class WuppertalIDFConverter implements IDFConverter {
 
     @Override
     public String toString() {
-        return "Wuppertal IDF Converter"; // NOI18N
+        return getFormatDisplayName();
+    }
+
+    @Override
+    public String getFormatName() {
+        return "wupp-idf-converter"; // NOI18N
+    }
+
+    @Override
+    public String getFormatDisplayName() {
+        return NbBundle.getMessage(
+                WuppertalIDFConverter.class,
+                "WuppertalIDFConverter.getFormatDisplayName().description"); // NOI18N
+    }
+
+    @Override
+    public String getFormatHtmlName() {
+        return null;
+    }
+
+    @Override
+    public String getFormatDescription() {
+        return NbBundle.getMessage(
+                WuppertalIDFConverter.class,
+                "WuppertalIDFConverter.getFormatDescription().description"); // NOI18N
+    }
+
+    @Override
+    public String getFormatHtmlDescription() {
+        return NbBundle.getMessage(
+                WuppertalIDFConverter.class,
+                "WuppertalIDFConverter.getFormatHtmlDescription().description"); // NOI18N
+    }
+
+    @Override
+    public Object getFormatExample() {
+        return NbBundle.getMessage(WuppertalIDFConverter.class, "WuppertalIDFConverter.getFormatExample().description"); // NOI18N
     }
 }
