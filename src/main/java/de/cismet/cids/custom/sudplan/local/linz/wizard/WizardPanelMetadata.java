@@ -86,36 +86,36 @@ public final class WizardPanelMetadata implements WizardDescriptor.Panel {
         final StringBuilder sb = new StringBuilder();
         boolean isSwmmRun = false;
         if (wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN) != null) {
-            sb.append("SWMM Projekt: ");
+            sb.append("SWMM Project: ");
             sb.append(((CidsBean)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN)).getProperty(
                     "title"));
-            sb.append('\n');
+            sb.append(", ");
         }
 
         if (wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT) != null) {
             isSwmmRun = true;
             final SwmmInput swmmInput = (SwmmInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT);
 
-            sb.append("SWMM INP File: ").append(swmmInput.getInpFile()).append('\n');
-            sb.append("SWMM Start Date: ").append(SwmmInput.DATE_FORMAT.format(swmmInput.getStartDate())).append('\n');
-            sb.append("SWMM End Datum: ").append(SwmmInput.DATE_FORMAT.format(swmmInput.getEndDate())).append('\n');
+            sb.append("SWMM INP File: ").append(swmmInput.getInpFile()).append(", ");
+            sb.append("SWMM Start Date: ").append(SwmmInput.DATE_FORMAT.format(swmmInput.getStartDate())).append(", ");
+            sb.append("SWMM End Date: ").append(SwmmInput.DATE_FORMAT.format(swmmInput.getEndDate())).append(", ");
             int i = 0;
             for (final String timeseries : swmmInput.getTimeseriesURLs()) {
                 i++;
-                sb.append("Time Series #").append(i).append(": ").append(timeseries).append('\n');
+                sb.append("Time Series #").append((i + 1)).append(": ").append(timeseries).append(", ");
             }
         }
 
         if (wizard.getProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT) != null) {
             final EtaInput etaInput = (EtaInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT);
             if (!isSwmmRun) {
-                sb.append("SWMM Scenario: ").append(etaInput.getSwmmRunName()).append('\n');
+                sb.append("SWMM Scenario: ").append(etaInput.getSwmmRunName()).append(", ");
             } else {
-                sb.append("ETA Calcualtion: yes").append('\n');
+                sb.append("ETA Calcualtion: yes").append(", ");
             }
-            sb.append("# ETA Configurations: ").append(etaInput.getEtaConfigurations().size()).append('\n');
+            sb.append("# ETA of Configurations: ").append(etaInput.getEtaConfigurations().size()).append(", ");
         } else if (isSwmmRun) {
-            sb.append("ETA Calculation: no").append('\n');
+            sb.append("ETA Calculation: no").append(", ");
         }
 
         return sb.toString();

@@ -43,7 +43,7 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="SWMM Projekt">
+            <TitledBorder title="SWMM Project">
               <ResourceString PropertyName="titleX" bundle="de/cismet/cids/custom/sudplan/local/linz/wizard/Bundle.properties" key="SwmmWizardPanelProjectUI.projectPanel.border.title" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </TitledBorder>
           </Border>
@@ -121,7 +121,7 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Konfiguration">
+            <TitledBorder title="Configuration">
               <ResourceString PropertyName="titleX" bundle="de/cismet/cids/custom/sudplan/local/linz/wizard/Bundle.properties" key="SwmmWizardPanelProjectUI.configurationPanel.border.title" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </TitledBorder>
           </Border>
@@ -233,6 +233,9 @@
         </Component>
         <Component class="com.toedter.calendar.JDateChooser" name="jdcStartDate">
           <Properties>
+            <Property name="dateFormatString" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="de/cismet/cids/custom/sudplan/local/linz/wizard/Bundle.properties" key="SwmmWizardPanelProjectUI.jdcStartDate.dateFormatString" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+            </Property>
             <Property name="opaque" type="boolean" value="false"/>
           </Properties>
           <BindingProperties>
@@ -241,6 +244,9 @@
         </Component>
         <Component class="com.toedter.calendar.JDateChooser" name="jdcEndDate">
           <Properties>
+            <Property name="dateFormatString" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="de/cismet/cids/custom/sudplan/local/linz/wizard/Bundle.properties" key="SwmmWizardPanelProjectUI.jdcEndDate.dateFormatString" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+            </Property>
             <Property name="opaque" type="boolean" value="false"/>
           </Properties>
           <BindingProperties>

@@ -257,10 +257,10 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
             this.validTimeIntervall = true;
             int i = 0;
             final TimeInterval modelIntervall = new TimeInterval(
-                    TimeInterval.Openness.OPEN,
+                    TimeInterval.Openness.CLOSED,
                     this.startDate,
                     this.endDate,
-                    TimeInterval.Openness.OPEN);
+                    TimeInterval.Openness.CLOSED);
             for (final String timeseries : timeseriesURLs) {
                 final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(timeseries);
                 final TimeInterval timeInterval = config.getInterval();
