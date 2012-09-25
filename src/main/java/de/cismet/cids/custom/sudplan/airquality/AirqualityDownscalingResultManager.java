@@ -21,6 +21,7 @@ import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.GeoServerRESTReader;
 import it.geosolutions.geoserver.rest.decoder.RESTLayerList;
 import it.geosolutions.geoserver.rest.decoder.utils.NameLinkElem;
+import it.geosolutions.geoserver.rest.encoder.GSLayerEncoder;
 import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
 
 import org.apache.log4j.Logger;
@@ -63,7 +64,6 @@ import de.cismet.cids.custom.sudplan.Variable;
 import de.cismet.cids.custom.sudplan.airquality.AirqualityDownscalingOutput.Result;
 import de.cismet.cids.custom.sudplan.geoserver.AttributesAwareGSFeatureTypeEncoder;
 import de.cismet.cids.custom.sudplan.geoserver.GSAttributeEncoder;
-import de.cismet.cids.custom.sudplan.geoserver.GSPathAwareLayerEncoder;
 
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
@@ -833,9 +833,9 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 featureType.addKeyword("max:" + max);
                 featureType.addKeyword("mean:" + mean);
 
-                final GSPathAwareLayerEncoder layer = new GSPathAwareLayerEncoder();
+                final GSLayerEncoder layer = new GSLayerEncoder();
                 layer.setEnabled(true);
-                layer.setPath("/"
+                layer.setWmsPath("/"
                             + name
                             + "/"
                             + formatForWmsPath(result.getResolution()) // NOI18N

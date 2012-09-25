@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
+import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
@@ -18,6 +19,11 @@ import java.awt.Component;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
+import java.util.Date;
 
 import javax.swing.event.ChangeListener;
 
@@ -42,6 +48,7 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
 
     //~ Instance fields --------------------------------------------------------
 
+    private final transient SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private final transient ChangeSupport changeSupport;
     private transient WizardDescriptor wizard;
     /** local swmm project variable. */
@@ -49,9 +56,7 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
     /** local swmm input variable. */
     private transient SwmmInput swmmInput;
     private transient volatile SwmmWizardPanelProjectUI component;
-
     private boolean etaCalculationEnabled;
-
     private final transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     //~ Constructors -----------------------------------------------------------
@@ -109,6 +114,20 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
         if (LOG.isDebugEnabled()) {
             LOG.debug("store settings");
         }
+
+        // remove time ..................
+        try {
+            final Date startDate = this.swmmInput.getStartDate();
+            final Date endDate = this.swmmInput.getEndDate();
+            swmmInput.setStartDate(dateFormat.parse(dateFormat.format(startDate)));
+            swmmInput.setEndDate(dateFormat.parse(dateFormat.format(endDate)));
+        } catch (ParseException ex) {
+            LOG.error("coud not sanitize start and end dates ("
+                        + swmmInput.getStartDate() + ", "
+                        + swmmInput.getEndDate() + "): " + ex.getLocalizedMessage(),
+                ex);
+        }
+
         wizard = (WizardDescriptor)settings;
         wizard.putProperty(SwmmPlusEtaWizardAction.PROP_SWMM_PROJECT_BEAN, this.getSwmmProject());
         wizard.putProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT, this.swmmInput);

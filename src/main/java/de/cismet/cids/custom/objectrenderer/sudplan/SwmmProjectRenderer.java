@@ -78,12 +78,12 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
     private javax.swing.JTextArea configurationArea;
     private javax.swing.JPanel etaAnalysisPanel;
     private javax.swing.JPanel etaRunPanel;
+    private javax.swing.JTextArea fldDescriptionText;
     private javax.swing.JTextField fldEtaHyd;
     private javax.swing.JTextField fldEtaSed;
     private javax.swing.JTextField fldOverflowVolume;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblDescription;
-    private javax.swing.JLabel lblDescriptionText;
     private javax.swing.JLabel lblOverflowUnit;
     private javax.swing.JLabel lblSwmmAnalysisProject;
     private javax.swing.JLabel lblSwmmAnalysisVolume;
@@ -168,7 +168,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
 
         this.lblTitleText.setText((cidsBean.getProperty("title") != null) ? cidsBean.getProperty("title").toString()
                                                                           : null);
-        this.lblDescriptionText.setText((cidsBean.getProperty("description") != null)
+        this.fldDescriptionText.setText((cidsBean.getProperty("description") != null)
                 ? cidsBean.getProperty("description").toString() : null);
         this.configurationArea.setText((cidsBean.getProperty("options") != null)
                 ? cidsBean.getProperty("options").toString() : null);
@@ -197,7 +197,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         lblTitle = new javax.swing.JLabel();
         lblTitleText = new javax.swing.JLabel();
         lblDescription = new javax.swing.JLabel();
-        lblDescriptionText = new javax.swing.JLabel();
+        fldDescriptionText = new javax.swing.JTextArea();
         previewPanel = new javax.swing.JPanel();
         previewLabel = new javax.swing.JLabel();
         configPanel = new javax.swing.JPanel();
@@ -249,6 +249,7 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblTitleText, gridBagConstraints);
@@ -261,22 +262,23 @@ public class SwmmProjectRenderer extends AbstractCidsBeanRenderer implements Tit
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
         add(lblDescription, gridBagConstraints);
 
-        lblDescriptionText.setText(org.openide.util.NbBundle.getMessage(
-                SwmmProjectRenderer.class,
-                "SwmmProjectRenderer.lblDescriptionText.text")); // NOI18N
-        lblDescriptionText.setMaximumSize(null);
-        lblDescriptionText.setMinimumSize(null);
-        lblDescriptionText.setPreferredSize(null);
+        fldDescriptionText.setEditable(false);
+        fldDescriptionText.setColumns(20);
+        fldDescriptionText.setRows(2);
+        fldDescriptionText.setWrapStyleWord(true);
+        fldDescriptionText.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblDescriptionText, gridBagConstraints);
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 5, 10);
+        add(fldDescriptionText, gridBagConstraints);
 
         previewPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
                 org.openide.util.NbBundle.getMessage(
