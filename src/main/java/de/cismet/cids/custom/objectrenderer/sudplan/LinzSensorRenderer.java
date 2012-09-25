@@ -203,18 +203,18 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
             if (LOG.isDebugEnabled()) {
                 LOG.debug("loading event for sensor '" + sensorType + "'");
             }
-            if (sensorType.indexOf(MonitorstationContext.LI_HYE.getKey()) != -1) {
+            if (MonitorstationContext.LI_HYE.getKey().indexOf(sensorType) != -1) {
                 currentSensorType = MonitorstationContext.LI_HYE;
-            } else if (sensorType.indexOf(MonitorstationContext.LI_WIE.getKey()) != -1) {
+            } else if (MonitorstationContext.LI_WIE.getKey().indexOf(sensorType) != -1) {
                 currentSensorType = MonitorstationContext.LI_WIE;
-            } else if (sensorType.indexOf(MonitorstationContext.LI_WOE.getKey()) != -1) {
+            } else if (MonitorstationContext.LI_WOE.getKey().indexOf(sensorType) != -1) {
                 currentSensorType = MonitorstationContext.LI_WOE;
             } else {
                 throw new Exception("Unsupported Sensor Type '" + sensorType
                             + "', expected '"
                             + MonitorstationContext.LI_HYE.getKey() + "', '"
                             + MonitorstationContext.LI_WIE.getKey() + "' or '"
-                            + MonitorstationContext.LI_WOE + "'");
+                            + MonitorstationContext.LI_WOE.getKey() + "'");
             }
 
             if ((eventDetectionUpdater != null) && eventDetectionUpdater.isRunning()) {
