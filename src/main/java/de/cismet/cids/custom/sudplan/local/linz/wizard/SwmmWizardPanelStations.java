@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
 import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
@@ -21,7 +22,6 @@ import javax.swing.event.ChangeListener;
 
 import de.cismet.cids.custom.sudplan.local.linz.SwmmInput;
 import de.cismet.cids.custom.sudplan.local.wupp.WizardInitialisationException;
-import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -115,7 +115,7 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
             // FIXME: i18n
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                NbBundle.getMessage(SwmmWizardPanelStations.class, 
+                NbBundle.getMessage(SwmmWizardPanelStations.class,
                     "SwmmWizardPanelStations.error.nostation"));
             valid = false;
         } else {

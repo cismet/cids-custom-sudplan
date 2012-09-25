@@ -21,6 +21,7 @@ import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.GeoServerRESTReader;
 import it.geosolutions.geoserver.rest.decoder.RESTLayerList;
 import it.geosolutions.geoserver.rest.decoder.utils.NameLinkElem;
+import it.geosolutions.geoserver.rest.encoder.GSLayerEncoder;
 import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
 
 import org.apache.log4j.Logger;
@@ -77,7 +78,6 @@ import de.cismet.tools.PropertyReader;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
-import it.geosolutions.geoserver.rest.encoder.GSLayerEncoder;
 
 /**
  * DOCUMENT ME!
