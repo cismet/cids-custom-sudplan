@@ -102,20 +102,21 @@ public final class WizardPanelMetadata implements WizardDescriptor.Panel {
             int i = 0;
             for (final String timeseries : swmmInput.getTimeseriesURLs()) {
                 i++;
-                sb.append("Time Series #").append((i + 1)).append(": ").append(timeseries).append(", ");
+                sb.append("Time Series #").append(i).append(": ").append(timeseries).append(", ");
             }
         }
 
-        if (wizard.getProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT) != null) {
+        if (((Boolean)this.wizard.getProperty(
+                            SwmmPlusEtaWizardAction.PROP_ETA_CALCULATION_ENABLED))) {
             final EtaInput etaInput = (EtaInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_ETA_INPUT);
             if (!isSwmmRun) {
                 sb.append("SWMM Scenario: ").append(etaInput.getSwmmRunName()).append(", ");
             } else {
                 sb.append("ETA Calcualtion: yes").append(", ");
             }
-            sb.append("# ETA of Configurations: ").append(etaInput.getEtaConfigurations().size()).append(", ");
+            sb.append("# ETA of Configurations: ").append(etaInput.getEtaConfigurations().size());
         } else if (isSwmmRun) {
-            sb.append("ETA Calculation: no").append(", ");
+            sb.append("ETA Calculation: no");
         }
 
         return sb.toString();
