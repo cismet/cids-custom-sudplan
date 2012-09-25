@@ -64,7 +64,6 @@ import de.cismet.cids.custom.sudplan.Variable;
 import de.cismet.cids.custom.sudplan.airquality.AirqualityDownscalingOutput.Result;
 import de.cismet.cids.custom.sudplan.geoserver.AttributesAwareGSFeatureTypeEncoder;
 import de.cismet.cids.custom.sudplan.geoserver.GSAttributeEncoder;
-import de.cismet.cids.custom.sudplan.geoserver.GSPathAwareLayerEncoder;
 
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
