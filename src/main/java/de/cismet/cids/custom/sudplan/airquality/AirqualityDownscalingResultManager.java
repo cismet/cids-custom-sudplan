@@ -138,8 +138,9 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 + "{3}";                                           // NOI18N
     private static final transient String DB_STMT_CREATE_VIEW = " CREATE OR REPLACE VIEW "
                 + "{0} AS "                                        // NOI18N
-                + " SELECT modeloutput_id, variable, resolution, \"timestamp\", geometry, value, unit, offering"
-                + " ,(SELECT max(value) FROM downscaled_airquality"
+                + " SELECT modeloutput_id, variable, resolution, \"timestamp\","
+                + " {1} as geometry, value, unit, offering,"
+                + " (SELECT max(value) FROM downscaled_airquality"
                 // + "    WHERE modeloutput_id = {1} "
                 + "    WHERE variable ILIKE ''{2}'' " // NOI18N
 
@@ -157,10 +158,10 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 + ") AS minValue"
                 + " FROM "                       // NOI18N
                 + DB_TABLE
-                + " WHERE modeloutput_id = {1} "
-                + " AND variable ILIKE ''{2}'' " // NOI18N
-                + " AND resolution ILIKE ''{3}''"
-                + " AND \"timestamp\" = {4}";    // NOI18N
+                + " WHERE modeloutput_id = {2} "
+                + " AND variable ILIKE ''{3}'' " // NOI18N
+                + " AND resolution ILIKE ''{4}''"
+                + " AND \"timestamp\" = {5}";    // NOI18N
 
     private static final transient String DB_QUERY_BOUNDINGBOX_TOKEN_SRS = "<aqds:srs>";
     private static final transient String DB_QUERY_BOUNDINGBOX = "SELECT "
@@ -184,6 +185,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
     private final Integer modelId;
     private final String name;
     private final Crs srs;
+    private final String geometryColumn;
 
     private transient Exception exception;
 
@@ -192,19 +194,27 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
     /**
      * Creates a new AirqualityDownscalingResultManager object.
      *
-     * @param  result   DOCUMENT ME!
-     * @param  modelId  DOCUMENT ME!
-     * @param  name     DOCUMENT ME!
-     * @param  srs      DOCUMENT ME!
+     * @param   result   DOCUMENT ME!
+     * @param   modelId  DOCUMENT ME!
+     * @param   name     DOCUMENT ME!
+     * @param   srs      DOCUMENT ME!
+     *
+     * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     public AirqualityDownscalingResultManager(final AirqualityDownscalingOutput.Result result,
             final Integer modelId,
             final String name,
             final Crs srs) {
+        if ((srs == null) || (srs.getCode() == null) || (srs.getCode().trim().length() <= 0)) {
+            throw new IllegalArgumentException("Please provide an SRS for the results.");
+        }
+
         this.result = result;
         this.modelId = modelId;
         this.name = name;
         this.srs = srs;
+
+        geometryColumn = "geometry_" + srs.getCode().toLowerCase().replaceAll(":", "_");
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -332,6 +342,54 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
     /**
      * DOCUMENT ME!
      *
+     * @param   connection  DOCUMENT ME!
+     *
+     * @throws  SQLException  DOCUMENT ME!
+     */
+    private void createCrsColumnIfNecessary(final Connection connection) throws SQLException {
+        Statement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery("SELECT EXISTS (SELECT * FROM pg_attribute"
+                            + " WHERE attrelid = 'downscaled_airquality'::regclass"
+                            + " AND attname = quote_ident('" + geometryColumn + "')"
+                            + " AND NOT attisdropped)  -- exclude dropped (dead) columns");
+
+            boolean addColumn = true;
+
+            if ((resultSet != null) && resultSet.next() && resultSet.getBoolean(1)) {
+                addColumn = false;
+            }
+
+            if (addColumn) {
+                statement.close();
+                statement = connection.createStatement();
+                statement.executeUpdate("ALTER TABLE downscaled_airquality ADD COLUMN " + geometryColumn + " geometry");
+            }
+        } catch (SQLException ex) {
+            throw ex;
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException ex) {
+                }
+            }
+
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   connection  valueKey DOCUMENT ME!
      * @param   floatData   insertStatement DOCUMENT ME!
      * @param   variable    DOCUMENT ME!
@@ -354,7 +412,9 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
 
         // TODO: Drop values if already inserted by a (broken) previous download.
         final StringBuilder insertStatementBuilder = new StringBuilder(
-                "INSERT INTO downscaled_airquality(modeloutput_id, variable, resolution, \"timestamp\", geometry, value, unit) VALUES("); // NOI18N
+                "INSERT INTO downscaled_airquality(modeloutput_id, variable, resolution, \"timestamp\", "
+                        + geometryColumn
+                        + ", geometry, value, unit) VALUES("); // NOI18N
 
         insertStatementBuilder.append(modelId);
         insertStatementBuilder.append(",'");  // NOI18N
@@ -370,9 +430,15 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 final StringBuilder insertValueBuilder = new StringBuilder(
                         insertStatementBuilder.toString());
 
-                insertValueBuilder.append("setSrid('"); // NOI18N
+                insertValueBuilder.append("setSrid('");     // NOI18N
                 insertValueBuilder.append(geometries[i][j].toText());
-                // TODO: Dynamic SRID?
+                insertValueBuilder.append("'::geometry, "); // NOI18N
+                insertValueBuilder.append(CrsTransformer.extractSridFromCrs(srs.getCode()));
+                insertValueBuilder.append("),");            // NOI18N
+
+                // Once again for the 'geometry' column
+                insertValueBuilder.append("setSrid('");     // NOI18N
+                insertValueBuilder.append(geometries[i][j].toText());
                 insertValueBuilder.append("'::geometry, "); // NOI18N
                 insertValueBuilder.append(CrsTransformer.extractSridFromCrs(srs.getCode()));
                 insertValueBuilder.append("),");            // NOI18N
@@ -388,6 +454,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
         insertStatement.addBatch(MessageFormat.format(
                 DB_STMT_CREATE_VIEW,
                 viewName,
+                geometryColumn,
                 modelId,
                 variable,
                 result.getResolution().getOfferingSuffix(),
@@ -579,25 +646,6 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             throw new Exception(message);
         }
 
-        final Geometry[][] geometries = createGeometries(timeseries);
-
-        final Object valueKeysObject = timeseries.getTSProperty(TimeSeries.VALUE_KEYS);
-        final Object unitsObject = timeseries.getTSProperty(TimeSeries.VALUE_UNITS);
-        final String valueKey;
-        final String unit;
-
-        if ((valueKeysObject instanceof String[]) && (((String[])valueKeysObject).length == 1)
-                    && (unitsObject instanceof String[])
-                    && (((String[])unitsObject).length > 0)) {
-            valueKey = ((String[])valueKeysObject)[0];
-            final String unitFromTimeseries = ((String[])unitsObject)[0];
-            unit = unitFromTimeseries.substring(unitFromTimeseries.lastIndexOf(":") + 1);     // NOI18N
-        } else {
-            final String message = "The valueKey or unit of selected timeseries is invalid."; // NOI18N
-            LOG.error(message);
-            throw new Exception(message);
-        }
-
         String variable;
         if ((result.getVariable() != null) && (result.getVariable().getPropertyKey() != null)) {
             variable = result.getVariable().getPropertyKey();
@@ -638,11 +686,57 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
         }
         Collections.sort(availableLayerNames);
 
+        boolean layersAlreadyCreated = true;
+        for (final TimeStamp stamp : timeseries.getTimeStamps()) {
+            final String viewName = MessageFormat.format(
+                        DB_VIEW_NAME_PATTERN,
+                        modelId,
+                        variable,
+                        result.getResolution().getOfferingSuffix(),
+                        Long.toString(stamp.asMilis()))
+                        .toLowerCase();
+
+            layersAlreadyCreated &= Collections.binarySearch(availableLayerNames, viewName) >= 0;
+        }
+
+        if (layersAlreadyCreated) {
+            // We are done here. The result already is visualized.
+            return;
+        }
+
+        final Geometry[][] geometries = createGeometries(timeseries);
+
+        final Object valueKeysObject = timeseries.getTSProperty(TimeSeries.VALUE_KEYS);
+        final Object unitsObject = timeseries.getTSProperty(TimeSeries.VALUE_UNITS);
+        final String valueKey;
+        final String unit;
+
+        if ((valueKeysObject instanceof String[]) && (((String[])valueKeysObject).length == 1)
+                    && (unitsObject instanceof String[])
+                    && (((String[])unitsObject).length > 0)) {
+            valueKey = ((String[])valueKeysObject)[0];
+            final String unitFromTimeseries = ((String[])unitsObject)[0];
+            unit = unitFromTimeseries.substring(unitFromTimeseries.lastIndexOf(":") + 1);     // NOI18N
+        } else {
+            final String message = "The valueKey or unit of selected timeseries is invalid."; // NOI18N
+            LOG.error(message);
+            throw new Exception(message);
+        }
+
         final Connection connection;
         try {
             connection = openConnection();
         } catch (final Exception ex) {
             final String message = "Couldn't connect to database '" + DB_URL + "'."; // NOI18N
+            LOG.error(message, ex);
+            throw new Exception(message, ex);
+        }
+
+        try {
+            createCrsColumnIfNecessary(connection);
+        } catch (final Exception ex) {
+            final String message = "Couldn't determine if geometry column '" + geometryColumn
+                        + "' is available or an error while creating this column occurred."; // NOI18N
             LOG.error(message, ex);
             throw new Exception(message, ex);
         }
@@ -752,6 +846,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 // TODO: SLD according to variable or style interprets variable property.
                 layer.setDefaultStyle(GEOSERVER_SLD);
 
+                createdLayers.add(viewName);
                 if (!geoServerRESTPublisher.publishDBLayer(
                                 GEOSERVER_WORKSPACE,
                                 GEOSERVER_DATASTORE,
@@ -759,8 +854,6 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                                 layer)) {
                     removeCreatedLayers = true;
                     throw new Exception("GeoServer import was not successful"); // NOI18N
-                } else {
-                    createdLayers.add(viewName);
                 }
             }
         } catch (final Exception ex) {
@@ -774,13 +867,30 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 LOG.warn("Could not close connection to database '" + DB_URL + "'.", ex); // NOI18N
             }
 
+            final Collection<String> brokenLayers = new LinkedList<String>();
             if (removeCreatedLayers) {
                 for (final String createdLayer : createdLayers) {
-                    geoServerRESTPublisher.unpublishFeatureType(GEOSERVER_WORKSPACE, GEOSERVER_DATASTORE, createdLayer);
-                    geoServerRESTPublisher.removeLayer(GEOSERVER_WORKSPACE, createdLayer);
+                    try {
+                        geoServerRESTPublisher.unpublishFeatureType(
+                            GEOSERVER_WORKSPACE,
+                            GEOSERVER_DATASTORE,
+                            createdLayer);
+                        geoServerRESTPublisher.removeLayer(GEOSERVER_WORKSPACE, createdLayer);
+                    } catch (final Exception ex) {
+                        brokenLayers.add(createdLayer);
+                    }
                 }
 
-                throw new Exception("At least one of the layers to create already exists.");
+                final String message;
+                if (brokenLayers.isEmpty()) {
+                    message = "At least one of the layers to create already exists.";
+                } else {
+                    message =
+                        "At least one of the layers to create already exists. While removing the layers and featuretypes for this result, following layers and/or featuretypes are left broken in the WMS: "
+                                + brokenLayers.toString();
+                }
+
+                throw new Exception(message);
             }
         }
     }
@@ -837,7 +947,10 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             }
 
             final String name = variableLayer.getName();
-            final String completePath = modelLayer.getName() + "/" + resolutionLayer.getName() + "/"
+            final String completePath = modelLayer.getName()
+                        + "/"
+                        + resolutionLayer.getName()
+                        + "/"
                         + variableLayer.getName();
 
             result = new SlidableWMSServiceLayerGroup(
@@ -1071,7 +1184,8 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
         public int hashCode() {
             int hash = 7;
 
-            hash = (43 * hash) + ((this.fileToSaveTo != null) ? this.fileToSaveTo.hashCode() : 0);
+            hash = (43 * hash)
+                        + ((this.fileToSaveTo != null) ? this.fileToSaveTo.hashCode() : 0);
 
             return hash;
         }

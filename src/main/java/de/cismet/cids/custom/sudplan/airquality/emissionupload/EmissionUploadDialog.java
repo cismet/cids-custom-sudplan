@@ -239,7 +239,7 @@ public class EmissionUploadDialog extends javax.swing.JDialog {
 
         //~ Instance fields ----------------------------------------------------
 
-        private final transient CidsBean cidsBean;
+        private CidsBean cidsBean;
 
         //~ Constructors -------------------------------------------------------
 
@@ -289,7 +289,7 @@ public class EmissionUploadDialog extends javax.swing.JDialog {
                         "EmissionUploadDialog.lblMessage.success"));
                 try {
                     cidsBean.setProperty("uploaded", true);
-                    cidsBean.persist();
+                    cidsBean = cidsBean.persist();
                 } catch (final Exception ex) {
                     LOG.warn("Couldn't set the uploaded flag in emission database.", ex);
                 }
