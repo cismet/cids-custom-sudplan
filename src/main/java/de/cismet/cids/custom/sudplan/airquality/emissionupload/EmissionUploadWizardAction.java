@@ -197,7 +197,7 @@ public class EmissionUploadWizardAction extends AbstractCidsBeanAction implement
             return;
         }
 
-        final CidsBean emissionDatabase;
+        CidsBean emissionDatabase;
 
         try {
             emissionDatabase = createEmissionDatabase((String)wizard.getProperty(PROPERTY_NAME),
@@ -206,7 +206,7 @@ public class EmissionUploadWizardAction extends AbstractCidsBeanAction implement
                     null,
                     (List<Grid>)wizard.getProperty(PROPERTY_GRIDS));
 
-            emissionDatabase.persist();
+            emissionDatabase = emissionDatabase.persist();
         } catch (final Exception ex) {
             final String errorMessage = "Can't create or persist new CidsBean for emission database '"
                         + wizard.getProperty(PROPERTY_NAME) + "'.";
