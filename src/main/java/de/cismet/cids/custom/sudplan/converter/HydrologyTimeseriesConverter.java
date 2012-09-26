@@ -89,7 +89,7 @@ public final class HydrologyTimeseriesConverter implements TimeseriesConverter, 
             ts.setTSProperty(TimeSeries.VALUE_UNITS, new String[] { Unit.M3S.getPropertyKey() });
             ts.setTSProperty(
                 TimeSeries.VALUE_OBSERVED_PROPERTY_URNS,
-                new String[] { Variable.PRECIPITATION.getPropertyKey() });
+                new String[] { Variable.COUT.getPropertyKey() });
             // must be present
             ts.setTSProperty(PropertyNames.DESCRIPTION, "imported_hydrology_timeseries_" + System.currentTimeMillis());
 
