@@ -51,9 +51,9 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String TIN_URL =
-        "http://sudplanwp6.cismet.de/geoserver/wms?SERVICE=WMS&&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=sudplan:GeoCPM%20TIN&STYLES=geocpm_triangle_style";                   // NOI18N
+        "http://sudplanwp6.cismet.de/geoserver/wms?SERVICE=WMS&&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=sudplan:GeoCPM_TIN&STYLES=geocpm_triangle_style";     // NOI18N
     public static final String BE_URL =
-        "http://sudplanwp6.cismet.de/geoserver/wms?SERVICE=WMS&&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=sudplan:GeoCPM%20Breaking%20Edges&STYLES=geocpm_breaking_edge_style"; // NOI18N
+        "http://sudplanwp6.cismet.de/geoserver/wms?SERVICE=WMS&&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=sudplan:GeoCPM_be&STYLES=geocpm_breaking_edge_style"; // NOI18N
 
     private static final transient Logger LOG = Logger.getLogger(GeocpmConfigurationEditor.class);
 
