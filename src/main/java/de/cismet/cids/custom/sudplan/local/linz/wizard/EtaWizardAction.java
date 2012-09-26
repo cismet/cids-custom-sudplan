@@ -220,7 +220,7 @@ public final class EtaWizardAction extends AbstractCidsBeanAction {
         final Date created = GregorianCalendar.getInstance().getTime();
         final String user = SessionManager.getSession().getUser().getName();
         final String runName = wizard.getProperty(PROP_NAME) + " (ETA)";
-        final String inputName = "Modellkonfiguration " + runName;
+        final String inputName = "ETA Configuration " + runName;
 
         etaInput.setCreated(created);
         etaInput.setUser(user);

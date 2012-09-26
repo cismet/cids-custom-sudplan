@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
 import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
@@ -114,7 +115,8 @@ public final class SwmmWizardPanelStations implements WizardDescriptor.Panel {
             // FIXME: i18n
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Bitte wählen Sie mindestens eine Regenmessstation aus");
+                NbBundle.getMessage(SwmmWizardPanelStations.class,
+                    "SwmmWizardPanelStations.error.nostation"));
             valid = false;
         } else {
             wizard.putProperty(
