@@ -50,6 +50,9 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
     public static final Unit MM_MIN = new Unit(
             "mm/min",                                                                                                   // NOI18N
             NbBundle.getMessage(Unit.class, "Unit.MM_MIN.localisedName"));                                              // NOI18N
+    public static final Unit MM_DAY = new Unit(
+            "mm/day",                                                                                                   // NOI18N
+            NbBundle.getMessage(Unit.class, "Unit.MM_DAY.localisedName"));                                              // NOI18N
     public static final Unit MG_L = new Unit(
             "mg/l",                                                                                                     // NOI18N
             NbBundle.getMessage(Unit.class, "Unit.MG_L.localisedName"));                                                // NOI18N
@@ -136,7 +139,7 @@ public final class Unit extends LocalisedEnum<Unit> implements Serializable {
     public static Unit[] values() {
         return new Unit[] {
                 MM, PPB, PPM, KELVIN,
-                M3S, LS, M3, MM_MIN,
+                M3S, LS, M3, MM_MIN, MM_DAY,
                 MG_L, METERS, KG, CELSIUS
             };
     }
