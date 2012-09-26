@@ -97,8 +97,12 @@ public final class WizardPanelMetadata implements WizardDescriptor.Panel {
             final SwmmInput swmmInput = (SwmmInput)wizard.getProperty(SwmmPlusEtaWizardAction.PROP_SWMM_INPUT);
 
             sb.append("SWMM INP File: ").append(swmmInput.getInpFile()).append(", ");
-            sb.append("SWMM Start Date: ").append(SwmmInput.DATE_FORMAT.format(swmmInput.getStartDate())).append(", ");
-            sb.append("SWMM End Date: ").append(SwmmInput.DATE_FORMAT.format(swmmInput.getEndDate())).append(", ");
+            sb.append("SWMM Start Date: ")
+                    .append(SwmmInput.UTC_DATE_FORMAT.format(swmmInput.getStartDate()))
+                    .append(" UTC, ");
+            sb.append("SWMM End Date: ")
+                    .append(SwmmInput.UTC_DATE_FORMAT.format(swmmInput.getEndDate()))
+                    .append(" UTC, ");
             int i = 0;
             for (final String timeseries : swmmInput.getTimeseriesURLs()) {
                 i++;
