@@ -29,7 +29,7 @@ public class DeltaConfigurationRenderer extends AbstractCidsBeanRenderer impleme
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient RunGeoCPMTitleComponent titleComponent;
+    private final transient GeoCPMCfgTitleComponent titleComponent;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private de.cismet.cids.custom.objecteditors.sudplan.DeltaConfigurationEditor deltaConfigurationEditor;
@@ -50,7 +50,7 @@ public class DeltaConfigurationRenderer extends AbstractCidsBeanRenderer impleme
     public DeltaConfigurationRenderer() {
         initComponents();
 
-        titleComponent = new RunGeoCPMTitleComponent();
+        titleComponent = new GeoCPMCfgTitleComponent();
     }
 
     //~ Methods ----------------------------------------------------------------
