@@ -119,8 +119,12 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
         try {
             final Date startDate = this.swmmInput.getStartDate();
             final Date endDate = this.swmmInput.getEndDate();
-            swmmInput.setStartDate(dateFormat.parse(dateFormat.format(startDate)));
-            swmmInput.setEndDate(dateFormat.parse(dateFormat.format(endDate)));
+            swmmInput.setStartDate(SwmmInput.UTC_DATE_FORMAT.parse(dateFormat.format(startDate)));
+            swmmInput.setEndDate(SwmmInput.UTC_DATE_FORMAT.parse(dateFormat.format(endDate)));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("start and end date " + startDate + ":" + endDate + " changed to"
+                            + swmmInput.getStartDate() + ":" + swmmInput.getEndDate());
+            }
         } catch (ParseException ex) {
             LOG.error("coud not sanitize start and end dates ("
                         + swmmInput.getStartDate() + ", "
@@ -289,5 +293,19 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
      */
     public WizardDescriptor getWizard() {
         return wizard;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  DOCUMENT ME!
+     */
+    public static void main(final String[] args) {
+        final java.util.Date date = new java.util.Date();
+        System.out.println(date);
+        final SimpleDateFormat df = new SimpleDateFormat();
+        System.out.println(df.format(date));
+        df.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+        System.out.println(df.format(date));
     }
 }

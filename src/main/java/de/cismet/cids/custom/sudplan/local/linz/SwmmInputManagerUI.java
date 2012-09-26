@@ -79,8 +79,8 @@ public class SwmmInputManagerUI extends javax.swing.JPanel {
             final List<CidsBean> timeseriesBeans = swmmInput.fetchTimeseries();
             final HashMap<String, CidsBean> beansMap = new HashMap<String, CidsBean>(timeseriesBeans.size() + 1);
 
-            this.startDateLabel.setText(SwmmInput.DATE_FORMAT.format(swmmInput.getStartDate()));
-            this.endDateLabel.setText(SwmmInput.DATE_FORMAT.format(swmmInput.getEndDate()));
+            this.startDateLabel.setText(SwmmInput.UTC_DATE_FORMAT.format(swmmInput.getStartDate()) + " UTC");
+            this.endDateLabel.setText(SwmmInput.UTC_DATE_FORMAT.format(swmmInput.getEndDate()) + " UTC");
 
             beansMap.put("-1", swmmProjectBean);
             for (final CidsBean timeseriesBean : timeseriesBeans) {

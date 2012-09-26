@@ -133,7 +133,7 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
             final String reloadId = "local.linz." + swmmInput.getSwmmProject()
                         + ".swmm.scenario." + this.cidsBean.getProperty("id"); // NOI18N
             if (LOG.isDebugEnabled()) {
-                LOG.debug(reloadId);
+                LOG.debug("SWMM Reload ID: " + reloadId);
             }
             return reloadId;
         } catch (final Exception e) {
@@ -332,18 +332,13 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
         this.spsTask = modelSPSHelper.createTask(swmmRunInfo.getModelName());
 
         try {
-            final SimpleDateFormat inputDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-            final SimpleDateFormat outputDateFormat = new SimpleDateFormat("dd.MM.yyyyZ");
-
-            final String startDate = isoDf.format(
-                    outputDateFormat.parse(inputDateFormat.format(swmmInput.getStartDate()) + "+0000"));
+            final String startDate = isoDf.format(swmmInput.getStartDate());
             if (LOG.isDebugEnabled()) {
                 LOG.debug("start date: " + swmmInput.getStartDate() + " (" + startDate + ")");
             }
             spsTask.setParameter("start", startDate);
 
-            final String endDate = isoDf.format(
-                    outputDateFormat.parse(inputDateFormat.format(swmmInput.getEndDate()) + "+0000"));
+            final String endDate = isoDf.format(swmmInput.getEndDate());
             if (LOG.isDebugEnabled()) {
                 LOG.debug("end date: " + swmmInput.getEndDate() + " (" + endDate + ")");
             }

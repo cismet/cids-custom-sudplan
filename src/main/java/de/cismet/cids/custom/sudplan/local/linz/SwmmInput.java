@@ -41,7 +41,7 @@ public final class SwmmInput {
     public static final String TABLENAME_MONITOR_STATION_TYPE = "monitorstationtype";
     public static final String FLD_MONITOR_STATION_TYPE = "name";       // NOI18N
     public static final String FK_MONITOR_STATION_TYPE = "type";
-    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+    public static final SimpleDateFormat UTC_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
     public static final String PROP_TIMESERIES = "timeseries";
     public static final String PROP_INPFILE = "inpFile";
     public static final String PROP_STARTDATE = "startDate";
@@ -53,7 +53,7 @@ public final class SwmmInput {
     public static final String PROP_USER = "user";
 
     static {
-        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+        UTC_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     //~ Instance fields --------------------------------------------------------
