@@ -196,7 +196,7 @@ public class EtaModelManager extends AbstractAsyncModelManager {
             final String reloadId = "local.linz." + etaInput.getSwmmProject()
                         + ".eta.scenario." + this.cidsBean.getProperty("id"); // NOI18N
             if (LOG.isDebugEnabled()) {
-                LOG.debug(reloadId);
+                LOG.debug("ETA Reload ID: " + reloadId);
             }
             return reloadId;
         } catch (final Exception e) {
