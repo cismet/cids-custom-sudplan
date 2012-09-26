@@ -40,6 +40,15 @@ public final class MonitorstationContext extends LocalisedEnum<MonitorstationCon
     public static final MonitorstationContext LI_HY = new MonitorstationContext(
             "LI-HY", // NOI18N
             NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-HY.localisedName")); // NOI18N
+    public static final MonitorstationContext LI_WIE = new MonitorstationContext(
+            "LI-WIE", // NOI18N
+            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-WIE.localisedName")); // NOI18N
+    public static final MonitorstationContext LI_WOE = new MonitorstationContext(
+            "LI-WOE", // NOI18N
+            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-WOE.localisedName")); // NOI18N
+    public static final MonitorstationContext LI_HYE = new MonitorstationContext(
+            "LI-HYE", // NOI18N
+            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-HYE.localisedName")); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -104,7 +113,7 @@ public final class MonitorstationContext extends LocalisedEnum<MonitorstationCon
      * @return  DOCUMENT ME!
      */
     public static MonitorstationContext[] values() {
-        return new MonitorstationContext[] { AQ, HD, RF, LI_RF, LI_WI, LI_WO, LI_HY };
+        return new MonitorstationContext[] { AQ, HD, RF, LI_RF, LI_WI, LI_WO, LI_HY, LI_WIE, LI_WOE, LI_HYE };
     }
 
     @Override

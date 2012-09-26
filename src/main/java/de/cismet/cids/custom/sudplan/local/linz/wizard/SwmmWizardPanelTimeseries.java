@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
 import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
@@ -172,14 +173,15 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
             // FIXME: i18n
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Bitte wählen Sie mindestens eine Regenzeitreihe aus");
+                NbBundle.getMessage(SwmmWizardPanelTimeseries.class,
+                    "SwmmWizardPanelTimeseries.error.notimeseries"));
             valid = false;
-            // FIXME: compare the intervals also here, not only in readSettings!
-            // FIXME: downscaled timeseries has not interval information !!???!!!
         } else if (!validTimeIntervall) {
             wizard.putProperty(
                 WizardDescriptor.PROP_WARNING_MESSAGE,
-                "Der Modellzeitrum wird nicht von den ausgewählten Zeitreihen abgedeckt");
+                NbBundle.getMessage(
+                    SwmmWizardPanelTimeseries.class,
+                    "SwmmWizardPanelTimeseries.error.wrongtimecoverage"));
             valid = false;
         } else {
             // TODO: check time intervall!
@@ -255,10 +257,10 @@ public final class SwmmWizardPanelTimeseries implements WizardDescriptor.Panel {
             this.validTimeIntervall = true;
             int i = 0;
             final TimeInterval modelIntervall = new TimeInterval(
-                    TimeInterval.Openness.OPEN,
+                    TimeInterval.Openness.CLOSED,
                     this.startDate,
                     this.endDate,
-                    TimeInterval.Openness.OPEN);
+                    TimeInterval.Openness.CLOSED);
             for (final String timeseries : timeseriesURLs) {
                 final TimeseriesRetrieverConfig config = TimeseriesRetrieverConfig.fromUrl(timeseries);
                 final TimeInterval timeInterval = config.getInterval();

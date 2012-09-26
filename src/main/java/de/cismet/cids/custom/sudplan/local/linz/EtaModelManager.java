@@ -65,7 +65,7 @@ public class EtaModelManager extends AbstractAsyncModelManager {
             etaOutput.setEtaRun((Integer)this.cidsBean.getProperty("id"));
             etaOutput.setEtaRunName((String)this.cidsBean.getProperty("name"));
 
-            final CidsBean etaModelOutput = SMSUtils.createModelOutput("Modellergebnisse " + etaOutput.getEtaRunName(), // NOI18N
+            final CidsBean etaModelOutput = SMSUtils.createModelOutput("ETA Results " + etaOutput.getEtaRunName(), // NOI18N
                     etaOutput,
                     SMSUtils.Model.LINZ_ETA);
 
@@ -193,9 +193,14 @@ public class EtaModelManager extends AbstractAsyncModelManager {
     protected String getReloadId() {
         try {
             final EtaInput etaInput = (EtaInput)getUR();
-            return "local.linz." + etaInput.getSwmmProject() + ".eta.scenarios"; // NOI18N
+            final String reloadId = "local.linz." + etaInput.getSwmmProject()
+                        + ".eta.scenario." + this.cidsBean.getProperty("id"); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(reloadId);
+            }
+            return reloadId;
         } catch (final Exception e) {
-            LOG.warn("cannot fetch reload id", e);                               // NOI18N
+            LOG.warn("cannot fetch reload id", e);                            // NOI18N
             return null;
         }
     }

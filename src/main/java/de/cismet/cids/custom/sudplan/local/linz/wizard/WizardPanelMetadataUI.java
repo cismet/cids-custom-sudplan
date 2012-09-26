@@ -106,17 +106,6 @@ public final class WizardPanelMetadataUI extends javax.swing.JPanel {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        descriptionButton.setText(org.openide.util.NbBundle.getMessage(
-                WizardPanelMetadataUI.class,
-                "WizardPanelMetadataUI.descriptionButton.text")); // NOI18N
-        descriptionButton.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    descriptionButtonActionPerformed(evt);
-                }
-            });
-
         setLayout(new java.awt.GridBagLayout());
 
         lblName.setText(NbBundle.getMessage(WizardPanelMetadataUI.class, "WizardPanelMetadataUI.lblName.text")); // NOI18N
@@ -147,7 +136,9 @@ public final class WizardPanelMetadataUI extends javax.swing.JPanel {
         add(lblDescription, gridBagConstraints);
 
         txaDescription.setColumns(20);
+        txaDescription.setLineWrap(true);
         txaDescription.setRows(5);
+        txaDescription.setWrapStyleWord(true);
         jScrollPane1.setViewportView(txaDescription);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -158,6 +149,23 @@ public final class WizardPanelMetadataUI extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(6, 6, 6, 6);
         add(jScrollPane1, gridBagConstraints);
+
+        descriptionButton.setText(org.openide.util.NbBundle.getMessage(
+                WizardPanelMetadataUI.class,
+                "WizardPanelMetadataUI.descriptionButton.text")); // NOI18N
+        descriptionButton.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    descriptionButtonActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
+        add(descriptionButton, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
     /**

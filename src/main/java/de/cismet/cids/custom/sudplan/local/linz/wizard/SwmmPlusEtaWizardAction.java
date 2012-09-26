@@ -156,7 +156,16 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
                     SMSUtils.executeAndShowRun(swmmModelRun);
 
                     final List<CidsBean> swmmScenarios = (List)cidsBean.getProperty("swmm_scenarios"); // NOI18N
-                    swmmScenarios.add(swmmModelRun);
+                    final boolean duplicate = false;
+                    for (final CidsBean swmmScenario : swmmScenarios) {
+                        if (swmmScenario.getProperty("id").equals(swmmModelRun.getProperty("id"))) {
+                            LOG.error("SWMM Run #" + swmmModelRun.getProperty("id") + " already created for project '"
+                                        + cidsBean.getProperty("title"));
+                        }
+                    }
+                    if (!duplicate) {
+                        swmmScenarios.add(swmmModelRun);
+                    }
                     cidsBean = cidsBean.persist();
 
                     // .........................................................
@@ -217,7 +226,7 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
         final String user = SessionManager.getSession().getUser().getName();
         final String name = (String)wizard.getProperty(PROP_NAME);
         final String runName = name + " (SWMM 5.0)";
-        final String inputName = "Modellkonfiguration " + runName;
+        final String inputName = "SWMM Configuration " + runName;
 
         swmmInput.setCreated(created);
         swmmInput.setUser(user);
@@ -240,7 +249,7 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
         final String user = SessionManager.getSession().getUser().getName();
         final String name = (String)wizard.getProperty(PROP_NAME);
         final String runName = name + " (ETA)";
-        final String inputName = "Modellkonfiguration " + runName;
+        final String inputName = "ETA Configuration " + runName;
         final String swmmRunName = name + " (SWMM 5.0)";
 
         etaInput.setCreated(created);

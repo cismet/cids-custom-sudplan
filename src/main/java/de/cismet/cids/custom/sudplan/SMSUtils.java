@@ -733,8 +733,10 @@ public final class SMSUtils {
                     }
                 }
 
-                // there has not been a known unit
-                LOG.warn("cannot determine known unit, creating custom unit: " + unit); // NOI18N
+                if (LOG.isDebugEnabled()) {
+                    // there has not been a known unit
+                    LOG.warn("cannot determine known unit, creating custom unit: " + unit); // NOI18N
+                }
 
                 return Unit.createCustomUnit(unit);
             } else {
