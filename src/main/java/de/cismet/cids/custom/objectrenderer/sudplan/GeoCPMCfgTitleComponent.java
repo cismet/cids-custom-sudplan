@@ -7,11 +7,20 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import org.apache.log4j.Logger;
+
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
 
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import java.net.URI;
 
 import de.cismet.cids.custom.objectactions.sudplan.ActionProviderFactory;
+import de.cismet.cids.custom.sudplan.cismap3d.Layer3D;
 import de.cismet.cids.custom.sudplan.local.wupp.RunGeoCPMWizardAction;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -24,20 +33,29 @@ import de.cismet.cids.utils.interfaces.CidsBeanAction;
  * @author   mscholl
  * @version  $Revision$, $Date$
  */
-public class RunGeoCPMTitleComponent extends javax.swing.JPanel {
+public class GeoCPMCfgTitleComponent extends javax.swing.JPanel {
+
+    //~ Instance fields --------------------------------------------------------
+
+    private final transient ActionListener to3DL;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnRunGeoCPM;
+    private javax.swing.JButton btnTo3DMap;
     private javax.swing.JLabel lblTitle;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates new form RunGeoCPMTitleComponent.
+     * Creates new form GeoCPMCfgTitleComponent.
      */
-    public RunGeoCPMTitleComponent() {
+    public GeoCPMCfgTitleComponent() {
+        this.to3DL = new To3DMapActionListener();
+
         initComponents();
+
+        btnTo3DMap.addActionListener(WeakListeners.create(ActionListener.class, to3DL, btnTo3DMap));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -74,6 +92,8 @@ public class RunGeoCPMTitleComponent extends javax.swing.JPanel {
             // trigger the action enable
             cba.isEnabled();
         }
+
+        setTitle((String)cidsBean.getProperty("name")); // NOI18N
     }
 
     /**
@@ -87,13 +107,14 @@ public class RunGeoCPMTitleComponent extends javax.swing.JPanel {
 
         lblTitle = new javax.swing.JLabel();
         btnRunGeoCPM = new javax.swing.JButton();
+        btnTo3DMap = new javax.swing.JButton();
 
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18));
+        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18));                                                          // NOI18N
         lblTitle.setForeground(new java.awt.Color(255, 255, 255));
-        lblTitle.setText(NbBundle.getMessage(RunGeoCPMTitleComponent.class, "RunGeoCPMTitleComponent.lblTitle.text")); // NOI18N
+        lblTitle.setText(NbBundle.getMessage(GeoCPMCfgTitleComponent.class, "GeoCPMCfgTitleComponent.lblTitle.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -105,13 +126,54 @@ public class RunGeoCPMTitleComponent extends javax.swing.JPanel {
 
         btnRunGeoCPM.setAction(ActionProviderFactory.getCidsBeanAction(RunGeoCPMWizardAction.class));
         btnRunGeoCPM.setText(NbBundle.getMessage(
-                RunGeoCPMTitleComponent.class,
-                "RunGeoCPMTitleComponent.btnRunGeoCPM.text")); // NOI18N
+                GeoCPMCfgTitleComponent.class,
+                "GeoCPMCfgTitleComponent.btnRunGeoCPM.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(btnRunGeoCPM, gridBagConstraints);
-    }                                                          // </editor-fold>//GEN-END:initComponents
+
+        btnTo3DMap.setText(NbBundle.getMessage(
+                GeoCPMCfgTitleComponent.class,
+                "GeoCPMCfgTitleComponent.btnTo3DMap.text")); // NOI18N
+        add(btnTo3DMap, new java.awt.GridBagConstraints());
+    }                                                        // </editor-fold>//GEN-END:initComponents
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private static final class To3DMapActionListener implements ActionListener {
+
+        //~ Static fields/initializers -----------------------------------------
+
+        /** LOGGER. */
+        private static final transient Logger LOG = Logger.getLogger(To3DMapActionListener.class);
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final String caps =
+                "http://sudplanwp6.cismet.de/geoserver/wms?SERVICE=WMS&EXCEPTIONS=application/vnd.ogc.se_xml&VERSION=1.1.1&REQUEST=GetCapabilities";
+            final String tinLayer = "sudplan:GeoCPM_TIN";
+            final String beLayer = "sudplan:GeoCPM_be";
+
+            final Layer3D layer3D = Lookup.getDefault().lookup(Layer3D.class);
+            if (layer3D != null) {
+                try {
+                    final URI uri = new URI(caps);
+                    layer3D.addWMSLayer(uri, tinLayer, 1);
+                    layer3D.addWMSLayer(uri, beLayer, 1);
+                } catch (final Exception ex) {
+                    LOG.warn("cannot add layers", ex);
+                }
+            }
+        }
+    }
 }

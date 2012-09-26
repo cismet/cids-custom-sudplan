@@ -164,6 +164,8 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
                 attachScenario(modelRun, wizard);
 
                 SMSUtils.executeAndShowRun(modelRun);
+
+                lockInputConfig(wizard);
             } catch (final Exception ex) {
                 // TODO: proper error panel
                 final String message = "Cannot perform geocpm run";
@@ -253,6 +255,39 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
         }
 
         return SMSUtils.createModelRun(name, description, inputBean);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   wizard  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private void lockInputConfig(final WizardDescriptor wizard) throws Exception {
+        final CidsBean input = (CidsBean)wizard.getProperty(PROP_INPUT_BEAN);
+
+        assert input != null : "input was not set";
+
+        if (
+            !SMSUtils.TABLENAME_DELTA_CONFIGURATION.equalsIgnoreCase(
+                        input.getMetaObject().getMetaClass().getTableName())) {
+            return;
+        }
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("lock input configuration: "
+                        + "input=" + input);
+        }
+
+        input.setProperty("locked", true);
+        input.persist();
+        // Refresh object katalogue and widged
+        final Integer investID = (Integer)input.getProperty("original_object.investigation_area.id");
+        ComponentRegistry.getRegistry()
+                .getCatalogueTree()
+                .requestRefreshNode("wupp.investigation_area." + investID + ".config");
+        DeltaConfigurationListWidged.getInstance().fireConfigsChanged();
     }
 
     @Override

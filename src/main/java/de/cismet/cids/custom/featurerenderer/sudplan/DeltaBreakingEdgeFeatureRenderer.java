@@ -7,9 +7,15 @@
 ****************************************************/
 package de.cismet.cids.custom.featurerenderer.sudplan;
 
+import Sirius.server.middleware.types.MetaObject;
+
+import org.apache.log4j.Logger;
+
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
+
+import de.cismet.cids.custom.sudplan.local.wupp.BreakingEdgeEditorPanel;
 
 import de.cismet.cids.featurerenderer.CustomCidsFeatureRenderer;
 
@@ -23,9 +29,15 @@ import de.cismet.cismap.commons.gui.piccolo.OldFixedWidthStroke;
  */
 public class DeltaBreakingEdgeFeatureRenderer extends CustomCidsFeatureRenderer {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final Logger LOG = Logger.getLogger(DeltaBreakingEdgeFeatureRenderer.class);
+
     //~ Instance fields --------------------------------------------------------
 
     private final transient OldFixedWidthStroke stroke;
+
+    private volatile BreakingEdgeEditorPanel bkEditorPanel = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -36,6 +48,15 @@ public class DeltaBreakingEdgeFeatureRenderer extends CustomCidsFeatureRenderer 
         this.stroke = new OldFixedWidthStroke();
 
         initComponents();
+
+        if (bkEditorPanel == null) {
+            synchronized (GeocpmBreakingEdgeFeatureRenderer.class) {
+                if (bkEditorPanel == null) {
+                    bkEditorPanel = new BreakingEdgeEditorPanel();
+                    this.add(bkEditorPanel);
+                }
+            }
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -47,12 +68,7 @@ public class DeltaBreakingEdgeFeatureRenderer extends CustomCidsFeatureRenderer 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        final org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 400, Short.MAX_VALUE));
-        layout.setVerticalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 300, Short.MAX_VALUE));
+        setLayout(new java.awt.BorderLayout());
     } // </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -72,9 +88,24 @@ public class DeltaBreakingEdgeFeatureRenderer extends CustomCidsFeatureRenderer 
     }
 
     @Override
+    public void setMetaObject(final MetaObject metaObject) {
+        try {
+            super.setMetaObject(metaObject);
+            bkEditorPanel.init(metaObject.getBean(), false);
+        } catch (Exception e) {
+            LOG.error("Cannot initialise editor panel", e);
+        }
+    }
+
+    @Override
     public Stroke getLineStyle() {
         stroke.setMultiplyer(15);
 
         return stroke;
+    }
+
+    @Override
+    public float getTransparency() {
+        return 1f;
     }
 }

@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan;
+package de.cismet.cids.custom.sudplan.local.wupp;
 
 import java.awt.EventQueue;
 

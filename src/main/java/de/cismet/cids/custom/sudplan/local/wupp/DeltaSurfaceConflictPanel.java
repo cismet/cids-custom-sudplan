@@ -5,13 +5,10 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package de.cismet.cids.custom.sudplan;
+package de.cismet.cids.custom.sudplan.local.wupp;
 
 import org.openide.util.ImageUtilities;
+import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
 import javax.swing.event.ChangeEvent;
@@ -64,22 +61,32 @@ public class DeltaSurfaceConflictPanel extends javax.swing.JPanel {
         cbSurfaces.setSelected(this.isSurfaceConflict);
         cbSurfaces.setEnabled(this.isSurfaceConflict);
         final StringBuilder strS = new StringBuilder(cbSurfaces.getText());
-        strS.append(" (").append(surfaceCount).append(" counted)");
+        strS.append(NbBundle.getMessage(
+                DeltaSurfaceConflictPanel.class,
+                "DeltaSurfaceConflictPanel.<init>.conflictCount", // NOI18N
+                surfaceCount));
         cbSurfaces.setText(strS.toString());
 
         cbEdges.setSelected(this.isBreakingedgeConflict);
         cbEdges.setEnabled(this.isBreakingedgeConflict);
         final StringBuilder strB = new StringBuilder(cbEdges.getText());
-        strB.append(" (").append(breakingedgesCount).append(" counted)");
+        strB.append(NbBundle.getMessage(
+                DeltaSurfaceConflictPanel.class,
+                "DeltaSurfaceConflictPanel.<init>.conflictCount", // NOI18N
+                breakingedgesCount));
         cbEdges.setText(strB.toString());
 
-        lblInfoMessage.setIcon(ImageUtilities.loadImageIcon("org/netbeans/modules/dialogs/warning.gif", false));
+        lblInfoMessage.setIcon(ImageUtilities.loadImageIcon("org/netbeans/modules/dialogs/warning.gif", false)); // NOI18N
         if (!isBreakingedgeConflict) {
             lblInfoMessage.setText(
-                "You may start the wizard but configurations with overlapping surfaces will not be selectable.");
+                NbBundle.getMessage(
+                    DeltaSurfaceConflictPanel.class,
+                    "DeltaSurfaceConflictPanel.<init>.lblInfoMessage.text.surfaceConflict"));                    // NOI18N
         } else {
             lblInfoMessage.setText(
-                "You may not start the wizard because it is illegal to change areas with breaking edges.");
+                NbBundle.getMessage(
+                    DeltaSurfaceConflictPanel.class,
+                    "DeltaSurfaceConflictPanel.<init>.lblInfoMessage.text.breakingEdgeConflict"));               // NOI18N
         }
     }
 

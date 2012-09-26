@@ -50,7 +50,9 @@ public class SurfaceManipulationVisualPanelMetadataConfig extends javax.swing.JP
             throw new IllegalStateException("model instance must not be null");
         }
 
-        this.setName("Add metadata to model");
+        this.setName(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationVisualPanelMetadataConfig.class,
+                "SurfaceManipulationVisualPanelMetadataConfig.SurfaceManipulationVisualPanelMetadataConfig(SurfaceManipulationWizardPanelMetadataConfig).name"));
 
         initComponents();
 
@@ -80,16 +82,21 @@ public class SurfaceManipulationVisualPanelMetadataConfig extends javax.swing.JP
 
         if (!isNew) {
             txtName.setEnabled(false);
+            if (!model.isConfigLocked()) {
+                txaDescription.setEnabled(true);
+                EventQueue.invokeLater(new Runnable() {
 
-            EventQueue.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        txaDescription.requestFocus();
-                    }
-                });
+                        @Override
+                        public void run() {
+                            txaDescription.requestFocus();
+                        }
+                    });
+            } else {
+                txaDescription.setEnabled(false);
+            }
         } else {
             txtName.setEnabled(true);
+            txaDescription.setEnabled(true);
             txtName.setSelectionStart(0);
             txtName.setSelectionEnd(txtName.getText().length());
 

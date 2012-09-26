@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.objectrenderer.sudplan;
 
+import Sirius.navigator.ui.RequestsFullSizeComponent;
+
 import com.vividsolutions.jts.geom.Geometry;
 
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
@@ -44,7 +46,7 @@ import de.cismet.cismap.navigatorplugin.CidsFeature;
  * @author   jlauter
  * @version  $Revision$, $Date$
  */
-public class DeltaSurfaceRenderer extends AbstractCidsBeanRenderer {
+public class DeltaSurfaceRenderer extends AbstractCidsBeanRenderer implements RequestsFullSizeComponent {
 
     //~ Static fields/initializers ---------------------------------------------
 

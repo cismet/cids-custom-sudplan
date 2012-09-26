@@ -75,11 +75,7 @@ public final class RunGeoCPMWizardPanelInput implements WizardDescriptor.Panel {
         if (component == null) {
             synchronized (this) {
                 if (component == null) {
-                    try {
-                        component = new RunGeoCPMVisualPanelInput(this);
-                    } catch (final WizardInitialisationException ex) {
-                        LOG.error("cannot create wizard panel component", ex); // NOI18N
-                    }
+                    component = new RunGeoCPMVisualPanelInput(this);
                 }
             }
         }
@@ -98,8 +94,11 @@ public final class RunGeoCPMWizardPanelInput implements WizardDescriptor.Panel {
         final CidsBean inputBean = (CidsBean)wizard.getProperty(RunGeoCPMWizardAction.PROP_INPUT_BEAN);
 
         setInput(inputBean);
-
-        component.init();
+        try {
+            component.init();
+        } catch (final WizardInitialisationException ex) {
+            LOG.error("cannot create wizard panel component", ex); // NOI18N
+        }
     }
 
     @Override
