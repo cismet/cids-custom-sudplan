@@ -304,6 +304,9 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
         binding.setSourceUnreadableValue(true);
         bindingGroup.addBinding(binding);
 
+        jdcStartDate.setDateFormatString(org.openide.util.NbBundle.getMessage(
+                SwmmWizardPanelProjectUI.class,
+                "SwmmWizardPanelProjectUI.jdcStartDate.dateFormatString")); // NOI18N
         jdcStartDate.setOpaque(false);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
@@ -314,6 +317,9 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                 org.jdesktop.beansbinding.BeanProperty.create("date"));
         bindingGroup.addBinding(binding);
 
+        jdcEndDate.setDateFormatString(org.openide.util.NbBundle.getMessage(
+                SwmmWizardPanelProjectUI.class,
+                "SwmmWizardPanelProjectUI.jdcEndDate.dateFormatString")); // NOI18N
         jdcEndDate.setOpaque(false);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(

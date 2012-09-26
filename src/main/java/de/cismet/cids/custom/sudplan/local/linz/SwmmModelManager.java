@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.io.BufferedReader;
@@ -33,6 +34,8 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 
 import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -59,7 +62,7 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
     private static final transient Logger LOG = Logger.getLogger(SwmmModelManager.class);
     public static final String TABLENAME_CSOS = SwmmPlusEtaWizardAction.TABLENAME_CSOS;
     public static final String TABLENAME_LINZ_SWMM_RESULT = "linz_swmm_result";
-    public static final int MAX_STEPS = 5;
+    public static final int MAX_STEPS = 4;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -108,7 +111,7 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
                 }
             }
 
-            final CidsBean swmmModelOutput = SMSUtils.createModelOutput("Modellergebnisse "
+            final CidsBean swmmModelOutput = SMSUtils.createModelOutput("SWMM Results "
                             + swmmOutput.getSwmmRunName(), // NOI18N
                     swmmOutput,
                     SMSUtils.Model.SWMM);
@@ -127,9 +130,14 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
     protected String getReloadId() {
         try {
             final SwmmInput swmmInput = (SwmmInput)getUR();
-            return "local.linz." + swmmInput.getSwmmProject() + ".swmm.scenarios"; // NOI18N
+            final String reloadId = "local.linz." + swmmInput.getSwmmProject()
+                        + ".swmm.scenario." + this.cidsBean.getProperty("id"); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(reloadId);
+            }
+            return reloadId;
         } catch (final Exception e) {
-            LOG.warn("cannot fetch reload id", e);                                 // NOI18N
+            LOG.warn("cannot fetch reload id", e);                             // NOI18N
             return null;
         }
     }
@@ -324,8 +332,23 @@ public class SwmmModelManager extends AbstractAsyncModelManager {
         this.spsTask = modelSPSHelper.createTask(swmmRunInfo.getModelName());
 
         try {
-            spsTask.setParameter("start", isoDf.format(swmmInput.getStartDate()));
-            spsTask.setParameter("end", isoDf.format(swmmInput.getEndDate()));
+            final SimpleDateFormat inputDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+            final SimpleDateFormat outputDateFormat = new SimpleDateFormat("dd.MM.yyyyZ");
+
+            final String startDate = isoDf.format(
+                    outputDateFormat.parse(inputDateFormat.format(swmmInput.getStartDate()) + "+0000"));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("start date: " + swmmInput.getStartDate() + " (" + startDate + ")");
+            }
+            spsTask.setParameter("start", startDate);
+
+            final String endDate = isoDf.format(
+                    outputDateFormat.parse(inputDateFormat.format(swmmInput.getEndDate()) + "+0000"));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("end date: " + swmmInput.getEndDate() + " (" + endDate + ")");
+            }
+
+            spsTask.setParameter("end", endDate);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             this.fireBroken(e.getMessage());

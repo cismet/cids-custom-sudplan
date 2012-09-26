@@ -47,7 +47,6 @@ public class RunRenderer extends AbstractManagerRenderer {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jplManager;
-    private javax.swing.JLabel lblDescription;
     private javax.swing.JLabel lblFinished;
     private javax.swing.JLabel lblFinishedValue;
     private javax.swing.JLabel lblInput;
@@ -55,6 +54,7 @@ public class RunRenderer extends AbstractManagerRenderer {
     private javax.swing.JLabel lblOutput;
     private javax.swing.JLabel lblStarted;
     private javax.swing.JLabel lblStartedValue;
+    private javax.swing.JTextArea taDescription;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
@@ -88,7 +88,7 @@ public class RunRenderer extends AbstractManagerRenderer {
         jLabel1 = new javax.swing.JLabel();
         lblName = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        lblDescription = new javax.swing.JLabel();
+        taDescription = new javax.swing.JTextArea();
         jplManager = new javax.swing.JPanel();
         lblInput = new javax.swing.JLabel();
         lblOutput = new javax.swing.JLabel();
@@ -124,6 +124,7 @@ public class RunRenderer extends AbstractManagerRenderer {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipadx = 215;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 9);
@@ -133,28 +134,34 @@ public class RunRenderer extends AbstractManagerRenderer {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(4, 9, 4, 4);
         add(jLabel2, gridBagConstraints);
+
+        taDescription.setEditable(false);
+        taDescription.setColumns(20);
+        taDescription.setLineWrap(true);
+        taDescription.setRows(3);
+        taDescription.setWrapStyleWord(true);
+        taDescription.setFocusable(false);
+        taDescription.setOpaque(false);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${cidsBean.description}"),
-                lblDescription,
+                taDescription,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
-        binding.setSourceNullValue("");
-        binding.setSourceUnreadableValue("<error>");
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipadx = 215;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 9);
-        add(lblDescription, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(3, 3, 4, 9);
+        add(taDescription, gridBagConstraints);
 
         jplManager.setOpaque(false);
         jplManager.setPreferredSize(new java.awt.Dimension(100, 100));
