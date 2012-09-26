@@ -12,16 +12,13 @@
 package de.cismet.cids.custom.sudplan.local.wupp;
 
 import Sirius.navigator.connection.SessionManager;
-import Sirius.navigator.ui.ComponentRegistry;
 
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
 
-import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.decorator.SortOrder;
-import org.jdesktop.swingx.error.ErrorInfo;
 
 import org.openide.util.WeakListeners;
 
@@ -32,7 +29,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -190,22 +186,10 @@ public class DeltaConfigurationListWidged extends javax.swing.JPanel implements 
                             }
 
                             lstDeltaCfgs.setSelectedValue(selectedConfig, true);
-                        } catch (ExecutionException eex) {
-                            final ErrorInfo errorInfo = new ErrorInfo(
-                                    "Load configurations error",
-                                    "Error while loading configurations",
-                                    null,
-                                    "ERROR",
-                                    eex,
-                                    Level.SEVERE,
-                                    null);
-                            JXErrorPane.showDialog(
-                                ComponentRegistry.getRegistry().getMainWindow(),
-                                errorInfo);
-                        } catch (InterruptedException iex) {
-                            LOG.error("List init interrupted", iex);
-                        } catch (Exception ex) {
-                            LOG.error("List init failt", ex);
+                        } catch (final ExecutionException eex) {
+                            LOG.error("error during fetch of the cids beans", eex); // NOI18N
+                        } catch (final InterruptedException iex) {
+                            LOG.error("List init interrupted", iex);                // NOI18N
                         }
                     }
                 }
