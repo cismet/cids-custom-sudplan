@@ -58,15 +58,6 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
     public static final Variable EVAPORATION = new Variable(
             "urn:ogc:def:property:OGC:Evaporation", // NOI18N
             NbBundle.getMessage(Variable.class, "Variable.EVAPORATION.localisedName")); // NOI18N
-    public static final Variable SOIL_MOISTURE = new Variable(
-            "urn:ogc:def:property:OGC:SoilMoisture", // NOI18N
-            NbBundle.getMessage(Variable.class, "Variable.SOIL_MOISTURE.localisedName")); // NOI18N
-    public static final Variable MEAN_Q = new Variable(
-            "urn:ogc:def:property:OGC:MeanQ", // NOI18N
-            NbBundle.getMessage(Variable.class, "Variable.MEAN_Q.localisedName")); // NOI18N
-    public static final Variable LOCAL_Q = new Variable(
-            "urn:ogc:def:property:OGC:LocalQ", // NOI18N
-            NbBundle.getMessage(Variable.class, "Variable.LOCAL_Q.localisedName")); // NOI18N
     public static final Variable COUT = new Variable(
             "urn:ogc:def:property:OGC:cout", // NOI18N
             NbBundle.getMessage(Variable.class, "Variable.COUT.localisedName")); // NOI18N
@@ -164,8 +155,6 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
     public static Variable[] values() {
         return new Variable[] {
                 EVAPORATION,
-                LOCAL_Q,
-                MEAN_Q,
                 NOX,
                 NO2,
                 O3,
@@ -173,7 +162,6 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
                 PM2_5,
                 PRECIPITATION,
                 SO2,
-                SOIL_MOISTURE,
                 TEMPERATURE,
                 COUT,
                 CPRC,
