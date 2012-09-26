@@ -19,7 +19,7 @@
     <Component class="javax.swing.JLabel" name="lblHead">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cids/custom/sudplan/Bundle.properties" key="DeltaSurfaceConflictPanel.lblHead.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cids/custom/sudplan/local/wupp/Bundle.properties" key="DeltaSurfaceConflictPanel.lblHead.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Constraints>
@@ -31,7 +31,7 @@
     <Component class="javax.swing.JCheckBox" name="cbEdges">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cids/custom/sudplan/Bundle.properties" key="DeltaSurfaceConflictPanel.cbEdges.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cids/custom/sudplan/local/wupp/Bundle.properties" key="DeltaSurfaceConflictPanel.cbEdges.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Constraints>
@@ -43,7 +43,7 @@
     <Component class="javax.swing.JCheckBox" name="cbSurfaces">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cids/custom/sudplan/Bundle.properties" key="DeltaSurfaceConflictPanel.cbSurfaces.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cids/custom/sudplan/local/wupp/Bundle.properties" key="DeltaSurfaceConflictPanel.cbSurfaces.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Constraints>
@@ -55,7 +55,7 @@
     <Component class="javax.swing.JLabel" name="lblInfoMessage">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cids/custom/sudplan/Bundle.properties" key="DeltaSurfaceConflictPanel.lblInfoMessage.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cids/custom/sudplan/local/wupp/Bundle.properties" key="DeltaSurfaceConflictPanel.lblInfoMessage.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Constraints>

@@ -26,7 +26,7 @@ public final class GeocpmConfigurationRenderer extends GeocpmConfigurationEditor
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient RunGeoCPMTitleComponent titleComponent;
+    private final transient GeoCPMCfgTitleComponent titleComponent;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -36,7 +36,7 @@ public final class GeocpmConfigurationRenderer extends GeocpmConfigurationEditor
     public GeocpmConfigurationRenderer() {
         super(false);
 
-        titleComponent = new RunGeoCPMTitleComponent();
+        titleComponent = new GeoCPMCfgTitleComponent();
     }
 
     //~ Methods ----------------------------------------------------------------

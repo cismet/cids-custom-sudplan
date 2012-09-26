@@ -39,21 +39,20 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(SurfaceManipulationVisualPanelHeight.class);
-    private static final String NUMBER_FORMAT = "#,##0.00";
-    private static final double SPINNER_MAX_NUMBER = 1000.0d;
-    private static final double SPINNER_MIN_NUMBER = -1000.0d;
-    private static final double SPINNER_STEPS = 0.50d;
+    private static final String NUMBER_FORMAT = "#,##0.00"; // NOI18N
+    private static final double SPINNER_STEPS = 0.05d;
 
     //~ Instance fields --------------------------------------------------------
 
     private final transient SurfaceManipulationWizardPanelHeight model;
     private final transient ChangeListener chL;
     private final transient ActionListener aL;
-//    private final transient SpinnerModelImpl spinnerModel;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup bgType;
     private javax.swing.Box.Filler filler1;
+    private javax.swing.Box.Filler filler2;
+    private javax.swing.Box.Filler filler3;
     private javax.swing.JLabel lblHeight;
     private javax.swing.JLabel lblUnit;
     private javax.swing.JPanel pnlType;
@@ -77,7 +76,9 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
             throw new IllegalStateException("model instance must not be null");
         }
 
-        this.setName("Change height");
+        this.setName(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationVisualPanelHeight.class,
+                "SurfaceManipulationVisualPanelHeight.SurfaceManipulationVisualPanelHeight(SurfaceManipulationWizardPanelHeight).name"));
 
         initComponents();
         spnHeight.setModel(new SpinnerNumberModel(0, -Double.MAX_VALUE, Double.MAX_VALUE, SPINNER_STEPS));
@@ -87,15 +88,16 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         final DecimalFormat decimalFormat = (DecimalFormat)intFormatter.getFormat();
         decimalFormat.applyPattern(NUMBER_FORMAT);
 
+        // FIXME: mscholl: why french format symbols? why format symbols anyway?
         final DecimalFormatSymbols frSymbols = new DecimalFormatSymbols(Locale.FRENCH); // 2 345 678.5
         frSymbols.setDecimalSeparator('.');
         decimalFormat.setDecimalFormatSymbols(frSymbols);
 
-//        spnHeight.setEditor(new JSpinner.NumberEditor(spnHeight, NUMBER_FORMAT));
-
         chL = new ChangeListenerImpl();
         spnHeight.addChangeListener(WeakListeners.change(chL, spnHeight));
-        spnHeight.setToolTipText("Red color for reducing / Blue color for increasing the Surface");
+        spnHeight.setToolTipText(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationVisualPanelHeight.class,
+                "SurfaceManipulationVisualPanelHeight.SurfaceManipulationVisualPanelHeight(SurfaceManipulationWizardPanelHeight).spnHeight.toolTipText"));
 
         aL = new ActionListenerImpl();
         rbAdjacentSurface.addActionListener(WeakListeners.create(ActionListener.class, aL, rbAdjacentSurface));
@@ -118,7 +120,6 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         }
 
         Boolean seaType = model.isSeaType();
-        // model.setHeight(spinnerModel.getDoubleValue());
         if (seaType == null) {
             seaType = false;
             model.setSeaType(seaType.booleanValue());
@@ -172,8 +173,15 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(32767, 32767));
+        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 32767));
         lblUnit = new javax.swing.JLabel();
+        filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 32767));
 
+        setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
         lblHeight.setText(org.openide.util.NbBundle.getMessage(
@@ -200,6 +208,7 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
                 org.openide.util.NbBundle.getMessage(
                     SurfaceManipulationVisualPanelHeight.class,
                     "SurfaceManipulationVisualPanelHeight.pnlType.border.title"))); // NOI18N
+        pnlType.setOpaque(false);
         pnlType.setLayout(new java.awt.GridBagLayout());
 
         bgType.add(rbSeaLevel);
@@ -228,6 +237,11 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         pnlType.add(filler1, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.weighty = 1.0;
+        pnlType.add(filler2, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -235,7 +249,6 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(pnlType, gridBagConstraints);
 
@@ -248,28 +261,12 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblUnit, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.weighty = 1.0;
+        add(filler3, gridBagConstraints);
     }                                                                  // </editor-fold>//GEN-END:initComponents
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    final JDialog dialog = new JDialog();
-                    dialog.setContentPane(
-                        new SurfaceManipulationVisualPanelHeight(new SurfaceManipulationWizardPanelHeight()));
-                    dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-                    dialog.setLocationRelativeTo(null);
-                    dialog.pack();
-                    dialog.setVisible(true);
-                }
-            });
-    }
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -287,9 +284,9 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
             final Double value = (Double)((JSpinner.NumberEditor)spnHeight.getEditor()).getModel().getNumber();
 
             final JFormattedTextField ftf = getTextField(spnHeight);
-            if (value.doubleValue() < 0.0d) {
+            if ((value.doubleValue() < 0.0d) && !rbSeaLevel.isSelected()) {
                 ftf.setForeground(Color.red);
-            } else if (value.doubleValue() > 0.0d) {
+            } else if ((value.doubleValue() > 0.0d) && !rbSeaLevel.isSelected()) {
                 ftf.setForeground(Color.blue);
             } else {
                 ftf.setForeground(Color.black);
@@ -310,6 +307,7 @@ public class SurfaceManipulationVisualPanelHeight extends javax.swing.JPanel {
         @Override
         public void actionPerformed(final ActionEvent ae) {
             model.setSeaType(rbSeaLevel.isSelected());
+            chL.stateChanged(null);
         }
     }
 }

@@ -193,7 +193,7 @@ public final class HydrologyCache {
             return Variable.CTMP;
         } else if ("gwat".equals(var)) {
             return Variable.GWAT;
-        } else if ("soim".equals(var)) {
+        } else if ("smdf".equals(var)) {
             return Variable.SOIL_MOISTURE;
         } else {
             throw new IllegalArgumentException("unknown var: " + var); // NOI18N
@@ -223,7 +223,7 @@ public final class HydrologyCache {
         } else if (Variable.GWAT.equals(variable)) {
             return "gwat";
         } else if (Variable.SOIL_MOISTURE.equals(variable)) {
-            return "soim";
+            return "smdf";
         } else {
             throw new IllegalArgumentException("unsupported variable: " + variable); // NOI18N
         }

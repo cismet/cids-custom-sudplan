@@ -38,7 +38,8 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
 
     //~ Instance fields --------------------------------------------------------
 
-    private final transient RunGeoCPMTitleComponent titleComponent;
+    private final transient RaineventTitleComponent titleComponent;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkForecast;
     private javax.swing.JLabel lblDescription;
@@ -55,7 +56,7 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
     public RaineventRenderer() {
         initComponents();
 
-        titleComponent = new RunGeoCPMTitleComponent();
+        titleComponent = new RaineventTitleComponent();
     }
 
     //~ Methods ----------------------------------------------------------------
