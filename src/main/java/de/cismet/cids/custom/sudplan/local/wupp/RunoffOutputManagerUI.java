@@ -20,8 +20,6 @@ import edu.umd.cs.piccolo.event.PInputEvent;
 
 import org.apache.log4j.Logger;
 
-import org.codehaus.jackson.map.ObjectMapper;
-
 import org.openide.util.NbBundle;
 
 import java.awt.EventQueue;
@@ -31,10 +29,15 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import javax.swing.JPanel;
 
 import de.cismet.cids.custom.sudplan.ManagerType;
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.geocpmrest.io.SimulationResult;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -315,13 +318,31 @@ public class RunoffOutputManagerUI extends JPanel {
                     public void mouseClicked(final PInputEvent evt) {
                         try {
                             if (evt.getClickCount() > 1) {
+                                String name;
+                                final Callable<String> nameGetter = new Callable<String>() {
+
+                                        @Override
+                                        public String call() throws Exception {
+                                            return (String)SMSUtils.runFromIO(model.getCidsBean()).getProperty("name"); // NOI18N
+                                        }
+                                    };
+
+                                final Future<String> nameFuture = SudplanConcurrency.getSudplanGeneralPurposePool()
+                                            .submit(nameGetter);
+                                try {
+                                    name = nameFuture.get(300, TimeUnit.MILLISECONDS);
+                                } catch (final Exception ex) {
+                                    LOG.warn("cannot get name info in time", ex); // NOI18N
+                                    name = sr.getTaskId();
+                                }
+
                                 final SimpleWMS layer = new SimpleWMS(
                                         new SimpleWmsGetMapUrl(prepareGetMapRequest(sr).toExternalForm()));
                                 layer.setName(
                                     NbBundle.getMessage(
                                         RunoffOutputManagerUI.class,
                                         "RunoffOutputManagerUI.initMap(SimulationResult).resultLayer.name", // NOI18N
-                                        sr.getGeocpmInfo()));
+                                        name));
                                 CismapBroker.getInstance().getMappingComponent().getMappingModel().addLayer(layer);
                                 SMSUtils.showMappingComponent();
                                 CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(bbox);
