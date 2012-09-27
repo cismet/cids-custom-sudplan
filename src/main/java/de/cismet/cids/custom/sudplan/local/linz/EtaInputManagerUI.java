@@ -14,9 +14,13 @@ package de.cismet.cids.custom.sudplan.local.linz;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
+
 import java.io.IOException;
 
 import javax.swing.table.DefaultTableModel;
+
+import de.cismet.cids.custom.sudplan.local.linz.wizard.EtaWizardPanelEtaConfigurationUI;
 
 /**
  * DOCUMENT ME!
@@ -58,22 +62,53 @@ public class EtaInputManagerUI extends javax.swing.JPanel {
     /**
      * DOCUMENT ME!
      */
-    protected void init() {
+    protected final void init() {
         try {
             final EtaInput etaInput = inputManager.getUR();
-            final DefaultTableModel ctoTableModel = (DefaultTableModel)this.etaTable.getModel();
+            final DefaultTableModel etaTableModel = new DefaultTableModel(
+                    new Object[][] {},
+                    new String[] {
+                        NbBundle.getMessage(
+                            EtaWizardPanelEtaConfigurationUI.class,
+                            "EtaConfigurationTableModel.column.cso"),
+                        NbBundle.getMessage(
+                            EtaWizardPanelEtaConfigurationUI.class,
+                            "EtaConfigurationTableModel.column.active"),
+                        NbBundle.getMessage(
+                            EtaWizardPanelEtaConfigurationUI.class,
+                            "EtaConfigurationTableModel.column.eta_sed"),
+                    }) {
+
+                    Class[] types = new Class[] {
+                            java.lang.String.class,
+                            java.lang.Boolean.class,
+                            java.lang.Float.class
+                        };
+                    boolean[] canEdit = new boolean[] { false, false, false };
+
+                    @Override
+                    public Class getColumnClass(final int columnIndex) {
+                        return types[columnIndex];
+                    }
+
+                    @Override
+                    public boolean isCellEditable(final int rowIndex, final int columnIndex) {
+                        return canEdit[columnIndex];
+                    }
+                };
             if (LOG.isDebugEnabled()) {
                 LOG.debug("loading configuration of #" + etaInput.getEtaConfigurations().size() + " CSOs");
             }
             for (final EtaConfiguration etaConfiguration : etaInput.getEtaConfigurations()) {
-                ctoTableModel.addRow(
+                etaTableModel.addRow(
                     new Object[] {
                         etaConfiguration.getName(),
                         etaConfiguration.isEnabled(),
                         etaConfiguration.getSedimentationEfficency()
                     });
             }
-            ctoTableModel.fireTableDataChanged();
+
+            this.etaTable.setModel(etaTableModel);
         } catch (IOException ex) {
             LOG.error("cannot initialise eta input manager ui", ex); // NOI18N
         }
@@ -99,7 +134,7 @@ public class EtaInputManagerUI extends javax.swing.JPanel {
                 new String[] { "CSO", "aktiv", "Wirkungsgrad" }) {
 
                 Class[] types = new Class[] { java.lang.String.class, java.lang.Boolean.class, java.lang.Float.class };
-                boolean[] canEdit = new boolean[] { false, true, true };
+                boolean[] canEdit = new boolean[] { false, false, false };
 
                 @Override
                 public Class getColumnClass(final int columnIndex) {

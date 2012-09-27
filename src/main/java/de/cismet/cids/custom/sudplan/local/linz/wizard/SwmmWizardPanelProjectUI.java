@@ -59,13 +59,13 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
     private com.toedter.calendar.JDateChooser jdcEndDate;
     private com.toedter.calendar.JDateChooser jdcStartDate;
     private javax.swing.JLabel lblDescription;
-    private javax.swing.JLabel lblDescriptionText;
     private javax.swing.JLabel lblEndDate;
     private javax.swing.JLabel lblEta;
     private javax.swing.JLabel lblInpFile;
     private javax.swing.JLabel lblProject;
     private javax.swing.JLabel lblStartDate;
     private javax.swing.JPanel projectPanel;
+    private javax.swing.JTextArea taDescriptionText;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
@@ -177,7 +177,7 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
         lblProject = new javax.swing.JLabel();
         cobProjects = new javax.swing.JComboBox();
         lblDescription = new javax.swing.JLabel();
-        lblDescriptionText = new javax.swing.JLabel();
+        taDescriptionText = new javax.swing.JTextArea();
         configurationPanel = new javax.swing.JPanel();
         lblStartDate = new javax.swing.JLabel();
         lblEndDate = new javax.swing.JLabel();
@@ -207,12 +207,21 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                 SwmmWizardPanelProjectUI.class,
                 "SwmmWizardPanelProjectUI.lblDescription.text")); // NOI18N
 
+        taDescriptionText.setEditable(false);
+        taDescriptionText.setColumns(20);
+        taDescriptionText.setLineWrap(true);
+        taDescriptionText.setRows(2);
+        taDescriptionText.setWrapStyleWord(true);
+        taDescriptionText.setOpaque(false);
+
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${model.swmmProject.description}"),
-                lblDescriptionText,
+                taDescriptionText,
                 org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding.setSourceNullValue("");
+        binding.setSourceUnreadableValue("");
         bindingGroup.addBinding(binding);
 
         final javax.swing.GroupLayout projectPanelLayout = new javax.swing.GroupLayout(projectPanel);
@@ -222,15 +231,13 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                 projectPanelLayout.createSequentialGroup().addContainerGap().addGroup(
                     projectPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(
                         lblDescription).addComponent(lblProject)).addGap(34, 34, 34).addGroup(
-                    projectPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(
-                        lblDescriptionText,
-                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                        320,
-                        Short.MAX_VALUE).addComponent(
-                        cobProjects,
-                        javax.swing.GroupLayout.PREFERRED_SIZE,
-                        185,
-                        javax.swing.GroupLayout.PREFERRED_SIZE)).addContainerGap()));
+                    projectPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                        projectPanelLayout.createSequentialGroup().addComponent(
+                            cobProjects,
+                            javax.swing.GroupLayout.PREFERRED_SIZE,
+                            185,
+                            javax.swing.GroupLayout.PREFERRED_SIZE).addGap(0, 0, Short.MAX_VALUE)).addComponent(
+                        taDescriptionText)).addContainerGap()));
         projectPanelLayout.setVerticalGroup(
             projectPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
                 projectPanelLayout.createSequentialGroup().addContainerGap().addGroup(
@@ -243,9 +250,9 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                     javax.swing.LayoutStyle.ComponentPlacement.UNRELATED).addGroup(
                     projectPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE).addComponent(
                         lblDescription).addComponent(
-                        lblDescriptionText,
+                        taDescriptionText,
                         javax.swing.GroupLayout.PREFERRED_SIZE,
-                        14,
+                        javax.swing.GroupLayout.DEFAULT_SIZE,
                         javax.swing.GroupLayout.PREFERRED_SIZE)).addContainerGap(
                     javax.swing.GroupLayout.DEFAULT_SIZE,
                     Short.MAX_VALUE)));
@@ -292,7 +299,10 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
             chbEta,
             org.openide.util.NbBundle.getMessage(
                 SwmmWizardPanelProjectUI.class,
-                "SwmmWizardPanelProjectUI.chbEta.text")); // NOI18N
+                "SwmmWizardPanelProjectUI.chbEta.text"));        // NOI18N
+        chbEta.setToolTipText(org.openide.util.NbBundle.getMessage(
+                SwmmWizardPanelProjectUI.class,
+                "SwmmWizardPanelProjectUI.chbEta.toolTipText")); // NOI18N
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
@@ -382,16 +392,14 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                javax.swing.GroupLayout.Alignment.TRAILING,
                 layout.createSequentialGroup().addContainerGap().addGroup(
-                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING).addComponent(
+                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(
                         projectPanel,
-                        javax.swing.GroupLayout.Alignment.LEADING,
+                        javax.swing.GroupLayout.Alignment.TRAILING,
                         javax.swing.GroupLayout.DEFAULT_SIZE,
                         javax.swing.GroupLayout.DEFAULT_SIZE,
                         Short.MAX_VALUE).addComponent(
                         configurationPanel,
-                        javax.swing.GroupLayout.Alignment.LEADING,
                         javax.swing.GroupLayout.DEFAULT_SIZE,
                         javax.swing.GroupLayout.DEFAULT_SIZE,
                         Short.MAX_VALUE)).addContainerGap()));
@@ -401,11 +409,14 @@ public final class SwmmWizardPanelProjectUI extends JPanel {
                     projectPanel,
                     javax.swing.GroupLayout.PREFERRED_SIZE,
                     javax.swing.GroupLayout.DEFAULT_SIZE,
-                    javax.swing.GroupLayout.PREFERRED_SIZE).addGap(18, 18, 18).addComponent(
+                    javax.swing.GroupLayout.PREFERRED_SIZE).addPreferredGap(
+                    javax.swing.LayoutStyle.ComponentPlacement.UNRELATED).addComponent(
                     configurationPanel,
                     javax.swing.GroupLayout.PREFERRED_SIZE,
                     javax.swing.GroupLayout.DEFAULT_SIZE,
-                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(17, Short.MAX_VALUE)));
+                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    Short.MAX_VALUE)));
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents

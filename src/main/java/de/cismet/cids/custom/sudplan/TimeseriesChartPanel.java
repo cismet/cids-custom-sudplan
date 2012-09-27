@@ -552,7 +552,7 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
 
                     String humanReadableObsProp = "";
                     final Variable var = config.getObservedProperty();
-                    if ((name != null) && (var == null)) {
+                    if ((name != null) && ((var == null) || (var == Variable.UNKNOWN))) {
                         final String[] splittedName = name.split(":");
                         humanReadableObsProp = splittedName[splittedName.length - 1];
                     } else if (var != null) {

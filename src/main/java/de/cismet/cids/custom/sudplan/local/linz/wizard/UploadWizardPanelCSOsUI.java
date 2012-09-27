@@ -142,8 +142,10 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
     private CsoConfigurationTableModel copyCSOs() throws Exception {
         // before we can copy the CSOs we have to perstis the new swmm bean ot obain an ID
         CidsBean newSwmmProject = model.getNewSwmmProjectBean();
+        final String projectName = (newSwmmProject.getProperty("title") != null)
+            ? newSwmmProject.getProperty("title").toString() : "";
         if (LOG.isDebugEnabled()) {
-            LOG.debug("saving new SWMM Project '" + newSwmmProject.getProperty("title") + "'");
+            LOG.debug("saving new SWMM Project '" + projectName + "'");
         }
         newSwmmProject = newSwmmProject.persist();
         model.setNewSwmmProjectBean(newSwmmProject);
@@ -156,6 +158,9 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
         final ServerActionParameter newProjectparameter = new ServerActionParameter(
                 CopyCSOsAction.PARAMETER_NEW_PROJECT,
                 newSwmmProject.getProperty("id").toString());
+        final ServerActionParameter newProjectNameParameter = new ServerActionParameter(
+                CopyCSOsAction.PARAMETER_NEW_PROJECT_NAME,
+                projectName);
         if (LOG.isDebugEnabled()) {
             LOG.debug("copying CSOs of SWMM Project #" + oldProjectparameter.getValue()
                         + " to new SWMM Project #" + newProjectparameter.getValue());
@@ -166,7 +171,8 @@ public final class UploadWizardPanelCSOsUI extends JPanel {
                         domain,
                         null,
                         oldProjectparameter,
-                        newProjectparameter);
+                        newProjectparameter,
+                        newProjectNameParameter);
 
         if ((object != null) && List.class.isAssignableFrom(object.getClass())) {
             final List<MetaObject> copiedCSOs = (List<MetaObject>)object;

@@ -80,6 +80,8 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
 
         this.initStations();
         this.tblStations.setModel(this.stationsTableModel);
+        this.tblStations.getColumnModel().getColumn(1).setPreferredWidth(40);
+        this.tblStations.getColumnModel().getColumn(1).setMaxWidth(60);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -119,9 +121,9 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
         sb.append(" WHERE ")
                 .append(mc.getTableName())
                 .append('.')
-                .append(SwmmInput.FK_MONITOR_STATION_TYPE)
+                .append(SwmmInput.FK_MONITOR_STATION_KEY)
                 .append(" LIKE '")
-                .append(MonitorstationContext.LI_RF.getKey())
+                .append(SwmmPlusEtaWizardAction.LINZ_RAINFALL_STATION_KEY)
                 .append('\'');
 
         final ClassAttribute ca = mc.getClassAttribute("sortingColumn");                        // NOI18N
@@ -257,7 +259,14 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
         private final boolean[] selectedStations;
         // private final String[] columnNames = { "Name", "Beschreibung", "Auswahl" };
         // private final Class[] columnClasses = { String.class, String.class, Boolean.class };
-        private final String[] columnNames = { "Name", "Auswahl" };
+        private final String[] columnNames = {
+                org.openide.util.NbBundle.getMessage(
+                    SwmmWizardPanelStationsUI.class,
+                    "SwmmWizardPanelStationsUI.table.name"),
+                org.openide.util.NbBundle.getMessage(
+                    SwmmWizardPanelStationsUI.class,
+                    "SwmmWizardPanelStationsUI.table.selection")
+            };
         private final Class[] columnClasses = { String.class, Boolean.class };
 
         //~ Constructors -------------------------------------------------------
