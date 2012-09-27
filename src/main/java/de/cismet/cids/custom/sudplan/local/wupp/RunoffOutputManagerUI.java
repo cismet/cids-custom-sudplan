@@ -67,9 +67,6 @@ public class RunoffOutputManagerUI extends JPanel {
 
     private static final transient Logger LOG = Logger.getLogger(RunoffOutputManagerUI.class);
 
-    public static final String ORTHO_URL =
-        "http://geoportal.wuppertal.de:8083/deegree/wms?&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:luftbild2010&STYLES=default"; // NOI18N
-
     //~ Instance fields --------------------------------------------------------
 
     private final transient RunoffOutputManager model;
@@ -241,7 +238,10 @@ public class RunoffOutputManagerUI extends JPanel {
             mappingModel.setSrs(new Crs(SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, true, true));
             mappingModel.addHome(bbox);
 
-            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(ORTHO_URL));
+            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(
+                        GeoCPMOptions.getInstance().getProperty("template.getmap.orthophoto").replace(
+                            "<cismap:srs>",
+                            "EPSG:31466")));
             ortho.setName("Wuppertal Ortophoto"); // NOI18N
             mappingModel.addLayer(ortho);
 

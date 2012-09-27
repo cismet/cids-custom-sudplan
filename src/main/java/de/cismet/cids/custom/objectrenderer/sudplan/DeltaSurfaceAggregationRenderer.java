@@ -17,16 +17,16 @@ import org.apache.log4j.Logger;
 
 import org.openide.util.WeakListeners;
 
-import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import java.math.BigDecimal;
 
-import java.util.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
@@ -37,6 +37,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.local.wupp.GeoCPMOptions;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -49,8 +50,6 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
-import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
 import de.cismet.cismap.navigatorplugin.CidsFeature;
 
@@ -69,8 +68,6 @@ public class DeltaSurfaceAggregationRenderer extends javax.swing.JPanel implemen
 
     private static final Logger LOG = Logger.getLogger(DeltaSurfaceAggregationRenderer.class);
 
-    public static final String ORTHO_URL =
-        "http://geoportal.wuppertal.de:8083/deegree/wms?VERSION=1.1.1&SERVICE=WMS&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:luftbild2010&STYLES=default";
     // Spaltenueberschriften
     private static final String[] AGR_COMLUMN_NAMES = new String[] {
             "Name",
@@ -268,15 +265,10 @@ public class DeltaSurfaceAggregationRenderer extends javax.swing.JPanel implemen
     private void initMap() {
         try {
             final XBoundingBox box = boundingBoxFromPointList(cidsBeans);
-//            final Geometry geom31466 = CrsTransformer.transformToGivenCrs(box.getEnvelope(), SMSUtils.EPSG_WUPP)
-//                        .buffer(60);
-            // geom31466 = geom31466.buffer(50);
-//            final XBoundingBox bbox = new XBoundingBox(geom31466, SMSUtils.EPSG_WUPP, true);
 
             final ActiveLayerModel mappingModel = new ActiveLayerModel();
             mappingModel.setSrs(new Crs(SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, true, true));
 
-//            mappingModel.addHome(bbox);
             mappingModel.addHome(new XBoundingBox(
                     box.getX1(),
                     box.getY1(),
@@ -285,7 +277,8 @@ public class DeltaSurfaceAggregationRenderer extends javax.swing.JPanel implemen
                     SMSUtils.EPSG_WUPP,
                     true));
 
-            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(ORTHO_URL));
+            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(
+                        GeoCPMOptions.getInstance().getProperty("template.getmap.orthophoto")));
 
             ortho.setName("Wuppertal Ortophoto"); // NOI18N
 
