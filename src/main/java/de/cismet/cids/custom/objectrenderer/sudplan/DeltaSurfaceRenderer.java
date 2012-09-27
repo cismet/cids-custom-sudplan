@@ -23,6 +23,7 @@ import java.awt.EventQueue;
 import de.cismet.cids.custom.objecteditors.sudplan.DeltaConfigurationEditor;
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.local.wupp.GeoCPMOptions;
 import de.cismet.cids.custom.sudplan.local.wupp.SurfaceManipulationWizardAction;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -51,19 +52,6 @@ public class DeltaSurfaceRenderer extends AbstractCidsBeanRenderer implements Re
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Logger LOG = Logger.getLogger(DeltaSurfaceRenderer.class);
-
-    public static final String TIN_URL =
-        "http://sudplanwp6.cismet.de/geoserver/wms?SERVICE=WMS&&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=sudplan:GeoCPM%20TIN&STYLES=geocpm_triangle_style";
-
-    public static final String ORTHO_URL =
-        "http://geoportal.wuppertal.de:8083/deegree/wms?VERSION=1.1.1&SERVICE=WMS&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:luftbild2010&STYLES=default";
-
-    //~ Instance fields --------------------------------------------------------
-
-    private final SimpleWMS tin = new SimpleWMS(new SimpleWmsGetMapUrl(TIN_URL));
-
-//    public static final String ORTHO_URL =
-//        "http://geoportal.wuppertal.de:8083/deegree/wms?&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:luftbild2010&STYLES=default"; // NOI18N
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private de.cismet.cids.custom.objecteditors.sudplan.DeltaConfigurationEditor deltaConfigurationEditor;
@@ -98,7 +86,6 @@ public class DeltaSurfaceRenderer extends AbstractCidsBeanRenderer implements Re
      */
     public DeltaSurfaceRenderer() {
         initComponents();
-        tin.setName("GeoCPM TIN");
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -448,20 +435,12 @@ public class DeltaSurfaceRenderer extends AbstractCidsBeanRenderer implements Re
 
             mappingModel.addHome(bbox);
 
-            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(ORTHO_URL));
-
-//            final CapabilityWidget.DragTree trvCap = new CapabilityWidget.DragTree();
-//            final WMSCapabilitiesFactory capFact = new WMSCapabilitiesFactory();
-
-//            final WMSServiceLayer l = new WMSServiceLayer(new Element("WMSServiceLayer", ""), );
-//            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(RunoffOutputManagerUI.ORTHO_URL));
+            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(
+                        GeoCPMOptions.getInstance().getProperty("template.getmap.orthophoto").replace(
+                            "<cismap:srs>",
+                            "EPSG:31466")));
 
             ortho.setName("Wuppertal Ortophoto"); // NOI18N
-
-//            final SimpleWMS beLayer = new SimpleWMS(new SimpleWmsGetMapUrl(BE_URL));
-//            beLayer.setName(NbBundle.getMessage(
-//                    GeocpmConfigurationEditor.class,
-//                    "GeocpmConfigurationEditor.initMap().beLayer.name")); // NOI18N
 
             final RetrievalListener rl = new RetrievalListener() {
 
@@ -526,8 +505,6 @@ public class DeltaSurfaceRenderer extends AbstractCidsBeanRenderer implements Re
 
             map.unlock();
             map.setInteractionMode(MappingComponent.ZOOM);
-//            final Collection<CidsFeature> cidsFeatures = new ArrayList<CidsFeature>();
-//            cidsFeatures.add(new CidsFeature(cidsBean.getMetaObject()));
             final CidsFeature feature = new CidsFeature(cidsBean.getMetaObject());
             map.getFeatureCollection().addFeature(feature);
             map.addCustomInputListener("DoubleClick", new PBasicInputEventHandler() {
@@ -535,14 +512,9 @@ public class DeltaSurfaceRenderer extends AbstractCidsBeanRenderer implements Re
                     @Override
                     public void mouseClicked(final PInputEvent pie) {
                         if (pie.getClickCount() > 1) {
-//                            final SimpleWMS tin = new SimpleWMS(new SimpleWmsGetMapUrl(TIN_URL));
-//                            tin.setName("GeoCPM TIN");
-                            CismapBroker.getInstance().getMappingComponent().getMappingModel().removeLayer(tin);
-                            CismapBroker.getInstance().getMappingComponent().getMappingModel().addLayer(tin);
                             SMSUtils.showMappingComponent();
                             CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(bbox);
                             CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(feature);
-//                            CismapBroker.getInstance().getMappingComponent().addToHistory(cidsBean.getMetaObject());
                         }
                     }
                 });

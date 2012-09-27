@@ -20,8 +20,6 @@ import edu.umd.cs.piccolo.event.PInputEvent;
 
 import org.apache.log4j.Logger;
 
-import org.codehaus.jackson.map.ObjectMapper;
-
 import org.openide.util.NbBundle;
 
 import java.awt.EventQueue;
@@ -31,10 +29,15 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import javax.swing.JPanel;
 
 import de.cismet.cids.custom.sudplan.ManagerType;
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 import de.cismet.cids.custom.sudplan.geocpmrest.io.SimulationResult;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -63,9 +66,6 @@ public class RunoffOutputManagerUI extends JPanel {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(RunoffOutputManagerUI.class);
-
-    public static final String ORTHO_URL =
-        "http://geoportal.wuppertal.de:8083/deegree/wms?&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:luftbild2010&STYLES=default"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -238,7 +238,10 @@ public class RunoffOutputManagerUI extends JPanel {
             mappingModel.setSrs(new Crs(SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, true, true));
             mappingModel.addHome(bbox);
 
-            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(ORTHO_URL));
+            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(
+                        GeoCPMOptions.getInstance().getProperty("template.getmap.orthophoto").replace(
+                            "<cismap:srs>",
+                            "EPSG:31466")));
             ortho.setName("Wuppertal Ortophoto"); // NOI18N
             mappingModel.addLayer(ortho);
 
@@ -315,13 +318,31 @@ public class RunoffOutputManagerUI extends JPanel {
                     public void mouseClicked(final PInputEvent evt) {
                         try {
                             if (evt.getClickCount() > 1) {
+                                String name;
+                                final Callable<String> nameGetter = new Callable<String>() {
+
+                                        @Override
+                                        public String call() throws Exception {
+                                            return (String)SMSUtils.runFromIO(model.getCidsBean()).getProperty("name"); // NOI18N
+                                        }
+                                    };
+
+                                final Future<String> nameFuture = SudplanConcurrency.getSudplanGeneralPurposePool()
+                                            .submit(nameGetter);
+                                try {
+                                    name = nameFuture.get(300, TimeUnit.MILLISECONDS);
+                                } catch (final Exception ex) {
+                                    LOG.warn("cannot get name info in time", ex); // NOI18N
+                                    name = sr.getTaskId();
+                                }
+
                                 final SimpleWMS layer = new SimpleWMS(
                                         new SimpleWmsGetMapUrl(prepareGetMapRequest(sr).toExternalForm()));
                                 layer.setName(
                                     NbBundle.getMessage(
                                         RunoffOutputManagerUI.class,
                                         "RunoffOutputManagerUI.initMap(SimulationResult).resultLayer.name", // NOI18N
-                                        sr.getGeocpmInfo()));
+                                        name));
                                 CismapBroker.getInstance().getMappingComponent().getMappingModel().addLayer(layer);
                                 SMSUtils.showMappingComponent();
                                 CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(bbox);

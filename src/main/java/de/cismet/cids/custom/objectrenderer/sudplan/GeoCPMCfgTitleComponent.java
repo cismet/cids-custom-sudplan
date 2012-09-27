@@ -21,6 +21,7 @@ import java.net.URI;
 
 import de.cismet.cids.custom.objectactions.sudplan.ActionProviderFactory;
 import de.cismet.cids.custom.sudplan.cismap3d.Layer3D;
+import de.cismet.cids.custom.sudplan.local.wupp.GeoCPMOptions;
 import de.cismet.cids.custom.sudplan.local.wupp.RunGeoCPMWizardAction;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -159,10 +160,9 @@ public class GeoCPMCfgTitleComponent extends javax.swing.JPanel {
 
         @Override
         public void actionPerformed(final ActionEvent e) {
-            final String caps =
-                "http://sudplanwp6.cismet.de/geoserver/wms?SERVICE=WMS&EXCEPTIONS=application/vnd.ogc.se_xml&VERSION=1.1.1&REQUEST=GetCapabilities";
-            final String tinLayer = "sudplan:GeoCPM_TIN";
-            final String beLayer = "sudplan:GeoCPM_be";
+            final String caps = GeoCPMOptions.getInstance().getProperty("geoserver.capabilities");      // NOI18N
+            final String tinLayer = GeoCPMOptions.getInstance().getProperty("geoserver.tinlayer.name"); // NOI18N
+            final String beLayer = GeoCPMOptions.getInstance().getProperty("geoserver.belayer.name");   // NOI18N
 
             final Layer3D layer3D = Lookup.getDefault().lookup(Layer3D.class);
             if (layer3D != null) {
