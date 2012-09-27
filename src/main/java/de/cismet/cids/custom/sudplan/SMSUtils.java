@@ -883,4 +883,48 @@ public final class SMSUtils {
 
         return manager.getUR();
     }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   ioBean  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IOException               DOCUMENT ME!
+     * @throws  IllegalArgumentException  DOCUMENT ME!
+     */
+    public static CidsBean runFromIO(final CidsBean ioBean) throws IOException {
+        if (ioBean == null) {
+            return null;
+        }
+
+        final User user = SessionManager.getSession().getUser();
+        final MetaClass mc = ClassCacheMultiple.getMetaClass(user.getDomain(), "RUN"); // NOI18N
+
+        if (mc == null) {
+            throw new IllegalArgumentException("system without run entity: " + user.getDomain()); // NOI18N
+        }
+
+        final boolean isInput = ioBean.getMetaObject().getMetaClass().getTableName().equals(TABLENAME_MODELINPUT);
+        final String query = "SELECT " + mc.getID() + "," + mc.getPrimaryKey()                               // NOI18N
+                    + " FROM "                                                                               // NOI18N
+                    + mc.getTableName()
+                    + " WHERE model" + (isInput ? "in" : "out") + "put = " + ioBean.getMetaObject().getID(); // NOI18N
+        try {
+            final MetaObject[] mos = SessionManager.getProxy().getMetaObjectByQuery(user, query);
+
+            if (mos.length == 1) {
+                return mos[0].getBean();
+            } else {
+                throw new IllegalStateException(
+                    "data inconsistency: unexpected number of accociated runs: " // NOI18N
+                            + mos.length);
+            }
+        } catch (final ConnectionException ex) {
+            final String message = "cannot connect to server";                   // NOI18N
+            LOG.error(message, ex);
+            throw new IOException(message, ex);
+        }
+    }
 }
