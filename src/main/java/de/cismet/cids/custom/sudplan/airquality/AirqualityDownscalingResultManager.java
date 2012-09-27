@@ -142,7 +142,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 + " {1} as geometry, value, unit, offering,"
                 + " (SELECT max(value) FROM downscaled_airquality"
                 // + "    WHERE modeloutput_id = {1} "
-                + "    WHERE variable ILIKE ''{2}'' " // NOI18N
+                + "    WHERE variable ILIKE ''{3}'' " // NOI18N
 
 
 //                + "      AND resolution ILIKE ''{3}''"
@@ -150,7 +150,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 + ") AS maxValue,"
                 + " (SELECT min(value) FROM downscaled_airquality"
                 // + "    WHERE modeloutput_id = {1} "
-                + "    WHERE variable ILIKE ''{2}'' " // NOI18N
+                + "    WHERE variable ILIKE ''{3}'' " // NOI18N
 
 
 //                + "      AND resolution ILIKE ''{3}''"
