@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.objectrenderer.sudplan;
+package de.cismet.cids.custom.sudplan.local.wupp;
 
 import org.apache.log4j.Logger;
 
