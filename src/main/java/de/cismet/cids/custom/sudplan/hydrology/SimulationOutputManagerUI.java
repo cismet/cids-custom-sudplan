@@ -10,17 +10,19 @@ package de.cismet.cids.custom.sudplan.hydrology;
 import org.apache.log4j.Logger;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import javax.swing.JLabel;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingWorker;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
-import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -66,59 +68,54 @@ public class SimulationOutputManagerUI extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     private void init() {
-        final Runnable r = new Runnable() {
+        final SwingWorker<Collection<TimeseriesRetrieverConfig>, Void> worker =
+            new SwingWorker<Collection<TimeseriesRetrieverConfig>, Void>() {
 
                 @Override
-                public void run() {
+                protected Collection<TimeseriesRetrieverConfig> doInBackground() throws Exception {
+                    final SimulationOutput output = model.getUR();
+
+                    final List<TimeseriesRetrieverConfig> cfgs = new ArrayList<TimeseriesRetrieverConfig>(6);
+                    for (final Integer tsId : output.getResultTsIds()) {
+                        final CidsBean tsBean = SMSUtils.fetchCidsBean(tsId, SMSUtils.TABLENAME_TIMESERIES);
+                        final String url = (String)tsBean.getProperty("uri"); // NOI18N
+                        final TimeseriesRetrieverConfig cfg = TimeseriesRetrieverConfig.fromUrl(url);
+
+                        cfgs.add(cfg);
+                    }
+
+                    return cfgs;
+                }
+
+                @Override
+                protected void done() {
                     try {
-                        final SimulationOutput output = model.getUR();
-
-                        final HashMap<TimeseriesRetrieverConfig, TimeseriesConverter> cfgs =
-                            new HashMap<TimeseriesRetrieverConfig, TimeseriesConverter>();
-                        for (final Integer tsId : output.getResultTsIds()) {
-                            final CidsBean tsBean = SMSUtils.fetchCidsBean(tsId, SMSUtils.TABLENAME_TIMESERIES);
-                            final String url = (String)tsBean.getProperty("uri"); // NOI18N
-                            final TimeseriesRetrieverConfig cfg = TimeseriesRetrieverConfig.fromUrl(url);
-
-                            cfgs.put(cfg, null);
+                        final Collection<TimeseriesRetrieverConfig> cfgs = get();
+                        final JTabbedPane tbpResults = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
+                        for (final TimeseriesRetrieverConfig cfg : cfgs) {
+                            final TimeseriesChartPanel tcp = new TimeseriesChartPanel(cfg, false);
+                            tbpResults.addTab(cfg.getObservedProperty().getLocalisedName(), null, tcp);
                         }
 
-                        EventQueue.invokeLater(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    final TimeseriesChartPanel tcp = new TimeseriesChartPanel(cfgs, false, null, false);
-                                    remove(lblLoading);
-                                    lblLoading.dispose();
-                                    setLayout(new BorderLayout());
-                                    add(tcp, BorderLayout.CENTER);
-                                    invalidate();
-                                    validate();
-                                }
-                            });
+                        remove(lblLoading);
+                        lblLoading.dispose();
+                        setLayout(new BorderLayout());
+                        add(tbpResults, BorderLayout.CENTER);
+                        invalidate();
+                        validate();
                     } catch (final Exception e) {
                         final String message = "cannot create output visualisation"; // NOI18N
                         LOG.error(message, e);
 
-                        EventQueue.invokeLater(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    remove(lblLoading);
-                                    lblLoading.dispose();
-                                    setLayout(new BorderLayout());
-                                    add(new JLabel(message + ": " + e), BorderLayout.CENTER); // NOI18N
-                                }
-                            });
+                        remove(lblLoading);
+                        lblLoading.dispose();
+                        setLayout(new BorderLayout());
+                        add(new JLabel(message + ": " + e), BorderLayout.CENTER); // NOI18N
                     }
                 }
             };
 
-        if (EventQueue.isDispatchThread()) {
-            SudplanConcurrency.getSudplanGeneralPurposePool().execute(r);
-        } else {
-            r.run();
-        }
+        SudplanConcurrency.getSudplanGeneralPurposePool().execute(worker);
     }
 
     /**

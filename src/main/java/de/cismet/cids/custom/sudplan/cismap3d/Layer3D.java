@@ -48,4 +48,13 @@ public interface Layer3D extends UIProvider {
      * DOCUMENT ME!
      */
     void removeAllLayers();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  capabilities  DOCUMENT ME!
+     * @param  layername     DOCUMENT ME!
+     * @param  opacity       DOCUMENT ME!
+     */
+    void addWMSLayer(URI capabilities, String layername, double opacity);
 }

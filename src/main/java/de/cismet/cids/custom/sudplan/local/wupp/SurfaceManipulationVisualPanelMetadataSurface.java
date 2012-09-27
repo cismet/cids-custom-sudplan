@@ -51,7 +51,9 @@ public class SurfaceManipulationVisualPanelMetadataSurface extends javax.swing.J
             throw new IllegalStateException("model instance must not be null");
         }
 
-        this.setName("Add metadata to surface");
+        this.setName(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationVisualPanelMetadataSurface.class,
+                "SurfaceManipulationVisualPanelMetadataSurface.SurfaceManipulationVisualPanelMetadataSurface(SurfaceManipulationWizardPanelMetadataSurface).name"));
 
         initComponents();
         documentListenerForName = new DocumentListenerImpl(true);

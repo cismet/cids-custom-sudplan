@@ -15,15 +15,12 @@ import Sirius.server.middleware.types.MetaObject;
 
 import org.apache.log4j.Logger;
 
-import org.openide.util.Exceptions;
 import org.openide.util.WeakListeners;
 
 import java.awt.Component;
 import java.awt.EventQueue;
 
 import javax.swing.*;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -77,7 +74,9 @@ public class SurfaceManipulationVisualPanelConfigSelection extends javax.swing.J
         }
         selL = new ListSelectionListenerImpl();
 
-        this.setName("Select Surface Model");
+        this.setName(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationVisualPanelConfigSelection.class,
+                "SurfaceManipulationVisualPanelConfigSelection.SurfaceManipulationVisualPanelConfigSelection(SurfaceManipulationWizardPanelConfigSelection).name"));
         initComponents();
 
         lstConfigurations.setCellRenderer(new ListCellRendererImpl());
@@ -95,34 +94,26 @@ public class SurfaceManipulationVisualPanelConfigSelection extends javax.swing.J
     public void init() {
         final CidsBean initialConfig = model.getInitialConfig();
         final CidsBean deltaSurfaceToAdd = model.getDeltaSurfaceToAdd();
+        final MetaObject[] overlappingSurfaces = model.getOverlappingSurfaces();
 
         final DefaultListModel lstModel = new DefaultListModel();
 
         final DefaultListModel loadModel = new DefaultListModel();
-        loadModel.addElement("Loading available models");
+        loadModel.addElement(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationVisualPanelConfigSelection.class,
+                "SurfaceManipulationVisualPanelConfigSelection.init().loadModel.element"));
         lstConfigurations.setModel(loadModel);
 
         EventQueue.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-//                    final int[] indexes = new int[initialModels.length];
-//                    int i = 0;
-//                    for (final MetaObject mo : initialModels) {
-//                        final CidsBean cidsBean = initialConfig.getBean();
                     lstModel.addElement(initialConfig);
-//                        indexes[i++] = (Integer)cidsBean.getProperty("id");
-//                    }
 
                     final MetaClass MC = ClassCacheMultiple.getMetaClass(
                             SMSUtils.DOMAIN_SUDPLAN_WUPP,
                             SMSUtils.TABLENAME_DELTA_CONFIGURATION);
 
-//                    if (MC == null) {
-//                        MC = ClassCacheMultiple.getMetaClass(
-//                                SessionManager.getSession().getUser().getDomain(),
-//                                SMSUtils.TABLENAME_DELTA_CONFIGURATION);
-//                    }
                     if (MC == null) {
                         LOG.error(
                             "cannot get MetaClass from Domain '"
@@ -136,18 +127,31 @@ public class SurfaceManipulationVisualPanelConfigSelection extends javax.swing.J
                     boolean isSelectionValid = false;
                     final CidsBean selectedModel = model.getConfigModel();
 
+                    String excludedConfigs = "";
+                    for (final MetaObject mo : overlappingSurfaces) {
+                        if (mo != null) {
+                            final Integer deltaId = (Integer)mo.getBean().getProperty("delta_configuration.id");
+                            excludedConfigs += String.valueOf(deltaId) + " ";
+                        }
+                    }
+                    excludedConfigs = excludedConfigs.trim().replace(' ', ',');
+
                     String query;
                     if (deltaSurfaceToAdd == null) {
-                        query = "select " + MC.getID() + ", m." + MC.getPrimaryKey() + " from "
-                                    + MC.getTableName();
-                        query += " m";
-                        query += " WHERE m.original_object = " + initialConfig.getProperty("id");
+                        query = "select " + MC.getID() + ", dc." + MC.getPrimaryKey() + " from ";
+                        query += MC.getTableName() + " dc";
+                        query += " WHERE dc.original_object = " + initialConfig.getProperty("id");
                     } else {
-                        query = "select " + MC.getID() + ", m." + MC.getPrimaryKey() + " from ";
-                        query += MC.getTableName() + " m, " + SMSUtils.TABLENAME_DELTA_SURFACE + " ds"; // NOI18N
+                        query = "select " + MC.getID() + ", dc." + MC.getPrimaryKey() + " from ";
+                        query += MC.getTableName() + " dc, " + SMSUtils.TABLENAME_DELTA_SURFACE + " ds"; // NOI18N
                         query += " WHERE ds.id = " + (Integer)deltaSurfaceToAdd.getProperty("id") + " AND "
-                                    + "m.id != ds.delta_configuration AND "
-                                    + "m.original_object = " + initialConfig.getProperty("id");
+                                    + "dc.id != ds.delta_configuration AND "
+                                    + "dc.original_object = " + initialConfig.getProperty("id");
+                    }
+                    query += " AND dc.locked = false";
+
+                    if (!excludedConfigs.isEmpty()) {
+                        query += " AND dc.id not in (" + excludedConfigs + ")";
                     }
 
                     MetaObject[] deltaConfigs;
@@ -177,7 +181,6 @@ public class SurfaceManipulationVisualPanelConfigSelection extends javax.swing.J
                             isSelectionValid = true;
                         }
                     }
-//                    }
 
                     lstConfigurations.setModel(lstModel);
 
@@ -294,13 +297,10 @@ public class SurfaceManipulationVisualPanelConfigSelection extends javax.swing.J
                 final CidsBean cidsBean = (CidsBean)value;
                 if (cidsBean.getMetaObject().getMetaClass().getTableName().equalsIgnoreCase(
                                 SMSUtils.TABLENAME_GEOCPM_CONFIGURATION)) {
-//                    sb.append("<html><font color=red>New </font>");
                     sb.append(geoCPMToString.convert(cidsBean.getMetaObject()));
-//                    sb.append("</font> - ");
                     sb.append(" - ");
                     final CidsBean invest = (CidsBean)cidsBean.getProperty("investigation_area");
                     sb.append(investToString.convert(invest.getMetaObject()));
-//                    sb.append("</html>");
                 } else if (cidsBean.getMetaObject().getMetaClass().getTableName().equalsIgnoreCase(
                                 SMSUtils.TABLENAME_DELTA_CONFIGURATION)) {
                     sb.append(deltaToString.convert(cidsBean.getMetaObject()));
@@ -340,13 +340,6 @@ public class SurfaceManipulationVisualPanelConfigSelection extends javax.swing.J
                 } else {
                     model.setConfigModel(cidsBean, true);
                 }
-
-//                if (cidsBean.getMetaObject().getMetaClass().getTableName().equalsIgnoreCase(
-//                                SMSUtils.TABLENAME_GEOCPM_CONFIGURATION)) {
-//                    model.setIsConfigModelNew(true);
-//                } else {
-//                    model.setIsConfigModelNew(false);
-//                }
             }
         }
     }

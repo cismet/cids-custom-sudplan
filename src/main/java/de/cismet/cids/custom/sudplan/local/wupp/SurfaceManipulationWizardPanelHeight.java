@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.wupp;
 
-import org.apache.log4j.Logger;
-
 import org.openide.WizardDescriptor;
 
 import java.awt.Component;
@@ -22,10 +20,6 @@ import de.cismet.cids.custom.sudplan.AbstractWizardPanel;
  * @version  $Revision$, $Date$
  */
 public final class SurfaceManipulationWizardPanelHeight extends AbstractWizardPanel {
-
-    //~ Static fields/initializers ---------------------------------------------
-
-    private static final transient Logger LOG = Logger.getLogger(SurfaceManipulationWizardPanelHeight.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -94,7 +88,11 @@ public final class SurfaceManipulationWizardPanelHeight extends AbstractWizardPa
         wizard.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, null);
 
         if (height.doubleValue() == 0.0d) {
-            wizard.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Please manipulate the height");
+            wizard.putProperty(
+                WizardDescriptor.PROP_WARNING_MESSAGE,
+                org.openide.util.NbBundle.getMessage(
+                    SurfaceManipulationWizardPanelHeight.class,
+                    "SurfaceManipulationWizardPanelHeight.isValid().noHeight"));
             return false;
         }
 

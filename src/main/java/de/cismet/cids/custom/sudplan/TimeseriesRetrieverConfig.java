@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,7 +52,11 @@ public final class TimeseriesRetrieverConfig {
 
     private static final String TOKEN_TIMEINTERVAL = "ts:interval";
     private static final Pattern PATTERN = Pattern.compile("[\\],\\[](\\w+);(\\w+)[\\],\\[]");
-    private static final String DATE_FORMAT = "yyyyMMdd'T'HHmmss";
+    private static final DateFormat UTC_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+
+    static {
+        UTC_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     //~ Instance fields --------------------------------------------------------
 
@@ -499,9 +504,8 @@ public final class TimeseriesRetrieverConfig {
                     }
 
                     try {
-                        final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-                        start = new TimeStamp(dateFormat.parse(matcher.group(1)));
-                        end = new TimeStamp(dateFormat.parse(matcher.group(2)));
+                        start = new TimeStamp(UTC_DATE_FORMAT.parse(matcher.group(1)));
+                        end = new TimeStamp(UTC_DATE_FORMAT.parse(matcher.group(2)));
                     } catch (final java.text.ParseException pe) {
                         throw new MalformedURLException("TimeStamps in TimeInterval do not have a "
                                     + "correct format: \"yyyyMMdd'T'HHmmss\"");
@@ -591,10 +595,9 @@ public final class TimeseriesRetrieverConfig {
                     sb.append("[");
                 }
 
-                final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-                sb.append(dateFormat.format(interval.getStart().asDate()));
+                sb.append(UTC_DATE_FORMAT.format(interval.getStart().asDate()));
                 sb.append(";");
-                sb.append(dateFormat.format(interval.getEnd().asDate()));
+                sb.append(UTC_DATE_FORMAT.format(interval.getEnd().asDate()));
 
                 if (interval.isRightOpen()) {
                     sb.append("[");

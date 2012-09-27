@@ -159,7 +159,7 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
                     final boolean duplicate = false;
                     for (final CidsBean swmmScenario : swmmScenarios) {
                         if (swmmScenario.getProperty("id").equals(swmmModelRun.getProperty("id"))) {
-                            LOG.error("SWMM Run #" + swmmModelRun.getProperty("id") + " already created for project '"
+                            LOG.fatal("SWMM Run #" + swmmModelRun.getProperty("id") + " already created for project '"
                                         + cidsBean.getProperty("title"));
                         }
                     }

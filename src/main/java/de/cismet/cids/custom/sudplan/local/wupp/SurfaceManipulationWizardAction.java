@@ -48,8 +48,6 @@ import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import de.cismet.cids.custom.sudplan.DeltaSurfaceConflictPanel;
-import de.cismet.cids.custom.sudplan.DeltaSurfacePreparePanel;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
@@ -90,6 +88,7 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
     public static final String PROP_DELTA_CONFIG_DESCRIPTION = "__prop_delta_config_description__";
     public static final String PROP_CONFIG_SELECTION_CHANGED = "__prop_config_selection_changed__";
     public static final String PROP_ADD_DELTA_SURFACE = "__prop_add_delta_surface__";
+    public static final String PROP_OVERLAPPING_SURFACES = "__prop_overlapping_surfaces__";
 
     private static final int MAX_COUNT_CONFLICTS_TO_WARN_USER = 30;
 
@@ -113,7 +112,9 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
      * Creates a new SurfaceManipulationWizardAction object.
      */
     public SurfaceManipulationWizardAction() {
-        super("Manipulate Surface");
+        super(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationWizardAction.class,
+                "SurfaceManipulationWizardAction.SurfaceManipulationWizardAction().super"));
     }
 
     /**
@@ -231,23 +232,24 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-        if (!addToConfiguration) {
-            assert source != null : "cannot perform action on empty source"; // NOI18N
-        }
-
         // Set all global search results to null because new action is performing
         geoCPMConfigurations = null;
         overlappingSurfaces = null;
         geoCPMBreakingEdges = null;
-
-        if (!startConflictSearch()) {
-            return;
+        if (!addToConfiguration) {
+            assert source != null : "cannot perform action on empty source"; // NOI18N
+            if (!startConflictSearch()) {
+                return;
+            }
+        } else {
+            overlappingSurfaces = searchGeometry((Geometry)deltaSurfaceToAdd.getProperty("geom.geo_field"),
+                    SMSUtils.TABLENAME_DELTA_SURFACE);
         }
 
         isSurfaceConflict = (overlappingSurfaces != null) && (overlappingSurfaces.length > 0);
         isBreakingedgeConflict = (geoCPMBreakingEdges != null) && (geoCPMBreakingEdges.length > 0);
 
-        if (isSurfaceConflict || isBreakingedgeConflict) {
+        if (!addToConfiguration && (isSurfaceConflict || isBreakingedgeConflict)) {
             startConflictDialog();
         } else {
             startWizardDialog();
@@ -267,10 +269,16 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                 JOptionPane.PLAIN_MESSAGE,
                 JOptionPane.CANCEL_OPTION,
                 null,
-                new Object[] { "Cancel" });
+                new Object[] {
+                    org.openide.util.NbBundle.getMessage(
+                        SurfaceManipulationWizardAction.class,
+                        "SurfaceManipulationWizardAction.startConflictSearch().preparePane.cancelButton")
+                });
 
         final JDialog prepareDialog = preparePane.createDialog(ComponentRegistry.getRegistry().getMainWindow(),
-                "Prepare wizard");
+                org.openide.util.NbBundle.getMessage(
+                    SurfaceManipulationWizardAction.class,
+                    "SurfaceManipulationWizardAction.startConflictSearch().prepareDialog.title"));
 
         final Future<Boolean> prepareWizardTask = SudplanConcurrency.getSudplanGeneralPurposePool()
                     .submit(new Callable<Boolean>() {
@@ -285,7 +293,10 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                                         return false;
                                     }
 
-                                    waitPanel.setProgressText("Search for initial configuration...");
+                                    waitPanel.setProgressText(
+                                        org.openide.util.NbBundle.getMessage(
+                                            SurfaceManipulationWizardAction.class,
+                                            "SurfaceManipulationWizardAction.startConflictSearch().call().waitPanel.progressText1"));
 
                                     geoCPMConfigurations = searchGeometry(
                                             source.getGeometry(),
@@ -302,9 +313,15 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                                     try {
                                         if ((geoCPMConfigurations == null) || (geoCPMConfigurations.length <= 0)) {
                                             final ErrorInfo errorInfo = new ErrorInfo(
-                                                    "Prepare wizard error",
-                                                    "Error while preparing wizard",
-                                                    "The wizard could not prepared because there is no Digital Surface Model defined",
+                                                    org.openide.util.NbBundle.getMessage(
+                                                        SurfaceManipulationWizardAction.class,
+                                                        "SurfaceManipulationWizardAction.startConflictSearch().call().ErrorInfo1.header"),
+                                                    org.openide.util.NbBundle.getMessage(
+                                                        SurfaceManipulationWizardAction.class,
+                                                        "SurfaceManipulationWizardAction.startConflictSearch().call().ErrorInfo1.message"),
+                                                    org.openide.util.NbBundle.getMessage(
+                                                        SurfaceManipulationWizardAction.class,
+                                                        "SurfaceManipulationWizardAction.startConflictSearch().call().ErrorInfo1.detailedMessage"),
                                                     "ERROR",
                                                     null,
                                                     Level.SEVERE,
@@ -320,9 +337,15 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                                             return false;
                                         } else if (geoCPMConfigurations.length > 1) {
                                             final ErrorInfo errorInfo = new ErrorInfo(
-                                                    "Prepare wizard error",
-                                                    "Error while preparing wizard",
-                                                    "The wizard could not prepared because there are several Digital Surface Model available",
+                                                    org.openide.util.NbBundle.getMessage(
+                                                        SurfaceManipulationWizardAction.class,
+                                                        "SurfaceManipulationWizardAction.startConflictSearch().call().ErrorInfo2.header"),
+                                                    org.openide.util.NbBundle.getMessage(
+                                                        SurfaceManipulationWizardAction.class,
+                                                        "SurfaceManipulationWizardAction.startConflictSearch().call().ErrorInfo2.message"),
+                                                    org.openide.util.NbBundle.getMessage(
+                                                        SurfaceManipulationWizardAction.class,
+                                                        "SurfaceManipulationWizardAction.startConflictSearch().call().ErrorInfo2.detailedMessage"),
                                                     "ERROR",
                                                     null,
                                                     Level.SEVERE,
@@ -342,7 +365,10 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                                     }
 
                                     waitPanel.setProgressValue(1);
-                                    waitPanel.setProgressText("Search for overlapping surfaces...");
+                                    waitPanel.setProgressText(
+                                        org.openide.util.NbBundle.getMessage(
+                                            SurfaceManipulationWizardAction.class,
+                                            "SurfaceManipulationWizardAction.startConflictSearch().call().waitPanel.progressText2"));
 
                                     overlappingSurfaces = searchGeometry(
                                             source.getGeometry(),
@@ -356,7 +382,10 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                                     }
 
                                     waitPanel.setProgressValue(2);
-                                    waitPanel.setProgressText("Search for overlapping breakingedges...");
+                                    waitPanel.setProgressText(
+                                        org.openide.util.NbBundle.getMessage(
+                                            SurfaceManipulationWizardAction.class,
+                                            "SurfaceManipulationWizardAction.startConflictSearch().call().waitPanel.progressText3"));
 
                                     geoCPMBreakingEdges = searchGeometry(
                                             source.getGeometry(),
@@ -371,7 +400,10 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                                     }
 
                                     waitPanel.setProgressValue(3);
-                                    waitPanel.setProgressText("Search done");
+                                    waitPanel.setProgressText(
+                                        org.openide.util.NbBundle.getMessage(
+                                            SurfaceManipulationWizardAction.class,
+                                            "SurfaceManipulationWizardAction.startConflictSearch().call().waitPanel.progressText4"));
 
                                     return true;
                                 } catch (final Exception e) {
@@ -380,7 +412,7 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                                         final ErrorInfo errorInfo = new ErrorInfo(
                                                 "Prepare wizard error",
                                                 "Error while preparing wizard",
-                                                "The wizard could not prepared",
+                                                null,
                                                 "ERROR",
                                                 e,
                                                 Level.SEVERE,
@@ -439,9 +471,15 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
             final int surfaceCount = (overlappingSurfaces != null) ? overlappingSurfaces.length : 0;
             final int edgesCount = (geoCPMBreakingEdges != null) ? geoCPMBreakingEdges.length : 0;
 
-            final String strShowConflicts = "Show conflicts";
-            final String strStartWizard = "Start wizard";
-            final String strCancel = "Cancel";
+            final String strShowConflicts = org.openide.util.NbBundle.getMessage(
+                    SurfaceManipulationWizardAction.class,
+                    "SurfaceManipulationWizardAction.startConflictDialog().showConflictsButton.text");
+            final String strStartWizard = org.openide.util.NbBundle.getMessage(
+                    SurfaceManipulationWizardAction.class,
+                    "SurfaceManipulationWizardAction.startConflictDialog().startWizardButton.text");
+            final String strCancel = org.openide.util.NbBundle.getMessage(
+                    SurfaceManipulationWizardAction.class,
+                    "SurfaceManipulationWizardAction.startConflictDialog().cancelButton.text");
 
             final JButton startWizardButton = new JButton(strStartWizard);
 
@@ -466,7 +504,9 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
 
             final JDialog conflictDialog = conflictPane.createDialog(
                     ComponentRegistry.getRegistry().getMainWindow(),
-                    "Conflict are found");
+                    org.openide.util.NbBundle.getMessage(
+                        SurfaceManipulationWizardAction.class,
+                        "SurfaceManipulationWizardAction.startConflictDialog().conflictDialog.title"));
 
             startWizardButton.addActionListener(new WizardButtonAction(conflictPane));
             startWizardButton.setEnabled(!isBreakingedgeConflict);
@@ -477,15 +517,15 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
 
             if ((conflictReturn != null) && (conflictReturn.equals(strShowConflicts))) {
                 if ((surfaceCount + edgesCount) > MAX_COUNT_CONFLICTS_TO_WARN_USER) {
-                    final String message = "There are more than " + (surfaceCount + edgesCount)
-                                + " objects to show! Press the ok button to continue";
+                    final String message = "Es sind " + (surfaceCount + edgesCount)
+                                + " Objekte zu zeigen! Ok-Button drücken um fortzufahren.";
                     final JOptionPane infoMessagePane = new JOptionPane(
                             message,
                             JOptionPane.QUESTION_MESSAGE,
                             JOptionPane.OK_CANCEL_OPTION);
                     final JDialog infoMessageDialog = infoMessagePane.createDialog(ComponentRegistry.getRegistry()
                                     .getMainWindow(),
-                            "Confirm to show conflicts");
+                            "Anzeige der Konflikte bestättigen");
                     infoMessageDialog.setVisible(true);
                     EventQueue.invokeLater(new Runnable() {
 
@@ -530,7 +570,9 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
     private void startWizardDialog() {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
         wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
-        wizard.setTitle("Digital Surface Model manipulation");
+        wizard.setTitle(org.openide.util.NbBundle.getMessage(
+                SurfaceManipulationWizardAction.class,
+                "SurfaceManipulationWizardAction.startWizardDialog().wizard.title"));
         if (addToConfiguration) {
             final CidsBean initConfig = (CidsBean)deltaSurfaceToAdd.getProperty(
                     "delta_configuration.original_object");
@@ -550,6 +592,7 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
             wizard.putProperty(PROP_INITIAL_CONFIG, geoCPMConfigurations[0].getBean());
             wizard.putProperty(PROP_ADD_DELTA_SURFACE, null);
         }
+        wizard.putProperty(PROP_OVERLAPPING_SURFACES, overlappingSurfaces);
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -562,7 +605,10 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
             try {
                 // Step 1: create new configuration or alter the description and save it
                 CidsBean deltaConfiguration = createDeltaConfiguration(wizard);
+
                 deltaConfiguration = deltaConfiguration.persist();
+
+                DeltaConfigurationListWidged.getInstance().fireConfigsChanged();
 
                 // Step 2: create new delta surface and save it
                 CidsBean newDeltaSurface = createDeltaSurface(wizard, deltaConfiguration);
@@ -577,13 +623,26 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                 // Step 4: show result in DescriptionPane
                 final ComponentRegistry reg = ComponentRegistry.getRegistry();
                 reg.getDescriptionPane().gotoMetaObject(newDeltaSurface.getMetaObject(), null);
+            } catch (final IllegalStateException ise) {
+                final String message = "Cannot check or save the delta configuration.";
+                LOG.error(message, ise);
+                JXErrorPane.showDialog(
+                    ComponentRegistry.getRegistry().getMainWindow(),
+                    new ErrorInfo(
+                        "Fehler",
+                        "Es ist ein Fehler beim Speichern aufgetreten.",
+                        null,
+                        "EDITOR",
+                        ise,
+                        Level.WARNING,
+                        null));
             } catch (final Exception ex) {
                 final String message = "Cannot save the surface manipulation.";
                 LOG.error(message, ex);
                 JOptionPane.showMessageDialog(
                     ComponentRegistry.getRegistry().getMainWindow(),
-                    message,
-                    "Error",
+                    "Die Oberflächenänderung kann nicht gespeichert werden!",
+                    "Fehler",
                     JOptionPane.ERROR_MESSAGE);
             } finally {
                 addToConfiguration = false;
@@ -654,7 +713,8 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
      *
      * @return  DOCUMENT ME!
      *
-     * @throws  Exception  DOCUMENT ME!
+     * @throws  Exception              DOCUMENT ME!
+     * @throws  IllegalStateException  DOCUMENT ME!
      */
     private CidsBean createDeltaConfiguration(final WizardDescriptor wizard) throws Exception {
         final CidsBean selectedConfig = (CidsBean)wizard.getProperty(PROP_DELTA_CONFIG);
@@ -675,9 +735,79 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
 
             return newDeltaConfig;
         } else {
+            // last Check for the locked state
+
+            final CidsBean configToCheck = reloadConfiguration(selectedConfig);
+
+            final Boolean locked = (Boolean)configToCheck.getProperty("locked");
+
+            if (locked == null) {
+                throw new IllegalStateException(
+                    "Die Überprüfung der Sperrung der Änderungskonfiguration konnte nicht durchgeführt werden.");
+            }
+
+            if (locked.booleanValue()) {
+                throw new IllegalStateException(
+                    "Die ausgewählte Änderungskonfiguration wurde gesperrt! Das Speichern ist nicht möglich.");
+            }
+
             selectedConfig.setProperty("description", desc);
 
             return selectedConfig;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   deltaConfig  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IllegalStateException  DOCUMENT ME!
+     */
+    public static CidsBean reloadConfiguration(final CidsBean deltaConfig) {
+        try {
+            if ((deltaConfig == null)) {
+                throw new IllegalStateException(
+                    "delta configuration cannot be null");
+            }
+            final MetaClass mc = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", "delta_configuration");   // NOI18N
+            if (mc == null) {
+                throw new IllegalStateException(
+                    "illegal domain for this operation, mc 'delta_configuration@SUDPLAN-WUPP' not found"); // NOI18N
+            }
+
+            final Integer deltaId = (Integer)deltaConfig.getProperty("id");
+            if (deltaId == null) {
+                throw new IllegalStateException("cannot get delta configuration id: " + deltaConfig);
+            }
+
+            final String query = "select " + mc.getID() + "," + mc.getPrimaryKey() + " from " // NOI18N
+                        + mc.getTableName()
+                        + " where id = " + deltaId;                                           // NOI18N
+
+            final MetaObject[] deltaCfgObjects = SessionManager.getProxy()
+                        .getMetaObjectByQuery(SessionManager.getSession().getUser(),
+                            query,
+                            SMSUtils.DOMAIN_SUDPLAN_WUPP);
+
+            if ((deltaCfgObjects == null) || (deltaCfgObjects.length <= 0) || (deltaCfgObjects.length > 1)
+                        || (deltaCfgObjects[0] == null)) {
+                throw new IllegalStateException(
+                    "cannot reload, because there is no configuration or more than one are found: "
+                            + deltaConfig);
+            }
+
+            final MetaObject mo = deltaCfgObjects[0];
+            final CidsBean configToCheck = mo.getBean();
+
+            return configToCheck;
+        } catch (final Exception ex) {
+            final String message = "cannot check for locked state from selected delta configuration"; // NOI18N
+            LOG.error(message, ex);
+
+            throw new IllegalStateException(message, ex);
         }
     }
 
@@ -714,16 +844,8 @@ public class SurfaceManipulationWizardAction extends AbstractAction implements C
                             SMSUtils.DOMAIN_SUDPLAN_WUPP);
             return metaObjects;
         } catch (ConnectionException ex) {
-//            try {
-//                final MetaObject[] metaObjects = SessionManager.getProxy()
-//                            .getMetaObjectByQuery(SessionManager.getSession().getUser(),
-//                                query,
-//                                SessionManager.getSession().getUser().getDomain());
-//                return metaObjects;
-//            } catch (ConnectionException cex) {
             LOG.error("Can't connect to domain " + SMSUtils.DOMAIN_SUDPLAN_WUPP, ex);
             return null;
-//            }
         }
     }
 

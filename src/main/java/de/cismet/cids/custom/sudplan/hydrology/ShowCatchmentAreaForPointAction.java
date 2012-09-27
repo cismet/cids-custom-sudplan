@@ -85,7 +85,7 @@ public final class ShowCatchmentAreaForPointAction extends AbstractWFSFeatureRet
      * Creates a new ShowCatchmentAreaForPointAction object.
      */
     public ShowCatchmentAreaForPointAction() {
-        super("Show Catchment Area");
+        super("Show local basin");
     }
 
     //~ Methods ----------------------------------------------------------------
