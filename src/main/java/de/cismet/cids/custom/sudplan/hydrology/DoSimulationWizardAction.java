@@ -194,8 +194,8 @@ public final class DoSimulationWizardAction extends AbstractAction {
                 input.setCreated(new Date(System.currentTimeMillis()));
 
                 final CidsBean inputBean = SMSUtils.createModelInput("Input of " + name, input, Model.HY_SIM);
-                final CidsBean runBean = SMSUtils.createModelRun(name, desc, inputBean);
-                runBean.persist();
+                CidsBean runBean = SMSUtils.createModelRun(name, desc, inputBean);
+                runBean = runBean.persist();
 
                 final List<CidsBean> simulations = hwBean.getBeanCollectionProperty("simulations"); // NOI18N
                 simulations.add(runBean);

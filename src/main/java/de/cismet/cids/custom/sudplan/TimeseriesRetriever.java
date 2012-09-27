@@ -452,9 +452,9 @@ public final class TimeseriesRetriever {
             if (Variable.COUT.equals(var)) {
                 return Unit.M3S;
             } else if (Variable.CRUN.equals(var)) {
-                return Unit.MM;
+                return Unit.MM_DAY;
             } else if (Variable.CPRC.equals(var)) {
-                return Unit.MM;
+                return Unit.MM_DAY;
             } else if (Variable.CTMP.equals(var)) {
                 return Unit.CELSIUS;
             } else if (Variable.GWAT.equals(var)) {

@@ -94,7 +94,7 @@ public final class HydrologyCache {
         }
 
         hydroDateFormat = new SimpleDateFormat("yyyy-MM-dd");                   // NOI18N
-        vars = new String[] { "cout", "crun", "cprc", "ctmp", "gwat", "soim" }; // NOI18N
+        vars = new String[] { "cout", "crun", "cprc", "ctmp", "gwat", "smdf" }; // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -194,7 +194,7 @@ public final class HydrologyCache {
         } else if ("gwat".equals(var)) {
             return Variable.GWAT;
         } else if ("smdf".equals(var)) {
-            return Variable.SOIL_MOISTURE;
+            return Variable.SMDF;
         } else {
             throw new IllegalArgumentException("unknown var: " + var); // NOI18N
         }
@@ -222,7 +222,7 @@ public final class HydrologyCache {
             return "ctmp";
         } else if (Variable.GWAT.equals(variable)) {
             return "gwat";
-        } else if (Variable.SOIL_MOISTURE.equals(variable)) {
+        } else if (Variable.SMDF.equals(variable)) {
             return "smdf";
         } else {
             throw new IllegalArgumentException("unsupported variable: " + variable); // NOI18N

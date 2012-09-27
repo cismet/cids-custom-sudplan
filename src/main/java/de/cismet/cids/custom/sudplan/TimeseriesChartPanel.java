@@ -549,11 +549,16 @@ public class TimeseriesChartPanel extends javax.swing.JPanel implements Disposab
                     tsFuture = TimeseriesRetriever.getInstance().retrieve(config, converter);
                     final TimeSeries timeseries = tsFuture.get();
                     final String name = config.getObsProp();
+
                     String humanReadableObsProp = "";
-                    if (name != null) {
+                    final Variable var = config.getObservedProperty();
+                    if ((name != null) && (var == null)) {
                         final String[] splittedName = name.split(":");
                         humanReadableObsProp = splittedName[splittedName.length - 1];
+                    } else if (var != null) {
+                        humanReadableObsProp = config.getObservedProperty().getLocalisedName();
                     }
+
                     timeseries.setTSProperty(TimeSeries.OBSERVEDPROPERTY, humanReadableObsProp);
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("retrieved timeseries"); // NOI18N
