@@ -76,6 +76,9 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
     public static final Variable SMDF = new Variable(
             "urn:ogc:def:property:OGC:smdf", // NOI18N
             NbBundle.getMessage(Variable.class, "Variable.SMDF.localisedName")); // NOI18N
+    public static final Variable UNKNOWN = new Variable(
+            "urn:ogc:def:property:OGC:unknown", // NOI18N
+            NbBundle.getMessage(Variable.class, "Variable.UNKNOWN.localisedName")); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -168,7 +171,8 @@ public final class Variable extends LocalisedEnum<Variable> implements Serializa
                 CRUN,
                 CTMP,
                 GWAT,
-                SMDF
+                SMDF,
+                UNKNOWN
             };
     }
 

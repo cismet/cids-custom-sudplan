@@ -351,7 +351,14 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
         private final boolean[] selectedTimeseries;
         // private final String[] columnNames = { "Name", "Beschreibung", "Auswahl" };
         // private final Class[] columnClasses = { String.class, String.class, Boolean.class };
-        private final String[] columnNames = { "Name", "Auswahl" };
+        private final String[] columnNames = {
+                org.openide.util.NbBundle.getMessage(
+                    SwmmWizardPanelTimeseriesUI.class,
+                    "SwmmWizardPanelTimeseriesUI.table.name"),
+                org.openide.util.NbBundle.getMessage(
+                    SwmmWizardPanelTimeseriesUI.class,
+                    "SwmmWizardPanelTimeseriesUI.table.selection")
+            };
         private final Class[] columnClasses = { String.class, Boolean.class };
 
         //~ Constructors -------------------------------------------------------
@@ -544,6 +551,8 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
                                     LOG.debug("TimeseriesUpdater: updating loaded results");
                                 }
                                 tblTimeseries.setModel(timeseriesTableModel);
+                                tblTimeseries.getColumnModel().getColumn(1).setPreferredWidth(40);
+                                tblTimeseries.getColumnModel().getColumn(1).setMaxWidth(60);
                                 ((CardLayout)cardPanel.getLayout()).show(cardPanel, "timeseries");
                                 run = false;
                             }

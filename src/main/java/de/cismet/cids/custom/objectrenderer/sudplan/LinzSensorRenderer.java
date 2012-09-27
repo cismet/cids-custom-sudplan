@@ -33,7 +33,6 @@ import javax.swing.JComponent;
 import javax.swing.table.AbstractTableModel;
 
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
-import de.cismet.cids.custom.sudplan.MonitorstationContext;
 import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
 import de.cismet.cids.custom.sudplan.TimeseriesRetriever;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
@@ -64,13 +63,16 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(LinzSensorRenderer.class);
     public static final String NETCDF_HOST = TimeSeriesRemoteHelper.NETCDF_HOST;
     public static final Credentials NETCDF_CREDS = TimeSeriesRemoteHelper.NETCDF_CREDS;
+    public static final String LINZ_STATION_HYE = "LI-HYE";
+    public static final String LINZ_STATION_WIE = "LI-WIE";
+    public static final String LINZ_STATION_WOE = "LI-WOE";
 
     //~ Instance fields --------------------------------------------------------
 
     private final transient TimeSeriesExportWizardAction exportAction = new LinzTimeSeriesExportWizardAction();
 
     private final transient LinzSensorTitleComponent linzSensorTitleComponent = new LinzSensorTitleComponent();
-    private transient MonitorstationContext currentSensorType;
+    private transient String currentSensorType;
     private transient EventDetectionUpdater eventDetectionUpdater = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel cardPanel;
@@ -203,18 +205,18 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
             if (LOG.isDebugEnabled()) {
                 LOG.debug("loading event for sensor '" + sensorType + "'");
             }
-            if (MonitorstationContext.LI_HYE.getKey().indexOf(sensorType) != -1) {
-                currentSensorType = MonitorstationContext.LI_HYE;
-            } else if (MonitorstationContext.LI_WIE.getKey().indexOf(sensorType) != -1) {
-                currentSensorType = MonitorstationContext.LI_WIE;
-            } else if (MonitorstationContext.LI_WOE.getKey().indexOf(sensorType) != -1) {
-                currentSensorType = MonitorstationContext.LI_WOE;
+            if (LINZ_STATION_HYE.indexOf(sensorType) != -1) {
+                currentSensorType = LINZ_STATION_HYE;
+            } else if (LINZ_STATION_WIE.indexOf(sensorType) != -1) {
+                currentSensorType = LINZ_STATION_WIE;
+            } else if (LINZ_STATION_WOE.indexOf(sensorType) != -1) {
+                currentSensorType = LINZ_STATION_WOE;
             } else {
                 throw new Exception("Unsupported Sensor Type '" + sensorType
                             + "', expected '"
-                            + MonitorstationContext.LI_HYE.getKey() + "', '"
-                            + MonitorstationContext.LI_WIE.getKey() + "' or '"
-                            + MonitorstationContext.LI_WOE.getKey() + "'");
+                            + LINZ_STATION_HYE + "', '"
+                            + LINZ_STATION_WIE + "' or '"
+                            + LINZ_STATION_WOE + "'");
             }
 
             if ((eventDetectionUpdater != null) && eventDetectionUpdater.isRunning()) {
@@ -253,13 +255,12 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
      *
      * @throws  IOException  DOCUMENT ME!
      */
-    private MetaObject[] getTimeseriesBeans(final MonitorstationContext sensor) throws IOException {
+    private MetaObject[] getTimeseriesBeans(final String sensor) throws IOException {
         final String domain = SessionManager.getSession().getUser().getDomain();
         final MetaClass mc = ClassCacheMultiple.getMetaClass(domain, SwmmPlusEtaWizardAction.TABLENAME_TIMESERIES);
         if (LOG.isDebugEnabled()) {
             LOG.debug("retrieving event timeseries (" + SwmmPlusEtaWizardAction.TABLENAME_TIMESERIES
-                        + ")for sensor '" + sensor + "' from monitorstation '"
-                        + sensor.getLocalisedName() + "' from domain '" + domain + "'");
+                        + ")for sensor '" + sensor + "' from domain '" + domain + "'");
         }
 
         if (mc == null) {
@@ -288,9 +289,9 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                 .append(" AND ")
                 .append(SwmmInput.TABLENAME_MONITOR_STATION)
                 .append('.')
-                .append("type")
+                .append(SwmmInput.FK_MONITOR_STATION_KEY)
                 .append(" LIKE '")
-                .append(sensor.getKey())
+                .append(sensor)
                 .append('\'');
 
         if (LOG.isDebugEnabled()) {
@@ -305,7 +306,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
             throw new IOException("cannot get timeseries  objects from database: " + ex.getMessage(), ex);
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(metaObjects.length + " timeseries retrieved for station '" + sensor.getLocalisedName() + "'");
+            LOG.debug(metaObjects.length + " timeseries retrieved for station '" + sensor + "'");
         }
         return metaObjects;
     }
@@ -319,13 +320,13 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
      *
      * @throws  IOException  DOCUMENT ME!
      */
-    private TimeSeries loadEvents(final MonitorstationContext sensor) throws IOException {
-        LOG.info("loading events for '" + sensor.getLocalisedName() + '\'');
+    private TimeSeries loadEvents(final String sensor) throws IOException {
+        LOG.info("loading events for '" + sensor + '\'');
         final MetaObject[] timeseriesMoList = getTimeseriesBeans(sensor);
 
         if (timeseriesMoList.length == 0) {
             throw new IOException("no timeseries found for '" + sensor
-                        + "' (" + sensor.getLocalisedName() + ")");
+                        + "' (" + sensor + ")");
         }
 
         final TimeseriesRetriever retriever = TimeseriesRetriever.getInstance();
@@ -352,7 +353,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
             }
         } catch (Exception ex) {
             throw new IOException("could not load timeseries '" + sensor
-                        + "' (" + sensor.getLocalisedName() + "): " + ex.getLocalizedMessage(),
+                        + "' (" + sensor + "): " + ex.getLocalizedMessage(),
                 ex);
         }
 
@@ -497,7 +498,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
         private final transient Logger LOG = Logger.getLogger(LinzSensorRenderer.EventDetectionUpdater.class);
         private transient boolean run = true;
         private EventDetectionTableModel eventDetectionTableModel;
-        private final MonitorstationContext sensor;
+        private final String sensor;
 
         //~ Constructors -------------------------------------------------------
 
@@ -506,7 +507,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
          *
          * @param  sensor  DOCUMENT ME!
          */
-        public EventDetectionUpdater(final MonitorstationContext sensor) {
+        public EventDetectionUpdater(final String sensor) {
             this.sensor = sensor;
         }
 
