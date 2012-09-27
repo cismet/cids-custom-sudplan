@@ -156,7 +156,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         // this.etaHydGauge.setThreshold(etaOutput.getEtaHydRequired());
         // this.etaHydGauge.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaHydActual()));
         this.etaHydBar.setThreshold(etaOutput.getEtaHydRequired());
-        this.etaHydBar.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaHydActual()));
+        this.etaHydBar.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaHydRequired()));
 
         if (etaHydRequired <= 50) {
             // this.etaHydGauge.setSections(SECTION_ETA_HYD_50);
@@ -191,7 +191,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         // this.etaSedGauge.setThreshold(etaOutput.getEtaSedRequired());
         // this.etaSedGauge.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaSedActual()));
         this.etaSedBar.setThreshold(etaOutput.getEtaSedRequired());
-        this.etaSedBar.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaSedActual()));
+        this.etaSedBar.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaSedRequired()));
 
         if (etaSedRequired <= 65) {
             // this.etaSedGauge.setSections(SECTION_ETA_SED_65);
@@ -577,7 +577,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         spacerOneLayout.setVerticalGroup(
             spacerOneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
                 0,
-                80,
+                70,
                 Short.MAX_VALUE));
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -655,7 +655,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         etaHydBarLayout.setHorizontalGroup(
             etaHydBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
                 0,
-                361,
+                360,
                 Short.MAX_VALUE));
         etaHydBarLayout.setVerticalGroup(
             etaHydBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
@@ -710,7 +710,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         etaSedBarLayout.setHorizontalGroup(
             etaSedBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
                 0,
-                359,
+                360,
                 Short.MAX_VALUE));
         etaSedBarLayout.setVerticalGroup(
             etaSedBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
@@ -780,7 +780,6 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
                 EtaOutputManagerUI.class,
                 "EtaOutputManagerUI.r720Bar.title"));         // NOI18N
         r720Bar.setTrackSection(30.0);
-        r720Bar.setTrackVisible(true);
         r720Bar.setUnitString(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
                 "EtaOutputManagerUI.r720Bar.unitString"));    // NOI18N
@@ -791,7 +790,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         r720BarLayout.setHorizontalGroup(
             r720BarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
                 0,
-                361,
+                360,
                 Short.MAX_VALUE));
         r720BarLayout.setVerticalGroup(
             r720BarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
@@ -832,6 +831,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
                 EtaOutputManagerUI.class,
                 "EtaOutputManagerUI.totalOverflowBar.title"));         // NOI18N
         totalOverflowBar.setTrackSection(30.0);
+        totalOverflowBar.setTransparentSectionsEnabled(true);
         totalOverflowBar.setUnitString(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
                 "EtaOutputManagerUI.totalOverflowBar.unitString"));    // NOI18N
@@ -842,7 +842,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         totalOverflowBarLayout.setHorizontalGroup(
             totalOverflowBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
                 0,
-                359,
+                360,
                 Short.MAX_VALUE));
         totalOverflowBarLayout.setVerticalGroup(
             totalOverflowBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
@@ -869,7 +869,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         spacerTwoLayout.setVerticalGroup(
             spacerTwoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
                 0,
-                80,
+                70,
                 Short.MAX_VALUE));
 
         gridBagConstraints = new java.awt.GridBagConstraints();
