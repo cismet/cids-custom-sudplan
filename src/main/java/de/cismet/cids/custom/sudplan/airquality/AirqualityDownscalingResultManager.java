@@ -211,7 +211,11 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
 
         this.result = result;
         this.modelId = modelId;
-        this.name = name;
+        if ((name != null) && name.startsWith("Results of '") && name.endsWith("'") && (name.length() > 13)) {
+            this.name = name.substring(12, name.length() - 1);
+        } else {
+            this.name = name;
+        }
         this.srs = srs;
 
         geometryColumn = "geometry_" + srs.getCode().toLowerCase().replaceAll(":", "_");
@@ -835,7 +839,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
 
                 final GSLayerEncoder layer = new GSLayerEncoder();
                 layer.setEnabled(true);
-                layer.setWmsPath("/"
+                layer.setWmsPath("/Air Quality/"
                             + name
                             + "/"
                             + formatForWmsPath(result.getResolution()) // NOI18N
@@ -910,8 +914,21 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                             + ") are empty."); // NOI18N
             }
 
-            Layer modelLayer = null;
+            Layer airQualityLayer = null;
             for (final Layer layer : wmsCapabilities.getLayer().getChildren()) {
+                if (layer.getName().equals("Air Quality")) {
+                    airQualityLayer = layer;
+                    break;
+                }
+            }
+
+            if (airQualityLayer == null) {
+                throw new Exception(
+                    "Geoserver's capabilities don't contain recently created layer. Layer 'Air Quality' couldn't be found."); // NOI18N
+            }
+
+            Layer modelLayer = null;
+            for (final Layer layer : airQualityLayer.getChildren()) {
                 if (layer.getName().equals(name)) {
                     modelLayer = layer;
                     break;
@@ -919,7 +936,8 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             }
 
             if (modelLayer == null) {
-                throw new Exception("Geoserver's capabilities don't contain recently created layer."); // NOI18N
+                throw new Exception("Geoserver's capabilities don't contain recently created layer. Layer 'Air Quality/"
+                            + name + "' couldn't be found."); // NOI18N
             }
 
             Layer resolutionLayer = null;
@@ -931,7 +949,8 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             }
 
             if (resolutionLayer == null) {
-                throw new Exception("Geoserver's capabilities don't contain recently created layer."); // NOI18N
+                throw new Exception("Geoserver's capabilities don't contain recently created layer. Layer 'Air Quality/"
+                            + name + "/" + formatForWmsPath(this.result.getResolution()) + "' couldn't be found."); // NOI18N
             }
 
             Layer variableLayer = null;
@@ -943,11 +962,14 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             }
 
             if (variableLayer == null) {
-                throw new Exception("Geoserver's capabilities don't contain recently created layer."); // NOI18N
+                throw new Exception("Geoserver's capabilities don't contain recently created layer. Layer 'Air Quality/"
+                            + name + "/" + formatForWmsPath(this.result.getResolution()) + "/"
+                            + formatForWmsPath(this.result.getVariable()).concat("[]") + "' couldn't be found."); // NOI18N
             }
 
             final String name = variableLayer.getName();
-            final String completePath = modelLayer.getName()
+            final String completePath = "Air Quality/"
+                        + modelLayer.getName()
                         + "/"
                         + resolutionLayer.getName()
                         + "/"
