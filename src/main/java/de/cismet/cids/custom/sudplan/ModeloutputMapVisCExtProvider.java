@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cids.custom.sudplan.hydrology;
+package de.cismet.cids.custom.sudplan;
 
 import Sirius.server.middleware.types.MetaClass;
 
@@ -14,9 +14,6 @@ import org.openide.util.lookup.ServiceProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-
-import de.cismet.cids.custom.sudplan.AbstractMapVisCExtProvider;
-import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -33,7 +30,7 @@ import de.cismet.ext.CExtProvider;
     service = CExtProvider.class,
     position = 1000
 )
-public final class HydroCExtProvider extends AbstractMapVisCExtProvider {
+public final class ModeloutputMapVisCExtProvider extends AbstractMapVisCExtProvider {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -49,10 +46,10 @@ public final class HydroCExtProvider extends AbstractMapVisCExtProvider {
             mc = null;
         }
 
-        if ((mc == null) || !SMSUtils.TABLENAME_HYDROLOGY_WORKSPACE.equals(mc.getTableName())) {
+        if ((mc == null) || !SMSUtils.TABLENAME_MODELOUTPUT.equals(mc.getTableName())) {
             return new ArrayList(0);
         } else {
-            return Arrays.asList(new HydroWorkspaceMapVisualisationProvider());
+            return Arrays.asList(new ModelOutputMapVisualisationProvider());
         }
     }
 }
