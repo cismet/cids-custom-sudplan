@@ -216,20 +216,10 @@ public class GridComparisonLayerProvider implements ActiveLayerListener {
 
     @Override
     public void layerPositionChanged(final ActiveLayerEvent e) {
-        final Object layer = e.getLayer();
-
-        if (isAQDSLayer(layer)) {
-            reloadLayers();
-        }
     }
 
     @Override
     public void layerVisibilityChanged(final ActiveLayerEvent e) {
-        final Object layer = e.getLayer();
-
-        if (isAQDSLayer(layer)) {
-            GridComparisonWidgetProvider.getWidget().reloadLayers();
-        }
     }
 
     @Override
