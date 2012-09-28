@@ -54,7 +54,7 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
     static {
         NUMBERFORMAT = NumberFormat.getInstance(Locale.US);
         NUMBERFORMAT.setMaximumFractionDigits(3);
-        NUMBERFORMAT.setMinimumFractionDigits(3);
+        NUMBERFORMAT.setMinimumFractionDigits(0);
         NUMBERFORMAT.setRoundingMode(RoundingMode.HALF_UP);
 
         DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // NOI18N
@@ -90,7 +90,14 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
                 TimeSeries.VALUE_OBSERVED_PROPERTY_URNS,
                 new String[] { Variable.PRECIPITATION.getPropertyKey() });
             // must be present
-            ts.setTSProperty(PropertyNames.DESCRIPTION, "imported_linz_timeseries_" + System.currentTimeMillis());
+            ts.setTSProperty(
+                PropertyNames.DESCRIPTION,
+                NbBundle.getMessage(
+                    LinzTimeseriesConverter.class,
+                    "LinzTimeseriesConverter.description")
+                        + "("
+                        + (System.currentTimeMillis() / 1000000000)
+                        + ")");
 
             while (line != null) {
                 final String[] split = line.split("   ");              // NOI18N
