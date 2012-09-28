@@ -12,8 +12,6 @@ import org.apache.log4j.Logger;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
-import java.awt.EventQueue;
-
 import java.net.URL;
 
 import java.util.MissingResourceException;
@@ -21,6 +19,8 @@ import java.util.MissingResourceException;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.cismap.navigatorplugin.CismapPlugin;
 
@@ -51,6 +51,10 @@ public class GridComparisonWidgetProvider implements BasicGuiComponentProvider {
     public static GridComparisonWidget getWidget() {
         if (WIDGET == null) {
             WIDGET = new GridComparisonWidget();
+            CismapBroker.getInstance()
+                    .getMappingComponent()
+                    .getFeatureCollection()
+                    .addFeatureCollectionListener(WIDGET);
             WIDGET.reloadLayers();
         }
 

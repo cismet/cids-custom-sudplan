@@ -39,6 +39,9 @@ import de.cismet.cids.custom.sudplan.timeseriesVisualisation.gridcomparison.Laye
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeatureCollectionEvent;
+import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
@@ -54,7 +57,7 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @author   jweintraut
  * @version  $Revision$, $Date$
  */
-public class GridComparisonWidget extends javax.swing.JPanel {
+public class GridComparisonWidget extends javax.swing.JPanel implements FeatureCollectionListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -648,7 +651,9 @@ public class GridComparisonWidget extends javax.swing.JPanel {
                 secondOperand.getPNode().setVisible(true);
             }
 
-            CismapBroker.getInstance().getMappingComponent().getFeatureCollection().removeFeature(feature);
+            final Feature oldFeature = feature;
+            feature = null;
+            CismapBroker.getInstance().getMappingComponent().getFeatureCollection().removeFeature(oldFeature);
         }
 
         if ((firstOperand == null) || (secondOperand == null) || (layerStyle == null) || (operation == null)) {
@@ -950,6 +955,47 @@ public class GridComparisonWidget extends javax.swing.JPanel {
         cmbComparisonMethod.setEnabled(enableGridComparisonListener.isFirstOperandReady()
                     && enableGridComparisonListener.isSecondOperandReady()
                     && (layerStyle != null));
+    }
+
+    @Override
+    public void featuresAdded(final FeatureCollectionEvent fce) {
+    }
+
+    @Override
+    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
+        if (feature != null) {
+            cmbComparisonMethod.setSelectedIndex(0);
+        }
+    }
+
+    @Override
+    public void featuresRemoved(final FeatureCollectionEvent fce) {
+        if ((feature == null) || (fce == null) || (fce.getEventFeatures() == null)) {
+            return;
+        }
+
+        for (final Feature featureFromEvent : fce.getEventFeatures()) {
+            if (feature.equals(featureFromEvent)) {
+                cmbComparisonMethod.setSelectedIndex(0);
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void featuresChanged(final FeatureCollectionEvent fce) {
+    }
+
+    @Override
+    public void featureSelectionChanged(final FeatureCollectionEvent fce) {
+    }
+
+    @Override
+    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
+    }
+
+    @Override
+    public void featureCollectionChanged() {
     }
 
     //~ Inner Classes ----------------------------------------------------------
