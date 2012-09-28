@@ -113,15 +113,21 @@ public final class AirqualityDownscalingWizardPanelDatabase extends AbstractWiza
                     try {
                         final Collection<MetaObject> databaseMetaObjectsFromSMS = SessionManager.getProxy()
                                     .customServerSearch(new EmissionDatabaseSearch());
+                        final Collection<CidsBean> databasesFromSMS = new LinkedList<CidsBean>();
                         for (final MetaObject databaseMetaObjectFromSMS : databaseMetaObjectsFromSMS) {
-                            databases.add(databaseMetaObjectFromSMS.getBean());
+                            databasesFromSMS.add(databaseMetaObjectFromSMS.getBean());
                         }
 
                         final Collection<String> databaseNamesFromSMS = new LinkedList<String>();
-                        for (final CidsBean databaseFromSMS : databases) {
-                            final Object databaseName = databaseFromSMS.getProperty("name"); // NOI18N
+                        for (final CidsBean databaseCandidate : databasesFromSMS) {
+                            final Object databaseName = databaseCandidate.getProperty("name"); // NOI18N
+
                             if (databaseName instanceof String) {
                                 databaseNamesFromSMS.add((String)databaseName);
+
+                                if (databasesFromSPS.contains((String)databaseName)) {
+                                    databases.add(databaseCandidate);
+                                }
                             }
                         }
 
