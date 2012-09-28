@@ -103,7 +103,8 @@ public class GridComparisonLayerProvider implements ActiveLayerListener {
 
             final String nameOfChildren = children.get(0).getName();
 
-            return (nameOfChildren != null) && nameOfChildren.startsWith("aqds_view_");
+            return (nameOfChildren != null)
+                        && (nameOfChildren.startsWith("aqds_view_") || (nameOfChildren.contains(":aqds_view_")));
         }
 
         final Layer[] children = layerInformation.getChildren();
@@ -128,7 +129,7 @@ public class GridComparisonLayerProvider implements ActiveLayerListener {
         final StringBuilder result = new StringBuilder();
         final String[] pathOfLayer = layer.getPath().split("/");
 
-        if ((pathOfLayer == null) || (pathOfLayer.length != 3)) {
+        if ((pathOfLayer == null) || (pathOfLayer.length != 4)) {
             LOG.warn("Something is wrong with layer '" + layer + "', since its path is in invalid (path: '"
                         + layer.getPath() + "').");
 
@@ -136,11 +137,11 @@ public class GridComparisonLayerProvider implements ActiveLayerListener {
                 result.append(partOfPath);
             }
         } else {
-            result.append(pathOfLayer[2].substring(0, pathOfLayer[2].lastIndexOf('[')));
+            result.append(pathOfLayer[3].substring(0, pathOfLayer[3].lastIndexOf('[')));
             result.append(" (");
-            result.append(pathOfLayer[0]);
-            result.append(", ");
             result.append(pathOfLayer[1]);
+            result.append(", ");
+            result.append(pathOfLayer[2]);
             result.append(")");
         }
 
