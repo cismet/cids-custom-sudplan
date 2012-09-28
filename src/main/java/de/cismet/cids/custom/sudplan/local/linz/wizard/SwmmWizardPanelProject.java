@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
-import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
@@ -293,19 +292,5 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
      */
     public WizardDescriptor getWizard() {
         return wizard;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        final java.util.Date date = new java.util.Date();
-        System.out.println(date);
-        final SimpleDateFormat df = new SimpleDateFormat();
-        System.out.println(df.format(date));
-        df.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
-        System.out.println(df.format(date));
     }
 }

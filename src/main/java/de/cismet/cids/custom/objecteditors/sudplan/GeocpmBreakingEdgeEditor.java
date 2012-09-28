@@ -56,6 +56,7 @@ import de.cismet.cids.custom.objecteditors.sudplan.DeltaBreakingEdgeEditor.BEHei
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.local.wupp.DeltaConfigurationListWidged;
+import de.cismet.cids.custom.sudplan.local.wupp.GeoCPMOptions;
 import de.cismet.cids.custom.tostringconverter.sudplan.DeltaConfigurationToStringConverter;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -90,9 +91,6 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(GeocpmBreakingEdgeEditor.class);
-
-    public static final String ORTHO_URL =
-        "http://geoportal.wuppertal.de:8083/deegree/wms?VERSION=1.1.1&SERVICE=WMS&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:luftbild2010&STYLES=default";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -593,7 +591,10 @@ public class GeocpmBreakingEdgeEditor extends AbstractCidsBeanRenderer implement
 
             mappingModel.addHome(bbox);
 
-            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(ORTHO_URL));
+            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(
+                        GeoCPMOptions.getInstance().getProperty("template.getmap.orthophoto").replace(
+                            "<cismap:srs>",
+                            "EPSG:31466")));
 
             ortho.setName("Wuppertal Ortophoto"); // NOI18N
 

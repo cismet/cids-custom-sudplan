@@ -301,7 +301,7 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
 
             final String[] split = type.split(":", 2); // NOI18N
 
-            assert split.length == 2 : "illegal type definition: " + type; // NOI18N
+            assert split.length == 2 : "illegal type definition (token): " + type; // NOI18N
 
             final String ctxKey = split[0];
             boolean ctxSet = false;
@@ -313,7 +313,7 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
                 }
             }
 
-            assert ctxSet : "illegal type definition: " + type; // NOI18N
+            assert ctxSet : "illegal type definition (context): " + type; // NOI18N
 
             final String[] vars = split[1].split(","); // NOI18N
             for (final String var : vars) {

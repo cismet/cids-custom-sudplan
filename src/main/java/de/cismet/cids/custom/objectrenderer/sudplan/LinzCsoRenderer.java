@@ -154,6 +154,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
     private javax.swing.JLabel lblPrevPage;
     private javax.swing.JLabel lblPropertiesHeading;
     private javax.swing.JLabel lblStorageUnit;
+    private javax.swing.JLabel lblSwmmProject;
+    private javax.swing.JLabel lblSwmmProjectText;
     private javax.swing.JLabel lblSwmmScenarios;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JLabel lblVolume;
@@ -421,6 +423,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         lblLinksHeading = new javax.swing.JLabel();
         lblOutfall = new javax.swing.JLabel();
         lblStorageUnit = new javax.swing.JLabel();
+        lblSwmmProject = new javax.swing.JLabel();
+        lblSwmmProjectText = new javax.swing.JLabel();
         panLinksSpacer = new javax.swing.JPanel();
         photosPanel = new de.cismet.tools.gui.RoundedPanel();
         panHeadInfo1 = new de.cismet.tools.gui.SemiRoundedPanel();
@@ -612,6 +616,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
                 "LinzCsoRenderer.lblDescriptionText.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -716,6 +721,25 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 10);
         linksPanel.add(lblStorageUnit, gridBagConstraints);
+
+        lblSwmmProject.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblSwmmProject.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 10);
+        linksPanel.add(lblSwmmProject, gridBagConstraints);
+
+        lblSwmmProjectText.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblSwmmProjectText.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 10);
+        linksPanel.add(lblSwmmProjectText, gridBagConstraints);
 
         panLinksSpacer.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();

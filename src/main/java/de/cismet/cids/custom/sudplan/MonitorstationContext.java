@@ -28,27 +28,9 @@ public final class MonitorstationContext extends LocalisedEnum<MonitorstationCon
     public static final MonitorstationContext RF = new MonitorstationContext(
             "RF", // NOI18N
             NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.RF.localisedName")); // NOI18N
-    public static final MonitorstationContext LI_RF = new MonitorstationContext(
-            "LI-RF", // NOI18N
-            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-RF.localisedName")); // NOI18N
-    public static final MonitorstationContext LI_WI = new MonitorstationContext(
-            "LI-WI", // NOI18N
-            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-WI.localisedName")); // NOI18N
-    public static final MonitorstationContext LI_WO = new MonitorstationContext(
-            "LI-WO", // NOI18N
-            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-WO.localisedName")); // NOI18N
-    public static final MonitorstationContext LI_HY = new MonitorstationContext(
-            "LI-HY", // NOI18N
-            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-HY.localisedName")); // NOI18N
-    public static final MonitorstationContext LI_WIE = new MonitorstationContext(
-            "LI-WIE", // NOI18N
-            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-WIE.localisedName")); // NOI18N
-    public static final MonitorstationContext LI_WOE = new MonitorstationContext(
-            "LI-WOE", // NOI18N
-            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-WOE.localisedName")); // NOI18N
-    public static final MonitorstationContext LI_HYE = new MonitorstationContext(
-            "LI-HYE", // NOI18N
-            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI-HYE.localisedName")); // NOI18N
+    public static final MonitorstationContext LI = new MonitorstationContext(
+            "LI", // NOI18N
+            NbBundle.getMessage(MonitorstationContext.class, "MonitorstationContext.LI.localisedName")); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -113,7 +95,7 @@ public final class MonitorstationContext extends LocalisedEnum<MonitorstationCon
      * @return  DOCUMENT ME!
      */
     public static MonitorstationContext[] values() {
-        return new MonitorstationContext[] { AQ, HD, RF, LI_RF, LI_WI, LI_WO, LI_HY, LI_WIE, LI_WOE, LI_HYE };
+        return new MonitorstationContext[] { AQ, HD, RF, LI };
     }
 
     @Override

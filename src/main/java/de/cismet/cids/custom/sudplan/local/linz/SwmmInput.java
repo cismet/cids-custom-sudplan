@@ -38,9 +38,7 @@ public final class SwmmInput {
 
     public static final String TABLENAME_SWMM_PROJECT = "SWMM_PROJECT"; // NOI18N
     public static final String TABLENAME_MONITOR_STATION = "monitorstation";
-    public static final String TABLENAME_MONITOR_STATION_TYPE = "monitorstationtype";
-    public static final String FLD_MONITOR_STATION_TYPE = "name";       // NOI18N
-    public static final String FK_MONITOR_STATION_TYPE = "type";
+    public static final String FK_MONITOR_STATION_KEY = "key";
     public static final SimpleDateFormat UTC_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
     public static final String PROP_TIMESERIES = "timeseries";
     public static final String PROP_INPFILE = "inpFile";

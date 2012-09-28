@@ -23,7 +23,7 @@ import javax.swing.JOptionPane;
 import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.SqlTimestampToStringConverter;
-import de.cismet.cids.custom.sudplan.local.wupp.RunoffOutputManagerUI;
+import de.cismet.cids.custom.sudplan.local.wupp.GeoCPMOptions;
 
 import de.cismet.cids.editors.DefaultCustomObjectEditor;
 import de.cismet.cids.editors.EditorClosedEvent;
@@ -49,11 +49,6 @@ import de.cismet.cismap.commons.retrieval.RetrievalListener;
 public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implements EditorSaveListener {
 
     //~ Static fields/initializers ---------------------------------------------
-
-    public static final String TIN_URL =
-        "http://sudplanwp6.cismet.de/geoserver/wms?SERVICE=WMS&&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=sudplan:GeoCPM_TIN&STYLES=geocpm_triangle_style";     // NOI18N
-    public static final String BE_URL =
-        "http://sudplanwp6.cismet.de/geoserver/wms?SERVICE=WMS&&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>&FORMAT=image/png&TRANSPARENT=TRUE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=sudplan:GeoCPM_be&STYLES=geocpm_breaking_edge_style"; // NOI18N
 
     private static final transient Logger LOG = Logger.getLogger(GeocpmConfigurationEditor.class);
 
@@ -854,10 +849,16 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
             mappingModel.setSrs(new Crs(SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, SMSUtils.EPSG_WUPP, true, true));
             mappingModel.addHome(bbox);
 
-            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(RunoffOutputManagerUI.ORTHO_URL));
+            final SimpleWMS ortho = new SimpleWMS(new SimpleWmsGetMapUrl(
+                        GeoCPMOptions.getInstance().getProperty("template.getmap.orthophoto").replace(
+                            "<cismap:srs>",
+                            "EPSG:31466")));
             ortho.setName("Wuppertal Ortophoto"); // NOI18N
 
-            final SimpleWMS beLayer = new SimpleWMS(new SimpleWmsGetMapUrl(BE_URL));
+            final SimpleWMS beLayer = new SimpleWMS(new SimpleWmsGetMapUrl(
+                        GeoCPMOptions.getInstance().getProperty("template.getmap.belayer").replace(
+                            "<cismap:srs>",
+                            "EPSG:31466")));
             beLayer.setName(NbBundle.getMessage(
                     GeocpmConfigurationEditor.class,
                     "GeocpmConfigurationEditor.initMap().beLayer.name")); // NOI18N
@@ -948,8 +949,12 @@ public class GeocpmConfigurationEditor extends AbstractCidsBeanRenderer implemen
                     public void mouseClicked(final PInputEvent evt) {
                         try {
                             if (evt.getClickCount() > 1) {
-                                final SimpleWMS tin = new SimpleWMS(new SimpleWmsGetMapUrl(TIN_URL));
-                                final SimpleWMS be = new SimpleWMS(new SimpleWmsGetMapUrl(BE_URL));
+                                final SimpleWMS tin = new SimpleWMS(
+                                        new SimpleWmsGetMapUrl(
+                                            GeoCPMOptions.getInstance().getProperty("template.getmap.tinlayer")));
+                                final SimpleWMS be = new SimpleWMS(
+                                        new SimpleWmsGetMapUrl(
+                                            GeoCPMOptions.getInstance().getProperty("template.getmap.belayer")));
                                 tin.setName(
                                     NbBundle.getMessage(
                                         GeocpmConfigurationEditor.class,

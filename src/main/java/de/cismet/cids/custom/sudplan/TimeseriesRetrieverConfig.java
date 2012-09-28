@@ -132,6 +132,10 @@ public final class TimeseriesRetrieverConfig {
         final String changedOffering;
         final String changedProcedure;
         if (PROTOCOL_NETCDF.equals(this.getProtocol())) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("changing resolution of " + PROTOCOL_NETCDF + " timeseries to "
+                            + resolution.getLocalisedName());
+            }
             if (Resolution.HOUR.getPrecision().equals(resolution.getPrecision())) {
                 changedOffering = this.offering;
                 changedProcedure = NETCDF_LIMITED;
@@ -217,8 +221,6 @@ public final class TimeseriesRetrieverConfig {
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
-     *
-     * @throws  IllegalStateException  DOCUMENT ME!
      */
     public Variable getObservedProperty() {
         if (obsProp == null) {
@@ -231,7 +233,8 @@ public final class TimeseriesRetrieverConfig {
             }
         }
 
-        throw new IllegalStateException("unknown observed property: " + obsProp); // NOI18N
+        LOG.warn("unknown observed property: " + obsProp); // NOI18N
+        return Variable.UNKNOWN;
     }
 
     /**

@@ -57,6 +57,7 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
     public static final String TABLENAME_MONITOR_STATION = SwmmInput.TABLENAME_MONITOR_STATION;
     public static final String TABLENAME_TIMESERIES = "timeseries";
     public static final String TABLENAME_CSOS = "linz_cso";
+    public static final String LINZ_RAINFALL_STATION_KEY = "LI-RF";
     // public static final String PROP_SCENARIO = "__prop_scenario__";       // NOI18N public static final String
     // PROP_TARGET_YEAR = "__prop_target_year__"; // NOI18N
     /** Name of the model run. */
