@@ -232,7 +232,7 @@ public class SlidingImagesFeature implements RasterDocumentFeature, XStyledFeatu
 
     @Override
     public float getTransparency() {
-        return .8F;
+        return .9F;
     }
 
     @Override
