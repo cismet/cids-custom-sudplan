@@ -255,7 +255,7 @@ public class DistributionComponent extends JComponent {
         }
 
         final double range = Math.abs(max - min);
-        final double slice = Math.abs(value) / range;
+        final double slice = Math.abs(value - min) / range;
         final double result = componentWidth * slice;
         final int resultingPosition = (int)Math.round(result);
 

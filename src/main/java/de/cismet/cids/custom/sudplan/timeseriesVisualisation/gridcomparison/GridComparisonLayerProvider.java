@@ -94,17 +94,9 @@ public class GridComparisonLayerProvider implements ActiveLayerListener {
         final Layer layerInformation = ((SlidableWMSServiceLayerGroup)layer).getLayerInformation();
 
         if (layerInformation == null) {
-            // Maybe it's while starting the Navigator, so let's try another way to inspect the children
-            final List<WMSServiceLayer> children = ((SlidableWMSServiceLayerGroup)layer).getLayers();
-
-            if ((children == null) || (children.isEmpty())) {
-                return false;
-            }
-
-            final String nameOfChildren = children.get(0).getName();
-
-            return (nameOfChildren != null)
-                        && (nameOfChildren.startsWith("aqds_view_") || (nameOfChildren.contains(":aqds_view_")));
+            // This may happen during startup and if there are some layers restored.
+            // But since the layer information is necessary for the grid comparison, we reject this layer.
+            return false;
         }
 
         final Layer[] children = layerInformation.getChildren();
