@@ -121,8 +121,8 @@ public final class SwmmWizardPanelProject implements WizardDescriptor.Panel {
             swmmInput.setStartDate(SwmmInput.UTC_DATE_FORMAT.parse(dateFormat.format(startDate)));
             swmmInput.setEndDate(SwmmInput.UTC_DATE_FORMAT.parse(dateFormat.format(endDate)));
             if (LOG.isDebugEnabled()) {
-                LOG.debug("start and end date " + startDate + ":" + endDate + " changed to"
-                            + swmmInput.getStartDate() + ":" + swmmInput.getEndDate());
+                LOG.debug("start and end date " + startDate + "<=>" + endDate + " changed to"
+                            + swmmInput.getStartDate() + "<=>" + swmmInput.getEndDate());
             }
         } catch (ParseException ex) {
             LOG.error("coud not sanitize start and end dates ("

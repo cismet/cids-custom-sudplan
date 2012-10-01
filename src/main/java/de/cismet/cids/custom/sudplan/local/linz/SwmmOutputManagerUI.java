@@ -22,6 +22,7 @@ import java.awt.Color;
 import java.awt.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -272,6 +273,7 @@ public class SwmmOutputManagerUI extends javax.swing.JPanel {
          */
         public CsoTableModel(final ArrayList<CsoOverflow> csoOverflows) {
             this.csoOverflows = csoOverflows;
+            Collections.sort(this.csoOverflows);
         }
 
         //~ Methods ------------------------------------------------------------

@@ -173,6 +173,9 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
         tblStations.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
                 new String[] {}));
+        tblStations.setRowSelectionAllowed(false);
+        tblStations.setSelectionBackground(new java.awt.Color(255, 255, 255));
+        tblStations.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPaneStations.setViewportView(tblStations);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -219,7 +222,9 @@ public final class SwmmWizardPanelStationsUI extends JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         forecastPanel.add(chbForecast, gridBagConstraints);
 

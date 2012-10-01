@@ -23,6 +23,7 @@ import java.awt.EventQueue;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -191,6 +192,7 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                 etaConfiguration.setCso(lightwightCso.getId());
                 etaConfigurations.add(etaConfiguration);
             }
+            Collections.sort(etaConfigurations);
         } else {
             LOG.error("search for CSOs for SWMM Project #" + swmmProjectId + " from localserver '"
                         + SessionManager.getSession().getUser().getDomain() + "' did not return any results");
@@ -229,6 +231,9 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
         tblEtaConfiguration.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
                 new String[] {}));
+        tblEtaConfiguration.setRowSelectionAllowed(false);
+        tblEtaConfiguration.setSelectionBackground(new java.awt.Color(255, 255, 255));
+        tblEtaConfiguration.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPaneEtaConfiguration.setViewportView(tblEtaConfiguration);
 
         cardPanel.add(jScrollPaneEtaConfiguration, "csos");
@@ -351,7 +356,12 @@ public final class EtaWizardPanelEtaConfigurationUI extends JPanel {
                 LOG.debug("updating CSO configuration at " + row + "/" + col + " to '" + value + "'");
             }
             if (col == 1) {
-                etaConfigurations.get(row).setEnabled((Boolean)value);
+                final boolean enabled = (Boolean)value;
+                etaConfigurations.get(row).setEnabled(enabled);
+                if (!enabled) {
+                    etaConfigurations.get(row).setSedimentationEfficency(0.0f);
+                }
+
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("configurations of CSO '" + etaConfigurations.get(row) + "' changed: considered=" + value
                                 + ", need to re-compute total overflow volume!");

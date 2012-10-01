@@ -7,13 +7,15 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 /**
  * DOCUMENT ME!
  *
- * @author   pd
+ * @author   Pascal Dihé
  * @version  $Revision$, $Date$
  */
-public class EtaConfiguration {
+public class EtaConfiguration implements Comparable<EtaConfiguration> {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -116,7 +118,23 @@ public class EtaConfiguration {
     }
 
     @Override
+    @JsonIgnore
     public String toString() {
         return this.getName();
+    }
+
+    @Override
+    @JsonIgnore
+    public int compareTo(final EtaConfiguration etaConfiguration) {
+        if ((etaConfiguration.getName() == null) && (this.getName() == null)) {
+            return 0;
+        }
+        if (this.getName() == null) {
+            return 1;
+        }
+        if (etaConfiguration.getName() == null) {
+            return -1;
+        }
+        return this.getName().compareTo(etaConfiguration.getName());
     }
 }
