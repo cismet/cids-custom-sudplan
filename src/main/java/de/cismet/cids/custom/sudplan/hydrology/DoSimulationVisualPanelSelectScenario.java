@@ -219,7 +219,10 @@ public class DoSimulationVisualPanelSelectScenario extends javax.swing.JPanel {
 
         lblDescriptionValue.setText(NbBundle.getMessage(
                 DoSimulationVisualPanelSelectScenario.class,
-                "DoSimulationVisualPanelSelectScenario.lblDescriptionValue.text")); // NOI18N
+                "DoSimulationVisualPanelSelectScenario.lblDescriptionValue.text"));        // NOI18N
+        lblDescriptionValue.setToolTipText(NbBundle.getMessage(
+                DoSimulationVisualPanelSelectScenario.class,
+                "DoSimulationVisualPanelSelectScenario.lblDescriptionValue.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;

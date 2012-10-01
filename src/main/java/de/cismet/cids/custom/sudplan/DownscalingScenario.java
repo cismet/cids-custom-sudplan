@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import org.openide.util.NbBundle;
+
 /**
  * DOCUMENT ME!
  *
@@ -47,43 +49,31 @@ public final class DownscalingScenario {
     public static String getHtmlDescription(final String scenario) {
         // FIXME: hardcoded description
         if (RF_CCSM3_A1B.equals(scenario)) {
-            return "<html>"                                                                                                             // NOI18N
-                        + "<b><a>CSSM3 A1B</a>:</b><br/>"                                                                               // NOI18N
-                        + "<i>IPCC emission scenario:</i> A1B (intermediate level of future CO2 emissions, peak at 2050)<br/>"          // NOI18N
-                        + "<i>Global model:</i> CSSM3 (University Corporation for Atmospheric Research, USA)<br/>"                      // NOI18N
-                        + "<i>Regional model:</i> RCA3 (SMHI, Sweden)"                                                                  // NOI18N
-                        + "</html>";                                                                                                    // NOI18N
+            return NbBundle.getMessage(
+                    DownscalingScenario.class,
+                    "DownscalingScenario.getHtmlDescription(String).ccsm3a1b.description");
         } else if (AQ_ECHAM_A1B3.equals(scenario) || RF_ECHAM5_A1B3.equals(scenario)
                     || HD_ECHAM5_A1B3.equals(scenario)) {
-            return "<html>"                                                                                                             // NOI18N
-                        + "<b><a>ECHAM5 A1B 3</a>:</b><br/>"                                                                            // NOI18N
-                        + "<i>IPCC emission scenario:</i> A1B (intermediate level of future CO2 emissions, peak at 2050)<br/>"          // NOI18N
-                        + "<i>Global model:</i> ECHAM5 (Max-Planck Institute, Germany)<br/>"                                            // NOI18N
-                        + "<i>Regional model:</i> RCA3 (SMHI, Sweden)"                                                                  // NOI18N
-                        + "</html>";                                                                                                    // NOI18N
+            return NbBundle.getMessage(
+                    DownscalingScenario.class,
+                    "DownscalingScenario.getHtmlDescription(String).echam5a1b3.description");
         } else if (RF_ECHAM5_A21.equals(scenario)) {
-            return "<html>"                                                                                                             // NOI18N
-                        + "<b><a>ECHAM5 A2 1</a>:</b><br/>"                                                                             // NOI18N
-                        + "<i>IPCC emission scenario:</i> A2 (high level of future CO2 emissions, continuous increase until 2100)<br/>" // NOI18N
-                        + "<i>Global model:</i> ECHAM5 (Max-Planck Institute, Germany)<br/>"                                            // NOI18N
-                        + "<i>Regional model:</i> RCA3 (SMHI, Sweden)"                                                                  // NOI18N
-                        + "</html>";                                                                                                    // NOI18N
+            return NbBundle.getMessage(
+                    DownscalingScenario.class,
+                    "DownscalingScenario.getHtmlDescription(String).echam5a21.description");
         } else if (AQ_HADLEY_A1B.equals(scenario) || RF_HADLEY_A1B.equals(scenario) || HD_HADLEY_A1B.equals(scenario)) {
-            return "<html>"                                                                                                             // NOI18N
-                        + "<b><a>HADCM3 A1B</a>:</b><br/>"                                                                              // NOI18N
-                        + "<i>IPCC emission scenario:</i> A1B (intermediate level of future CO2 emissions, peak at 2050)<br/>"          // NOI18N
-                        + "<i>Global model:</i> HADCM3 (Hadley Centre, UK)<br/>"                                                        // NOI18N
-                        + "<i>Regional model:</i> RCA3 (SMHI, Sweden)"                                                                  // NOI18N
-                        + "</html>";                                                                                                    // NOI18N
+            return NbBundle.getMessage(
+                    DownscalingScenario.class,
+                    "DownscalingScenario.getHtmlDescription(String).hadleya1b.description");
         } else if (AQ_CNRM_A1B.equals(scenario)) {
-            return "<html>"                                                                                                             // NOI18N
-                        + "<b><a>CNRM A1B</a>:</b><br/>"                                                                                // NOI18N
-                        + "<i>IPCC emission scenario:</i> A1B (intermediate level of future CO2 emissions, peak at 2050)<br/>"          // NOI18N
-                        + "<i>Global model:</i> CNRM-CM3 (Center National Weather Research, Meteo-France<br/>"                          // NOI18N
-                        + "<i>Regional model:</i> RCA3 (SMHI, Sweden)"                                                                  // NOI18N
-                        + "</html>";                                                                                                    // NOI18N
+            return NbBundle.getMessage(
+                    DownscalingScenario.class,
+                    "DownscalingScenario.getHtmlDescription(String).cnrma1b.description");
         } else {
-            return "<html>unknown scenario: " + scenario + "</html>";                                                                   // NOI18N
+            return NbBundle.getMessage(
+                    DownscalingScenario.class,
+                    "DownscalingScenario.getHtmlDescription(String).unknown.description",
+                    scenario);
         }
     }
 

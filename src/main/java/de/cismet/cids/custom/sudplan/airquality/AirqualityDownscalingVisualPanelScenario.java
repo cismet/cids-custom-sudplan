@@ -193,7 +193,10 @@ public final class AirqualityDownscalingVisualPanelScenario extends javax.swing.
 
         lblDescriptionValue.setText(NbBundle.getMessage(
                 AirqualityDownscalingVisualPanelScenario.class,
-                "AirqualityDownscalingVisualPanelScenario.lblDescriptionValue.text")); // NOI18N
+                "AirqualityDownscalingVisualPanelScenario.lblDescriptionValue.text"));        // NOI18N
+        lblDescriptionValue.setToolTipText(NbBundle.getMessage(
+                AirqualityDownscalingVisualPanelScenario.class,
+                "AirqualityDownscalingVisualPanelScenario.lblDescriptionValue.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -208,7 +211,7 @@ public final class AirqualityDownscalingVisualPanelScenario extends javax.swing.
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         add(filler1, gridBagConstraints);
-    }                                                                                  // </editor-fold>//GEN-END:initComponents
+    }                                                                                         // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
 
