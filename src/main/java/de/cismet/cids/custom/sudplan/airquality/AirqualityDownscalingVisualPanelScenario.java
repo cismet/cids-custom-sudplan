@@ -12,12 +12,20 @@ import org.apache.log4j.Logger;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
+import java.awt.Cursor;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
 import java.util.Arrays;
-import java.util.MissingResourceException;
 
 import javax.swing.DefaultListModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import de.cismet.cids.custom.sudplan.DownscalingScenario;
+
+import de.cismet.tools.BrowserLauncher;
 
 /**
  * DOCUMENT ME!
@@ -43,8 +51,10 @@ public final class AirqualityDownscalingVisualPanelScenario extends javax.swing.
 
     private final transient AirqualityDownscalingWizardPanelScenario model;
     private final transient ListSelectionListener changeModelListener;
+    private final transient MouseListener descL;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.Box.Filler filler1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblDescription;
     private javax.swing.JLabel lblDescriptionValue;
@@ -62,6 +72,7 @@ public final class AirqualityDownscalingVisualPanelScenario extends javax.swing.
     public AirqualityDownscalingVisualPanelScenario(final AirqualityDownscalingWizardPanelScenario model) {
         this.model = model;
         changeModelListener = new ChangeModelListener();
+        descL = new DescriptionClickListener();
 
         // name of the wizard step
         this.setName(NbBundle.getMessage(
@@ -74,6 +85,7 @@ public final class AirqualityDownscalingVisualPanelScenario extends javax.swing.
                 ListSelectionListener.class,
                 changeModelListener,
                 lstScenarios));
+        lblDescriptionValue.addMouseListener(WeakListeners.create(MouseListener.class, descL, lblDescriptionValue));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -130,8 +142,12 @@ public final class AirqualityDownscalingVisualPanelScenario extends javax.swing.
         lstScenarios = new javax.swing.JList();
         lblDescription = new javax.swing.JLabel();
         lblDescriptionValue = new javax.swing.JLabel();
+        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 32767));
 
         setMinimumSize(new java.awt.Dimension(200, 150));
+        setOpaque(false);
         setPreferredSize(new java.awt.Dimension(450, 300));
         setLayout(new java.awt.GridBagLayout());
 
@@ -147,6 +163,9 @@ public final class AirqualityDownscalingVisualPanelScenario extends javax.swing.
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
         add(lblScenarios, gridBagConstraints);
 
+        jScrollPane1.setMinimumSize(new java.awt.Dimension(260, 96));
+        jScrollPane1.setPreferredSize(new java.awt.Dimension(260, 96));
+
         lstScenarios.setModel(new DefaultListModel());
         lstScenarios.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(lstScenarios);
@@ -156,11 +175,7 @@ public final class AirqualityDownscalingVisualPanelScenario extends javax.swing.
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.ipadx = 337;
-        gridBagConstraints.ipady = 213;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jScrollPane1, gridBagConstraints);
 
@@ -186,6 +201,13 @@ public final class AirqualityDownscalingVisualPanelScenario extends javax.swing.
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblDescriptionValue, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(filler1, gridBagConstraints);
     }                                                                                  // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
@@ -201,36 +223,50 @@ public final class AirqualityDownscalingVisualPanelScenario extends javax.swing.
 
         @Override
         public void valueChanged(final ListSelectionEvent e) {
-            if (MODEL_LOADING.equals(lstScenarios.getModel()) || e.getValueIsAdjusting()) {
-                lblDescriptionValue.setText(null);
-                return;
-            }
+            if (!e.getValueIsAdjusting()) {
+                final Object selectedValue = lstScenarios.getSelectedValue();
 
-            final String selectedModel = (String)lstScenarios.getSelectedValue();
-
-            model.setScenario(selectedModel);
-
-            String description;
-            if (selectedModel != null) {
-                try {
-                    description = NbBundle.getMessage(
+                if (selectedValue == null) {
+                    lblDescriptionValue.setText(NbBundle.getMessage(
                             AirqualityDownscalingVisualPanelScenario.class,
-                            "AirqualityDownscalingVisualPanelScenario.lblDescriptionValue.text."
-                                    + lstScenarios.getSelectedValue().toString());                            // NOI18N
-                } catch (final MissingResourceException ex) {
-                    LOG.info("Couldn't find a description for model '" + selectedModel + "'.", ex);           // NOI18N
-                    description = NbBundle.getMessage(
-                            AirqualityDownscalingVisualPanelScenario.class,
-                            "AirqualityDownscalingVisualPanelScenario.lblDescriptionValue.text.unknownModel", // NOI18N
-                            selectedModel);
+                            "AirqualityDownscalingVisualPanelScenario.lblDescriptionValue.text")); // NOI18N
+                } else {
+                    final String scenario = (String)selectedValue;
+                    model.setScenario(scenario);
+                    lblDescriptionValue.setText(DownscalingScenario.getHtmlDescription(scenario));
                 }
-            } else {
-                description = NbBundle.getMessage(
-                        AirqualityDownscalingVisualPanelScenario.class,
-                        "AirqualityDownscalingVisualPanelScenario.lblDescriptionValue.text.noModel");         // NOI18N
             }
+        }
+    }
 
-            lblDescriptionValue.setText(description);
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class DescriptionClickListener extends MouseAdapter {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void mouseEntered(final MouseEvent e) {
+            lblDescriptionValue.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        }
+
+        @Override
+        public void mouseExited(final MouseEvent e) {
+            lblDescriptionValue.setCursor(null);
+        }
+
+        @Override
+        public void mouseClicked(final MouseEvent e) {
+            final String url = DownscalingScenario.getDetailLink(lstScenarios.getSelectedValue().toString());
+
+            try {
+                BrowserLauncher.openURL(url);
+            } catch (final Exception ex) {
+                LOG.warn("cannot open link", ex); // NOI18N
+            }
         }
     }
 }

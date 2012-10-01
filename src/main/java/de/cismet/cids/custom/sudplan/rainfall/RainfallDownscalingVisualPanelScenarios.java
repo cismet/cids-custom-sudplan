@@ -7,11 +7,16 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.rainfall;
 
-import org.openide.util.Exceptions;
+import org.apache.log4j.Logger;
+
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
+import java.awt.Cursor;
 import java.awt.EventQueue;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import java.util.Arrays;
 
@@ -19,7 +24,10 @@ import javax.swing.DefaultListModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import de.cismet.cids.custom.sudplan.DownscalingScenario;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
+
+import de.cismet.tools.BrowserLauncher;
 
 /**
  * DOCUMENT ME!
@@ -29,14 +37,21 @@ import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
  */
 public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.JPanel {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    /** LOGGER. */
+    private static final transient Logger LOG = Logger.getLogger(RainfallDownscalingVisualPanelScenarios.class);
+
     //~ Instance fields --------------------------------------------------------
 
     private final transient RainfallDownscalingWizardPanelScenarios model;
     private final transient ListSelectionListener listL;
+    private final transient MouseListener descL;
 
     private transient LoadingIndicator li;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.Box.Filler filler1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblDescription;
     private javax.swing.JLabel lblDescriptionValue;
@@ -54,6 +69,7 @@ public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.J
     public RainfallDownscalingVisualPanelScenarios(final RainfallDownscalingWizardPanelScenarios model) {
         this.model = model;
         this.listL = new ListSelectionListenerImpl();
+        this.descL = new DescriptionClickListener();
 
         // name of the wizard step
         this.setName(NbBundle.getMessage(
@@ -63,6 +79,7 @@ public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.J
         initComponents();
 
         lstScenarios.addListSelectionListener(WeakListeners.create(ListSelectionListener.class, listL, lstScenarios));
+        lblDescriptionValue.addMouseListener(WeakListeners.create(MouseListener.class, descL, lblDescriptionValue));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -136,6 +153,9 @@ public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.J
         lstScenarios = new javax.swing.JList();
         lblDescriptionValue = new javax.swing.JLabel();
         lblDescription = new javax.swing.JLabel();
+        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 32767));
 
         setMinimumSize(new java.awt.Dimension(200, 150));
         setOpaque(false);
@@ -152,6 +172,10 @@ public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.J
         gridBagConstraints.insets = new java.awt.Insets(20, 20, 0, 0);
         add(lblScenarios, gridBagConstraints);
 
+        jScrollPane1.setMaximumSize(new java.awt.Dimension(32767, 96));
+        jScrollPane1.setMinimumSize(new java.awt.Dimension(260, 96));
+        jScrollPane1.setPreferredSize(new java.awt.Dimension(260, 96));
+
         lstScenarios.setModel(new DefaultListModel());
         lstScenarios.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(lstScenarios);
@@ -160,18 +184,17 @@ public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.J
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.ipadx = 337;
-        gridBagConstraints.ipady = 213;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(8, 20, 20, 20);
         add(jScrollPane1, gridBagConstraints);
 
         lblDescriptionValue.setText(NbBundle.getMessage(
                 RainfallDownscalingVisualPanelScenarios.class,
-                "RainfallDownscalingVisualPanelScenarios.lblDescriptionValue.text")); // NOI18N
+                "RainfallDownscalingVisualPanelScenarios.lblDescriptionValue.text"));        // NOI18N
+        lblDescriptionValue.setToolTipText(NbBundle.getMessage(
+                RainfallDownscalingVisualPanelScenarios.class,
+                "RainfallDownscalingVisualPanelScenarios.lblDescriptionValue.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -190,9 +213,47 @@ public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.J
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 20, 5, 20);
         add(lblDescription, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(filler1, gridBagConstraints);
     }                                                                            // </editor-fold>//GEN-END:initComponents
 
     //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class DescriptionClickListener extends MouseAdapter {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void mouseEntered(final MouseEvent e) {
+            lblDescriptionValue.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        }
+
+        @Override
+        public void mouseExited(final MouseEvent e) {
+            lblDescriptionValue.setCursor(null);
+        }
+
+        @Override
+        public void mouseClicked(final MouseEvent e) {
+            final String url = DownscalingScenario.getDetailLink(lstScenarios.getSelectedValue().toString());
+
+            try {
+                BrowserLauncher.openURL(url);
+            } catch (final Exception ex) {
+                LOG.warn("cannot open link", ex); // NOI18N
+            }
+        }
+    }
 
     /**
      * DOCUMENT ME!
@@ -265,26 +326,19 @@ public final class RainfallDownscalingVisualPanelScenarios extends javax.swing.J
          */
         @Override
         public void valueChanged(final ListSelectionEvent e) {
-            model.fireChangeEvent();
+            if (!e.getValueIsAdjusting()) {
+                model.fireChangeEvent();
 
-            // FIXME: hardcoded description
-            if ("ECHAM5 A1B 3 RCP 4.5".equals(lstScenarios.getSelectedValue())) {
-                lblDescriptionValue.setText(
-                    "<html>"
-                            + "This data was calculated using the ECHAM 5 global climate model operated by the Max-Planck-"
-                            + "Institut für Meterologie, Hamburg, Germany. The A1B greenhouse gas climate scenario in "
-                            + "variation 3 was utilised and European tracer emissions tuned to a net radiative forcing of "
-                            + "4.5 W/m² at stabilization after year 2100."
-                            + "</html>");
-            } else if ("HADLEY A1B RCP 4.5".equals(lstScenarios.getSelectedValue())) {
-                lblDescriptionValue.setText(
-                    "<html>"
-                            + "This data was calculated using the HADLEY global climate model operated by Hadley Centre, "
-                            + "Bracknell, UK. The A1B greenhouse gas climate scenario was utilised and European tracer "
-                            + "emissions tuned to a net radiative forcing of 4.5 W/m² at stabilization after year 2100."
-                            + "</html>");
-            } else {
-                lblDescriptionValue.setText(null);
+                final Object selectedValue = lstScenarios.getSelectedValue();
+
+                if (selectedValue == null) {
+                    lblDescriptionValue.setText(NbBundle.getMessage(
+                            RainfallDownscalingVisualPanelScenarios.class,
+                            "RainfallDownscalingVisualPanelScenarios.lblDescriptionValue.text")); // NOI18N
+                } else {
+                    final String scenario = lstScenarios.getSelectedValue().toString();
+                    lblDescriptionValue.setText(DownscalingScenario.getHtmlDescription(scenario));
+                }
             }
         }
     }
