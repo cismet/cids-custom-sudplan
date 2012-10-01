@@ -196,7 +196,12 @@ public class ChangeLayerStyleAction extends AbstractMapPopupAction {
                             + ((layerStyle != null) ? layerStyle.getName() : "null") + "'.");
             }
 
-            layer.setCustomSLD(layerStyle.getSLDForLayer());
+            if (layerStyle == null) {
+                layer.setCustomSLD(null);
+            } else {
+                layer.setCustomSLD(layerStyle.getSLDForLayer());
+            }
+
             layer.retrieve(true);
         }
     }
