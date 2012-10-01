@@ -15,6 +15,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -84,9 +85,10 @@ public class EtaInput extends SwmmOutput {
                         csoOverflow.getCso());
                 this.etaConfigurations.add(etaConfiguration);
             }
+            Collections.sort(this.etaConfigurations);
+            this.resetToDefaults();
         }
 
-        this.resetToDefaults();
         this.computeTotalOverflowVolume();
     }
 
@@ -152,6 +154,7 @@ public class EtaInput extends SwmmOutput {
      */
     public void setEtaConfigurations(final List<EtaConfiguration> etaConfigurations) {
         this.etaConfigurations = etaConfigurations;
+        Collections.sort(this.etaConfigurations);
 
         if ((this.csoOverflows != null) && !this.csoOverflows.isEmpty()) {
             if (LOG.isDebugEnabled()) {
@@ -237,15 +240,11 @@ public class EtaInput extends SwmmOutput {
     public void resetToDefaults() {
         if ((this.etaConfigurations != null) && !this.etaConfigurations.isEmpty()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("resetting " + this.etaConfigurations.size() + " ETA Configurations of '" + this
+                LOG.warn("resetting " + this.etaConfigurations.size() + " ETA Configurations of '" + this
                             + "' to defaults");
             }
             for (final EtaConfiguration etaConfiguration : etaConfigurations) {
-                if (etaConfiguration.getName().equalsIgnoreCase("RKL_Ablauf")
-                            || etaConfiguration.getName().equalsIgnoreCase("RUEB_Lunznolink")
-                            || etaConfiguration.getName().equalsIgnoreCase("RUEB_Pleshnolink")
-                            || etaConfiguration.getName().equalsIgnoreCase("RDS20_1S48nolink")
-                            || etaConfiguration.getName().equalsIgnoreCase("RHHB_Wsee3nolink")) {
+                if (etaConfiguration.getName().equalsIgnoreCase("RKL_Ablauf")) {
                     etaConfiguration.setEnabled(false);
                 }
 
@@ -256,7 +255,6 @@ public class EtaInput extends SwmmOutput {
                             || etaConfiguration.getName().equalsIgnoreCase("EDBSP1nolink")
                             || etaConfiguration.getName().equalsIgnoreCase("ENNSP1nolink")
                             || etaConfiguration.getName().equalsIgnoreCase("ENNSP2nolink")
-                            || etaConfiguration.getName().equalsIgnoreCase("RUEB_Traunnolink")
                             || etaConfiguration.getName().equalsIgnoreCase("EWDSP1nolink")
                             || etaConfiguration.getName().equalsIgnoreCase("FKDSP1nolink")
                             || etaConfiguration.getName().equalsIgnoreCase("GLWSP1nolink")
@@ -267,12 +265,15 @@ public class EtaInput extends SwmmOutput {
                             || etaConfiguration.getName().equalsIgnoreCase("NNKSP1nolink")
                             || etaConfiguration.getName().equalsIgnoreCase("OTHSP1nolink")
                             || etaConfiguration.getName().equalsIgnoreCase("PNASP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("RHHB_Weikerlsee3nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("RUEB_Traunnolink")
                             || etaConfiguration.getName().equalsIgnoreCase("SMMSP1nolink")
                             || etaConfiguration.getName().equalsIgnoreCase("STYSP1nolink")
+                            || etaConfiguration.getName().equalsIgnoreCase("ULKS1")
                             || etaConfiguration.getName().equalsIgnoreCase("WLDSP1nolink")
                             || etaConfiguration.getName().equalsIgnoreCase("WLDSP2nolink")
                             || etaConfiguration.getName().equalsIgnoreCase("WLGSP1nolink")) {
-                    etaConfiguration.setSedimentationEfficency(21.0f);
+                    etaConfiguration.setSedimentationEfficency(20.0f);
                 } else {
                     etaConfiguration.setSedimentationEfficency(0.0f);
                 }
