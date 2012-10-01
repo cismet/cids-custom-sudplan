@@ -288,7 +288,6 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
                 new String[] {}));
         tblTimeseries.setRowSelectionAllowed(false);
         tblTimeseries.setSelectionBackground(new java.awt.Color(255, 255, 255));
-        tblTimeseries.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPaneTimeseries.setViewportView(tblTimeseries);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
