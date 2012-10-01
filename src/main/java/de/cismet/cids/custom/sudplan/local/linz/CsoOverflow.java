@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.linz;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -20,7 +22,7 @@ import de.cismet.cids.dynamics.CidsBean;
  * @author   pd
  * @version  $Revision$, $Date$
  */
-public class CsoOverflow {
+public class CsoOverflow implements Comparable<CsoOverflow> {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -223,7 +225,23 @@ public class CsoOverflow {
     }
 
     @Override
+    @JsonIgnore
     public String toString() {
         return this.getName();
+    }
+
+    @Override
+    @JsonIgnore
+    public int compareTo(final CsoOverflow csoOverflow) {
+        if ((csoOverflow.getName() == null) && (this.getName() == null)) {
+            return 0;
+        }
+        if (this.getName() == null) {
+            return 1;
+        }
+        if (csoOverflow.getName() == null) {
+            return -1;
+        }
+        return this.getName().compareTo(csoOverflow.getName());
     }
 }

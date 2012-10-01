@@ -150,13 +150,16 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
      * @param  etaOutput  DOCUMENT ME!
      */
     private void updateGauges(final EtaOutput etaOutput) {
+        final DecimalFormat decimalFormat = new DecimalFormat("#.#");
         final int etaHydRequired = (int)etaOutput.getEtaHydRequired();
         final int etaSedRequired = (int)etaOutput.getEtaSedRequired();
 
         // this.etaHydGauge.setThreshold(etaOutput.getEtaHydRequired());
         // this.etaHydGauge.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaHydActual()));
         this.etaHydBar.setThreshold(etaOutput.getEtaHydRequired());
-        this.etaHydBar.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaHydRequired()));
+        this.etaHydBar.setToolTipText(decimalFormat.format(etaOutput.getEtaHydRequired()));
+        this.etaHydBar.setUnitString(this.etaHydBar.getUnitString()
+                    + decimalFormat.format(etaOutput.getEtaHydRequired()) + '%');
 
         if (etaHydRequired <= 50) {
             // this.etaHydGauge.setSections(SECTION_ETA_HYD_50);
@@ -191,7 +194,9 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         // this.etaSedGauge.setThreshold(etaOutput.getEtaSedRequired());
         // this.etaSedGauge.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaSedActual()));
         this.etaSedBar.setThreshold(etaOutput.getEtaSedRequired());
-        this.etaSedBar.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getEtaSedRequired()));
+        this.etaSedBar.setToolTipText(decimalFormat.format(etaOutput.getEtaSedRequired()));
+        this.etaSedBar.setUnitString(this.etaSedBar.getUnitString()
+                    + decimalFormat.format(etaOutput.getEtaSedRequired()) + '%');
 
         if (etaSedRequired <= 65) {
             // this.etaSedGauge.setSections(SECTION_ETA_SED_65);
@@ -225,8 +230,8 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
 
         // this.r720Gauge.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getR720()));
         // this.totalOverflowGauge.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getTotalOverflowVolume()));
-        this.r720Bar.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getR720()));
-        this.totalOverflowBar.setToolTipText(new DecimalFormat("#.#").format(etaOutput.getTotalOverflowVolume()));
+        this.r720Bar.setToolTipText(decimalFormat.format(etaOutput.getR720()));
+        this.totalOverflowBar.setToolTipText(decimalFormat.format(etaOutput.getTotalOverflowVolume()));
         if (etaOutput.getTotalOverflowVolume() > 0) {
             // this.totalOverflowGauge.setMaxValue(etaOutput.getTotalOverflowVolume() * 1.5);
             this.totalOverflowBar.setMaxValue(etaOutput.getTotalOverflowVolume() * 1.5);
@@ -626,10 +631,10 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         etaHydBar.setLcdDecimals(2);
         etaHydBar.setLcdInfoString(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
-                "EtaOutputManagerUI.etaHydBar.lcdInfoString")); // NOI18N
+                "EtaOutputManagerUI.etaHydBar.lcdInfoString"));             // NOI18N
         etaHydBar.setLcdUnitString(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
-                "EtaOutputManagerUI.etaHydBar.lcdUnitString")); // NOI18N
+                "EtaOutputManagerUI.etaHydBar.lcdUnitString"));             // NOI18N
         etaHydBar.setLcdUnitStringVisible(true);
         etaHydBar.setLedVisible(false);
         etaHydBar.setMaxNoOfMajorTicks(5);
@@ -642,12 +647,15 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         etaHydBar.setThreshold(0.0);
         etaHydBar.setThresholdType(eu.hansolo.steelseries.tools.ThresholdType.ARROW);
         etaHydBar.setThresholdVisible(true);
+        etaHydBar.setTicklabelsVisible(false);
         etaHydBar.setTitle(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
-                "EtaOutputManagerUI.etaHydBar.title"));         // NOI18N
+                "EtaOutputManagerUI.etaHydBar.title"));                     // NOI18N
+        etaHydBar.setTitleAndUnitFont(new java.awt.Font("Verdana", 0, 12)); // NOI18N
+        etaHydBar.setTitleAndUnitFontEnabled(true);
         etaHydBar.setUnitString(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
-                "EtaOutputManagerUI.etaHydBar.unitString"));    // NOI18N
+                "EtaOutputManagerUI.etaHydBar.unitString"));                // NOI18N
         etaHydBar.setUserLedVisible(true);
 
         final javax.swing.GroupLayout etaHydBarLayout = new javax.swing.GroupLayout(etaHydBar);
@@ -679,11 +687,11 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         etaSedBar.setLcdDecimals(2);
         etaSedBar.setLcdInfoString(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
-                "EtaOutputManagerUI.etaSedBar.lcdInfoString")); // NOI18N
+                "EtaOutputManagerUI.etaSedBar.lcdInfoString"));             // NOI18N
         etaSedBar.setLcdThreshold(5.0);
         etaSedBar.setLcdUnitString(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
-                "EtaOutputManagerUI.etaSedBar.lcdUnitString")); // NOI18N
+                "EtaOutputManagerUI.etaSedBar.lcdUnitString"));             // NOI18N
         etaSedBar.setLcdUnitStringVisible(true);
         etaSedBar.setLedVisible(false);
         etaSedBar.setMaxNoOfMajorTicks(5);
@@ -696,13 +704,15 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         etaSedBar.setThreshold(0.0);
         etaSedBar.setThresholdType(eu.hansolo.steelseries.tools.ThresholdType.ARROW);
         etaSedBar.setThresholdVisible(true);
-        etaSedBar.setTickmarkSectionsVisible(true);
+        etaSedBar.setTicklabelsVisible(false);
         etaSedBar.setTitle(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
-                "EtaOutputManagerUI.etaSedBar.title"));         // NOI18N
+                "EtaOutputManagerUI.etaSedBar.title"));                     // NOI18N
+        etaSedBar.setTitleAndUnitFont(new java.awt.Font("Verdana", 0, 12)); // NOI18N
+        etaSedBar.setTitleAndUnitFontEnabled(true);
         etaSedBar.setUnitString(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
-                "EtaOutputManagerUI.etaSedBar.unitString"));    // NOI18N
+                "EtaOutputManagerUI.etaSedBar.unitString"));                // NOI18N
         etaSedBar.setUserLedVisible(true);
 
         final javax.swing.GroupLayout etaSedBarLayout = new javax.swing.GroupLayout(etaSedBar);
@@ -779,6 +789,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         r720Bar.setTitle(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
                 "EtaOutputManagerUI.r720Bar.title"));         // NOI18N
+        r720Bar.setTitleAndUnitFontEnabled(true);
         r720Bar.setTrackSection(30.0);
         r720Bar.setUnitString(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
@@ -830,6 +841,7 @@ public class EtaOutputManagerUI extends javax.swing.JPanel implements Titled {
         totalOverflowBar.setTitle(org.openide.util.NbBundle.getMessage(
                 EtaOutputManagerUI.class,
                 "EtaOutputManagerUI.totalOverflowBar.title"));         // NOI18N
+        totalOverflowBar.setTitleAndUnitFontEnabled(true);
         totalOverflowBar.setTrackSection(30.0);
         totalOverflowBar.setTransparentSectionsEnabled(true);
         totalOverflowBar.setUnitString(org.openide.util.NbBundle.getMessage(
