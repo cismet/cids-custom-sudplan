@@ -60,14 +60,12 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
 
     @Override
     public Component getComponent() {
-        if (component == null) {
-            synchronized (this) {
-                if (component == null) {
-                    try {
-                        component = new EtaWizardPanelProjectUI(this);
-                    } catch (final WizardInitialisationException ex) {
-                        LOG.error("cannot create wizard panel component", ex); // NOI18N
-                    }
+        synchronized (this) {
+            if (component == null) {
+                try {
+                    component = new EtaWizardPanelProjectUI(this);
+                } catch (final Exception ex) {
+                    LOG.error("cannot create wizard panel component", ex); // NOI18N
                 }
             }
         }
@@ -92,6 +90,7 @@ public final class EtaWizardPanelProject implements WizardDescriptor.Panel {
             this.selectedSwmmScenario = (CidsBean)wizard.getProperty(EtaWizardAction.PROP_SWMM_SCENARIO_BEAN);
         }
 
+        assert component != null : "GUI Component is NULL!";
         component.init();
     }
 
