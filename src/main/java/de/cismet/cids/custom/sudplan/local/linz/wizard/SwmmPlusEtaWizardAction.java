@@ -112,7 +112,7 @@ public final class SwmmPlusEtaWizardAction extends AbstractCidsBeanAction {
 
         if (TABLENAME_SWMM_PROJECT.equals(mc.getTableName())) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("opening wizard with swmm project:" + mo);
+                LOG.debug("opening wizard with swmm project: " + mo);
             }
             final SwmmPlusEtaWizardIterator iterator = new SwmmPlusEtaWizardIterator();
             wizardDescriptor = new WizardDescriptor(iterator);

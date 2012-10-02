@@ -49,7 +49,7 @@ public final class SwmmActionCExtProvider implements CExtProvider<CidsBeanAction
      */
     public SwmmActionCExtProvider() {
         ifaceClass = "de.cismet.cids.utils.interfaces.CidsBeanAction";                                     // NOI18N
-        etaWizardActionClass = "de.cismet.cids.custom.sudplan.local.linz.wizard.EtaWizardActionClass";     // NOI18N
+        etaWizardActionClass = "de.cismet.cids.custom.sudplan.local.linz.wizard.EtaWizardAction";          // NOI18N
         swmmWizardActionClass = "de.cismet.cids.custom.sudplan.local.linz.wizard.SwmmPlusEtaWizardAction"; // NOI18N
     }
 
