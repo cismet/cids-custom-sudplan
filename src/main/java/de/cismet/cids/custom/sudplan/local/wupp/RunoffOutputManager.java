@@ -159,7 +159,7 @@ public final class RunoffOutputManager implements Manager {
         if (io.getDeltaInputId() < 0) {
             geocpmBean = io.fetchGeocpmInput();
         } else {
-            geocpmBean = io.fetchDeltaInput();
+            geocpmBean = (CidsBean)io.fetchDeltaInput().getProperty("original_object"); // NOI18N
         }
 
         final Geometry geom = (Geometry)geocpmBean.getProperty("geom.geo_field"); // NOI18N
