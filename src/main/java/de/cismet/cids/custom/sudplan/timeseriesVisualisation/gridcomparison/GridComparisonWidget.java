@@ -105,17 +105,25 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
      * Creates new form GridComparisonWidget.
      */
     public GridComparisonWidget() {
-        layerStylesChangeListener = new LayerStylesChangeListener();
-        LayerStyles.instance().addPropertyChangeListener(layerStylesChangeListener);
-
         enableGridComparisonListener = new EnableGridComparisonRetrievalListener();
+        layerStylesChangeListener = new LayerStylesChangeListener();
 
         initComponents();
 
-        StaticSwingTools.enableSliderToolTips(sldContrastResult, new MessageFormat("Contrast: {0,number,#0.0}"), .1D);
-
         cmbFirstOperand.setRenderer(new SlidableWMSServiceLayerGroupCellRenderer());
         cmbSecondOperand.setRenderer(new SlidableWMSServiceLayerGroupCellRenderer());
+
+        cmbLayerStyle.insertItemAt(NbBundle.getMessage(
+                GridComparisonWidget.class,
+                "GridComparisonWidget.cmbLayerStyle.selectAStyle"),
+            0);
+        cmbLayerStyle.insertItemAt(NbBundle.getMessage(
+                GridComparisonWidget.class,
+                "GridComparisonWidget.cmbLayerStyle.automaticStyle"),
+            1);
+        LayerStyles.instance().addPropertyChangeListener(layerStylesChangeListener);
+
+        lscLayerStyle.setVisible(false);
 
         String cmbComparisonMethodNoSelection = "Please select an operation";
         String nullValueForLayerCmbs = "Please select an operation";
@@ -137,7 +145,8 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
         cmbFirstOperand.setPrototypeDisplayValue(nullValueForLayerCmbs);
         cmbSecondOperand.setPrototypeDisplayValue(nullValueForLayerCmbs);
 
-        lscLayerStyle.setVisible(false);
+        StaticSwingTools.enableSliderToolTips(sldContrastResult, new MessageFormat("Contrast: {0,number,#0.0}"), .1D);
+        sldContrastResult.setEnabled(false);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -389,6 +398,8 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
         final Object operationObj = cmbComparisonMethod.getSelectedItem();
         if (!(operationObj instanceof GridComparator.Operation)) {
             operation = null;
+
+            // The user reset the operation, but if there is a valid layer style, we still display the distributions.
             if ((firstOperand != null) && (secondOperand != null) && (layerStyle != null)) {
                 pnlLayerStyleAdditionalInformation.add(disDistributions, BorderLayout.CENTER);
             }
@@ -399,7 +410,6 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
             lscLayerStyle.setLayerStyle(layerStyle);
         } else {
             operation = (GridComparator.Operation)operationObj;
-            sldContrastResult.setEnabled(true);
         }
 
         refreshFeature();
@@ -491,7 +501,9 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
      * @param  evt  DOCUMENT ME!
      */
     private void cmbFirstOperandItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_cmbFirstOperandItemStateChanged
-        if (evt.getStateChange() != ItemEvent.SELECTED) {
+        // If the combo box is disabled, we are in the progress of reloading layers. Within this progress, the combo box
+        // will be enabled again. Then this method will be invoked by changing the selection.
+        if ((evt.getStateChange() != ItemEvent.SELECTED) || !cmbFirstOperand.isEnabled()) {
             return;
         }
 
@@ -508,7 +520,9 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
      * @param  evt  DOCUMENT ME!
      */
     private void cmbSecondOperandItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_cmbSecondOperandItemStateChanged
-        if (evt.getStateChange() != ItemEvent.SELECTED) {
+        // If the combo box is disabled, we are in the progress of reloading layers. Within this progress, the combo box
+        // will be enabled again. Then this method will be invoked by changing the selection.
+        if ((evt.getStateChange() != ItemEvent.SELECTED) || !cmbSecondOperand.isEnabled()) {
             return;
         }
 
@@ -611,17 +625,25 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
      * DOCUMENT ME!
      */
     protected void reloadLayers() {
-        final List<SlidableWMSServiceLayerGroup> layers = GridComparisonLayerProvider.instance().getLayers(true);
-
         EventQueue.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
+                    final List<SlidableWMSServiceLayerGroup> layers = GridComparisonLayerProvider.instance()
+                                .getLayers(true);
+
                     cmbFirstOperand.removeAllItems();
                     cmbSecondOperand.removeAllItems();
-                    checkControls();
 
                     if ((layers == null) || (layers.size() < 2)) {
+                        firstOperand = null;
+                        secondOperand = null;
+                        layerStyle = null;
+
+                        cmbLayerStyle.setSelectedIndex(0);
+
+                        checkControls();
+
                         return;
                     }
 
@@ -630,8 +652,51 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
                         cmbSecondOperand.addItem(layer);
                     }
 
-                    checkControls();
-                    setOperands(layers.get(0), layers.get(1));
+                    // Don't let the selection be changed by just adding some items
+                    cmbFirstOperand.setSelectedItem(null);
+                    cmbSecondOperand.setSelectedItem(null);
+
+                    // Enable the layer selectors in order to allow processing of selection changes.
+                    cmbFirstOperand.setEnabled(true);
+                    cmbSecondOperand.setEnabled(true);
+
+                    if (!(layers.contains(firstOperand) && !(layers.contains(secondOperand)))) {
+                        setOperands(layers.get(0), layers.get(1));
+
+                        // Set the automatic layer style after the new operands have been set. setOperands() appends
+                        // a Runnable at the end of the EventQueue, thus forcing us to generate and set the automatic
+                        // layer style after that.
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    if (layerStyle == null) {
+                                        generateAutomaticLayerStyle();
+                                        cmbLayerStyle.setSelectedIndex(1);
+                                    }
+                                }
+                            });
+                    } else if (!layers.contains(secondOperand)) {
+                        SlidableWMSServiceLayerGroup secondLayer = null;
+                        for (final SlidableWMSServiceLayerGroup layerCandidate : layers) {
+                            if (layerCandidate.equals(firstOperand)) {
+                                secondLayer = layerCandidate;
+                                break;
+                            }
+                        }
+
+                        setOperands(null, secondLayer);
+                    } else if (!layers.contains(firstOperand)) {
+                        SlidableWMSServiceLayerGroup firstLayer = null;
+                        for (final SlidableWMSServiceLayerGroup layerCandidate : layers) {
+                            if (layerCandidate.equals(secondOperand)) {
+                                firstLayer = layerCandidate;
+                                break;
+                            }
+                        }
+
+                        setOperands(firstLayer, null);
+                    }
 
                     checkControls();
                     cmbComparisonMethod.setSelectedIndex(0);
@@ -700,10 +765,13 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
 
         if ((result != null) && !result.isEmpty()) {
             final Geometry geometry = ((SlidableWMSServiceLayerGroup)firstOperand).getBoundingBox().getGeometry();
+
             feature = new SlidingImagesFeature(result, geometry);
             feature.setSliderPosition(sldTimestamp.getValue());
             feature.setName(nameOfFeature);
+
             CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(feature);
+
             sldTimestamp.setEnabled(true);
 
             if ((firstOperand != null) && (firstOperand.getPNode() != null)) {
@@ -957,6 +1025,34 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
                     && (layerStyle != null));
     }
 
+    /**
+     * DOCUMENT ME!
+     */
+    private void generateAutomaticLayerStyle() {
+        if ((firstOperand != null) && (secondOperand != null)) {
+            final Distribution firstDistribution = extractDistribution(firstOperand);
+            final Distribution secondDistribution = extractDistribution(secondOperand);
+
+            if ((firstDistribution != null) && (firstDistribution.getMax() != Double.NaN)
+                        && (firstDistribution.getMin() != Double.NaN)
+                        && (secondDistribution != null)
+                        && (secondDistribution.getMax() != Double.NaN)
+                        && (secondDistribution.getMin() != Double.NaN)) {
+                final List<Entry> colorMap = new LinkedList<Entry>();
+                colorMap.add(new Entry(Math.min(firstDistribution.getMin(), secondDistribution.getMin()), Color.green));
+                colorMap.add(new Entry(Math.max(firstDistribution.getMax(), secondDistribution.getMax()), Color.red));
+
+                cmbLayerStyle.removeItemAt(1);
+                cmbLayerStyle.insertItemAt(new LayerStyle(
+                        NbBundle.getMessage(
+                            LayerStyleCellRenderer.class,
+                            "GridComparisonWidget.cmbLayerStyle.automaticStyle"),
+                        colorMap),
+                    1);
+            }
+        }
+    }
+
     @Override
     public void featuresAdded(final FeatureCollectionEvent fce) {
     }
@@ -1122,10 +1218,26 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
             }
 
             final List newValue = (List)evt.getNewValue();
+            LayerStyle automaticStyle = null;
+            if (cmbLayerStyle.getItemCount() > 1) {
+                final Object automaticStyleCandidate = cmbLayerStyle.getItemAt(1);
+
+                if (!(automaticStyleCandidate instanceof LayerStyle)
+                            || !(((LayerStyle)automaticStyleCandidate).getName().equals(
+                                    NbBundle.getMessage(
+                                        LayerStyleCellRenderer.class,
+                                        "GridComparisonWidget.cmbLayerStyle.automaticStyle")))) {
+                    automaticStyle = null;
+                }
+            }
+
             cmbLayerStyle.removeAllItems();
             cmbLayerStyle.addItem(NbBundle.getMessage(
                     LayerStyleCellRenderer.class,
-                    "GridComparisonWidget.LayerStylesChangeListener.selectAStyle"));
+                    "GridComparisonWidget.cmbLayerStyle.selectAStyle"));
+            if (automaticStyle != null) {
+                cmbLayerStyle.addItem(automaticStyle);
+            }
 
             for (final Object layerStyleObj : newValue) {
                 if (!(layerStyleObj instanceof LayerStyle)) {
