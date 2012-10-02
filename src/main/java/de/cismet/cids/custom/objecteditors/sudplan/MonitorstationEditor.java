@@ -438,7 +438,7 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
             createCtx();
 
             if ((e.getSource() instanceof JCheckBox) && (cidsBean.getProperty("type") == null)) {
-                // we have to use invoke later in the edt because the dialog would cause a selection event to be thrown 
+                // we have to use invoke later in the edt because the dialog would cause a selection event to be thrown
                 // again, resulting in a checkbox that cannot be deselected
                 EventQueue.invokeLater(new Runnable() {
 
