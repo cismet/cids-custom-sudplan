@@ -185,6 +185,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
     private javax.swing.JScrollPane scpFotoList;
     private javax.swing.JScrollPane scrollPane;
     private de.cismet.tools.gui.RoundedPanel swmmScenarioPanel;
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -394,6 +395,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
+        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         panFooter = new javax.swing.JPanel();
         panButtons1 = new javax.swing.JPanel();
@@ -731,12 +733,20 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 10);
         linksPanel.add(lblSwmmProject, gridBagConstraints);
 
-        lblSwmmProjectText.setText(org.openide.util.NbBundle.getMessage(
-                LinzCsoRenderer.class,
-                "LinzCsoRenderer.lblSwmmProjectText.text")); // NOI18N
+        lblSwmmProjectText.setPreferredSize(new java.awt.Dimension(3, 20));
+
+        final org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${cidsBean}"),
+                lblSwmmProjectText,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 10);
         linksPanel.add(lblSwmmProjectText, gridBagConstraints);
@@ -991,6 +1001,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panPage2.add(etaScenarioPanel, gridBagConstraints);
 
         add(panPage2, "CARD2");
+
+        bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
 
     /**
@@ -1067,13 +1079,13 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lstFotosValueChanged(final javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstFotosValueChanged
+    private void lstFotosValueChanged(final javax.swing.event.ListSelectionEvent evt) { //GEN-FIRST:event_lstFotosValueChanged
 //        if (isShowing()) {
         if (!evt.getValueIsAdjusting() && listListenerEnabled) {
             loadFoto();
         }
 //        }
-    }//GEN-LAST:event_lstFotosValueChanged
+    } //GEN-LAST:event_lstFotosValueChanged
 
     /**
      * DOCUMENT ME!
@@ -1092,67 +1104,67 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnBackActionPerformed
         lstFotos.setSelectedIndex(lstFotos.getSelectedIndex() - 1);
-    }//GEN-LAST:event_btnBackActionPerformed
+    }                                                                           //GEN-LAST:event_btnBackActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnForwardActionPerformed
+    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnForwardActionPerformed
         lstFotos.setSelectedIndex(lstFotos.getSelectedIndex() + 1);
-    }//GEN-LAST:event_btnForwardActionPerformed
+    }                                                                              //GEN-LAST:event_btnForwardActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblPrevPageMouseClicked(final java.awt.event.MouseEvent evt)//GEN-FIRST:event_lblPrevPageMouseClicked
-    {//GEN-HEADEREND:event_lblPrevPageMouseClicked
+    private void lblPrevPageMouseClicked(final java.awt.event.MouseEvent evt) //GEN-FIRST:event_lblPrevPageMouseClicked
+    {                                                                         //GEN-HEADEREND:event_lblPrevPageMouseClicked
         btnPrevPageActionPerformed(null);
-    }//GEN-LAST:event_lblPrevPageMouseClicked
+    }                                                                         //GEN-LAST:event_lblPrevPageMouseClicked
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_btnPrevPageActionPerformed
-    {//GEN-HEADEREND:event_btnPrevPageActionPerformed
+    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_btnPrevPageActionPerformed
+    {                                                                             //GEN-HEADEREND:event_btnPrevPageActionPerformed
         ((CardLayout)this.getLayout()).show(this, CARD_1);
         btnPrevPage.setEnabled(false);
         btnNextPage.setEnabled(true);
         lblPrevPage.setEnabled(false);
         lblNextPage.setEnabled(true);
-    }//GEN-LAST:event_btnPrevPageActionPerformed
+    }                                                                             //GEN-LAST:event_btnPrevPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_btnNextPageActionPerformed
-    {//GEN-HEADEREND:event_btnNextPageActionPerformed
+    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_btnNextPageActionPerformed
+    {                                                                             //GEN-HEADEREND:event_btnNextPageActionPerformed
 
         ((CardLayout)this.getLayout()).show(this, CARD_2);
         btnPrevPage.setEnabled(true);
         btnNextPage.setEnabled(false);
         lblPrevPage.setEnabled(true);
         lblNextPage.setEnabled(false);
-    }//GEN-LAST:event_btnNextPageActionPerformed
+    } //GEN-LAST:event_btnNextPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblNextPageMouseClicked(final java.awt.event.MouseEvent evt)//GEN-FIRST:event_lblNextPageMouseClicked
-    {//GEN-HEADEREND:event_lblNextPageMouseClicked
+    private void lblNextPageMouseClicked(final java.awt.event.MouseEvent evt) //GEN-FIRST:event_lblNextPageMouseClicked
+    {                                                                         //GEN-HEADEREND:event_lblNextPageMouseClicked
         btnNextPageActionPerformed(null);
-    }//GEN-LAST:event_lblNextPageMouseClicked
+    }                                                                         //GEN-LAST:event_lblNextPageMouseClicked
 
     /**
      * DOCUMENT ME!
@@ -1179,7 +1191,10 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
             this.lblDescriptionText.setText(
                 (cidsBean.getProperty("description") != null) ? cidsBean.getProperty("description").toString() : "");
             this.lblVolumeText.setText(
-                (cidsBean.getProperty("volume") != null) ? cidsBean.getProperty("volume").toString() : "0.0");
+                (cidsBean.getProperty("volume") != null) ? cidsBean.getProperty("volume").toString() : "unknown");
+            this.lblSwmmProjectText.setText(
+                (cidsBean.getProperty("swmm_project_name") != null)
+                    ? cidsBean.getProperty("swmm_project_name").toString() : "");
 
             if (cidsBean.getProperty("photos") != null) {
                 final String[] photos = cidsBean.getProperty("photos").toString().split(";");
