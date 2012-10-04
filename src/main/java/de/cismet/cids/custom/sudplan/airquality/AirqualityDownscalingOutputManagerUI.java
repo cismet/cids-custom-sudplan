@@ -378,17 +378,11 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                 return;
             }
 
-            final Crs srs = CismapBroker.getInstance().crsFromCode(input.getSrs());
-            if (srs == null) {
-                LOG.error("Couldn't get a Crs object from SRS code '" + input.getSrs() + "'.");
-                return;
-            }
-
             final AirqualityDownscalingResultManager manager = new AirqualityDownscalingResultManager(
                     resultToShow,
                     (Integer)model.getCidsBean().getProperty("id"),
                     (String)model.getCidsBean().getProperty("name"),
-                    srs);
+                    input);
             final Future<SlidableWMSServiceLayerGroup> managerFuture = SudplanConcurrency.getSudplanGeneralPurposePool()
                         .submit(manager);
 
@@ -506,17 +500,11 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                 return;
             }
 
-            final Crs srs = CismapBroker.getInstance().crsFromCode(input.getSrs());
-            if (srs == null) {
-                LOG.error("Couldn't get a Crs object from SRS code '" + input.getSrs() + "'.");
-                return;
-            }
-
             final AirqualityDownscalingResultManager manager = new AirqualityDownscalingResultManager(
                     resultToShow,
                     (Integer)model.getCidsBean().getProperty("id"),
                     (String)model.getCidsBean().getProperty("name"),
-                    srs);
+                    input);
 
             if (!DownloadManagerDialog.showAskingForUserTitle(AirqualityDownscalingOutputManagerUI.this)) {
                 return;
