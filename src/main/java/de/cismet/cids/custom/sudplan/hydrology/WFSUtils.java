@@ -306,7 +306,9 @@ public final class WFSUtils {
                                                 @Override
                                                 public void run() {
                                                     final JOptionPane noResultsPane = new JOptionPane(
-                                                            "Query did not find any valid results",
+                                                            (queryInfo.getNoResultsMessage() == null)
+                                                                ? "Query did not find any valid results"
+                                                                : queryInfo.getNoResultsMessage(),
                                                             JOptionPane.INFORMATION_MESSAGE,
                                                             JOptionPane.OK_OPTION,
                                                             null,

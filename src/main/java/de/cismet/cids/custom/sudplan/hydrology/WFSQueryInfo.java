@@ -37,6 +37,13 @@ public interface WFSQueryInfo {
      *
      * @return  DOCUMENT ME!
      */
+    String getNoResultsMessage();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     QualifiedName getFeatureQName();
 
     /**
