@@ -153,7 +153,6 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
     private boolean displayVisible = false;
     private JTabbedPane tabPane;
     private transient Coordinate currentCoordinate;
-    private transient Resolution fallBackResolution;
     private final transient ActionListener resL;
     private final transient ActionListener holdL;
     private final transient ActionListener aggrL;
@@ -947,7 +946,8 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
             if (isOnHold()) {
                 return Resolution.DECADE.equals(type);
             } else {
-                return true;
+                return Resolution.DECADE.equals(type) || Resolution.YEAR.equals(type) || Resolution.MONTH.equals(type)
+                            || Resolution.DAY.equals(type);
             }
         }
     }
@@ -1231,10 +1231,8 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
                 LOG.error(message, ex.getCause());
 
                 // As an error occured, the new resolution couldn't be loaded. For this reason,
-                // cboResolution is set to the foregoing resolution
-                if (fallBackResolution != null) {
-                    cboResolution.setSelectedItem(fallBackResolution);
-                }
+                // cboResolution is set to the resolution that is always available
+                cboResolution.setSelectedItem(Resolution.DECADE);
 
                 JOptionPane.showMessageDialog(
                     SOSFeatureInfoDisplay.this,
@@ -1248,7 +1246,6 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
             } finally {
                 // unlock panel
                 lockableUI.setLocked(false);
-                fallBackResolution = this.resolution;
             }
         }
     }

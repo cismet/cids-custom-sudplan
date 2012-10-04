@@ -67,6 +67,7 @@ import de.cismet.cids.custom.sudplan.geoserver.GSAttributeEncoder;
 
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
@@ -182,6 +183,7 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
     //~ Instance fields --------------------------------------------------------
 
     private final AirqualityDownscalingOutput.Result result;
+    private final AirqualityDownscalingInput input;
     private final Integer modelId;
     private final String name;
     private final Crs srs;
@@ -197,14 +199,21 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
      * @param   result   DOCUMENT ME!
      * @param   modelId  DOCUMENT ME!
      * @param   name     DOCUMENT ME!
-     * @param   srs      DOCUMENT ME!
+     * @param   input    DOCUMENT ME!
      *
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     public AirqualityDownscalingResultManager(final AirqualityDownscalingOutput.Result result,
             final Integer modelId,
             final String name,
-            final Crs srs) {
+            final AirqualityDownscalingInput input) {
+        if (input == null) {
+            throw new IllegalArgumentException("Please provide the input parameters of the results.");
+        }
+
+        this.input = input;
+        this.srs = CismapBroker.getInstance().crsFromCode(this.input.getSrs());
+
         if ((srs == null) || (srs.getCode() == null) || (srs.getCode().trim().length() <= 0)) {
             throw new IllegalArgumentException("Please provide an SRS for the results.");
         }
@@ -216,7 +225,6 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
         } else {
             this.name = name;
         }
-        this.srs = srs;
 
         geometryColumn = "geometry_" + srs.getCode().toLowerCase().replaceAll(":", "_");
     }
@@ -311,13 +319,13 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             for (int y = 0; y < gridcellCountY; y++) {
                 final Envelope cellEnvelope = new Envelope(
                         envelope.getMinX()
-                                + (x * gridcellSize),
-                        envelope.getMinX()
-                                + ((x + 1) * gridcellSize),
-                        envelope.getMinY()
                                 + (y * gridcellSize),
-                        envelope.getMinY()
-                                + ((y + 1) * gridcellSize));
+                        envelope.getMinX()
+                                + ((y + 1) * gridcellSize),
+                        envelope.getMaxY()
+                                - (x * gridcellSize),
+                        envelope.getMaxY()
+                                - ((x + 1) * gridcellSize));
                 geometries[x][y] = geometryFactory.toGeometry(cellEnvelope);
             }
         }
@@ -836,6 +844,16 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 featureType.addKeyword("min:" + min);
                 featureType.addKeyword("max:" + max);
                 featureType.addKeyword("mean:" + mean);
+                featureType.addKeyword("ts:observed_property=" + result.getVariable().getPropertyKey());
+                featureType.addKeyword("ts:available_data_min="
+                            + AirqualityDownscalingModelManager.DATEFORMAT_SOS.format(input.getStartDate()));
+                featureType.addKeyword("ts:available_data_max="
+                            + AirqualityDownscalingModelManager.DATEFORMAT_SOS.format(input.getEndDate()));
+                featureType.addKeyword("ts:offering=" + result.getOffering());
+                featureType.addKeyword("sos_url=" + result.getUrl());
+                featureType.addKeyword("ts:procedure=urn:ogc:object:" + input.getScenario() + ":"
+                            + result.getResolution().getOfferingSuffix());
+                featureType.addKeyword("ts:feature_of_interest=" + result.getDescription());
 
                 final GSLayerEncoder layer = new GSLayerEncoder();
                 layer.setEnabled(true);
