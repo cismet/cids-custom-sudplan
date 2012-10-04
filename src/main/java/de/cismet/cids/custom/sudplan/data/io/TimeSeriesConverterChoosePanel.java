@@ -12,6 +12,7 @@ import java.util.List;
 
 import de.cismet.cids.custom.sudplan.converter.HydrologyTimeseriesConverter;
 import de.cismet.cids.custom.sudplan.converter.LinzTimeseriesConverter;
+import de.cismet.cids.custom.sudplan.converter.SwmmTimeseriesConverter;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 import de.cismet.cids.custom.sudplan.converter.WuppertalTimeseriesConverter;
 
@@ -42,6 +43,7 @@ public class TimeSeriesConverterChoosePanel extends AbstractConverterChoosePanel
         converters.add(new LinzTimeseriesConverter());
         converters.add(new WuppertalTimeseriesConverter());
         converters.add(new HydrologyTimeseriesConverter());
+        converters.add(new SwmmTimeseriesConverter());
     }
 
     //~ Methods ----------------------------------------------------------------
