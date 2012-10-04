@@ -9,8 +9,6 @@ package de.cismet.cids.custom.objecteditors.sudplan;
 
 import Sirius.navigator.tools.MetaObjectChangeEvent;
 import Sirius.navigator.tools.MetaObjectChangeSupport;
-import Sirius.navigator.ui.ComponentRegistry;
-import Sirius.navigator.ui.tree.MetaCatalogueTree;
 
 import Sirius.server.middleware.types.MetaObject;
 
@@ -20,9 +18,13 @@ import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
 import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +59,8 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
 
     //~ Instance fields --------------------------------------------------------
 
+    private final transient CreateCtxListener ctxL;
+
     private transient MetaObject oldMo;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -84,10 +88,14 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
      * Creates new form MonitorstationEditor.
      */
     public MonitorstationEditor() {
+        this.ctxL = new CreateCtxListener();
+
         initComponents();
 
         initVariables();
         initContext();
+
+        cboContext.addItemListener(WeakListeners.create(ItemListener.class, ctxL, cboContext));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -97,23 +105,12 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
      */
     private void initVariables() {
         final Variable[] vars = Variable.values();
-
-        int columns = 1;
-        int rows = 1;
-        for (; columns < vars.length; ++columns) {
-            // round up row count
-            rows = (vars.length + columns - 1) / columns;
-            if (rows < columns) {
-                // this is what we want, more columns than rows
-                break;
-            }
-        }
-
-        final GridLayout varLayout = new GridLayout(rows, columns, 5, 5);
+        final GridLayout varLayout = new GridLayout(Math.round(vars.length / 2.0f), 2, 5, 5);
         pnlVariables.setLayout(varLayout);
         for (final Variable var : vars) {
             final VarCheckBox box = new VarCheckBox(var);
             box.setContentAreaFilled(false);
+            box.addItemListener(WeakListeners.create(ItemListener.class, ctxL, cboContext));
             pnlVariables.add(box);
         }
     }
@@ -237,7 +234,6 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         pnlContent.add(pnlVariables, gridBagConstraints);
@@ -423,49 +419,93 @@ public class MonitorstationEditor extends AbstractCidsBeanRenderer implements Ed
             return false;
         }
 
-        final StringBuilder typeSb = new StringBuilder();
-
-        final MonitorstationContext mCtx = (MonitorstationContext)cboContext.getSelectedItem();
-        typeSb.append(mCtx.getKey());
-        typeSb.append(':');
-
-        final List<Variable> selectedVars = getSelectedVars();
-        if (selectedVars.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                this,
-                "Please select at least one variable",
-                "Missing variable",
-                JOptionPane.INFORMATION_MESSAGE);
-            return false;
-        }
-
-        for (final Variable var : selectedVars) {
-            typeSb.append(var.getPropertyKey());
-            typeSb.append(',');
-        }
-
-        typeSb.deleteCharAt(typeSb.length() - 1);
-        try {
-            cidsBean.setProperty("type", typeSb.toString()); // NOI18N
-        } catch (final Exception ex) {
-            LOG.error("cannot set type string", ex);         // NOI18N
-            final ErrorInfo info = new ErrorInfo(
-                    "Error",
-                    "Error while setting type property",
-                    null,
-                    "Error",
-                    ex,
-                    Level.SEVERE,
-                    null);
-            JXErrorPane.showDialog(this, info);
-
-            return false;
-        }
-
         return true;
     }
 
     //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class CreateCtxListener implements ItemListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void itemStateChanged(final ItemEvent e) {
+            createCtx();
+
+            if ((e.getSource() instanceof JCheckBox) && (cidsBean.getProperty("type") == null)) {
+                // we have to use invoke later in the edt because the dialog would cause a selection event to be thrown
+                // again, resulting in a checkbox that cannot be deselected
+                EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            JOptionPane.showMessageDialog(
+                                MonitorstationEditor.this,
+                                "Please select at least one variable",
+                                "Missing variable",
+                                JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    });
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         */
+        private void createCtx() {
+            final StringBuilder typeSb = new StringBuilder();
+
+            final MonitorstationContext mCtx = (MonitorstationContext)cboContext.getSelectedItem();
+            typeSb.append(mCtx.getKey());
+            typeSb.append(':');
+
+            final List<Variable> selectedVars = getSelectedVars();
+            if (selectedVars.isEmpty()) {
+                try {
+                    cidsBean.setProperty("type", null);      // NOI18N
+                } catch (final Exception ex) {
+                    LOG.error("cannot set type string", ex); // NOI18N
+                    final ErrorInfo info = new ErrorInfo(
+                            "Error",
+                            "Error while setting type property",
+                            null,
+                            "Error",
+                            ex,
+                            Level.SEVERE,
+                            null);
+                    JXErrorPane.showDialog(MonitorstationEditor.this, info);
+                }
+
+                return;
+            }
+
+            for (final Variable var : selectedVars) {
+                typeSb.append(var.getPropertyKey());
+                typeSb.append(',');
+            }
+
+            typeSb.deleteCharAt(typeSb.length() - 1);
+            try {
+                cidsBean.setProperty("type", typeSb.toString()); // NOI18N
+            } catch (final Exception ex) {
+                LOG.error("cannot set type string", ex);         // NOI18N
+                final ErrorInfo info = new ErrorInfo(
+                        "Error",
+                        "Error while setting type property",
+                        null,
+                        "Error",
+                        ex,
+                        Level.SEVERE,
+                        null);
+                JXErrorPane.showDialog(MonitorstationEditor.this, info);
+            }
+        }
+    }
 
     /**
      * DOCUMENT ME!
