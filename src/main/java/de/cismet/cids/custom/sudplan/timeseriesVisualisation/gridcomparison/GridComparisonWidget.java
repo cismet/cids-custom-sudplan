@@ -632,6 +632,13 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
                     final List<SlidableWMSServiceLayerGroup> layers = GridComparisonLayerProvider.instance()
                                 .getLayers(true);
 
+                    // Disable the layer selectors in order to prevent processing of selection changes.
+                    cmbFirstOperand.setEnabled(false);
+                    cmbSecondOperand.setEnabled(false);
+
+                    final Object firstOperandSelection = cmbFirstOperand.getSelectedItem();
+                    final Object secondOperandSelection = cmbSecondOperand.getSelectedItem();
+
                     cmbFirstOperand.removeAllItems();
                     cmbSecondOperand.removeAllItems();
 
@@ -652,15 +659,16 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
                         cmbSecondOperand.addItem(layer);
                     }
 
-                    // Don't let the selection be changed by just adding some items
-                    cmbFirstOperand.setSelectedItem(null);
-                    cmbSecondOperand.setSelectedItem(null);
+                    // JComboBox.removeAllItems() and JComboBox.addItem(Object) changes the selected item. Thus we
+                    // save and restore the selection.
+                    cmbFirstOperand.setSelectedItem(firstOperandSelection);
+                    cmbSecondOperand.setSelectedItem(secondOperandSelection);
 
                     // Enable the layer selectors in order to allow processing of selection changes.
                     cmbFirstOperand.setEnabled(true);
                     cmbSecondOperand.setEnabled(true);
 
-                    if (!(layers.contains(firstOperand) && !(layers.contains(secondOperand)))) {
+                    if (!(layers.contains(firstOperand)) && !(layers.contains(secondOperand))) {
                         setOperands(layers.get(0), layers.get(1));
 
                         // Set the automatic layer style after the new operands have been set. setOperands() appends
@@ -820,17 +828,23 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
             firstDistribution = extractDistribution(this.firstOperand);
             disDistributions.addDistribution(firstDistribution, Color.green);
 
-            if (layerStyle != null) {
-                this.firstOperand.setCustomSLD(layerStyle.getSLDForLayer());
-                this.firstOperand.retrieve(true);
+            generateAutomaticLayerStyle();
+            if ((layerStyle != null) && (cmbLayerStyle.getSelectedIndex() == 1)) {
+                // Yes, the "automatic style" is selected, but we need to reload the layers.
+                cmbLayerStyle.setSelectedIndex(1);
             } else {
-                if (this.firstOperand.getCustomSLD() != null) {
-                    this.firstOperand.setCustomSLD(null);
+                // No automatic style, we just need to reload this layer.
+                if (layerStyle != null) {
+                    this.firstOperand.setCustomSLD(layerStyle.getSLDForLayer());
                     this.firstOperand.retrieve(true);
+                } else {
+                    if (this.firstOperand.getCustomSLD() != null) {
+                        this.firstOperand.setCustomSLD(null);
+                        this.firstOperand.retrieve(true);
+                    }
                 }
             }
         } else {
-            this.firstOperand = null;
             firstDistribution = null;
 
             if (cmbFirstOperand.getSelectedItem() != null) {
@@ -863,17 +877,23 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
             secondDistribution = extractDistribution(this.secondOperand);
             disDistributions.addDistribution(secondDistribution, Color.blue);
 
-            if (layerStyle != null) {
-                this.secondOperand.setCustomSLD(layerStyle.getSLDForLayer());
-                this.secondOperand.retrieve(true);
+            generateAutomaticLayerStyle();
+            if ((layerStyle != null) && (cmbLayerStyle.getSelectedIndex() == 1)) {
+                // Yes, the "automatic style" is selected, but we need to reload the layers.
+                cmbLayerStyle.setSelectedIndex(1);
             } else {
-                if (this.secondOperand.getCustomSLD() != null) {
-                    this.secondOperand.setCustomSLD(null);
+                // No automatic style, we just need to reload this layer.
+                if (layerStyle != null) {
+                    this.secondOperand.setCustomSLD(layerStyle.getSLDForLayer());
                     this.secondOperand.retrieve(true);
+                } else {
+                    if (this.secondOperand.getCustomSLD() != null) {
+                        this.secondOperand.setCustomSLD(null);
+                        this.secondOperand.retrieve(true);
+                    }
                 }
             }
         } else {
-            this.secondOperand = null;
             secondDistribution = null;
 
             if (cmbSecondOperand.getSelectedItem() != null) {
@@ -1042,6 +1062,7 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
                 colorMap.add(new Entry(Math.min(firstDistribution.getMin(), secondDistribution.getMin()), Color.green));
                 colorMap.add(new Entry(Math.max(firstDistribution.getMax(), secondDistribution.getMax()), Color.red));
 
+                final int selectedIndex = cmbLayerStyle.getSelectedIndex();
                 cmbLayerStyle.removeItemAt(1);
                 cmbLayerStyle.insertItemAt(new LayerStyle(
                         NbBundle.getMessage(
@@ -1049,6 +1070,7 @@ public class GridComparisonWidget extends javax.swing.JPanel implements FeatureC
                             "GridComparisonWidget.cmbLayerStyle.automaticStyle"),
                         colorMap),
                     1);
+                cmbLayerStyle.setSelectedIndex(selectedIndex);
             }
         }
     }
