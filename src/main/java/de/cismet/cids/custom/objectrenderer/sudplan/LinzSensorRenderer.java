@@ -66,6 +66,7 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
     public static final String LINZ_STATION_HYE = "LI-HYE";
     public static final String LINZ_STATION_WIE = "LI-WIE";
     public static final String LINZ_STATION_WOE = "LI-WOE";
+    public static final String LINZ_STATION_PCE = "LI-PCE";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -211,12 +212,15 @@ public class LinzSensorRenderer extends AbstractCidsBeanRenderer implements Titl
                 currentSensorType = LINZ_STATION_WIE;
             } else if (LINZ_STATION_WOE.indexOf(sensorType) != -1) {
                 currentSensorType = LINZ_STATION_WOE;
+            } else if (LINZ_STATION_PCE.indexOf(sensorType) != -1) {
+                currentSensorType = LINZ_STATION_PCE;
             } else {
                 throw new Exception("Unsupported Sensor Type '" + sensorType
                             + "', expected '"
                             + LINZ_STATION_HYE + "', '"
-                            + LINZ_STATION_WIE + "' or '"
-                            + LINZ_STATION_WOE + "'");
+                            + LINZ_STATION_WIE + "', '"
+                            + LINZ_STATION_WOE + "' or '"
+                            + LINZ_STATION_PCE + "'");
             }
 
             if ((eventDetectionUpdater != null) && eventDetectionUpdater.isRunning()) {

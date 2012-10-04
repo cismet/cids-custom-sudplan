@@ -301,7 +301,7 @@ public final class SwmmWizardPanelTimeseriesUI extends JPanel {
         descriptionArea.setRows(4);
         descriptionArea.setEnabled(false);
         descriptionArea.setFocusable(false);
-        descriptionArea.setMinimumSize(new java.awt.Dimension(200, 35));
+        descriptionArea.setMinimumSize(new java.awt.Dimension(200, 60));
         descriptionArea.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 1;

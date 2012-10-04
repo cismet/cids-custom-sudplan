@@ -392,8 +392,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents()
-    {
+    private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
         panFooter = new javax.swing.JPanel();
@@ -431,10 +430,10 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panHeadInfo1 = new de.cismet.tools.gui.SemiRoundedPanel();
         lblHeadingPhotos = new javax.swing.JLabel();
         panCard = new javax.swing.JPanel();
-        lblBusy = new org.jdesktop.swingx.JXBusyLabel(new Dimension(75,75));
+        lblBusy = new org.jdesktop.swingx.JXBusyLabel(new Dimension(75, 75));
         panPreview = new javax.swing.JPanel();
         lblPicture = new javax.swing.JLabel();
-        RoundedPanel rp = new RoundedPanel();
+        final RoundedPanel rp = new RoundedPanel();
         rp.setBackground(new java.awt.Color(51, 51, 51));
         rp.setAlpha(255);
         panButtons = rp;
@@ -451,7 +450,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panHeadInfoScenario1 = new de.cismet.tools.gui.SemiRoundedPanel();
         lblEtaScenarios = new javax.swing.JLabel();
         scrollPane = new javax.swing.JScrollPane();
-        csoTotalOverflowComparisionPanel = new de.cismet.cids.custom.sudplan.local.linz.CsoTotalOverflowComparisionPanel();
+        csoTotalOverflowComparisionPanel =
+            new de.cismet.cids.custom.sudplan.local.linz.CsoTotalOverflowComparisionPanel();
 
         panFooter.setOpaque(false);
         panFooter.setLayout(new java.awt.BorderLayout());
@@ -466,20 +466,23 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
 
         lblPrevPage.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblPrevPage.setForeground(new java.awt.Color(255, 255, 255));
-        lblPrevPage.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblPrevPage.text")); // NOI18N
+        lblPrevPage.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblPrevPage.text"));            // NOI18N
         lblPrevPage.setEnabled(false);
         lblPrevPage.setMaximumSize(null);
         lblPrevPage.setPreferredSize(null);
-        lblPrevPage.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mouseClicked(java.awt.event.MouseEvent evt)
-            {
-                lblPrevPageMouseClicked(evt);
-            }
-        });
+        lblPrevPage.addMouseListener(new java.awt.event.MouseAdapter() {
+
+                @Override
+                public void mouseClicked(final java.awt.event.MouseEvent evt) {
+                    lblPrevPageMouseClicked(evt);
+                }
+            });
         panFooterPrevPage.add(lblPrevPage);
 
-        btnPrevPage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/arrow-left.png"))); // NOI18N
+        btnPrevPage.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/arrow-left.png"))); // NOI18N
         btnPrevPage.setBorderPainted(false);
         btnPrevPage.setContentAreaFilled(false);
         btnPrevPage.setEnabled(false);
@@ -487,13 +490,13 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         btnPrevPage.setMaximumSize(new java.awt.Dimension(30, 30));
         btnPrevPage.setMinimumSize(new java.awt.Dimension(30, 30));
         btnPrevPage.setPreferredSize(new java.awt.Dimension(30, 30));
-        btnPrevPage.addActionListener(new java.awt.event.ActionListener()
-        {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
-            {
-                btnPrevPageActionPerformed(evt);
-            }
-        });
+        btnPrevPage.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnPrevPageActionPerformed(evt);
+                }
+            });
         panFooterPrevPage.add(btnPrevPage);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -505,32 +508,35 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panFooterNextPage.setOpaque(false);
         panFooterNextPage.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 5));
 
-        btnNextPage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/arrow-right.png"))); // NOI18N
+        btnNextPage.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/sudplan/local/linz/arrow-right.png"))); // NOI18N
         btnNextPage.setBorderPainted(false);
         btnNextPage.setContentAreaFilled(false);
         btnNextPage.setFocusPainted(false);
         btnNextPage.setMaximumSize(new java.awt.Dimension(30, 30));
         btnNextPage.setMinimumSize(new java.awt.Dimension(30, 30));
         btnNextPage.setPreferredSize(new java.awt.Dimension(30, 30));
-        btnNextPage.addActionListener(new java.awt.event.ActionListener()
-        {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
-            {
-                btnNextPageActionPerformed(evt);
-            }
-        });
+        btnNextPage.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnNextPageActionPerformed(evt);
+                }
+            });
         panFooterNextPage.add(btnNextPage);
 
         lblNextPage.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblNextPage.setForeground(new java.awt.Color(255, 255, 255));
-        lblNextPage.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblNextPage.text")); // NOI18N
-        lblNextPage.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mouseClicked(java.awt.event.MouseEvent evt)
-            {
-                lblNextPageMouseClicked(evt);
-            }
-        });
+        lblNextPage.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblNextPage.text"));            // NOI18N
+        lblNextPage.addMouseListener(new java.awt.event.MouseAdapter() {
+
+                @Override
+                public void mouseClicked(final java.awt.event.MouseEvent evt) {
+                    lblNextPageMouseClicked(evt);
+                }
+            });
         panFooterNextPage.add(lblNextPage);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -543,7 +549,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panTitle.setOpaque(false);
         panTitle.setLayout(new java.awt.GridBagLayout());
 
-        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 18));                                                           // NOI18N
         lblTitle.setForeground(new java.awt.Color(255, 255, 255));
         lblTitle.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblTitle.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -567,7 +573,9 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panHeadInfo.setLayout(new java.awt.FlowLayout());
 
         lblPropertiesHeading.setForeground(new java.awt.Color(255, 255, 255));
-        lblPropertiesHeading.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblPropertiesHeading.text")); // NOI18N
+        lblPropertiesHeading.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblPropertiesHeading.text")); // NOI18N
         panHeadInfo.add(lblPropertiesHeading);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -579,7 +587,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         gridBagConstraints.weightx = 1.0;
         propertiesPanel.add(panHeadInfo, gridBagConstraints);
 
-        lblName.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        lblName.setFont(new java.awt.Font("Tahoma", 1, 11));                                                          // NOI18N
         lblName.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblName.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -594,14 +602,18 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         propertiesPanel.add(lblNameText, gridBagConstraints);
 
         lblDescription.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        lblDescription.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblDescription.text")); // NOI18N
+        lblDescription.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblDescription.text"));            // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         propertiesPanel.add(lblDescription, gridBagConstraints);
 
-        lblDescriptionText.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblDescriptionText.text")); // NOI18N
+        lblDescriptionText.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblDescriptionText.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridwidth = 2;
@@ -611,14 +623,18 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         propertiesPanel.add(lblDescriptionText, gridBagConstraints);
 
         lblVolume.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        lblVolume.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblVolume.text")); // NOI18N
+        lblVolume.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblVolume.text"));            // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         propertiesPanel.add(lblVolume, gridBagConstraints);
 
-        lblVolumeText.setName(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblVolumeText.name")); // NOI18N
+        lblVolumeText.setName(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblVolumeText.name")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -630,13 +646,13 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
 
         lstFotos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         lstFotos.setMinimumSize(new java.awt.Dimension(100, 150));
-        lstFotos.addListSelectionListener(new javax.swing.event.ListSelectionListener()
-        {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt)
-            {
-                lstFotosValueChanged(evt);
-            }
-        });
+        lstFotos.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+
+                @Override
+                public void valueChanged(final javax.swing.event.ListSelectionEvent evt) {
+                    lstFotosValueChanged(evt);
+                }
+            });
         scpFotoList.setViewportView(lstFotos);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -648,7 +664,9 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         propertiesPanel.add(scpFotoList, gridBagConstraints);
 
         lblFotoList.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        lblFotoList.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblFotoList.text")); // NOI18N
+        lblFotoList.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblFotoList.text"));            // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
@@ -672,7 +690,9 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panLinksHeadInfo.setLayout(new java.awt.FlowLayout());
 
         lblLinksHeading.setForeground(new java.awt.Color(255, 255, 255));
-        lblLinksHeading.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblLinksHeading.text")); // NOI18N
+        lblLinksHeading.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblLinksHeading.text")); // NOI18N
         panLinksHeadInfo.add(lblLinksHeading);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -684,21 +704,27 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         gridBagConstraints.weightx = 1.0;
         linksPanel.add(panLinksHeadInfo, gridBagConstraints);
 
-        lblOutfall.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblOutfall.text")); // NOI18N
+        lblOutfall.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblOutfall.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 10);
         linksPanel.add(lblOutfall, gridBagConstraints);
 
-        lblStorageUnit.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblStorageUnit.text")); // NOI18N
+        lblStorageUnit.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblStorageUnit.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 10);
         linksPanel.add(lblStorageUnit, gridBagConstraints);
 
-        lblSwmmProject.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblSwmmProject.text")); // NOI18N
+        lblSwmmProject.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblSwmmProject.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -740,7 +766,9 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panHeadInfo1.setLayout(new java.awt.FlowLayout());
 
         lblHeadingPhotos.setForeground(new java.awt.Color(255, 255, 255));
-        lblHeadingPhotos.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblHeadingPhotos.text")); // NOI18N
+        lblHeadingPhotos.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblHeadingPhotos.text")); // NOI18N
         panHeadInfo1.add(lblHeadingPhotos);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -794,7 +822,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panFooterLeft.setPreferredSize(new java.awt.Dimension(20, 40));
         panFooterLeft.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 10, 5));
 
-        btnBack.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/objectrenderer/sudplan/arrow-left.png"))); // NOI18N
+        btnBack.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/objectrenderer/sudplan/arrow-left.png")));          // NOI18N
         btnBack.setBorder(null);
         btnBack.setBorderPainted(false);
         btnBack.setContentAreaFilled(false);
@@ -803,15 +832,17 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         btnBack.setMaximumSize(new java.awt.Dimension(30, 30));
         btnBack.setMinimumSize(new java.awt.Dimension(30, 30));
         btnBack.setPreferredSize(new java.awt.Dimension(30, 30));
-        btnBack.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/objectrenderer/sudplan/arrow-left-pressed.png"))); // NOI18N
-        btnBack.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/objectrenderer/sudplan/arrow-left-selected.png"))); // NOI18N
-        btnBack.addActionListener(new java.awt.event.ActionListener()
-        {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
-            {
-                btnBackActionPerformed(evt);
-            }
-        });
+        btnBack.setPressedIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/objectrenderer/sudplan/arrow-left-pressed.png")));  // NOI18N
+        btnBack.setRolloverIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/objectrenderer/sudplan/arrow-left-selected.png"))); // NOI18N
+        btnBack.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnBackActionPerformed(evt);
+                }
+            });
         panFooterLeft.add(btnBack);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -827,7 +858,8 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panFooterRight.setPreferredSize(new java.awt.Dimension(20, 40));
         panFooterRight.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 5));
 
-        btnForward.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/objectrenderer/sudplan/arrow-right.png"))); // NOI18N
+        btnForward.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/objectrenderer/sudplan/arrow-right.png")));          // NOI18N
         btnForward.setBorder(null);
         btnForward.setBorderPainted(false);
         btnForward.setContentAreaFilled(false);
@@ -835,15 +867,17 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         btnForward.setMaximumSize(new java.awt.Dimension(30, 30));
         btnForward.setMinimumSize(new java.awt.Dimension(30, 30));
         btnForward.setPreferredSize(new java.awt.Dimension(30, 30));
-        btnForward.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/objectrenderer/sudplan/arrow-right-pressed.png"))); // NOI18N
-        btnForward.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/objectrenderer/sudplan/arrow-right-selected.png"))); // NOI18N
-        btnForward.addActionListener(new java.awt.event.ActionListener()
-        {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
-            {
-                btnForwardActionPerformed(evt);
-            }
-        });
+        btnForward.setPressedIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/objectrenderer/sudplan/arrow-right-pressed.png")));  // NOI18N
+        btnForward.setRolloverIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cids/custom/objectrenderer/sudplan/arrow-right-selected.png"))); // NOI18N
+        btnForward.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnForwardActionPerformed(evt);
+                }
+            });
         panFooterRight.add(btnForward);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -880,7 +914,9 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panHeadInfoScenario.setLayout(new java.awt.FlowLayout());
 
         lblSwmmScenarios.setForeground(new java.awt.Color(255, 255, 255));
-        lblSwmmScenarios.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblSwmmScenarios.text")); // NOI18N
+        lblSwmmScenarios.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblSwmmScenarios.text")); // NOI18N
         panHeadInfoScenario.add(lblSwmmScenarios);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -919,7 +955,9 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panHeadInfoScenario1.setLayout(new java.awt.FlowLayout());
 
         lblEtaScenarios.setForeground(new java.awt.Color(255, 255, 255));
-        lblEtaScenarios.setText(org.openide.util.NbBundle.getMessage(LinzCsoRenderer.class, "LinzCsoRenderer.lblEtaScenarios.text")); // NOI18N
+        lblEtaScenarios.setText(org.openide.util.NbBundle.getMessage(
+                LinzCsoRenderer.class,
+                "LinzCsoRenderer.lblEtaScenarios.text")); // NOI18N
         panHeadInfoScenario1.add(lblEtaScenarios);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -952,7 +990,7 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         panPage2.add(etaScenarioPanel, gridBagConstraints);
 
         add(panPage2, "CARD2");
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
@@ -1028,13 +1066,13 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lstFotosValueChanged(final javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstFotosValueChanged
+    private void lstFotosValueChanged(final javax.swing.event.ListSelectionEvent evt) { //GEN-FIRST:event_lstFotosValueChanged
 //        if (isShowing()) {
         if (!evt.getValueIsAdjusting() && listListenerEnabled) {
             loadFoto();
         }
 //        }
-    }//GEN-LAST:event_lstFotosValueChanged
+    } //GEN-LAST:event_lstFotosValueChanged
 
     /**
      * DOCUMENT ME!
@@ -1053,67 +1091,67 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+    private void btnBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnBackActionPerformed
         lstFotos.setSelectedIndex(lstFotos.getSelectedIndex() - 1);
-    }//GEN-LAST:event_btnBackActionPerformed
+    }                                                                           //GEN-LAST:event_btnBackActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnForwardActionPerformed
+    private void btnForwardActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnForwardActionPerformed
         lstFotos.setSelectedIndex(lstFotos.getSelectedIndex() + 1);
-    }//GEN-LAST:event_btnForwardActionPerformed
+    }                                                                              //GEN-LAST:event_btnForwardActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblPrevPageMouseClicked(final java.awt.event.MouseEvent evt)//GEN-FIRST:event_lblPrevPageMouseClicked
-    {//GEN-HEADEREND:event_lblPrevPageMouseClicked
+    private void lblPrevPageMouseClicked(final java.awt.event.MouseEvent evt) //GEN-FIRST:event_lblPrevPageMouseClicked
+    {                                                                         //GEN-HEADEREND:event_lblPrevPageMouseClicked
         btnPrevPageActionPerformed(null);
-    }//GEN-LAST:event_lblPrevPageMouseClicked
+    }                                                                         //GEN-LAST:event_lblPrevPageMouseClicked
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_btnPrevPageActionPerformed
-    {//GEN-HEADEREND:event_btnPrevPageActionPerformed
+    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_btnPrevPageActionPerformed
+    {                                                                             //GEN-HEADEREND:event_btnPrevPageActionPerformed
         ((CardLayout)this.getLayout()).show(this, CARD_1);
         btnPrevPage.setEnabled(false);
         btnNextPage.setEnabled(true);
         lblPrevPage.setEnabled(false);
         lblNextPage.setEnabled(true);
-    }//GEN-LAST:event_btnPrevPageActionPerformed
+    }                                                                             //GEN-LAST:event_btnPrevPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_btnNextPageActionPerformed
-    {//GEN-HEADEREND:event_btnNextPageActionPerformed
+    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_btnNextPageActionPerformed
+    {                                                                             //GEN-HEADEREND:event_btnNextPageActionPerformed
 
         ((CardLayout)this.getLayout()).show(this, CARD_2);
         btnPrevPage.setEnabled(true);
         btnNextPage.setEnabled(false);
         lblPrevPage.setEnabled(true);
         lblNextPage.setEnabled(false);
-    }//GEN-LAST:event_btnNextPageActionPerformed
+    } //GEN-LAST:event_btnNextPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblNextPageMouseClicked(final java.awt.event.MouseEvent evt)//GEN-FIRST:event_lblNextPageMouseClicked
-    {//GEN-HEADEREND:event_lblNextPageMouseClicked
+    private void lblNextPageMouseClicked(final java.awt.event.MouseEvent evt) //GEN-FIRST:event_lblNextPageMouseClicked
+    {                                                                         //GEN-HEADEREND:event_lblNextPageMouseClicked
         btnNextPageActionPerformed(null);
-    }//GEN-LAST:event_lblNextPageMouseClicked
+    }                                                                         //GEN-LAST:event_lblNextPageMouseClicked
 
     /**
      * DOCUMENT ME!
