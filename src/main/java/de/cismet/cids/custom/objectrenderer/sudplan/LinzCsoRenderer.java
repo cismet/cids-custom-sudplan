@@ -731,12 +731,11 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 10);
         linksPanel.add(lblSwmmProject, gridBagConstraints);
 
-        lblSwmmProjectText.setText(org.openide.util.NbBundle.getMessage(
-                LinzCsoRenderer.class,
-                "LinzCsoRenderer.lblSwmmProjectText.text")); // NOI18N
+        lblSwmmProjectText.setPreferredSize(new java.awt.Dimension(3, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 10);
         linksPanel.add(lblSwmmProjectText, gridBagConstraints);
@@ -1179,7 +1178,10 @@ public class LinzCsoRenderer extends AbstractCidsBeanRenderer implements BorderP
             this.lblDescriptionText.setText(
                 (cidsBean.getProperty("description") != null) ? cidsBean.getProperty("description").toString() : "");
             this.lblVolumeText.setText(
-                (cidsBean.getProperty("volume") != null) ? cidsBean.getProperty("volume").toString() : "0.0");
+                (cidsBean.getProperty("volume") != null) ? cidsBean.getProperty("volume").toString() : "unknown");
+            this.lblSwmmProjectText.setText(
+                (cidsBean.getProperty("swmm_project_name") != null)
+                    ? cidsBean.getProperty("swmm_project_name").toString() : "");
 
             if (cidsBean.getProperty("photos") != null) {
                 final String[] photos = cidsBean.getProperty("photos").toString().split(";");
