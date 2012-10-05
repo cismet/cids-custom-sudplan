@@ -92,6 +92,11 @@ public final class HydroWorkspaceMapVisualisationProvider implements MapVisualis
                 }
 
                 @Override
+                public String getNoResultsMessage() {
+                    return null;
+                }
+
+                @Override
                 public QualifiedName getFeatureQName() {
                     return scafpa.getFeatureQName();
                 }

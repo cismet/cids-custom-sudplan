@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import de.cismet.cids.custom.sudplan.Unit;
 import de.cismet.cids.custom.sudplan.Variable;
@@ -58,6 +59,7 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
         NUMBERFORMAT.setRoundingMode(RoundingMode.HALF_UP);
 
         DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // NOI18N
+        DATEFORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     //~ Methods ----------------------------------------------------------------

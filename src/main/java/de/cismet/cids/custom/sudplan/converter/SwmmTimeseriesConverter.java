@@ -14,7 +14,6 @@ import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 
 import org.apache.log4j.Logger;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -27,7 +26,6 @@ import java.math.RoundingMode;
 
 import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
@@ -53,7 +51,7 @@ public final class SwmmTimeseriesConverter implements TimeseriesConverter, Forma
 
     private static final DateFormat DATEFORMAT;
     private static final NumberFormat NUMBERFORMAT;
-    private static final String STATION = "STA01 ";
+    private static final String STATION = "STA1 ";
 
     static {
         NUMBERFORMAT = NumberFormat.getInstance(Locale.US);
@@ -105,12 +103,16 @@ public final class SwmmTimeseriesConverter implements TimeseriesConverter, Forma
                         + ")");
 
             while (line != null) {
-                final String dateString = line.substring(6, 22);
+                final String dateString = line.substring(STATION.length(), 21);
                 final String valueString = line.substring(22);
 
                 final Date date = DATEFORMAT.parse(dateString);
                 final float val = NUMBERFORMAT.parse(valueString.trim()).floatValue();
                 ts.setValue(new TimeStamp(date), PropertyNames.VALUE, val);
+//                if (LOG.isDebugEnabled()) {
+//                    LOG.debug(date + " = " + val
+//                                + " (" + dateString + " = " + valueString + ")");
+//                }
 
                 if (Thread.currentThread().isInterrupted()) {
                     LOG.warn("execution was interrupted"); // NOI18N

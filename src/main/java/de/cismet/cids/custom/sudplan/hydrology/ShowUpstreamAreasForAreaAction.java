@@ -189,6 +189,11 @@ public final class ShowUpstreamAreasForAreaAction extends AbstractWFSFeatureRetr
         return "Fetching Upstream Areas";
     }
 
+    @Override
+    public String getNoResultsMessage() {
+        return "No upstream areas";
+    }
+
     /**
      * DOCUMENT ME!
      *

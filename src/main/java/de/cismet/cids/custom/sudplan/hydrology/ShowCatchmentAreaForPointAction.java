@@ -212,4 +212,9 @@ public final class ShowCatchmentAreaForPointAction extends AbstractWFSFeatureRet
     public JMenu getSubmenu() {
         return null;
     }
+
+    @Override
+    public String getNoResultsMessage() {
+        return null;
+    }
 }
