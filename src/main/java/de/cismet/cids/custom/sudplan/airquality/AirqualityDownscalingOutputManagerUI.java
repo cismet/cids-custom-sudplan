@@ -228,6 +228,7 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                 AirqualityDownscalingOutputManagerUI.class,
                 "AirqualityDownscalingOutputManagerUI.btnExport.text")); // NOI18N
         btnExport.setEnabled(false);
+        btnExport.setFocusPainted(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -239,6 +240,7 @@ public class AirqualityDownscalingOutputManagerUI extends javax.swing.JPanel imp
                 AirqualityDownscalingOutputManagerUI.class,
                 "AirqualityDownscalingOutputManagerUI.btnShowInMap.text")); // NOI18N
         btnShowInMap.setEnabled(false);
+        btnShowInMap.setFocusPainted(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
