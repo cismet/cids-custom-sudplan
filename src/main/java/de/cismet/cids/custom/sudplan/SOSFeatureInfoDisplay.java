@@ -431,7 +431,31 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
     public void init(final SlidableWMSServiceLayerGroup layer, final JTabbedPane parentTabbedPane)
             throws InitialisationException {
         tabPane = parentTabbedPane;
-        parseKeywords(layer.getLayerInformation().getKeywords());
+
+        if (layer == null) {
+            throw new InitialisationException("Can't display feature infos for a null layer.");
+        }
+
+        String[] keywords = null;
+
+        if (layer.getLayerInformation() != null) {
+            keywords = layer.getLayerInformation().getKeywords();
+        }
+
+        if (((keywords == null) || (keywords.length <= 0)) && (layer.getLayers() != null)) {
+            try {
+                keywords = layer.getLayers().get(0).getLayerInformation().getKeywords();
+            } catch (final Exception ex) {
+                LOG.info("Couldn't fetch keywords from child layer information.", ex);
+            }
+        }
+
+        if (keywords == null) {
+            throw new InitialisationException(
+                "Couldn't fetch keywords neither from group layer information nor from child layer information.");
+        }
+
+        parseKeywords(keywords);
 
         initialised = true;
     }
