@@ -317,16 +317,12 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
         final Geometry[][] geometries = new Geometry[gridcellCountY][gridcellCountX];
         for (int y = 0; y < gridcellCountY; y++) {
             for (int x = 0; x < gridcellCountX; x++) {
-                final Envelope cellEnvelope = new Envelope(
-                        envelope.getMinX()
-                                + (x * gridcellSize),
-                        envelope.getMinX()
-                                + ((x + 1) * gridcellSize),
-                        envelope.getMaxY()
-                                - (y * gridcellSize),
-                        envelope.getMaxY()
-                                - ((y + 1) * gridcellSize));
-                geometries[y][x] = geometryFactory.toGeometry(cellEnvelope);
+                final double minX = envelope.getMinX() + (x * gridcellSize);
+                final double maxX = envelope.getMinX() + ((x + 1) * gridcellSize);
+                final double minY = envelope.getMaxY() - (y * gridcellSize);
+                final double maxY = envelope.getMaxY() - ((y + 1) * gridcellSize);
+
+                geometries[y][x] = geometryFactory.toGeometry(new Envelope(minX, maxX, minY, maxY));
             }
         }
 
