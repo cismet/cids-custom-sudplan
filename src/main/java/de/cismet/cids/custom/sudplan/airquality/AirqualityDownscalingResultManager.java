@@ -314,19 +314,15 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             return result;
         }
 
-        final Geometry[][] geometries = new Geometry[gridcellCountX][gridcellCountY];
-        for (int x = 0; x < gridcellCountX; x++) {
-            for (int y = 0; y < gridcellCountY; y++) {
-                final Envelope cellEnvelope = new Envelope(
-                        envelope.getMinX()
-                                + (y * gridcellSize),
-                        envelope.getMinX()
-                                + ((y + 1) * gridcellSize),
-                        envelope.getMaxY()
-                                - (x * gridcellSize),
-                        envelope.getMaxY()
-                                - ((x + 1) * gridcellSize));
-                geometries[x][y] = geometryFactory.toGeometry(cellEnvelope);
+        final Geometry[][] geometries = new Geometry[gridcellCountY][gridcellCountX];
+        for (int y = 0; y < gridcellCountY; y++) {
+            for (int x = 0; x < gridcellCountX; x++) {
+                final double minX = envelope.getMinX() + (x * gridcellSize);
+                final double maxX = envelope.getMinX() + ((x + 1) * gridcellSize);
+                final double minY = envelope.getMaxY() - (y * gridcellSize);
+                final double maxY = envelope.getMaxY() - ((y + 1) * gridcellSize);
+
+                geometries[y][x] = geometryFactory.toGeometry(new Envelope(minX, maxX, minY, maxY));
             }
         }
 
@@ -852,8 +848,8 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                 featureType.addKeyword("ts:offering=" + result.getOffering());
                 featureType.addKeyword("sos_url=" + result.getUrl());
                 featureType.addKeyword("ts:procedure=urn:ogc:object:" + input.getScenario() + ":"
-                            + result.getResolution().getOfferingSuffix());
-                featureType.addKeyword("ts:feature_of_interest=" + result.getDescription());
+                            + result.getResolution().getPrecision());
+                featureType.addKeyword("ts:feature_of_interest=urn:sudplan:feature:" + result.getOffering());
 
                 final GSLayerEncoder layer = new GSLayerEncoder();
                 layer.setEnabled(true);

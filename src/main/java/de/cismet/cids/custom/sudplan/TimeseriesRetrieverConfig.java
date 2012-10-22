@@ -586,7 +586,7 @@ public final class TimeseriesRetrieverConfig {
                 sb.append(TimeSeries.OFFERING).append('=').append(offering).append('&');
             }
             if (geometry != null) {
-                sb.append(TimeSeries.GEOMETRY).append('=').append(geometry);
+                sb.append(TimeSeries.GEOMETRY).append('=').append(geometry).append('&');
             }
 
             if (interval != null) {
@@ -607,6 +607,8 @@ public final class TimeseriesRetrieverConfig {
                 } else {
                     sb.append("]");
                 }
+
+                sb.append('&');
             }
 
             if (sb.charAt(sb.length() - 1) == '&') {
