@@ -423,6 +423,7 @@ public final class TimeseriesRetriever {
                 ts.setTSProperty(
                     TimeSeries.VALUE_UNITS,
                     new String[] { hypeVarUnit(config.getObservedProperty()).getPropertyKey() });
+                ts.setTSProperty(PropertyNames.DESCRIPTION, config.getOffering());
 
                 for (final Sample sample : tsSamples) {
                     final Date date = sample.getDate().toDateMidnight().toDate();

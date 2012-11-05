@@ -38,7 +38,7 @@ public final class CalibrationOutputManager extends AbstractIOManager<Calibratio
     @Override
     protected JComponent createUI() {
         try {
-            return new CalibrationOutputManagerUI(getUR());
+            return new CalibrationOutputManagerUI(this);
         } catch (final IOException ex) {
             final String message = "cannot create ui from ur"; // NOI18N
             LOG.error(message, ex);
