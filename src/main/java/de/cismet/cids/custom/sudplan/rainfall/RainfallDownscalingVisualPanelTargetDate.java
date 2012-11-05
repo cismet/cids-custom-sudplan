@@ -78,6 +78,14 @@ public final class RainfallDownscalingVisualPanelTargetDate extends javax.swing.
         chkFreqAdjust.setSelected(model.getFrequencyAdjustment());
         chkFreqAdjust.setEnabled(!model.isIdfDownscaling());
 
+        lblYear.setText(model.isIdfDownscaling()
+                ? NbBundle.getMessage(
+                    RainfallDownscalingVisualPanelTargetDate.class,
+                    "RainfallDownscalingVisualPanelTargetDate.lblYear.idf.text")     // NOI18N
+                : NbBundle.getMessage(
+                    RainfallDownscalingVisualPanelTargetDate.class,
+                    "RainfallDownscalingVisualPanelTargetDate.lblYear.ts.text"));    // NOI18N
+
         // default is target year 2050
         if (model.getTargetYear() == null) {
             txtYear.setText("2050"); // NOI18N
