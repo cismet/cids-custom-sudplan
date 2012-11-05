@@ -1255,8 +1255,12 @@ public final class SOSFeatureInfoDisplay extends AbstractFeatureInfoDisplay<Slid
                 LOG.error(message, ex.getCause());
 
                 // As an error occured, the new resolution couldn't be loaded. For this reason,
-                // cboResolution is set to the resolution that is always available
-                cboResolution.setSelectedItem(Resolution.DECADE);
+                // cboResolution is set to the resolution that is always available. This change of the selected item
+                // will trigger another request. However, if the requested resolution was DECADE there is a general
+                // issue with the service and thus we cannot fetch any time series
+                if ((resolution != null) && (Resolution.DECADE != resolution)) {
+                    cboResolution.setSelectedItem(Resolution.DECADE);
+                }
 
                 JOptionPane.showMessageDialog(
                     SOSFeatureInfoDisplay.this,
