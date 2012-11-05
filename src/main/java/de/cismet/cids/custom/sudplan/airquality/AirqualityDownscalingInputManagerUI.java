@@ -110,7 +110,8 @@ public class AirqualityDownscalingInputManagerUI extends javax.swing.JPanel {
                 model.getGridcellCountY(),
                 model.getGridcellSize(),
                 model.getLowerleft(),
-                model.getUpperright());
+                model.getUpperright(),
+                Integer.parseInt(model.getSrs().substring(5)));
     }
 
     /**

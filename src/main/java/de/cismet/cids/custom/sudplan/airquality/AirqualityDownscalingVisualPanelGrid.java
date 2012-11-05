@@ -117,7 +117,8 @@ public final class AirqualityDownscalingVisualPanelGrid extends javax.swing.JPan
                 model.getGridcellCountY(),
                 model.getGridcellSize(),
                 model.getLowerleft(),
-                model.getUpperright());
+                model.getUpperright(),
+                Integer.parseInt(CismapBroker.getInstance().getSrs().getCode().substring(5)));
     }
 
     //~ Methods ----------------------------------------------------------------
