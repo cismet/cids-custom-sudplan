@@ -70,12 +70,14 @@ final class GridFeature extends DefaultStyledFeature implements XStyledFeature {
      * @param  gridcellSize    DOCUMENT ME!
      * @param  lowerleft       DOCUMENT ME!
      * @param  upperright      DOCUMENT ME!
+     * @param  srid            DOCUMENT ME!
      */
     public GridFeature(final Long gridcellCountX,
             final Long gridcellCountY,
             final Integer gridcellSize,
             final Coordinate lowerleft,
-            final Coordinate upperright) {
+            final Coordinate upperright,
+            final int srid) {
         this.gridcellCountX = gridcellCountX;
         this.gridcellCountY = gridcellCountY;
         this.gridcellSize = gridcellSize;
@@ -84,7 +86,7 @@ final class GridFeature extends DefaultStyledFeature implements XStyledFeature {
 
         // TODO: Externalize.
         // TODO: Don't hardwire the SRID.
-        geometryFactory = new GeometryFactory(new PrecisionModel(), 3021);
+        geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
 
         setLinePaint(Color.blue);
         setLineWidth(1);

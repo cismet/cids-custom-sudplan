@@ -7,18 +7,33 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.hydrology;
 
+import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
+import at.ac.ait.enviro.tsapi.timeseries.TimeInterval.Openness;
+import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
+
 import org.apache.log4j.Logger;
+
+import se.smhi.sudplan.client.Scenario;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+
+import java.io.IOException;
+
+import java.net.URL;
+
+import java.text.DateFormat;
 
 import java.util.HashMap;
 
 import javax.swing.JLabel;
 
+import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.SudplanOptions;
 import de.cismet.cids.custom.sudplan.TimeseriesChartPanel;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
+import de.cismet.cids.custom.sudplan.Variable;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -39,6 +54,7 @@ public class CalibrationOutputManagerUI extends javax.swing.JPanel {
     //~ Instance fields --------------------------------------------------------
 
     private final transient CalibrationOutput model;
+    private final transient CidsBean outputBean;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient de.cismet.cids.custom.sudplan.LoadingLabel lblLoading =
@@ -50,10 +66,13 @@ public class CalibrationOutputManagerUI extends javax.swing.JPanel {
     /**
      * Creates new form CalibrationOutputManagerUI.
      *
-     * @param  model  DOCUMENT ME!
+     * @param   manager  DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
      */
-    public CalibrationOutputManagerUI(final CalibrationOutput model) {
-        this.model = model;
+    public CalibrationOutputManagerUI(final CalibrationOutputManager manager) throws IOException {
+        this.model = manager.getUR();
+        this.outputBean = manager.getCidsBean();
 
         initComponents();
 
@@ -68,7 +87,7 @@ public class CalibrationOutputManagerUI extends javax.swing.JPanel {
     private void init() {
         try {
             final HashMap<TimeseriesRetrieverConfig, TimeseriesConverter> configs =
-                new HashMap<TimeseriesRetrieverConfig, TimeseriesConverter>(3);
+                new HashMap<TimeseriesRetrieverConfig, TimeseriesConverter>(4);
 
             final CidsBean resultTsBean = model.fetchResultTs();
             final String url = (String)resultTsBean.getProperty("uri"); // NOI18N
@@ -83,6 +102,31 @@ public class CalibrationOutputManagerUI extends javax.swing.JPanel {
                 final TimeseriesRetrieverConfig cfgInput = TimeseriesRetrieverConfig.fromUrl(urlInput);
                 configs.put(cfgInput, SMSUtils.loadConverter(inputTsBean));
             }
+
+            final Scenario calScenario = HydrologyCache.getInstance().getCalibrationScenario();
+            final DateFormat hypeFormat = HydrologyCache.getInstance().getHydroDateFormat();
+
+            final TimeInterval interval = new TimeInterval();
+            interval.setLeft(Openness.OPEN);
+            interval.setRight(Openness.OPEN);
+            interval.setStart(new TimeStamp(hypeFormat.parse(calScenario.getCdate())));
+            interval.setEnd(new TimeStamp(hypeFormat.parse(calScenario.getEdate())));
+
+            final CalibrationModelManager cmm = (CalibrationModelManager)SMSUtils.loadModelManagerInstanceFromIO(
+                    outputBean);
+            final TimeseriesRetrieverConfig cfgUncalibrated = new TimeseriesRetrieverConfig(
+                    TimeseriesRetrieverConfig.PROTOCOL_HYPE,
+                    null,
+                    new URL("http://" + SudplanOptions.getInstance().getHdHypeIp()), // NOI18N
+                    "urn:ogc:object:cal_normal:cout:"
+                            + Resolution.DAY.getPrecision(), // NOI18N,
+                    String.valueOf(cmm.getRunInfo().getBasinId()),
+                    Variable.COUT.getPropertyKey(),
+                    "normal-cout-day-1981-01-01",
+                    null,
+                    interval);
+
+            configs.put(cfgUncalibrated, null);
 
             final Runnable r = new Runnable() {
 

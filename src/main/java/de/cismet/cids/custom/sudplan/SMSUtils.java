@@ -84,7 +84,8 @@ public final class SMSUtils {
     public static final String EPSG_WUPP = "EPSG:31466";                                // NOI18N
     public static final String EPSG_WGS84 = "EPSG:4326";                                // NOI18N
 
-    private static final String RUN_FROM_IO_QUERY = "SELECT {0}, {1} FROM run WHERE modelinput = {2}"; // NOI18N
+    private static final String RUN_FROM_INPUT_QUERY = "SELECT {0}, {1} FROM run WHERE modelinput = {2}";   // NOI18N
+    private static final String RUN_FROM_OUTPUT_QUERY = "SELECT {0}, {1} FROM run WHERE modeloutput = {2}"; // NOI18N
 
     //~ Enums ------------------------------------------------------------------
 
@@ -319,7 +320,8 @@ public final class SMSUtils {
             final User user = SessionManager.getSession().getUser();
             final MetaClass runClass = ClassCacheMultiple.getMetaClass(user.getDomain(), "run"); // NOI18N
             final String query = MessageFormat.format(
-                    RUN_FROM_IO_QUERY,
+                    TABLENAME_MODELINPUT.equals(ioBean.getMetaObject().getMetaClass().getTableName())
+                        ? RUN_FROM_INPUT_QUERY : RUN_FROM_OUTPUT_QUERY,
                     runClass.getID(),
                     runClass.getPrimaryKey(),
                     ioBean.getMetaObject().getID());
