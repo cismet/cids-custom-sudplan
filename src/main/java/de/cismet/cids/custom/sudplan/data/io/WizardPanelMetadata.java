@@ -15,6 +15,7 @@ import Sirius.server.middleware.types.MetaClass;
 import org.apache.log4j.Logger;
 
 import org.openide.WizardDescriptor;
+import org.openide.util.Exceptions;
 
 import java.awt.Component;
 
@@ -22,6 +23,7 @@ import java.text.MessageFormat;
 
 import java.util.Collection;
 
+import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.server.search.TimeSeriesSearch;
 
 import de.cismet.cids.dynamics.CidsBean;
@@ -104,10 +106,28 @@ public class WizardPanelMetadata extends AbstractWizardPanelCtrl {
         return this.cidsBean;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getTableName() {
+        return tableName;
+    }
+
     @Override
     protected void store(final WizardDescriptor wizard) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Entering store(WizardDescriptor)"); // NOI18N
+        }
+
+        // FIXME: quick and dirty
+        if (SMSUtils.TABLENAME_IDFCURVE.equals(tableName)) {
+            try {
+                cidsBean.setProperty("year", comp.getYear());  // NOI18N
+            } catch (final Exception ex) {
+                LOG.warn("cannot set year for idf curve", ex); // NOI18N
+            }
         }
 
         wizard.putProperty(PROP_BEAN, this.cidsBean);

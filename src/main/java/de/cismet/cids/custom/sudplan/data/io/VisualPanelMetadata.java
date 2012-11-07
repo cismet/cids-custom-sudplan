@@ -10,6 +10,7 @@ package de.cismet.cids.custom.sudplan.data.io;
 import org.apache.log4j.Logger;
 
 import org.openide.util.ImageUtilities;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -24,6 +25,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 
 import de.cismet.cids.custom.sudplan.MonitorstationContext;
+import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cids.dynamics.CidsBean;
 
@@ -58,8 +60,10 @@ public class VisualPanelMetadata extends javax.swing.JPanel {
     private javax.swing.JLabel lblForecast;
     private javax.swing.JLabel lblName;
     private javax.swing.JLabel lblStation;
+    private javax.swing.JLabel lblYear;
     private javax.swing.JTextField txtDescription;
     private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtYear;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
@@ -130,6 +134,8 @@ public class VisualPanelMetadata extends javax.swing.JPanel {
             LOG.error("ERROR", e);
         }
 
+        initYearField();
+
         DefaultCustomObjectEditor.setMetaClassInformationToMetaClassStoreComponentsInBindingGroup(
             bindingGroup,
             cidsBean);
@@ -141,6 +147,32 @@ public class VisualPanelMetadata extends javax.swing.JPanel {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Leaving init()");
         }
+    }
+    /**
+     * FIXME: quick and dirty
+     *
+     * @return  DOCUMENT ME!
+     */
+    Integer getYear() {
+        try {
+            return Integer.parseInt(txtYear.getText());
+        } catch (final NumberFormatException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("unparsable year: " + txtYear.getText(), e); // NOI18N
+            }
+
+            return null;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void initYearField() {
+        final boolean isIdf = SMSUtils.TABLENAME_IDFCURVE.equals(ctrl.getTableName());
+        txtYear.setEnabled(isIdf);
+        lblYear.setEnabled(isIdf);
+        txtYear.setToolTipText(isIdf ? null : "Year only applicable for IDF curves");
     }
 
     /**
@@ -169,6 +201,8 @@ public class VisualPanelMetadata extends javax.swing.JPanel {
         txtDescription = new javax.swing.JTextField();
         cboStation = new de.cismet.cids.editors.DefaultBindableReferenceCombo();
         chkForecast = new javax.swing.JCheckBox();
+        lblYear = new javax.swing.JLabel();
+        txtYear = new javax.swing.JTextField();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -294,10 +328,46 @@ public class VisualPanelMetadata extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(9, 9, 9, 9);
         jPanel1.add(chkForecast, gridBagConstraints);
 
+        lblYear.setText(NbBundle.getMessage(VisualPanelMetadata.class, "VisualPanelMetadata.lblYear.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.ipadx = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(9, 9, 9, 9);
+        jPanel1.add(lblYear, gridBagConstraints);
+
+        txtYear.setText(NbBundle.getMessage(VisualPanelMetadata.class, "VisualPanelMetadata.txtYear.text")); // NOI18N
+        txtYear.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    txtYearActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.ipadx = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(9, 9, 9, 9);
+        jPanel1.add(txtYear, gridBagConstraints);
+
         add(jPanel1, java.awt.BorderLayout.CENTER);
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void txtYearActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_txtYearActionPerformed
+        // TODO add your handling code here:
+    } //GEN-LAST:event_txtYearActionPerformed
 
     //~ Inner Classes ----------------------------------------------------------
 
