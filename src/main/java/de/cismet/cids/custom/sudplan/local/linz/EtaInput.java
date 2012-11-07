@@ -273,7 +273,7 @@ public class EtaInput extends SwmmOutput {
                             || etaConfiguration.getName().equalsIgnoreCase("WLDSP1nolink")
                             || etaConfiguration.getName().equalsIgnoreCase("WLDSP2nolink")
                             || etaConfiguration.getName().equalsIgnoreCase("WLGSP1nolink")) {
-                    etaConfiguration.setSedimentationEfficency(20.0f);
+                    etaConfiguration.setSedimentationEfficency(25.0f);
                 } else {
                     etaConfiguration.setSedimentationEfficency(0.0f);
                 }
