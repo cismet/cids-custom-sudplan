@@ -144,6 +144,7 @@ public final class TimeSeriesSerializer implements TimeseriesConverter {
         }
 
         final SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
+        dateFormat.setTimeZone(UTC_TIME_ZONE);
 
         final ByteArrayOutputStream byteOut = new ByteArrayOutputStream(1000);
         final DeflaterOutputStream zOut = new DeflaterOutputStream(byteOut);
@@ -213,7 +214,8 @@ public final class TimeSeriesSerializer implements TimeseriesConverter {
                 writer.write(FIELD_SEP_AS_CHAR);
                 writer.write(String.valueOf(ts.getValue(stamp, PropertyNames.VALUE)));
             }
-
+            LOG.info(timestamps.length + " measurements successfully serialized from timeseries '"
+                        + ts.getTSProperty(PropertyNames.DESCRIPTION) + '\'');
             writer.flush();
         } catch (final Exception e) {
             final String message = "An error occured while serializing TimeSeries: " + ts; // NOI18N
@@ -266,8 +268,11 @@ public final class TimeSeriesSerializer implements TimeseriesConverter {
         // --- start processing decompressed data
 
         final SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
+        dateFormat.setTimeZone(UTC_TIME_ZONE);
         final ByteArrayInputStream bin2 = new ByteArrayInputStream(bOut.toByteArray());
         final LineNumberReader reader = new LineNumberReader(new InputStreamReader(bin2));
+
+        long count = 0;
 
         final TimeSeriesImpl ts = new TimeSeriesImpl();
 
@@ -317,6 +322,7 @@ public final class TimeSeriesSerializer implements TimeseriesConverter {
                             ts.setValue(new TimeStamp(dateFormat.parse(splitted[0])),
                                 PropertyNames.VALUE,
                                 Float.parseFloat(splitted[1]));
+                            count++;
                         } catch (final Exception e) {
                             LOG.error("TimeSeries data representation is corrupted.", e);
                             throw new IllegalArgumentException("TimeSeries data representation is corrupted.", e);
@@ -342,7 +348,8 @@ public final class TimeSeriesSerializer implements TimeseriesConverter {
                 return null;
             }
         }
-
+        LOG.info(count + " measurements successfully deserialized to timeseries '"
+                    + ts.getTSProperty(PropertyNames.DESCRIPTION) + '\'');
         return ts;
     }
 

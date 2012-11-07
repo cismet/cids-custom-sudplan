@@ -24,7 +24,6 @@ import org.openide.util.lookup.ServiceProvider;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -66,6 +65,9 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
 
         DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // NOI18N
         TS_DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
+        TS_DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
+        DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -254,6 +256,7 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
                         final String event_start = split[1];
                         final String event_end = split[2];
 
+                        DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
                         final Date startDate = DATEFORMAT.parse(event_start);
                         final Date endDate = DATEFORMAT.parse(event_end);
 
@@ -271,6 +274,7 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
                         }
                     } else {
                         final String key = split[0];
+                        DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
                         final Date date = DATEFORMAT.parse(key);
                         for (int i = 1; i < split.length; i++) {
                             final String value = split[i];
@@ -288,6 +292,7 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
                     final String event_start = split[1];
                     final String event_end = split[2];
 
+                    DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
                     final Date startDate = DATEFORMAT.parse(event_start);
                     final Date endDate = DATEFORMAT.parse(event_end);
 
@@ -309,6 +314,7 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
 
                     if (!NAN.equals(value) && !NEG_INF.equals(value)) {
                         final String key = split[0];
+                        DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
                         final Date date = DATEFORMAT.parse(key);
                         final float val = NUMBERFORMAT.parse(value).floatValue();
 
@@ -412,15 +418,18 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
             sb.append(lineSep);
 
             final Iterator<TimeStamp> it = to.getTimeStamps().iterator();
+            int i = 0;
             while (it.hasNext()) {
                 final TimeStamp stamp = it.next();
+                DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
                 sb.append(DATEFORMAT.format(stamp.asDate())).append(valueSep);
 
-                int i = 0;
                 for (final String valueKey : valueKeys) {
                     final Object value = to.getValue(stamp, valueKey);
                     if (isEventTimeseries && (i == 0)) {
                         // end timestamp
+                        TS_DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
+                        DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
                         sb.append(DATEFORMAT.format(TS_DATEFORMAT.parse((String)value))).append(valueSep);
                     } else if (isEventTimeseries && (i == 1)) {
                         // event id
@@ -435,7 +444,8 @@ public final class LinzNetcdfConverter implements TimeseriesConverter {
                 }
                 sb.append(lineSep);
             }
-
+            LOG.info(i + " measurements successfully exported from timeseries '"
+                        + to.getTSProperty(PropertyNames.DESCRIPTION) + '\'');
             return new ByteArrayInputStream(sb.toString().getBytes());
         } catch (final Exception e) {
             final String message = "cannot convert timeseries data"; // NOI18N
