@@ -172,7 +172,8 @@ public class VisualPanelMetadata extends javax.swing.JPanel {
         final boolean isIdf = SMSUtils.TABLENAME_IDFCURVE.equals(ctrl.getTableName());
         txtYear.setEnabled(isIdf);
         lblYear.setEnabled(isIdf);
-        txtYear.setToolTipText(isIdf ? null : "Year only applicable for IDF curves");
+        txtYear.setToolTipText(isIdf
+                ? null : NbBundle.getMessage(VisualPanelMetadata.class, "VisualPanelMetadata.txtYear.tooltiptext")); // NOI18N
     }
 
     /**
