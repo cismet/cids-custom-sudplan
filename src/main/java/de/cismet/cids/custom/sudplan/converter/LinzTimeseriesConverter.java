@@ -59,7 +59,7 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
         NUMBERFORMAT.setRoundingMode(RoundingMode.HALF_UP);
 
         DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // NOI18N
-        DATEFORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+        DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -77,6 +77,7 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
     @Override
     public TimeSeries convertForward(final InputStream from, final String... params) throws ConversionException {
         final BufferedReader br;
+        long count = 0;
         try {
             br = new BufferedReader(new InputStreamReader(from));
 
@@ -116,9 +117,11 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
                     final String key = split[0];
                     final String value = split[1];
 
+                    DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
                     final Date date = DATEFORMAT.parse(key);
                     final float val = NUMBERFORMAT.parse(value.trim()).floatValue();
                     ts.setValue(new TimeStamp(date), PropertyNames.VALUE, val);
+                    count++;
                 }
 
                 if (Thread.currentThread().isInterrupted()) {
@@ -129,6 +132,8 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
                 line = br.readLine();
             }
 
+            LOG.info(count + " measurements successfully imported into timeseries '"
+                        + ts.getTSProperty(PropertyNames.DESCRIPTION) + '\'');
             return ts;
         } catch (final Exception ex) {
             final String message = "cannot convert from input stream"; // NOI18N
@@ -152,6 +157,7 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
         try {
             final Object valueKeyObject = to.getTSProperty(TimeSeries.VALUE_KEYS);
             final String valueKey;
+            long count = 0;
             if (valueKeyObject instanceof String) {
                 valueKey = (String)valueKeyObject;
                 if (LOG.isDebugEnabled()) {
@@ -180,12 +186,16 @@ public final class LinzTimeseriesConverter implements TimeseriesConverter, Forma
                 final TimeStamp stamp = it.next();
                 final Float value = (Float)to.getValue(stamp, valueKey);
 
+                DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
                 sb.append(DATEFORMAT.format(stamp.asDate()));
                 sb.append("   "); // NOI18N
                 sb.append(NUMBERFORMAT.format(value));
                 sb.append(lineSep);
+                count++;
             }
 
+            LOG.info(count + " measurements successfully exported from timeseries '"
+                        + to.getTSProperty(PropertyNames.DESCRIPTION) + '\'');
             return new ByteArrayInputStream(sb.toString().getBytes());
         } catch (final Exception e) {
             final String message = "cannot convert timeseries data"; // NOI18N

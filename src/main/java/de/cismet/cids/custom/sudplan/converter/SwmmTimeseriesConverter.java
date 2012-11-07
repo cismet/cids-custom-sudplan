@@ -60,7 +60,7 @@ public final class SwmmTimeseriesConverter implements TimeseriesConverter, Forma
         NUMBERFORMAT.setRoundingMode(RoundingMode.HALF_UP);
 
         DATEFORMAT = new SimpleDateFormat("yyyy MM dd HH mm"); // NOI18N
-        DATEFORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+        DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -78,6 +78,7 @@ public final class SwmmTimeseriesConverter implements TimeseriesConverter, Forma
     @Override
     public TimeSeries convertForward(final InputStream from, final String... params) throws ConversionException {
         final BufferedReader br;
+        long count = 0;
         try {
             br = new BufferedReader(new InputStreamReader(from));
 
@@ -98,14 +99,15 @@ public final class SwmmTimeseriesConverter implements TimeseriesConverter, Forma
                 NbBundle.getMessage(
                     SwmmTimeseriesConverter.class,
                     "SwmmTimeseriesConverter.description")
-                        + "("
-                        + (System.currentTimeMillis() / 1000000000)
+                        + " ("
+                        + (System.currentTimeMillis() / 100000000)
                         + ")");
 
             while (line != null) {
                 final String dateString = line.substring(STATION.length(), 21);
                 final String valueString = line.substring(22);
 
+                DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
                 final Date date = DATEFORMAT.parse(dateString);
                 final float val = NUMBERFORMAT.parse(valueString.trim()).floatValue();
                 ts.setValue(new TimeStamp(date), PropertyNames.VALUE, val);
@@ -120,8 +122,11 @@ public final class SwmmTimeseriesConverter implements TimeseriesConverter, Forma
                 }
 
                 line = br.readLine();
+                count++;
             }
 
+            LOG.info(count + " measurements successfully imported into timeseries '"
+                        + ts.getTSProperty(PropertyNames.DESCRIPTION) + '\'');
             return ts;
         } catch (final Exception ex) {
             final String message = "cannot convert from input stream"; // NOI18N
@@ -145,6 +150,7 @@ public final class SwmmTimeseriesConverter implements TimeseriesConverter, Forma
         try {
             final Object valueKeyObject = to.getTSProperty(TimeSeries.VALUE_KEYS);
             final String valueKey;
+            long count = 0;
             if (valueKeyObject instanceof String) {
                 valueKey = (String)valueKeyObject;
                 if (LOG.isDebugEnabled()) {
@@ -174,12 +180,16 @@ public final class SwmmTimeseriesConverter implements TimeseriesConverter, Forma
                 final Float value = (Float)to.getValue(stamp, valueKey);
 
                 sb.append(STATION);
+                DATEFORMAT.setTimeZone(UTC_TIME_ZONE);
                 sb.append(DATEFORMAT.format(stamp.asDate()));
                 sb.append(' '); // NOI18N
                 sb.append(NUMBERFORMAT.format(value));
                 sb.append(lineSep);
+                count++;
             }
 
+            LOG.info(count + " measurements successfully exported from timeseries '"
+                        + to.getTSProperty(PropertyNames.DESCRIPTION) + '\'');
             return new ByteArrayInputStream(sb.toString().getBytes());
         } catch (final Exception e) {
             final String message = "cannot convert timeseries data"; // NOI18N
