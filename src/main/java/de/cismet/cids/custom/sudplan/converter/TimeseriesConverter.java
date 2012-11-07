@@ -19,7 +19,7 @@ import java.util.TimeZone;
  */
 public interface TimeseriesConverter extends InputStreamConverter<TimeSeries> {
 
-    //~ Static fields/initializers ---------------------------------------------
+    //~ Instance fields --------------------------------------------------------
 
     TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 }
