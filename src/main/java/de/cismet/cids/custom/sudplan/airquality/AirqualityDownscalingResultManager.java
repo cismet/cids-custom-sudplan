@@ -12,10 +12,7 @@ import at.ac.ait.enviro.tsapi.timeseries.TimeInterval;
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 import at.ac.ait.enviro.tsapi.timeseries.TimeStamp;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.*;
 
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.GeoServerRESTReader;
@@ -40,8 +37,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -1159,6 +1159,8 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
             Writer out = null;
             try {
                 out = new BufferedWriter(new FileWriter(fileToSaveTo));
+                final DateFormat format = new SimpleDateFormat("yyyy;MM;dd;HH");
+                format.setTimeZone(TimeZone.getTimeZone("UTC"));
 
                 for (final TimeStamp stamp : timeseries.getTimeStamps()) {
                     final Float[][] values = (Float[][])timeseries.getValue(stamp, valueKey);
@@ -1169,10 +1171,14 @@ public class AirqualityDownscalingResultManager implements Callable<SlidableWMSS
                             out.write(';');
                             out.write(result.getResolution().getOfferingSuffix());
                             out.write(';');
-                            out.write(Long.toString(stamp.asMilis()));
+                            out.write(format.format(stamp.asDate()));
                             out.write(';');
-                            out.write(geometries[x][y].toText());
-                            out.write(';');
+                            for (final Coordinate coord : geometries[x][y].getCoordinates()) {
+                                out.write(String.valueOf(coord.x));
+                                out.write(';');
+                                out.write(String.valueOf(coord.y));
+                                out.write(';');
+                            }
                             out.write(values[x][y].toString());
                             out.write(';');
                             out.write(unit);
