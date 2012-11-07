@@ -11,7 +11,6 @@ import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.exception.ConnectionException;
 
 import Sirius.server.middleware.types.MetaClass;
-import Sirius.server.search.CidsServerSearch;
 
 import org.apache.log4j.Logger;
 
@@ -28,6 +27,8 @@ import de.cismet.cids.custom.sudplan.server.search.TimeSeriesSearch;
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
+
+import de.cismet.cids.server.search.CidsServerSearch;
 
 /**
  * DOCUMENT ME!
