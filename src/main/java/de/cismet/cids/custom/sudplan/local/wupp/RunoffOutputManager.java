@@ -62,6 +62,8 @@ public final class RunoffOutputManager implements Manager {
     private transient CidsBean modelOutputBean;
     private transient volatile RunoffOutputManagerUI ui;
 
+    private transient XBoundingBox bbox;
+
     //~ Methods ----------------------------------------------------------------
 
     @Override
@@ -113,59 +115,67 @@ public final class RunoffOutputManager implements Manager {
      * @throws  IllegalStateException  DOCUMENT ME!
      */
     public XBoundingBox loadBBoxFromInput() {
-        final RunoffInputManager m = (RunoffInputManager)SMSUtils.loadManagerFromModel((CidsBean)
-                modelOutputBean.getProperty(
-                    "model"),
-                ManagerType.INPUT);
+        if (bbox == null) {
+            final RunoffInputManager m = (RunoffInputManager)SMSUtils.loadManagerFromModel((CidsBean)
+                    modelOutputBean.getProperty(
+                        "model"),
+                    ManagerType.INPUT);
 
-        final MetaClass mc = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", SMSUtils.TABLENAME_MODELINPUT);
+            final MetaClass mc = ClassCacheMultiple.getMetaClass("SUDPLAN-WUPP", SMSUtils.TABLENAME_MODELINPUT);
 
-        if (mc == null) {
-            throw new IllegalStateException("cannot fetch model input metaclass"); // NOI18N
+            if (mc == null) {
+                throw new IllegalStateException("cannot fetch model input metaclass"); // NOI18N
+            }
+
+            final StringBuilder sb = new StringBuilder();
+
+            sb.append("SELECT ").append(mc.getID()).append(", o.").append(mc.getPrimaryKey()); // NOI18N
+            sb.append(" FROM ")
+                    .append(mc.getTableName())
+                    .append(" o, ")
+                    .append(SMSUtils.TABLENAME_MODELRUN)
+                    .append(" r");                                                             // NOI18N
+            sb.append(" WHERE o.").append(mc.getPrimaryKey()).append(" = r.modelinput");       // NOI18N
+            sb.append(" AND r.modeloutput = ").append(modelOutputBean.getProperty("id"));      // NOI18N
+
+            final MetaObject[] metaObjects;
+            try {
+                metaObjects = SessionManager.getProxy()
+                            .getMetaObjectByQuery(SessionManager.getSession().getUser(),
+                                    sb.toString(),
+                                    SMSUtils.DOMAIN_SUDPLAN_WUPP);
+            } catch (final ConnectionException ex) {
+                final String message = "cannot get timeseries meta objects from database"; // NOI18N
+                LOG.error(message, ex);
+                throw new IllegalStateException(message, ex);
+            }
+
+            if (metaObjects.length != 1) {
+                throw new IllegalStateException("did not find exactly one input to this output: " + modelOutputBean); // NOI18N
+            }
+
+            m.setCidsBean(metaObjects[0].getBean());
+            final RunoffInput io;
+            try {
+                io = m.getUR();
+            } catch (final IOException ex) {
+                throw new IllegalStateException("cannot fetch runoff input from ur", ex); // NOI18N
+            }
+
+            final CidsBean geocpmBean;
+            if (io.getDeltaInputId() < 0) {
+                geocpmBean = io.fetchGeocpmInput();
+            } else {
+                geocpmBean = (CidsBean)io.fetchDeltaInput().getProperty("original_object"); // NOI18N
+            }
+
+            final Geometry geom = (Geometry)geocpmBean.getProperty("geom.geo_field"); // NOI18N
+            final Geometry geom31466 = CrsTransformer.transformToGivenCrs(geom.getEnvelope(), SMSUtils.EPSG_WUPP);
+
+            bbox = new XBoundingBox(geom31466, SMSUtils.EPSG_WUPP, true);
         }
 
-        final StringBuilder sb = new StringBuilder();
-
-        sb.append("SELECT ").append(mc.getID()).append(", o.").append(mc.getPrimaryKey());                             // NOI18N
-        sb.append(" FROM ").append(mc.getTableName()).append(" o, ").append(SMSUtils.TABLENAME_MODELRUN).append(" r"); // NOI18N
-        sb.append(" WHERE o.").append(mc.getPrimaryKey()).append(" = r.modelinput");                                   // NOI18N
-        sb.append(" AND r.modeloutput = ").append(modelOutputBean.getProperty("id"));                                  // NOI18N
-
-        final MetaObject[] metaObjects;
-        try {
-            metaObjects = SessionManager.getProxy()
-                        .getMetaObjectByQuery(SessionManager.getSession().getUser(),
-                                sb.toString(),
-                                SMSUtils.DOMAIN_SUDPLAN_WUPP);
-        } catch (final ConnectionException ex) {
-            final String message = "cannot get timeseries meta objects from database"; // NOI18N
-            LOG.error(message, ex);
-            throw new IllegalStateException(message, ex);
-        }
-
-        if (metaObjects.length != 1) {
-            throw new IllegalStateException("did not find exactly one input to this output: " + modelOutputBean); // NOI18N
-        }
-
-        m.setCidsBean(metaObjects[0].getBean());
-        final RunoffInput io;
-        try {
-            io = m.getUR();
-        } catch (final IOException ex) {
-            throw new IllegalStateException("cannot fetch runoff input from ur", ex); // NOI18N
-        }
-
-        final CidsBean geocpmBean;
-        if (io.getDeltaInputId() < 0) {
-            geocpmBean = io.fetchGeocpmInput();
-        } else {
-            geocpmBean = (CidsBean)io.fetchDeltaInput().getProperty("original_object"); // NOI18N
-        }
-
-        final Geometry geom = (Geometry)geocpmBean.getProperty("geom.geo_field"); // NOI18N
-        final Geometry geom31466 = CrsTransformer.transformToGivenCrs(geom.getEnvelope(), SMSUtils.EPSG_WUPP);
-
-        return new XBoundingBox(geom31466, SMSUtils.EPSG_WUPP, true);
+        return bbox;
     }
 
     /**
