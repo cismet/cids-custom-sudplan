@@ -7,10 +7,13 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.local.wupp;
 
+import Sirius.navigator.connection.SessionManager;
+import Sirius.navigator.exception.ConnectionException;
 import Sirius.navigator.ui.ComponentRegistry;
 
 import Sirius.server.middleware.types.MetaClass;
 import Sirius.server.middleware.types.MetaObject;
+import Sirius.server.newuser.User;
 
 import org.apache.log4j.Logger;
 
@@ -28,15 +31,17 @@ import java.io.IOException;
 import java.text.MessageFormat;
 
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
+import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 import de.cismet.cids.dynamics.CidsBean;
-
-import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
 
@@ -188,7 +193,14 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
      */
     private void attachScenario(final CidsBean modelRun, final WizardDescriptor wizard) throws IOException {
         final CidsBean input = (CidsBean)wizard.getProperty(PROP_INPUT_BEAN);
-        final CidsBean iaBean = (CidsBean)input.getProperty("investigation_area"); // NOI18N
+        final String iaProperty;
+
+        if (SMSUtils.TABLENAME_DELTA_CONFIGURATION.equals(input.getMetaObject().getMetaClass().getTableName())) {
+            iaProperty = "original_object.investigation_area";           // NOI18N
+        } else {
+            iaProperty = "investigation_area";
+        }
+        final CidsBean iaBean = (CidsBean)input.getProperty(iaProperty); // NOI18N
 
         final List<CidsBean> scenarios = (List)iaBean.getProperty("scenarios"); // NOI18N
         scenarios.add(modelRun);
@@ -227,7 +239,14 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
         final String name = "GeoCPM run input (" + wizName + ")";
 
         final RunoffInput runoffIO = new RunoffInput();
-        runoffIO.setGeocpmInputId(input.getMetaObject().getID());
+
+        if (SMSUtils.TABLENAME_DELTA_CONFIGURATION.equals(input.getMetaObject().getMetaClass().getTableName())) {
+            runoffIO.setDeltaInputId(input.getMetaObject().getID());
+            runoffIO.setGeocpmInputId(((CidsBean)input.getProperty("original_object")).getMetaObject().getID());
+        } else {
+            runoffIO.setGeocpmInputId(input.getMetaObject().getID());
+        }
+
         runoffIO.setRaineventId(rainevent.getMetaObject().getID());
 
         return SMSUtils.createModelInput(name, runoffIO, SMSUtils.Model.GEOCPM);
@@ -292,14 +311,28 @@ public final class RunGeoCPMWizardAction extends AbstractCidsBeanAction {
 
     @Override
     public boolean isEnabled() {
-        final boolean isEnabled = true;
+        boolean isEnabled = false;
 
-        // FIXME: for validation if (getCidsBean() == null) { LOG.warn("source == null, geocpm run action disabled");
-        // // NOI18N } else { final User user =
-        // SessionManager.getSession().getUser(); try { isEnabled = SessionManager.getProxy().hasConfigAttr(user,
-        // "sudplan.local.wupp.runGeoCPM");             // NOI18N } catch (final ConnectionException ex) { final String
-        // message = "cannot check for config attr 'sudplan.local.wupp.runGeoCPM', action disabled"; // NOI18N
-        // LOG.warn(message, ex); } }
+        final User user = SessionManager.getSession().getUser();
+        final Callable<Boolean> enable = new Callable<Boolean>() {
+
+                @Override
+                public Boolean call() throws Exception {
+                    try {
+                        return SessionManager.getProxy().hasConfigAttr(user, "sudplan.local.wupp.geocpm.run"); // NOI18N
+                    } catch (final ConnectionException ex) {
+                        LOG.warn("cannot check for config attr", ex);                                          // NOI18N
+                        return false;
+                    }
+                }
+            };
+
+        final Future<Boolean> future = SudplanConcurrency.getSudplanGeneralPurposePool().submit(enable);
+        try {
+            isEnabled = future.get(300, TimeUnit.MILLISECONDS);
+        } catch (final Exception ex) {
+            LOG.warn("cannot get result of enable future", ex); // NOI18N
+        }
 
         setEnabled(isEnabled);
 
