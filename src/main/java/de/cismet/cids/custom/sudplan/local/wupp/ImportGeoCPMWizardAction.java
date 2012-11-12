@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
-import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 
@@ -162,10 +161,9 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
                 @Override
                 public Boolean call() throws Exception {
                     try {
-                        // TODO: introduce proper attribute
-                        return SessionManager.getProxy().hasConfigAttr(user, ""); // NOI18N
+                        return SessionManager.getProxy().hasConfigAttr(user, "sudplan.local.wupp.geocpm.import"); // NOI18N
                     } catch (final ConnectionException ex) {
-                        LOG.warn("cannot check for config attr", ex);             // NOI18N
+                        LOG.warn("cannot check for config attr", ex);                                             // NOI18N
                         return false;
                     }
                 }
