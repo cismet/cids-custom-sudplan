@@ -283,9 +283,9 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
                                 }
 
                                 // FIXME: validation adaption
-                                final ImportStatus status = client.importConfiguration(cfg);
+// final ImportStatus status = client.importConfiguration(cfg);
 
-//                                final ImportStatus status = new ImportStatus(-1);
+                                final ImportStatus status = new ImportStatus(-1);
 
                                 geocpmId = status.getGeocpmId();
 
@@ -298,18 +298,18 @@ public final class ImportGeoCPMWizardPanelUpload implements WizardDescriptor.Pan
                                 // FIXME: for the validation
                                 Thread.currentThread().sleep(1333);
 
-                                final MetaClass mc = ClassCacheMultiple.getMetaClass(
-                                        SMSUtils.DOMAIN_SUDPLAN_WUPP, // NOI18N
-                                        "geocpm_configuration"); // NOI18N
+//                                final MetaClass mc = ClassCacheMultiple.getMetaClass(
+//                                        SMSUtils.DOMAIN_SUDPLAN_WUPP, // NOI18N
+//                                        "geocpm_configuration"); // NOI18N
+//
+//                                final MetaObject mo = SessionManager.getProxy()
+//                                            .getMetaObject(geocpmId, mc.getID(), SMSUtils.DOMAIN_SUDPLAN_WUPP);          // NOI18N
+//                                final CidsBean importBean = mo.getBean();
+//                                importBean.setProperty("name", cfgBean.getProperty("name"));                             // NOI18N
+//                                importBean.setProperty("description", cfgBean.getProperty("description"));               // NOI18N
+//                                importBean.setProperty("investigation_area", cfgBean.getProperty("investigation_area")); // NOI18N
 
-                                final MetaObject mo = SessionManager.getProxy()
-                                            .getMetaObject(geocpmId, mc.getID(), SMSUtils.DOMAIN_SUDPLAN_WUPP);          // NOI18N
-                                final CidsBean importBean = mo.getBean();
-                                importBean.setProperty("name", cfgBean.getProperty("name"));                             // NOI18N
-                                importBean.setProperty("description", cfgBean.getProperty("description"));               // NOI18N
-                                importBean.setProperty("investigation_area", cfgBean.getProperty("investigation_area")); // NOI18N
-
-                                importBean.persist();
+//                                importBean.persist();
 
                                 setStatusEDT(
                                     false,
