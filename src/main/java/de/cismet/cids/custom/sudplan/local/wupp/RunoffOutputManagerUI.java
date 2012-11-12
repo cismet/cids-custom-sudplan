@@ -14,13 +14,12 @@ import org.apache.log4j.Logger;
 
 import java.awt.EventQueue;
 
-import java.io.IOException;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 
 import de.cismet.cids.custom.sudplan.SMSUtils;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
@@ -86,32 +85,29 @@ public class RunoffOutputManagerUI extends JPanel {
      * DOCUMENT ME!
      */
     private void init() {
-        try {
-            final SimulationResult output = model.getUR();
+        final SwingWorker run = new SwingWorker<XBoundingBox, Void>() {
 
-            final Runnable run = new Runnable() {
+                private SimulationResult output = null;
 
-                    @Override
-                    public void run() {
+                @Override
+                protected XBoundingBox doInBackground() throws Exception {
+                    output = model.getUR();
+
+                    return model.loadBBoxFromInput();
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        initMap(output, get());
                         edpInfo.setText(output.getGeocpmInfo());
-                        initMap(output, model.loadBBoxFromInput());
-                    }
-                };
-
-            if (EventQueue.isDispatchThread()) {
-                run.run();
-            } else {
-                EventQueue.invokeLater(run);
-            }
-        } catch (final IOException ex) {
-            EventQueue.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
+                    } catch (final Exception ex) {
                         edpInfo.setText("ERROR: " + ex); // NOI18N
                     }
-                });
-        }
+                }
+            };
+
+        SudplanConcurrency.getSudplanGeneralPurposePool().execute(run);
     }
 
     /**
