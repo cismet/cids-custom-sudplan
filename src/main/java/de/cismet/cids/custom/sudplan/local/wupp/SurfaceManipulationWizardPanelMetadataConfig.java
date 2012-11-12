@@ -123,34 +123,36 @@ public class SurfaceManipulationWizardPanelMetadataConfig extends AbstractWizard
         isSelectionChanged = (Boolean)wizard.getProperty(SurfaceManipulationWizardAction.PROP_CONFIG_SELECTION_CHANGED);
 
         // Check the lock state
-        try {
-            final CidsBean configToCheck = SurfaceManipulationWizardAction.reloadConfiguration(selectedConfig);
+        if (!isConfigNew) {
+            try {
+                final CidsBean configToCheck = SurfaceManipulationWizardAction.reloadConfiguration(selectedConfig);
 
-            final Boolean locked = (Boolean)configToCheck.getProperty("locked");
+                final Boolean locked = (Boolean)configToCheck.getProperty("locked");
 
-            if (locked == null) {
-                throw new IllegalStateException("cannot check the locked state from the delta configuration");
+                if (locked == null) {
+                    throw new IllegalStateException("cannot check the locked state from the delta configuration");
+                }
+
+                isConfigLocked = locked.booleanValue();
+            } catch (IllegalStateException ise) {
+                JXErrorPane.showDialog(
+                    ComponentRegistry.getRegistry().getMainWindow(),
+                    new ErrorInfo(
+                        "Fehler",
+                        "Es ist ein Fehler beim Überprüfen der Änderungskonfiguration aufgetreten.",
+                        null,
+                        "EDITOR",
+                        ise,
+                        Level.WARNING,
+                        null));
+
+                isConfigLocked = true;
             }
 
-            isConfigLocked = locked.booleanValue();
-        } catch (IllegalStateException ise) {
-            JXErrorPane.showDialog(
-                ComponentRegistry.getRegistry().getMainWindow(),
-                new ErrorInfo(
-                    "Fehler",
-                    "Es ist ein Fehler beim Überprüfen der Änderungskonfiguration aufgetreten.",
-                    null,
-                    "EDITOR",
-                    ise,
-                    Level.WARNING,
-                    null));
-
-            isConfigLocked = true;
-        }
-
-        if (isConfigLocked) {
-            // Reset the selected configuration to null
-            wizard.putProperty(SurfaceManipulationWizardAction.PROP_DELTA_CONFIG, null);
+            if (isConfigLocked) {
+                // Reset the selected configuration to null
+                wizard.putProperty(SurfaceManipulationWizardAction.PROP_DELTA_CONFIG, null);
+            }
         }
 
         if (isSelectionChanged) {
