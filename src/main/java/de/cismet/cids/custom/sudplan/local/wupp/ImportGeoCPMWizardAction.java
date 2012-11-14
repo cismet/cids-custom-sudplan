@@ -28,12 +28,8 @@ import java.awt.event.ActionEvent;
 
 import java.text.MessageFormat;
 
-import java.util.concurrent.*;
-
 import javax.swing.Action;
 import javax.swing.JComponent;
-
-import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 
 import de.cismet.cids.navigator.utils.CidsClientToolbarItem;
 
@@ -156,24 +152,13 @@ public final class ImportGeoCPMWizardAction extends AbstractCidsBeanAction imple
     @Override
     public boolean isEnabled() {
         final User user = SessionManager.getSession().getUser();
-        final Callable<Boolean> enable = new Callable<Boolean>() {
 
-                @Override
-                public Boolean call() throws Exception {
-                    try {
-                        return SessionManager.getProxy().hasConfigAttr(user, "sudplan.local.wupp.geocpm.import"); // NOI18N
-                    } catch (final ConnectionException ex) {
-                        LOG.warn("cannot check for config attr", ex);                                             // NOI18N
-                        return false;
-                    }
-                }
-            };
-
-        final Future<Boolean> future = SudplanConcurrency.getSudplanGeneralPurposePool().submit(enable);
+        // NOTE: won't use a timeout as this is read during startup and startup only (atm). the task doesn't have a
+        // chance to finish in time during startup and so we won't use a timeout.
         try {
-            return future.get(300, TimeUnit.MILLISECONDS);
-        } catch (final Exception ex) {
-            LOG.warn("cannot get result of enable future", ex); // NOI18N
+            return SessionManager.getProxy().hasConfigAttr(user, "sudplan.local.wupp.geocpm.import"); // NOI18N
+        } catch (final ConnectionException ex) {
+            LOG.warn("cannot check for config attr", ex);                                             // NOI18N
 
             return false;
         }
