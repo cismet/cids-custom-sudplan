@@ -93,19 +93,7 @@ public class MonitorstationRenderer extends AbstractCidsBeanRenderer {
      */
     private void initVariables() {
         final Variable[] vars = Variable.values();
-
-        int columns = 1;
-        int rows = 1;
-        for (; columns < vars.length; ++columns) {
-            // round up row count
-            rows = (vars.length + columns - 1) / columns;
-            if (rows < columns) {
-                // this is what we want, more columns than rows
-                break;
-            }
-        }
-
-        final GridLayout varLayout = new GridLayout(rows, columns, 5, 5);
+        final GridLayout varLayout = new GridLayout(Math.round(vars.length / 2.0f), 2, 5, 5);
         pnlVariables.setLayout(varLayout);
         for (final Variable var : vars) {
             final VarCheckBox box = new VarCheckBox(var);
