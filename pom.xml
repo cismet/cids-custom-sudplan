@@ -22,14 +22,17 @@
     </prerequisites>
 
     <scm>
-        <connection>https://github.com/cismet/cids-custom-sudplan.git</connection>
+        <connection>scm:git:https://github.com/cismet/cids-custom-sudplan.git</connection>
         <developerConnection>scm:git:git@github.com:cismet/cids-custom-sudplan.git</developerConnection>
         <url>https://github.com/cismet/cids-custom-sudplan</url>
     </scm>
-
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/cismet/cids-custom-sudplan/issues</url>
+    </issueManagement>
     <ciManagement>
-        <system>hudson</system>
-        <url>http://ci.cismet.de/job/cids-custom-sudplan/</url>
+        <system>jenkins</system>
+        <url>https://ci.cismet.de/job/cids-custom-sudplan%20%28git-hub%29/</url>
     </ciManagement>
     <developers>
         <developer>
@@ -52,7 +55,7 @@
         </developer>
         <developer>
             <id>pdihe</id>
-            <name>Pascal Dih√©</name>
+            <name>Pascal Dihé</name>
             <email>pascal.dihe@cismet.de</email>
             <organization>cismet GmbH</organization>
         </developer>
