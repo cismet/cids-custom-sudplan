@@ -108,18 +108,4 @@ public class TimeSeriesSerializerTest
 
         TimeSeriesTestUtil.compareTimeSeries(ts, newTs);
     }
-
-    
-    
-    @Test
-    public void testSerializationDeserializationWithWuppertalData() throws Exception
-    {
-        final WuppertalTimeseriesConverter converter = new WuppertalTimeseriesConverter();
-        final InputStream in = this.getClass().getResourceAsStream("buchenhofen-pluvio_n_k_o_60-10.csv");
-      
-        assertNotNull(in);
-        
-        final TimeSeries ts = converter.convertForward(in);
-        this.testSerializationDeserialization(ts);
-    }
 }

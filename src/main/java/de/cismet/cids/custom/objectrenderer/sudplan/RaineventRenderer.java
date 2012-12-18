@@ -17,7 +17,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
@@ -25,20 +24,13 @@ import de.cismet.cids.custom.sudplan.AbstractCidsBeanRenderer;
 import de.cismet.cids.custom.sudplan.RaineventPanel;
 import de.cismet.cids.custom.sudplan.geocpmrest.io.Rainevent;
 
-import de.cismet.tools.gui.TitleComponentProvider;
-
 /**
  * DOCUMENT ME!
  *
  * @author   jimmy.lauter@cismet.de
  * @version  $Revision$, $Date$
  */
-public class RaineventRenderer extends AbstractCidsBeanRenderer implements TitleComponentProvider,
-    RequestsFullSizeComponent {
-
-    //~ Instance fields --------------------------------------------------------
-
-    private final transient RaineventTitleComponent titleComponent;
+public class RaineventRenderer extends AbstractCidsBeanRenderer implements RequestsFullSizeComponent {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkForecast;
@@ -55,8 +47,6 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
      */
     public RaineventRenderer() {
         initComponents();
-
-        titleComponent = new RaineventTitleComponent();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -163,9 +153,6 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
         bindingGroup.unbind();
         bindingGroup.bind();
 
-        titleComponent.setCidsBean(cidsBean);
-        titleComponent.setTitle((String)cidsBean.getProperty("name"));
-
         final String data = (String)cidsBean.getProperty("data");
         final Integer interval = (Integer)cidsBean.getProperty("interval");
 
@@ -211,15 +198,5 @@ public class RaineventRenderer extends AbstractCidsBeanRenderer implements Title
                     RaineventRenderer.this.validate();
                 }
             });
-    }
-
-    @Override
-    public JComponent getTitleComponent() {
-        return titleComponent;
-    }
-
-    @Override
-    public void setTitle(final String title) {
-        titleComponent.setTitle(title);
     }
 }

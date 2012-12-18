@@ -7,12 +7,12 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.data.io;
 
+import org.openide.util.Lookup;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import de.cismet.cids.custom.sudplan.converter.IDFConverter;
-import de.cismet.cids.custom.sudplan.converter.LinzIDFConverter;
-import de.cismet.cids.custom.sudplan.converter.WuppertalIDFConverter;
 
 /**
  * DOCUMENT ME!
@@ -36,10 +36,8 @@ public class IDFImportVisualPanelChooseConverter extends AbstractConverterChoose
     public IDFImportVisualPanelChooseConverter(final AbstractConverterChoosePanelCtrl ctrl) {
         super(ctrl);
 
-        // TODO: use lookup
         converters = new ArrayList<IDFConverter>();
-        converters.add(new LinzIDFConverter());
-        converters.add(new WuppertalIDFConverter());
+        converters.addAll(Lookup.getDefault().lookupAll(IDFConverter.class));
     }
 
     //~ Methods ----------------------------------------------------------------

@@ -10,14 +10,10 @@ package de.cismet.cids.custom.sudplan;
 import org.apache.log4j.Logger;
 
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
-import de.cismet.cids.custom.sudplan.geocpmrest.io.SimulationResult;
-import de.cismet.cids.custom.sudplan.local.wupp.RunoffOutputManager;
 
 import de.cismet.cids.dynamics.CidsBean;
 
-import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 
 import de.cismet.cismap.navigatorplugin.CidsFeature;
 import de.cismet.cismap.navigatorplugin.MapVisualisationProvider;
@@ -73,26 +69,12 @@ public final class ModelOutputMapVisualisationProvider implements MapVisualisati
         @Override
         public void run() {
             try {
-                final Manager manager = SMSUtils.loadManagerFromModel((CidsBean)moBean.getProperty("model"),
-                        ManagerType.OUTPUT); // NOI18N
+                final Manager manager = SMSUtils.loadManagerFromModel((CidsBean)moBean.getProperty("model"), // NOI18N
+                        ManagerType.OUTPUT);
 
-                if (manager instanceof RunoffOutputManager) {
-                    final RunoffOutputManager rManager = (RunoffOutputManager)manager;
-                    rManager.setCidsBean(moBean);
-
-                    final SimulationResult sr = rManager.getUR();
-                    final String name = (String)SMSUtils.runFromIO(moBean).getProperty("name"); // NOI18N
-                    final XBoundingBox bbox = rManager.loadBBoxFromInput();
-
-                    rManager.addResultLayerToMap(new SimpleWmsGetMapUrl(
-                            rManager.prepareGetMapRequest(sr).toExternalForm()),
-                        bbox,
-                        name);
-                } else {
-                    LOG.info("this modeloutput does not contain supportive layer data: " + moBean); // NOI18N
-                }
+                LOG.info("this modeloutput does not contain supportive layer data: " + moBean); // NOI18N
             } catch (final Exception e) {
-                LOG.warn("cannot add supporting layer to map for bean: " + moBean, e);              // NOI18N
+                LOG.warn("cannot add supporting layer to map for bean: " + moBean, e);          // NOI18N
             }
         }
     }

@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.data.io;
 
-import org.openide.WizardDescriptor;
-
 /**
  * DOCUMENT ME!
  *
