@@ -7,14 +7,12 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan.data.io;
 
+import org.openide.util.Lookup;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import de.cismet.cids.custom.sudplan.converter.HydrologyTimeseriesConverter;
-import de.cismet.cids.custom.sudplan.converter.LinzTimeseriesConverter;
-import de.cismet.cids.custom.sudplan.converter.SwmmTimeseriesConverter;
 import de.cismet.cids.custom.sudplan.converter.TimeseriesConverter;
-import de.cismet.cids.custom.sudplan.converter.WuppertalTimeseriesConverter;
 
 /**
  * DOCUMENT ME!
@@ -40,10 +38,7 @@ public class TimeSeriesConverterChoosePanel extends AbstractConverterChoosePanel
 
         // TODO: use lookup
         converters = new ArrayList<TimeseriesConverter>();
-        converters.add(new LinzTimeseriesConverter());
-        converters.add(new WuppertalTimeseriesConverter());
-        converters.add(new HydrologyTimeseriesConverter());
-        converters.add(new SwmmTimeseriesConverter());
+        converters.addAll(Lookup.getDefault().lookupAll(TimeseriesConverter.class));
     }
 
     //~ Methods ----------------------------------------------------------------

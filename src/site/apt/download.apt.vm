@@ -7,11 +7,56 @@
 
 {Download SMS component}
 
-    Here you can find the customisation jar for the cids Navigator that contains the
-    SUDPLAN SMS specific extensions.
+  Here you can find the customisation jar for the cids Navigator that contains the
+  SUDPLAN SMS specific extensions.
 
-    The SUDPLAN extension is distributed unter the
-    {{{./license.html}GNU Lesser General Public License, Version 3}}.
+  The SUDPLAN extension is distributed unter the
+  {{{./license.html}GNU Lesser General Public License, Version 3}}.
+
+  However, if you plan to use the SMS artifacts the binaries available below won't be sufficient and thus it is highly recommended
+  to use the
+  {{{http://maven.apache.org}maven3}} build tool to either include the SMS binaries in your build:
+
+-------------------
+
+[...]
+
+    <dependencies>
+        <dependency>
+            <groupId>de.cismet.cids.custom.sudplan</groupId>
+            <artifactId>cids-custom-sudplan</artifactId>
+            <!-- use this for the 3d binaries -->
+            <!--artifactId>cids-custom-sudplan-3d</artifactId-->
+            <!-- use this for the wuppertal pilot binaries -->
+            <!--artifactId>cids-custom-sudplan-wupp</artifactId-->
+            <!-- use this for the linz pilot binaries -->
+            <!--artifactId>cids-custom-sudplan-linz</artifactId-->
+            <version>2.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>cismet-repo</id>
+            <url>https://repo.cismet.de/repo</url>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+                <updatePolicy>daily</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+                <updatePolicy>interval:60</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
+[...]
+
+-------------------
+
+  or alternatively check out a fresh copy from {{{https://github.com/cismet/cids-custom-sudplan}GitHub}}.
 
 {SUDPLAN SMS extension ${projectVersion}}
 ~~ TODO: link to sub sites!!!
@@ -22,7 +67,19 @@
 *--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+----------+
 ||                         ||Binary                                                                                                                                                                          ||MD5     ||SHA1     |
 *--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+----------+
-|Sudplan SMS binary jar    |{{{http://flexo.cismet.de:8081/artifactory/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan/1.0-SNAPSHOT/cids-custom-sudplan-1.0-SNAPSHOT.jar}${projectName}-${projectVersion}.${projectPackaging}}}               |{{{http://flexo.cismet.de:8081/artifactory/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan/1.0-SNAPSHOT/cids-custom-sudplan-1.0-SNAPSHOT.jar.md5}MD5}}  |{{{http://flexo.cismet.de:8081/artifactory/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan/1.0-SNAPSHOT/cids-custom-sudplan-1.0-SNAPSHOT.jar.sha1}SHA1}}   |
+|Sudplan SMS binary jar    |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan/2.0-SNAPSHOT/cids-custom-sudplan-2.0-SNAPSHOT.jar}${projectName}-${projectVersion}.${projectPackaging}}}               |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan/2.0-SNAPSHOT/cids-custom-sudplan-2.0-SNAPSHOT.jar.md5}MD5}}  |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan/2.0-SNAPSHOT/cids-custom-sudplan-2.0-SNAPSHOT.jar.sha1}SHA1}}   |
 *--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+----------+
-|Sudplan SMS sources jar   |{{{http://flexo.cismet.de:8081/artifactory/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan/1.0-SNAPSHOT/cids-custom-sudplan-1.0-SNAPSHOT-sources.jar}${projectName}-${projectVersion}.${projectPackaging}}}               |{{{http://flexo.cismet.de:8081/artifactory/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan/1.0-SNAPSHOT/cids-custom-sudplan-1.0-SNAPSHOT-sources.jar.md5}MD5}}  |{{{http://flexo.cismet.de:8081/artifactory/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan/1.0-SNAPSHOT/cids-custom-sudplan-1.0-SNAPSHOT-sources.jar.sha1}SHA1}}   |
+|Sudplan SMS sources jar   |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan/2.0-SNAPSHOT/cids-custom-sudplan-2.0-SNAPSHOT-sources.jar}${projectName}-${projectVersion}.${projectPackaging}}}               |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan/2.0-SNAPSHOT/cids-custom-sudplan-2.0-SNAPSHOT-sources.jar.md5}MD5}}  |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan/2.0-SNAPSHOT/cids-custom-sudplan-2.0-SNAPSHOT-sources.jar.sha1}SHA1}}   |
+*--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+----------+
+|Sudplan SMS 3D binary jar    |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-3d/2.0-SNAPSHOT/cids-custom-sudplan-3d-2.0-SNAPSHOT.jar}${projectName}-3d-${projectVersion}.${projectPackaging}}}               |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-3d/2.0-SNAPSHOT/cids-custom-sudplan-3d-2.0-SNAPSHOT.jar.md5}MD5}}  |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-3d/2.0-SNAPSHOT/cids-custom-sudplan-3d-2.0-SNAPSHOT.jar.sha1}SHA1}}   |
+*--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+----------+
+|Sudplan SMS 3D sources jar   |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-3d/2.0-SNAPSHOT/cids-custom-sudplan-3d-2.0-SNAPSHOT-sources.jar}${projectName}-3d-${projectVersion}.${projectPackaging}}}               |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-3d/2.0-SNAPSHOT/cids-custom-sudplan-3d-2.0-SNAPSHOT-sources.jar.md5}MD5}}  |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-3d/2.0-SNAPSHOT/cids-custom-sudplan-3d-2.0-SNAPSHOT-sources.jar.sha1}SHA1}}   |
+*--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+----------+
+|Sudplan SMS Wuppertal Pilot binary jar    |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-wupp/2.0-SNAPSHOT/cids-custom-sudplan-wupp-2.0-SNAPSHOT.jar}${projectName}-wupp-${projectVersion}.${projectPackaging}}}               |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-wupp/2.0-SNAPSHOT/cids-custom-sudplan-wupp-2.0-SNAPSHOT.jar.md5}MD5}}  |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-wupp/2.0-SNAPSHOT/cids-custom-sudplan-wupp-2.0-SNAPSHOT.jar.sha1}SHA1}}   |
+*--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+----------+
+|Sudplan SMS Wuppertal Pilot sources jar   |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-wupp/2.0-SNAPSHOT/cids-custom-sudplan-wupp-2.0-SNAPSHOT-sources.jar}${projectName}-wupp-${projectVersion}.${projectPackaging}}}               |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-wupp/2.0-SNAPSHOT/cids-custom-sudplan-wupp-2.0-SNAPSHOT-sources.jar.md5}MD5}}  |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-wupp/2.0-SNAPSHOT/cids-custom-sudplan-wupp-2.0-SNAPSHOT-sources.jar.sha1}SHA1}}   |
+*--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+----------+
+|Sudplan SMS Linz Pilot binary jar    |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-linz/2.0-SNAPSHOT/cids-custom-sudplan-linz-2.0-SNAPSHOT.jar}${projectName}-linz${projectVersion}.${projectPackaging}}}               |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-linz/2.0-SNAPSHOT/cids-custom-sudplan-linz-2.0-SNAPSHOT.jar.md5}MD5}}  |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-linz/2.0-SNAPSHOT/cids-custom-sudplan-linz-2.0-SNAPSHOT.jar.sha1}SHA1}}   |
+*--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+----------+
+|Sudplan SMS Linz Pilot sources jar   |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-linz/2.0-SNAPSHOT/cids-custom-sudplan-linz-2.0-SNAPSHOT-sources.jar}${projectName}-linz-${projectVersion}.${projectPackaging}}}               |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-linz/2.0-SNAPSHOT/cids-custom-sudplan-linz-2.0-SNAPSHOT-sources.jar.md5}MD5}}  |{{{https://repo.cismet.de/repo/de/cismet/cids/custom/sudplan/cids-custom-sudplan-linz/2.0-SNAPSHOT/cids-custom-sudplan-linz-2.0-SNAPSHOT-sources.jar.sha1}SHA1}}   |
 *--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------+----------+

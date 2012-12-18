@@ -1,0 +1,29 @@
+            ------
+            What is SMS
+            ------
+            Martin Scholl
+            ------
+            29/12/2010
+
+{What is the SMS}
+
+  The SUDPLAN Scenario Management System (SMS) is the main piece of software that lets users (city planners, IT and GIS
+  experts, environmental modelers, etc.) interact with SUDPLAN. It is build on top of the
+  {{{http://wiki.cismet.de/index.php/Cids_Integrationsbaukasten}cids integration toolkit}} and enables users to easily
+  create, view and manage SUDPLAN actions and results. It is also built for providing an user interface capable of
+  management of local models including model input and output. On top of that the SMS ultimately allows for easy
+  integration of SUDPLAN results with local models to provide more precise results than ever before.
+
+
+  Here you can see a video of the Wuppertal Pilot Integration into the SMS showcasing not only Pilot specific features
+  but also many features available to all SUDPLAN users. Alternatively head for the 
+  {{{http://wiki.cismet.de/index.php/Cids_Integrationsbaukasten}SUDPLAN YouTube channel}} to see the actual capabilities
+  of the SUDPLAN SMS.
+
+%{snippet|url=file://${baseDir}/src/site/resources/sms_embedded_video.html|verbatim=false}
+
+  Head for the {{{../download.html#Download_SMS_component}download section}} to download
+  binaries and the sources of the SUDPLAN extension.
+
+  In the {{{../run.html#Run_the_SMS_from_the_web}run section}} you can run the current
+  version of the SMS right away.

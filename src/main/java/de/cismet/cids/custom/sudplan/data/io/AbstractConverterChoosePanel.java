@@ -18,6 +18,8 @@ import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import de.cismet.cids.custom.sudplan.converter.Converter;
@@ -84,7 +86,20 @@ public abstract class AbstractConverterChoosePanel<T extends Converter> extends 
     public void init() {
         this.cboConverterChooser.removeAllItems();
 
-        for (final T converter : getConverters()) {
+        final List<T> converters = getConverters();
+        Collections.sort(converters, new Comparator<T>() {
+
+                @Override
+                public int compare(final T o1, final T o2) {
+                    if ((o1 instanceof FormatHint) && (o2 instanceof FormatHint)) {
+                        return ((FormatHint)o1).getFormatName().compareTo(((FormatHint)o2).getFormatName());
+                    } else {
+                        return o1.hashCode() - o2.hashCode();
+                    }
+                }
+            });
+
+        for (final T converter : converters) {
             this.cboConverterChooser.addItem(converter);
         }
 

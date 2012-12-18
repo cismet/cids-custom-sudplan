@@ -28,22 +28,34 @@
 
   Don't hesitate to try out the happier smileys. Maybe your machine is more powerful than you think ;)
 
+{Run the cismap WMS client with PE Extension from the web}
 
-  Documentation:
+  Especially for all non-Sudplaners this is an interesting option because this application will run without a login. Thus
+  anybody is able to access Sudplan results on the Pan-European level. It is recommended that you watch the 
+  {{{http://www.youtube.com/watch?v=9949YM2gtW4} Pan-European Common Service video}} at the 
+  {{{http://www.youtube.com/user/Sudplan} YouTube Sudplan channel}} first to get an idea of
+  the controls of the application.
+
+%{snippet|url=file://${baseDir}/src/site/resources/run_cismap.html|verbatim=false}
+
+{Available documentation}
+
+* Documentation
+
+  * Sudplan specific doc: {{{http://www.youtube.com/user/Sudplan} Video Tutorials}}
 
   * cismap WebMap Software: {{{http://www.cismet.de/en/cismapV2ReferenceManual.pdf} Reference Manual (en)}}
 
   * cids Navigator Software: {{{http://sudplan.cismet.de/sudplanDist/cids.Navigator%20Benutzerhandbuch%20V1.0.2.pdf} Reference Manual (de)}}
 
-  * Sudplan specific doc: {{{http://sudplanwp3.cismet.de/?cat=49} SMS Video Tutorials}}
-
   * Issue reporting: {{{https://service.projectplace.com/pp/pp.cgi/d604965796/Sudplan_SMS_Issue_Reporting_template.ppt?save_as=1} PPT template}}
+    or directly on {{{http://github.com/cismet/cids-custom-sudplan} GitHub}}
 
   []
 
-  INFO:
+* INFO
 
-  * This software is ALPHA
+  * This software is BETA
 
   * Username and credential are available for Sudplan partners only
 

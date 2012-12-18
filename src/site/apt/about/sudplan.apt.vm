@@ -1,0 +1,36 @@
+            ------
+            What is SUDPLAN
+            ------
+            Martin Scholl
+            ------
+            29/12/2010
+
+{What is SUDPLAN}
+
+  The SUDPLAN project - Sustainable Urban Development Planner for Climate Change Adaptation -
+  aims at developing a web-based planning, prediction and training tool to support decisions
+  in long term urban planning. This will help to assure population’s health, comfort, safety
+  and life quality as well as sustainability of investments in utilities and infrastructures
+  within a changing climate. With its open nature and architectural design, SUDPLAN will
+  contribute to a shared information space in Europe.
+
+  SUDPLAN will cover:
+
+  * Planning for environmental factors
+
+  * Downscaling of climate model output
+
+  * Storm water flooding and CSO management
+
+  * River flooding
+
+  * Air pollution
+
+  []
+
+  Have a look at the official SUDPLAN project video:
+
+%{snippet|url=file://${baseDir}/src/site/resources/sudplan_embedded_video.html|verbatim=false}
+
+  For more information on the SUDPLAN project visit the
+  {{{http://www.sudplan.eu}SUDPLAN Web Page}}.

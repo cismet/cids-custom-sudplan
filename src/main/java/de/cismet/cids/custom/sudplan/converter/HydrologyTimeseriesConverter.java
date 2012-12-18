@@ -15,6 +15,7 @@ import at.ac.ait.enviro.tsapi.timeseries.impl.TimeSeriesImpl;
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -41,6 +42,7 @@ import de.cismet.cids.custom.sudplan.Variable;
  * @version  $Revision$, $Date$
  */
 // FIXME: proper implementation, this serves only testing purposes
+@ServiceProvider(service = TimeseriesConverter.class)
 public final class HydrologyTimeseriesConverter implements TimeseriesConverter, FormatHint {
 
     //~ Static fields/initializers ---------------------------------------------
