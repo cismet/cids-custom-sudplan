@@ -11,6 +11,8 @@ import Sirius.navigator.ui.ComponentRegistry;
 
 import at.ac.ait.enviro.tsapi.timeseries.TimeSeries;
 
+import org.apache.log4j.Logger;
+
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Cancellable;
@@ -20,6 +22,7 @@ import org.openide.util.NbBundle;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.EventQueue;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 
 import java.text.MessageFormat;
@@ -30,6 +33,10 @@ import javax.swing.JComponent;
 import de.cismet.cids.custom.sudplan.TimeseriesRetrieverConfig;
 
 import de.cismet.cids.utils.abstracts.AbstractCidsBeanAction;
+
+import de.cismet.cismap.commons.interaction.CismapBroker;
+
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -42,6 +49,9 @@ public class TimeSeriesExportWizardAction extends AbstractCidsBeanAction {
 
     public static final String PROP_TIMESERIES = "__prop_timeseries__";             // NOI18N
     public static final String PROP_TS_RETRIEVER_CFG = "__prop_ts_retriever_cfg__"; // NOI18N
+
+    /** LOGGER. */
+    private static final transient Logger LOG = Logger.getLogger(TimeSeriesExportWizardAction.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -168,9 +178,21 @@ public class TimeSeriesExportWizardAction extends AbstractCidsBeanAction {
         wizard.putProperty(PROP_TIMESERIES, timeSeries);
         wizard.putProperty(PROP_TS_RETRIEVER_CFG, timeseriesRetrieverConfig);
 
+        Frame parent;
+        try {
+            parent = ComponentRegistry.getRegistry().getMainWindow();
+        } catch (final Exception ex) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("component registry not availabe, trying mapping component", ex); // NOI18N
+            }
+
+            final JComponent c = CismapBroker.getInstance().getMappingComponent();
+            parent = StaticSwingTools.getParentFrame(c);
+        }
+
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
-        dialog.setLocationRelativeTo(ComponentRegistry.getRegistry().getMainWindow());
+        dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
         dialog.toFront();
 
