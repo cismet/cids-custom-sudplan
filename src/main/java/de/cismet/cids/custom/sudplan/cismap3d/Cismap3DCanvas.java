@@ -35,6 +35,8 @@ import javax.swing.JComponent;
 import de.cismet.cids.custom.sudplan.SMSUtils;
 
 import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -66,8 +68,10 @@ public class Cismap3DCanvas extends javax.swing.JPanel implements BasicGuiCompon
     private final transient Canvas3D canvas3D;
     private final transient Layer3D layer3D;
 
+    private final transient MovingCameraFeature camFeature;
+
     private final transient ActionListener homeL;
-//    private final transient ActionListener toggleCamL;
+    private final transient ActionListener toggleCamL;
     private final transient ActionListener toBBoxL;
     private final transient ActionListener fromBBoxL;
 
@@ -91,7 +95,7 @@ public class Cismap3DCanvas extends javax.swing.JPanel implements BasicGuiCompon
      */
     public Cismap3DCanvas() {
         homeL = new HomeListener();
-//        toggleCamL = new CameraToggleListener();
+        toggleCamL = new CameraToggleListener();
         toBBoxL = new ToBBoxListener();
         fromBBoxL = new FromBBoxListener();
 
@@ -106,6 +110,7 @@ public class Cismap3DCanvas extends javax.swing.JPanel implements BasicGuiCompon
             LOG.info("no canvas 3d implementation can be found"); // NOI18N
 
             dropTarget = null;
+            camFeature = null;
         } else {
             LOG.info("found canvas 3d implementation: " + canvas3D); // NOI18N
 
@@ -119,12 +124,14 @@ public class Cismap3DCanvas extends javax.swing.JPanel implements BasicGuiCompon
 
             if (canvas3D instanceof DropTarget3D) {
                 dropTarget = new DropTarget(this, (DropTarget3D)canvas3D);
+                camFeature = new MovingCameraFeature();
             } else {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("drop target 3d not available for canvas 3d, ignoring drop events"); // NOI18N
                 }
 
                 dropTarget = null;
+                camFeature = null;
             }
         }
     }
@@ -191,14 +198,14 @@ public class Cismap3DCanvas extends javax.swing.JPanel implements BasicGuiCompon
     public Collection<JComponent> getCustomButtons() {
         final List<JComponent> list = new ArrayList<JComponent>(3);
 
-        final JButton home = createButton("home_16.gif", homeL); // NOI18N
-//        final JButton toggleCam = createButton("camera_toggle_16.png", toggleCamL); // NOI18N
-        final JButton toBBox = createButton("to_bbox_16.png", toBBoxL);       // NOI18N
-        final JButton fromBBox = createButton("from_bbox_16.png", fromBBoxL); // NOI18N
+        final JButton home = createButton("home_16.gif", homeL);                    // NOI18N
+        final JButton toggleCam = createButton("camera_toggle_16.png", toggleCamL); // NOI18N
+        final JButton toBBox = createButton("to_bbox_16.png", toBBoxL);             // NOI18N
+        final JButton fromBBox = createButton("from_bbox_16.png", fromBBoxL);       // NOI18N
 
         list.add(toBBox);
         list.add(fromBBox);
-//        list.add(toggleCam);
+        list.add(toggleCam);
         list.add(home);
 
         return Collections.unmodifiableList(list);
@@ -288,6 +295,37 @@ public class Cismap3DCanvas extends javax.swing.JPanel implements BasicGuiCompon
         @Override
         public void actionPerformed(final ActionEvent e) {
             canvas3D.home();
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class CameraToggleListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+            final FeatureCollection fc = mc.getFeatureCollection();
+
+            boolean removed = false;
+            for (final Feature f : fc.getAllFeatures()) {
+                if (f.equals(camFeature)) {
+                    fc.removeFeature(camFeature);
+                    removed = true;
+                    break;
+                }
+            }
+
+            if (!removed) {
+                fc.addFeature(camFeature);
+                fc.holdFeature(camFeature);
+                mc.gotoBoundingBoxWithHistory(new XBoundingBox(canvas3D.getBoundingBox()));
+            }
         }
     }
 }
