@@ -125,16 +125,20 @@ public final class MovingCameraFeature extends DefaultStyledFeature implements X
         }
 
         final Vector2d newDirection = new Vector2d(cce.getNewDirection().x, cce.getNewDirection().y);
-        newDirection.normalize();
-
-        // rotate clock-wise if looking to south or counter clock-wise if looking to north
-        final double angle = -1 * Math.signum(newDirection.y) * iconDirection.angle(newDirection);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("new angle: " + angle); // NOI18N
+            LOG.debug("x|y=" + newDirection.x + "|" + newDirection.y); // NOI18N
         }
 
-        final ImageIcon newDirIcon = Static2DTools.rotate(defaultPointIcon, angle, true);
+        // mathematically 0° = (1,0,0) {east}, but we want it to be (0,1,0) {north} thus our angle = math angle - PI/2
+        // additionally we have to compensate that our icon is shifted by 90° thus we rotate another -PI/2
+        final double angleRad = Math.atan2(newDirection.y, newDirection.x) - Math.PI;
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("new icon angle: " + (angleRad * (180d / Math.PI))); // NOI18N
+        }
+
+        final ImageIcon newDirIcon = Static2DTools.rotate(defaultPointIcon, angleRad, true);
 
         synchronized (this) {
             currentPointIcon = newDirIcon;

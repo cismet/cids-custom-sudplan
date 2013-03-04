@@ -52,7 +52,7 @@ import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
-import de.cismet.tools.BlacklistClassloading;
+import de.cismet.commons.classloading.BlacklistClassloading;
 
 /**
  * DOCUMENT ME!
