@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import de.cismet.commons.utils.ProgressListener;
+import de.cismet.commons.utils.ProgressEvent;
 import Sirius.navigator.exception.ConnectionException;
 import Sirius.navigator.exception.ExceptionManager;
 import Sirius.navigator.ui.ComponentRegistry;

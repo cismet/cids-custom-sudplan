@@ -17,8 +17,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import de.cismet.cids.custom.sudplan.ProgressEvent;
-import de.cismet.cids.custom.sudplan.ProgressEvent.State;
+import de.cismet.commons.utils.ProgressEvent;
+import de.cismet.commons.utils.ProgressEvent.State;
 import de.cismet.cids.custom.sudplan.commons.CismetExecutors;
 import de.cismet.cids.custom.sudplan.commons.SudplanConcurrency;
 

@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import de.cismet.commons.utils.ProgressListener;
+import de.cismet.commons.utils.ProgressEvent;
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;

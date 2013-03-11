@@ -7,6 +7,7 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
+import de.cismet.commons.utils.ProgressListener;
 import java.io.IOException;
 
 /**
