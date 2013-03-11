@@ -32,7 +32,7 @@ import java.text.DateFormat;
 import java.util.concurrent.Future;
 
 import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
-import de.cismet.cids.custom.sudplan.ProgressEvent;
+import de.cismet.commons.utils.ProgressEvent;
 import de.cismet.cids.custom.sudplan.Resolution;
 import de.cismet.cids.custom.sudplan.SudplanOptions;
 import de.cismet.cids.custom.sudplan.TimeSeriesRemoteHelper;
