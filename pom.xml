@@ -64,7 +64,7 @@
     <distributionManagement>
         <site>
             <id>sudplan-site</id>
-            <url>scp://sudplanwp3.cismet.de/var/www/vhosts/sudplanwp3.cismet.de/httpdocs/sms/</url>
+            <url>scp://demo@sudplan.cismet.de/var/www/</url>
         </site>
     </distributionManagement>
 

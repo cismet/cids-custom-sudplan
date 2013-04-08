@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
-import de.cismet.commons.utils.ProgressListener;
 import Sirius.navigator.connection.SessionManager;
 import Sirius.navigator.exception.ConnectionException;
 
@@ -27,6 +26,8 @@ import de.cismet.cids.custom.sudplan.concurrent.Watchable;
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
+
+import de.cismet.commons.utils.ProgressListener;
 
 import de.cismet.tools.gui.downloadmanager.Download;
 

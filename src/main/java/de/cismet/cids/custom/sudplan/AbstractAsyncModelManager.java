@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
-import de.cismet.commons.utils.ProgressListener;
-import de.cismet.commons.utils.ProgressEvent;
 import Sirius.navigator.exception.ConnectionException;
 import Sirius.navigator.exception.ExceptionManager;
 import Sirius.navigator.ui.ComponentRegistry;
@@ -28,6 +26,9 @@ import javax.swing.JOptionPane;
 import de.cismet.cids.custom.sudplan.concurrent.ProgressWatch;
 
 import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.commons.utils.ProgressEvent;
+import de.cismet.commons.utils.ProgressListener;
 
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.Download;

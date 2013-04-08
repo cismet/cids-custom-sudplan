@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cids.custom.sudplan;
 
-import de.cismet.commons.utils.ProgressListener;
-import de.cismet.commons.utils.ProgressEvent;
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -17,6 +15,9 @@ import org.openide.util.WeakListeners;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import de.cismet.commons.utils.ProgressEvent;
+import de.cismet.commons.utils.ProgressListener;
 
 /**
  * DOCUMENT ME!
