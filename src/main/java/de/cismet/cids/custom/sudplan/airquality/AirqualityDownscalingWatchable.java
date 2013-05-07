@@ -26,9 +26,10 @@ import java.util.Properties;
 import java.util.Set;
 
 import de.cismet.cids.custom.sudplan.AbstractModelRunWatchable;
-import de.cismet.cids.custom.sudplan.ProgressEvent;
 
 import de.cismet.cids.dynamics.CidsBean;
+
+import de.cismet.commons.utils.ProgressEvent;
 
 /**
  * DOCUMENT ME!

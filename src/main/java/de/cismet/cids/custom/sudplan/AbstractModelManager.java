@@ -49,6 +49,10 @@ import de.cismet.cids.tools.metaobjectrenderer.CidsBeanRenderer;
 
 import de.cismet.cismap.commons.features.Feature;
 
+import de.cismet.commons.utils.ProgressEvent;
+import de.cismet.commons.utils.ProgressListener;
+import de.cismet.commons.utils.ProgressSupport;
+
 /**
  * DOCUMENT ME!
  *

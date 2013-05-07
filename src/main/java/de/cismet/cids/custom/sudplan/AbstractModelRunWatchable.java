@@ -27,6 +27,8 @@ import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
 
+import de.cismet.commons.utils.ProgressListener;
+
 import de.cismet.tools.gui.downloadmanager.Download;
 
 /**

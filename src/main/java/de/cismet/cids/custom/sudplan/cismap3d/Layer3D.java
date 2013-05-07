@@ -9,8 +9,9 @@ package de.cismet.cids.custom.sudplan.cismap3d;
 
 import java.net.URI;
 
-import de.cismet.cids.custom.sudplan.ProgressListener;
 import de.cismet.cids.custom.sudplan.UIProvider;
+
+import de.cismet.commons.utils.ProgressListener;
 
 /**
  * DOCUMENT ME!

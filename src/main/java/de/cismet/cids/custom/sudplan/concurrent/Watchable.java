@@ -9,8 +9,8 @@ package de.cismet.cids.custom.sudplan.concurrent;
 
 import java.io.IOException;
 
-import de.cismet.cids.custom.sudplan.ProgressEvent;
-import de.cismet.cids.custom.sudplan.ProgressListener;
+import de.cismet.commons.utils.ProgressEvent;
+import de.cismet.commons.utils.ProgressListener;
 
 /**
  * DOCUMENT ME!
