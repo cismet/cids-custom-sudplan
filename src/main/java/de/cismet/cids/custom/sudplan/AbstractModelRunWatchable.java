@@ -220,8 +220,4 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
         }
     }
 
-    @Override
-    public void cancelDownload() {
-        LOG.warn("Cancelling an AbstrachModelRunWatchable is not allowed yet.");
-    }
 }
