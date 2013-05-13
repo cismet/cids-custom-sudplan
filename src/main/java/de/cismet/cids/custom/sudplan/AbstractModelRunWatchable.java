@@ -1,12 +1,10 @@
-/**
- * *************************************************
- *
- * cismet GmbH, Saarbruecken, Germany
- * 
-* ... and it just works.
- * 
-***************************************************
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cids.custom.sudplan;
 
 import Sirius.navigator.connection.SessionManager;
@@ -21,6 +19,7 @@ import java.io.File;
 
 import java.util.Observable;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import de.cismet.cids.custom.sudplan.concurrent.Watchable;
@@ -28,25 +27,28 @@ import de.cismet.cids.custom.sudplan.concurrent.Watchable;
 import de.cismet.cids.dynamics.CidsBean;
 
 import de.cismet.cids.navigator.utils.ClassCacheMultiple;
+
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.commons.utils.ProgressListener;
-import de.cismet.tools.gui.StaticSwingTools;
 
+import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.Download;
-import javax.swing.JOptionPane;
 
 /**
  * DOCUMENT ME!
  *
- * @author martin.scholl@cismet.de
- * @version $Revision$, $Date$
+ * @author   martin.scholl@cismet.de
+ * @version  $Revision$, $Date$
  */
 public abstract class AbstractModelRunWatchable extends Observable implements Watchable, Download {
 
     //~ Static fields/initializers ---------------------------------------------
+
     private static final transient Logger LOG = Logger.getLogger(AbstractAsyncModelManager.class);
+
     //~ Instance fields --------------------------------------------------------
+
     private final transient CidsBean cidsBean;
     private final transient int metaclassId;
     private final transient int metaobjectId;
@@ -54,12 +56,13 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
     private transient Exception downloadException;
 
     //~ Constructors -----------------------------------------------------------
+
     /**
      * Creates a new AbstractModelRunWatchable object.
      *
-     * @param cidsBean DOCUMENT ME!
+     * @param   cidsBean  DOCUMENT ME!
      *
-     * @throws IllegalArgumentException DOCUMENT ME!
+     * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     public AbstractModelRunWatchable(final CidsBean cidsBean) {
         if (cidsBean == null) {
@@ -84,19 +87,19 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
     /**
      * Creates a new AbstractModelRunWatchable object.
      *
-     * @param metaclassId DOCUMENT ME!
-     * @param metaobjectId DOCUMENT ME!
+     * @param   metaclassId   DOCUMENT ME!
+     * @param   metaobjectId  DOCUMENT ME!
      *
-     * @throws IllegalArgumentException DOCUMENT ME!
+     * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     public AbstractModelRunWatchable(final int metaclassId, final int metaobjectId) {
         if ((metaclassId < 1) || (metaobjectId < 1)) {
             throw new IllegalArgumentException(
-                    "neither metaclassId nor metaobjectId must be < 1: [metaclassId=" // NOI18N
-                    + metaclassId
-                    + " || metaobjectId="
-                    + metaobjectId // NOI18N
-                    + "]");                                                   // NOI18N
+                "neither metaclassId nor metaobjectId must be < 1: [metaclassId=" // NOI18N
+                        + metaclassId
+                        + " || metaobjectId="
+                        + metaobjectId                                            // NOI18N
+                        + "]");                                                   // NOI18N
         }
 
         final MetaClass mc = ClassCacheMultiple.getMetaClass(SessionManager.getSession().getUser().getDomain(),
@@ -116,6 +119,7 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
     }
 
     //~ Methods ----------------------------------------------------------------
+
     @Override
     public ProgressListener getStatusCallback() {
         final CidsBean runBean;
@@ -132,7 +136,7 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
         if (manager instanceof ProgressListener) {
             manager.setCidsBean(runBean);
 
-            return (ProgressListener) manager;
+            return (ProgressListener)manager;
         } else {
             throw new IllegalStateException("cannot use manager instance that is not a ProgressListener"); // NOI18N
         }
@@ -141,10 +145,10 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      *
-     * @throws ConnectionException DOCUMENT ME!
-     * @throws IllegalStateException DOCUMENT ME!
+     * @throws  ConnectionException    DOCUMENT ME!
+     * @throws  IllegalStateException  DOCUMENT ME!
      */
     public CidsBean getCidsBean() throws ConnectionException {
         if (cidsBean == null) {
@@ -153,7 +157,7 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
 
             if (mo == null) {
                 throw new IllegalStateException("cannot fetch metaobject: [metaclassId=" + metaclassId // NOI18N
-                        + " || metaobjectId=" + metaobjectId + "]"); // NOI18N
+                            + " || metaobjectId=" + metaobjectId + "]"); // NOI18N
             }
 
             return mo.getBean();
@@ -185,7 +189,7 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
     /**
      * DOCUMENT ME!
      *
-     * @param e DOCUMENT ME!
+     * @param  e  DOCUMENT ME!
      */
     protected void setDownloadException(final Exception e) {
         this.downloadException = e;
@@ -210,7 +214,7 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
     /**
      * DOCUMENT ME!
      *
-     * @param state DOCUMENT ME!
+     * @param  state  DOCUMENT ME!
      */
     protected void setStatus(final State state) {
         if (currentState != state) {
@@ -219,5 +223,4 @@ public abstract class AbstractModelRunWatchable extends Observable implements Wa
             notifyObservers(state);
         }
     }
-
 }
