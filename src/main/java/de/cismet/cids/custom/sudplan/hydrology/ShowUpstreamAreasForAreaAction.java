@@ -45,7 +45,7 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 
-import de.cismet.security.AccessHandler.ACCESS_METHODS;
+import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
 
 import de.cismet.security.WebAccessManager;
 
